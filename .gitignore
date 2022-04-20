@@ -21,3 +21,4 @@ dist-ssr
 *.sw?
 .eslintcache
 .stylelintcache
+.vercel
