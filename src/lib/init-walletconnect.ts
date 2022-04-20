@@ -1,0 +1,166 @@
+import WalletConnect from "@walletconnect/client";
+import type { ISessionParams } from "@walletconnect/types";
+import type { VerificationRequest } from "@worldcoin/id";
+import { ErrorCodes } from "@worldcoin/id";
+import { fetchApprovalRequestMetadata } from "./get-metadata";
+import { defaultAbiCoder as abi } from "@ethersproject/abi";
+import { keccak256 } from "@ethersproject/solidity";
+
+export interface WalletConnectRequest extends VerificationRequest {
+  code?: string;
+}
+
+export async function connectWallet({ uri }: { uri: string }): Promise<{
+  connector: WalletConnect;
+  request: WalletConnectRequest;
+  meta: Awaited<ReturnType<typeof fetchApprovalRequestMetadata>>;
+}> {
+  console.log("Initializing WalletConnect with uri:", uri);
+  // we don't want persistent sessions
+  const STORAGE_KEY = "walletconnect-worldid-check";
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {}
+  const connector = new WalletConnect({
+    uri,
+    storageId: STORAGE_KEY,
+    storage: {
+      getSession: () => null,
+      setSession: (s) => s,
+      removeSession() {}, // eslint-disable-line @typescript-eslint/no-empty-function
+    },
+  });
+  // connector.on("session_update", (error, _payload) => {
+  //   console.log("EVENT", "session_update");
+  //   if (error) throw error;
+  // });
+  // connector.on("wc_sessionRequest", (error, _payload) => {
+  //   console.log("EVENT", "wc_sessionRequest");
+  //   if (error) throw error;
+  // });
+  // connector.on("wc_sessionUpdate", (error, _payload) => {
+  //   console.log("EVENT", "wc_sessionUpdate");
+  //   if (error) throw error;
+  // });
+  // connector.on("connect", (error, _payload) => {
+  //   console.log("EVENT", "connect");
+  //   if (error) throw error;
+  // });
+  connector.on("disconnect", (error, _payload) => {
+    console.log("EVENT", "disconnect");
+    if (error) throw error;
+  });
+
+  // we should immediately receive session request from SDK
+  const sessionRequestPayload = await new Promise<ISessionParams>(
+    (resolve, reject) =>
+      connector.on(
+        "session_request",
+        (error: Error | null, payload: { params: ISessionParams[] }) => {
+          console.log("EVENT", "session_request");
+          if (error) return reject(error);
+          console.log("SESSION_REQUEST", payload.params);
+          resolve(payload.params[0]);
+        },
+      ),
+  );
+
+  const disconnectSessionOnUnload = () => {
+    if (connector.connected)
+      connector.killSession().catch(console.error.bind(console));
+  };
+  window.addEventListener("beforeunload", disconnectSessionOnUnload);
+
+  // we should immediately approve session on connection and expect receive call request from SDK
+  const [callRequestPayload] = (await Promise.all([
+    new Promise((resolve, reject) =>
+      connector.on("call_request", (error: Error | null, payload) => {
+        console.log("EVENT", "call_request");
+        if (error) return reject(error);
+        console.log(payload);
+        resolve(payload);
+      }),
+    ),
+    connector.approveSession({
+      chainId: sessionRequestPayload.chainId ?? connector.chainId,
+      accounts: connector.accounts,
+    }),
+  ])) as [WalletConnectRequest, unknown];
+
+  const rejectRequest = () => {
+    if (connector.connected)
+      connector.rejectRequest({
+        id: callRequestPayload.id,
+        error: {
+          code: -32100,
+          message: ErrorCodes.VerificationRejected,
+        },
+      });
+  };
+  window.removeEventListener("beforeunload", disconnectSessionOnUnload);
+
+  console.log("WalletConnect connected");
+
+  // validate method
+  if (callRequestPayload.method !== "wld_worldIDVerification") {
+    console.error("Unknown request method:", callRequestPayload.method);
+    connector.rejectRequest({
+      id: callRequestPayload.id,
+      error: {
+        code: -32601,
+        message: "method_not_found",
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (connector.connected) await connector.killSession();
+    throw new TypeError(
+      `Unsupported request method: ${callRequestPayload.method}`,
+    );
+  }
+
+  // decoding external Nullifier string
+  try {
+    [callRequestPayload.code] = abi.decode(
+      ["string"],
+      callRequestPayload.params[0].externalNullifier,
+    );
+  } catch (err) {
+    console.error(err);
+    connector.rejectRequest({
+      id: callRequestPayload.id,
+      error: {
+        code: -32602,
+        message: ErrorCodes.InvalidExternalNullifier,
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (connector.connected) await connector.killSession();
+    throw err;
+  }
+
+  // validating proof signal
+  try {
+    keccak256(["bytes"], [callRequestPayload.params[0].proofSignal]);
+  } catch (err) {
+    console.error(err);
+    connector.rejectRequest({
+      id: callRequestPayload.id,
+      error: {
+        code: -32602,
+        message: ErrorCodes.InvalidProofSignal,
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (connector.connected) await connector.killSession();
+    throw err;
+  }
+
+  window.addEventListener("beforeunload", rejectRequest);
+  connector.on("disconnect", () => {
+    window.removeEventListener("beforeunload", rejectRequest);
+  });
+
+  const meta = await fetchApprovalRequestMetadata(callRequestPayload);
+
+  return { connector, request: callRequestPayload, meta };
+}

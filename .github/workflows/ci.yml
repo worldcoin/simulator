@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+          persist-credentials: false
+
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        cache: 'npm'
+
+    - run: npm ci
+
+    - run: npm run lint
+
+    - name: Types Check
+      run: npx tsc --noEmit
+
+    - run: npx prettier --check src/**
+
+    - uses: streetsidesoftware/cspell-action@v1
+
+    - run: npm run build
+
+    - run: npm run test --if-present

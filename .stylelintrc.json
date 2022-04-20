@@ -1,0 +1,24 @@
+{
+  "ignoreFiles": "dist/**",
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-idiomatic-order",
+    "stylelint-config-prettier"
+  ],
+  "plugins": ["stylelint-no-unsupported-browser-features"],
+  "rules": {
+    "selector-class-pattern": null,
+    "keyframes-name-pattern": null,
+    "plugin/no-unsupported-browser-features": [
+      true,
+      {
+        "severity": "warning",
+        "ignorePartialSupport": true
+      }
+    ],
+    "at-rule-no-unknown": [
+      true,
+      { "ignoreAtRules": ["tailwind", "apply", "layer"] }
+    ]
+  }
+}

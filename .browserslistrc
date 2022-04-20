@@ -1,0 +1,3 @@
+supports es6-module-dynamic-import
+supports wasm
+not edge <= 18

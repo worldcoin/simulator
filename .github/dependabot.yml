@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: '12:00'
+    open-pull-requests-limit: 10
+    reviewers:
+      - tino-otto
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: '12:00'
+    open-pull-requests-limit: 10
+    reviewers:
+      - tino-otto

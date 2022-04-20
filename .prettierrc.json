@@ -1,0 +1,15 @@
+{
+  "semi": true,
+  "trailingComma": "all",
+  "singleAttributePerLine": true,
+  "attributeGroups": ["$CODE_GUIDE"],
+  "overrides": [
+    {
+      "files": ["*.svg"],
+      "options": {
+        "parser": "xml",
+        "xmlWhitespaceSensitivity": "ignore"
+      }
+    }
+  ]
+}
