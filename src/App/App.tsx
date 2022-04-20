@@ -98,9 +98,28 @@ const App = React.memo(function App() {
             className="h-10 w-10"
           />
           <p className="w-full text-777e90">
-            This is a mock app that simulates the behavior of the Worldcoin app
-            for the purposes of testing World ID.
+            This is a mock app that simulates the behavior of the{" "}
+            <a
+              href="https://worldcoin.org"
+              target="_blank"
+              className="text-4940e0"
+              rel="noreferrer"
+            >
+              Worldcoin
+            </a>{" "}
+            app for the purposes of testing World ID.
           </p>
+          <div>
+            <a
+              href="https://id.worldcoin.org/docs/protocol/test-network"
+              target="_blank"
+              className="text-4940e0"
+              rel="noreferrer"
+            >
+              Read the docs
+            </a>
+            .
+          </div>
         </div>
       )}
 
