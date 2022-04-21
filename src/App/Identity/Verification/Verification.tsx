@@ -291,7 +291,7 @@ const Verification = React.memo(function Verification(props: {
                 } will be able to anonymously verify you’re a real person doing this only once. `}
               </span>
               <a
-                href="https://id.worldcoin.org/docs/protocol/privacy"
+                href="https://id.worldcoin.org/docs/about/privacy"
                 target="_blank"
                 rel="noreferrer noopener"
                 className="text-4940e0"
