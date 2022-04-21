@@ -45,7 +45,7 @@ export async function inclusionProof(
   identityCommitment: EncodedCommitment,
   env: Environment = Environment.STAGING,
 ) {
-  return await postRequest<[Record<"Left" | "Right", string>]>(
+  return await postRequest<Record<"Left" | "Right", string>[]>(
     "inclusionProof",
     identityCommitment,
     env,
