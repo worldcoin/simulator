@@ -1,5 +1,6 @@
 import Button from "@/common/Button/Button";
 import { Icon } from "@/common/Icon";
+import { insertIdentity } from "@/lib/sequencer-service";
 import arrowSvg from "@static/arrow-right.svg";
 import checkmarkSvg from "@static/checkmark.svg";
 import errorSvg from "@static/error.svg";
@@ -8,7 +9,6 @@ import spinnerSvg from "@static/spinner.svg";
 import cn from "classnames";
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { insertIdentity } from "src/lib/sequencer-service";
 
 const IdentityFaucet = React.memo(function IdentityFaucet() {
   const location = useLocation();
@@ -25,16 +25,19 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
   const [loading, setLoading] = React.useState<boolean>(false);
 
   const addIdentity = React.useCallback(async () => {
-    setLoading(true);
     try {
-      await insertIdentity(input);
+      setLoading(true);
+
+      const result = await insertIdentity(input);
+      console.log("Identity insertion result:", result);
+
       setSubmitSuccess(true);
-    } catch {
+    } catch (err) {
       setSubmitSuccess(false);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [input]);
 
   const onInput = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) =>

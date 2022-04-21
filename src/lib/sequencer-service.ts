@@ -32,18 +32,20 @@ async function postRequest<T = unknown>(
   return (await res.json()) as Promise<T>;
 }
 
-export async function insertIdentity<T = unknown>(
+export async function insertIdentity(
   identityCommitment: EncodedCommitment,
   env: Environment = Environment.STAGING,
 ) {
-  return await postRequest<T>("insertIdentity", identityCommitment, env);
+  return await postRequest<{
+    identityIndex: number;
+  }>("insertIdentity", identityCommitment, env);
 }
 
 export async function inclusionProof(
   identityCommitment: EncodedCommitment,
   env: Environment = Environment.STAGING,
 ) {
-  return await postRequest<[Record<"left" | "right", string>]>(
+  return await postRequest<[Record<"Left" | "Right", string>]>(
     "inclusionProof",
     identityCommitment,
     env,
