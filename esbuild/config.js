@@ -25,7 +25,7 @@ if (!process.env.INFURA_ID) {
   process.exit(1);
 }
 
-const target = resolveToEsbuildTarget(browserslist("defaults"), {
+const target = resolveToEsbuildTarget(browserslist(), {
   printUnknownTargets: false,
 });
 

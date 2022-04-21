@@ -4,6 +4,7 @@ import { Icon } from "@/common/Icon";
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
+import { BigNumber } from "@ethersproject/bignumber";
 import { keccak256 } from "@ethersproject/solidity";
 import checkSvg from "@static/check.svg";
 import verifiedSvg from "@static/checkmark.svg";
@@ -21,6 +22,9 @@ import { generateMerkleProof, Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
 import React, { useState } from "react";
 import "./mask.css";
+
+const DEPTH_SEMAPHORE = 20;
+const ZERO_VALUE = BigInt(0);
 
 function hashBytes(signal: string) {
   return BigInt(keccak256(["bytes"], [signal])) >> BigInt(8);
@@ -142,10 +146,16 @@ const Verification = React.memo(function Verification(props: {
 
       const [{ externalNullifier, proofSignal }] = request.params;
 
+      const leaves = identity.inclusionProof
+        .flatMap((v) => Object.values(v))
+        .map((v) => BigNumber.from(v).toBigInt());
+      if (!leaves.includes(identity.commitment))
+        leaves.push(identity.commitment);
+
       const merkleProof = generateMerkleProof(
-        20,
-        BigInt(0),
-        [identity.commitment],
+        DEPTH_SEMAPHORE,
+        ZERO_VALUE,
+        leaves,
         identity.commitment,
       );
 

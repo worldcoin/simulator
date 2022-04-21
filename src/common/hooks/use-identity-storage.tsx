@@ -32,7 +32,7 @@ export function useIdentityStorage() {
       const trapdoor = parsedZkIdentity.getTrapdoor();
       const nullifier = parsedZkIdentity.getNullifier();
 
-      const identity: Omit<Identity, "verified"> = {
+      const identity: Omit<Identity, "inclusionProof" | "verified"> = {
         commitment,
         trapdoor,
         nullifier,

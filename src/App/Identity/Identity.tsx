@@ -179,7 +179,6 @@ const Identity = React.memo(function Identity(props: {
   }, [approval.connector]);
 
   const copyIdentity = React.useCallback(() => {
-    // eslint-disable-next-line compat/compat
     navigator.clipboard
       .writeText(encodeIdentityCommitment(props.identity.commitment))
       .then(() => console.log(`id copied to clipboard`))

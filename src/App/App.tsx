@@ -28,6 +28,7 @@ const App = React.memo(function App() {
   const [identity, setIdentity] = React.useState<IdentityType>({
     id: "",
     verified: false,
+    inclusionProof: [],
     commitment: BigInt("0000"),
     trapdoor: BigInt("0000"),
     nullifier: BigInt("0000"),
@@ -43,12 +44,23 @@ const App = React.memo(function App() {
       return;
     }
 
-    // TODO: We need to obtain the merkleRoot information from the request above
+    let verified = false;
+    let proof: IdentityType["inclusionProof"] = [];
     inclusionProof(encodeIdentityCommitment(storedIdentity.commitment))
-      .then(() => setIdentity({ ...identity, verified: true }))
-      .catch((error) => console.error(error))
+      .then((result) => {
+        verified = true;
+        proof = result;
+      })
+      .catch((error) => {
+        console.error(error);
+      })
       .finally(() => {
-        setIdentity({ ...identity, ...storedIdentity });
+        setIdentity({
+          ...identity,
+          ...storedIdentity,
+          verified,
+          inclusionProof: proof,
+        });
         setPhase(Phase.Identity);
       });
 
