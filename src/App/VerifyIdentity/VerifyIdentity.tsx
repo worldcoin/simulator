@@ -5,6 +5,7 @@ import orbPng from "@static/orb.png";
 import cn from "classnames";
 import React from "react";
 import { Link } from "react-router-dom";
+import { encodeIdentityCommitment } from "../Identity/Identity";
 
 const VerifyIdentity = React.memo(function VerifyIdentity(props: {
   extended?: boolean;
@@ -82,7 +83,9 @@ const VerifyIdentity = React.memo(function VerifyIdentity(props: {
         )}
 
         <Link
-          to={`/identity-faucet?commitment=${props.identity.commitment}`}
+          to={`/identity-faucet?commitment=${encodeIdentityCommitment(
+            props.identity.commitment,
+          )}`}
           target="_blank"
           className={cn(
             "rounded-full border border-4940e0 py-4.5 text-center hover:opacity-70",

@@ -8,6 +8,7 @@ import spinnerSvg from "@static/spinner.svg";
 import cn from "classnames";
 import React from "react";
 import { useLocation } from "react-router-dom";
+import { insertIdentity } from "src/lib/sequencer-service";
 
 const IdentityFaucet = React.memo(function IdentityFaucet() {
   const location = useLocation();
@@ -17,7 +18,7 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
     [location.search],
   );
 
-  const [_input, setInput] = React.useState<string>(identityCommitment);
+  const [input, setInput] = React.useState<string>(identityCommitment);
   const [submitSuccess, setSubmitSuccess] = React.useState<boolean | null>(
     null,
   );
@@ -25,21 +26,14 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
 
   const addIdentity = React.useCallback(async () => {
     setLoading(true);
-    await new Promise((resolve, reject) => {
-      if (Math.random() > 0.5) {
-        return setTimeout(() => {
-          setSubmitSuccess(true);
-          setLoading(false);
-          return resolve(true);
-        }, 1000);
-      } else {
-        return setTimeout(() => {
-          setSubmitSuccess(false);
-          setLoading(false);
-          return reject(false);
-        }, 1000);
-      }
-    });
+    try {
+      await insertIdentity(input);
+      setSubmitSuccess(true);
+    } catch {
+      setSubmitSuccess(false);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const onInput = React.useCallback(

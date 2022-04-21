@@ -27,7 +27,7 @@ export const WalletProvider = React.memo(function WalletProvider(props: {
       clientMeta: {
         name: "World ID Mock App",
         description: "World ID in the Test Network",
-        url: "https://id.worldcoin.org/docs/protocol/test-network",
+        url: "https://id.worldcoin.org/test",
         icons: [
           document.head.querySelector<HTMLLinkElement>("link[rel~=icon]")!.href,
         ],
