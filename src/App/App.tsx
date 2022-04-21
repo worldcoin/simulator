@@ -43,6 +43,7 @@ const App = React.memo(function App() {
       return;
     }
 
+    // TODO: We need to obtain the merkleRoot information from the request above
     inclusionProof(encodeIdentityCommitment(storedIdentity.commitment))
       .then(() => setIdentity({ ...identity, verified: true }))
       .catch((error) => console.error(error))

@@ -38,6 +38,7 @@ const Initial = React.memo(function Initial(props: {
 
       try {
         await inclusionProof(encodedCommitment);
+        // TODO: We need to obtain the merkleRoot information from the request above
         verified = true;
       } catch (err) {
         console.warn(err);
