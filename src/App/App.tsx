@@ -15,7 +15,7 @@ import cn from "classnames";
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { Background } from "./Background/Background";
-import Identity from "./Identity/Identity";
+import Identity, { encodeIdentityCommitment } from "./Identity/Identity";
 import IdentityFaucet from "./IdentityFaucet/IdentityFaucet";
 import Initial from "./Initial/Initial";
 import Signature from "./Signature/Signature";
@@ -43,7 +43,7 @@ const App = React.memo(function App() {
       return;
     }
 
-    inclusionProof({ commitment: storedIdentity.commitment })
+    inclusionProof(encodeIdentityCommitment(storedIdentity.commitment))
       .then(() => setIdentity({ ...identity, verified: true }))
       .catch((error) => console.error(error))
       .finally(() => {

@@ -3,12 +3,12 @@ import { WalletProviderContext } from "@/common/WalletProvider/WalletProvider";
 import { inclusionProof } from "@/lib/sequencer-service";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
-import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import { Web3Provider } from "@ethersproject/providers";
 import { keccak256 } from "@ethersproject/solidity";
 import { Strategy, ZkIdentity } from "@zk-kit/identity";
 import cn from "classnames";
 import React, { useContext } from "react";
+import { encodeIdentityCommitment } from "../Identity/Identity";
 import Card from "./Card/Card";
 
 const Initial = React.memo(function Initial(props: {
@@ -31,11 +31,13 @@ const Initial = React.memo(function Initial(props: {
       const trapdoor = newIdentity.getTrapdoor();
       const nullifier = newIdentity.getNullifier();
 
-      const id = abi.encode(["uint256"], [commitment]).slice(-10);
+      const encodedCommitment = encodeIdentityCommitment(commitment);
+
+      const id = encodedCommitment.slice(0, 10);
       let verified = false;
 
       try {
-        await inclusionProof({ commitment });
+        await inclusionProof(encodedCommitment);
         verified = true;
       } catch (err) {
         console.warn(err);
