@@ -12,6 +12,7 @@
     "yaml",
     "json"
   ],
+  "ignorePaths": [".gitignore"],
   "words": [
     "bbbec",
     "binded",

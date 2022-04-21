@@ -22,8 +22,7 @@ export const WalletProvider = React.memo(function WalletProvider(props: {
 
   const createProvider = React.useCallback(() => {
     const newProvider = new WalletConnectProvider({
-      // FIXME: replace with env var before going to production
-      infuraId: "7a86b0b59ca94123acf323a7d3fc5c3f",
+      infuraId: process.env.INFURA_ID,
       storageId: "wallet-identity-connector",
       clientMeta: {
         name: "World ID Mock App",
