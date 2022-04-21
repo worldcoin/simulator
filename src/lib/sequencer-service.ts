@@ -1,6 +1,6 @@
-import type { Identity } from "@/types";
 import { Environment } from "@/types";
-import { defaultAbiCoder as abi } from "@ethersproject/abi";
+
+type EncodedCommitment = string; // this should be a 64-padded hex-string
 
 const SEQUENCER_ENDPOINT: Record<Environment, string> = {
   [Environment.STAGING]: "https://signup.stage-crypto.worldcoin.dev/",
@@ -15,13 +15,12 @@ const getUrl = (pathname: string, env: Environment) =>
 
 async function postRequest<T = unknown>(
   endpoint: string,
-  identity: Pick<Identity, "commitment">,
+  identityCommitment: EncodedCommitment,
   env: Environment,
 ) {
-  const commitment = abi.encode(["uint256"], [identity.commitment]);
   const res = await fetch(getUrl(endpoint, env).toString(), {
     method: "POST",
-    body: JSON.stringify([1, commitment]),
+    body: JSON.stringify([1, identityCommitment]),
     headers: {
       "Content-Type": "application/json",
     },
@@ -34,19 +33,19 @@ async function postRequest<T = unknown>(
 }
 
 export async function insertIdentity<T = unknown>(
-  identity: Pick<Identity, "commitment">,
+  identityCommitment: EncodedCommitment,
   env: Environment = Environment.STAGING,
 ) {
-  return await postRequest<T>("insertIdentity", identity, env);
+  return await postRequest<T>("insertIdentity", identityCommitment, env);
 }
 
 export async function inclusionProof(
-  identity: Pick<Identity, "commitment">,
+  identityCommitment: EncodedCommitment,
   env: Environment = Environment.STAGING,
 ) {
   return await postRequest<[Record<"left" | "right", string>]>(
     "inclusionProof",
-    identity,
+    identityCommitment,
     env,
   );
 }

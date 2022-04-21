@@ -25,6 +25,12 @@ enum InputMode {
   Scan,
 }
 
+export const encodeIdentityCommitment = (
+  identityCommitment: BigInt,
+): string => {
+  return identityCommitment.toString(16).padStart(64, "0");
+};
+
 const Identity = React.memo(function Identity(props: {
   setPhase: React.Dispatch<React.SetStateAction<Phase>>;
   className?: string;
@@ -175,7 +181,7 @@ const Identity = React.memo(function Identity(props: {
   const copyIdentity = React.useCallback(() => {
     // eslint-disable-next-line compat/compat
     navigator.clipboard
-      .writeText(String(props.identity.commitment))
+      .writeText(encodeIdentityCommitment(props.identity.commitment))
       .then(() => console.log(`id copied to clipboard`))
       .catch((error) => console.error(error));
   }, [props.identity.commitment]);
