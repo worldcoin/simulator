@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import autoprefixer from "autoprefixer";
@@ -13,6 +14,16 @@ import postcss from "postcss";
 import { optimize as optimizeSVG } from "svgo";
 import tailwindcss from "tailwindcss";
 import { transformFileAsync as babelTransformFileAsync } from "@babel/core";
+
+if (!process.env.INFURA_ID) {
+  console.error(
+    "\x1b[1m\x1b[5m\x1b[31mINFURA_ID\x1b[0m environment variable is required to build this project",
+  );
+  console.error(
+    "Set one either explicitely or create an .env file (see .env.sample)",
+  );
+  process.exit(1);
+}
 
 const target = resolveToEsbuildTarget(browserslist("defaults"), {
   printUnknownTargets: false,
@@ -144,5 +155,8 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
   format: "esm",
   splitting: true,
   target,
-  define: { global: "window" },
+  define: {
+    global: "window",
+    "process.env.INFURA_ID": `"${process.env.INFURA_ID}"`,
+  },
 });

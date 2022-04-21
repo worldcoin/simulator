@@ -21,6 +21,8 @@ Full documentation for this repository can be found at [https://id.worldcoin.org
 
 ## 🧑‍💻 Development & testing
 
+- Get an Infura project ID from https://infura.io/ and create an `.env` file with it (see [.env.sample](./.env.sample))
+
 - Install dependencies
 
   ```bash

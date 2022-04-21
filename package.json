@@ -33,6 +33,7 @@
     "browserslist": "^4.20.2",
     "cspell": "^5.19.7",
     "cssnano": "^5.1.7",
+    "dotenv": "^16.0.0",
     "esbuild": "0.14.36",
     "esbuild-plugin-browserslist": "^0.4.9",
     "esbuild-plugin-clean": "^0.9.0",

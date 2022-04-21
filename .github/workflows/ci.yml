@@ -31,5 +31,7 @@ jobs:
     - uses: streetsidesoftware/cspell-action@v1
 
     - run: npm run build
+      env:
+        INFURA_ID: ${{ secrets.INFURA_ID }}
 
     - run: npm run test --if-present
