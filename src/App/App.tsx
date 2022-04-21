@@ -44,20 +44,23 @@ const App = React.memo(function App() {
       return;
     }
 
+    let verified = false;
+    let proof: IdentityType["inclusionProof"] = [];
     inclusionProof(encodeIdentityCommitment(storedIdentity.commitment))
-      .then((proof) =>
-        setIdentity({ ...identity, verified: true, inclusionProof: proof }),
-      )
+      .then((result) => {
+        verified = true;
+        proof = result;
+      })
       .catch((error) => {
         console.error(error);
+      })
+      .finally(() => {
         setIdentity({
           ...identity,
           ...storedIdentity,
-          verified: false,
-          inclusionProof: [],
+          verified,
+          inclusionProof: proof,
         });
-      })
-      .finally(() => {
         setPhase(Phase.Identity);
       });
 
