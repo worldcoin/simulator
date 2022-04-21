@@ -35,10 +35,10 @@ const Initial = React.memo(function Initial(props: {
 
       const id = encodedCommitment.slice(0, 10);
       let verified = false;
+      let proof: IdentityType["inclusionProof"] = [];
 
       try {
-        await inclusionProof(encodedCommitment);
-        // TODO: We need to obtain the merkleRoot information from the request above
+        proof = await inclusionProof(encodedCommitment);
         verified = true;
       } catch (err) {
         console.warn(err);
@@ -51,6 +51,7 @@ const Initial = React.memo(function Initial(props: {
         nullifier,
         id,
         verified,
+        inclusionProof: proof,
       };
 
       props.setIdentity(extendedIdentity);

@@ -9,6 +9,7 @@
     "@walletconnect/web3-provider": "^1.7.7",
     "@zk-kit/identity": "^1.4.1",
     "@zk-kit/protocols": "^1.11.1",
+    "bigint-conversion": "^2.2.1",
     "blockies-ts": "^1.0.0",
     "classnames": "^2.3.1",
     "qr-scanner": "^1.4.1",
