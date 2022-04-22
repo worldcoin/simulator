@@ -1,10 +1,9 @@
+import { keccak256 } from "@ethersproject/solidity";
 import WalletConnect from "@walletconnect/client";
 import type { ISessionParams } from "@walletconnect/types";
 import type { VerificationRequest } from "@worldcoin/id";
 import { ErrorCodes } from "@worldcoin/id";
 import { fetchApprovalRequestMetadata } from "./get-metadata";
-import { defaultAbiCoder as abi } from "@ethersproject/abi";
-import { keccak256 } from "@ethersproject/solidity";
 
 export interface WalletConnectRequest extends VerificationRequest {
   code?: string;
@@ -116,26 +115,6 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
     throw new TypeError(
       `Unsupported request method: ${callRequestPayload.method}`,
     );
-  }
-
-  // decoding external Nullifier string
-  try {
-    [callRequestPayload.code] = abi.decode(
-      ["string"],
-      callRequestPayload.params[0].externalNullifier,
-    );
-  } catch (err) {
-    console.error(err);
-    connector.rejectRequest({
-      id: callRequestPayload.id,
-      error: {
-        code: -32602,
-        message: ErrorCodes.InvalidExternalNullifier,
-      },
-    });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    if (connector.connected) await connector.killSession();
-    throw err;
   }
 
   // validating proof signal
