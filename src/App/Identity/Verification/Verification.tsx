@@ -1,6 +1,7 @@
 import Button from "@/common/Button/Button";
 import { validateImageUrl } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
+import { getRoot } from "@/lib/sequencer-service";
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
@@ -20,7 +21,8 @@ import {
   StrBigInt,
 } from "@zk-kit/protocols";
 import cn from "classnames";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { encodeIdentityCommitment } from "../Identity";
 import "./mask.css";
 
 function hashBytes(signal: string) {
@@ -72,6 +74,23 @@ const Verification = React.memo(function Verification(props: {
 }) {
   const [verificationState, setVerificationState] =
     React.useState<VerificationState>(VerificationState.Initial);
+
+  const [merkleRoot, setMerkleRoot] = React.useState("");
+
+  const fetchMerkleProof = async () => {
+    try {
+      const merkleRoot = await getRoot(
+        encodeIdentityCommitment(props.identity.commitment),
+      );
+      setMerkleRoot(merkleRoot);
+    } catch (err) {
+      throw "Error fetching Merkle root.";
+    }
+  };
+
+  useEffect(() => {
+    fetchMerkleProof();
+  }, []);
 
   const [projectLogo, setProjectLogo] = useState<string>("");
 
@@ -167,11 +186,11 @@ const Verification = React.memo(function Verification(props: {
       );
 
       void Semaphore.genProof(witness, wasmFilePath, finalZkeyPath)
-        .then((fullProof) =>
+        .then((fullProof) => {
           connector.approveRequest({
             id: request.id,
             result: {
-              merkleRoot: abi.encode(["uint256"], [merkleProof.root]),
+              merkleRoot: merkleRoot,
               nullifierHash: abi.encode(
                 ["uint256"],
                 [fullProof.publicSignals.nullifierHash],
@@ -181,8 +200,8 @@ const Verification = React.memo(function Verification(props: {
                 [Semaphore.packToSolidityProof(fullProof.proof)],
               ),
             },
-          }),
-        )
+          });
+        })
         .catch((err) => {
           console.error(err);
           setVerificationState(VerificationState.Error);
