@@ -13,12 +13,12 @@ import spinnerSvg from "@static/spinner.svg";
 import unknownProjectLogoSvg from "@static/unknown-project.svg";
 import unverifiedSvg from "@static/unknown.svg";
 import { ErrorCodes } from "@worldcoin/id";
-import type {
+import {
   MerkleProof,
+  Semaphore,
   SemaphoreWitness,
   StrBigInt,
 } from "@zk-kit/protocols";
-import { generateMerkleProof, Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
 import React, { useState } from "react";
 import "./mask.css";
@@ -146,18 +146,20 @@ const Verification = React.memo(function Verification(props: {
 
       const [{ externalNullifier, proofSignal }] = request.params;
 
-      const leaves = identity.inclusionProof
+      const siblings = identity.inclusionProof
         .flatMap((v) => Object.values(v))
         .map((v) => BigNumber.from(v).toBigInt());
-      if (!leaves.includes(identity.commitment))
-        leaves.push(identity.commitment);
 
-      const merkleProof = generateMerkleProof(
-        DEPTH_SEMAPHORE,
-        ZERO_VALUE,
-        leaves,
-        identity.commitment,
-      );
+      const pathIndices = identity.inclusionProof
+        .flatMap((v) => Object.keys(v))
+        .map((v) => (v == "Left" ? 0 : 1));
+
+      const merkleProof: MerkleProof = {
+        root: null,
+        leaf: null,
+        siblings: siblings,
+        pathIndices: pathIndices,
+      };
 
       const witness = generateSemaphoreWitness(
         identity.trapdoor,
