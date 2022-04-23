@@ -23,9 +23,6 @@ import cn from "classnames";
 import React, { useState } from "react";
 import "./mask.css";
 
-const DEPTH_SEMAPHORE = 20;
-const ZERO_VALUE = BigInt(0);
-
 function hashBytes(signal: string) {
   return BigInt(keccak256(["bytes"], [signal])) >> BigInt(8);
 }
