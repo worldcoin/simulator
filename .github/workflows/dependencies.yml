@@ -5,10 +5,9 @@ on:
       - .github/workflows/dependencies.yml
   workflow_dispatch: {}
   schedule:
-    # "At 06:00 on Wednesday" UTC
-    # i.e. 7 am CET or 8 am CEST
-    # https://crontab.guru/#0_6_*_*_3
-    - cron: 0 6 * * 3
+    # "At 00:00 on the first of the month" UTC
+    # https://crontab.guru/every-month
+    - cron: 0 0 1 * *
 
 jobs:
   update:
