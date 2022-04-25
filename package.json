@@ -30,7 +30,7 @@
     "@typescript-eslint/eslint-plugin": "5.20.0",
     "@typescript-eslint/parser": "5.20.0",
     "@worldcoin/id": "^0.0.1",
-    "autoprefixer": "^10.4.4",
+    "autoprefixer": "^10.4.5",
     "browserslist": "^4.20.2",
     "cspell": "^5.19.7",
     "cssnano": "^5.1.7",
