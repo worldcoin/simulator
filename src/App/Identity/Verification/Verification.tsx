@@ -14,12 +14,12 @@ import spinnerSvg from "@static/spinner.svg";
 import unknownProjectLogoSvg from "@static/unknown-project.svg";
 import unverifiedSvg from "@static/unknown.svg";
 import { ErrorCodes } from "@worldcoin/id";
-import {
+import type {
   MerkleProof,
-  Semaphore,
   SemaphoreWitness,
   StrBigInt,
 } from "@zk-kit/protocols";
+import { Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
 import React, { useEffect, useState } from "react";
 import { encodeIdentityCommitment } from "../Identity";
@@ -77,20 +77,11 @@ const Verification = React.memo(function Verification(props: {
 
   const [merkleRoot, setMerkleRoot] = React.useState("");
 
-  const fetchMerkleProof = async () => {
-    try {
-      const merkleRoot = await getRoot(
-        encodeIdentityCommitment(props.identity.commitment),
-      );
-      setMerkleRoot(merkleRoot);
-    } catch (err) {
-      throw "Error fetching Merkle root.";
-    }
-  };
-
   useEffect(() => {
-    fetchMerkleProof();
-  }, []);
+    getRoot(encodeIdentityCommitment(props.identity.commitment))
+      .then((merkleRoot) => setMerkleRoot(merkleRoot))
+      .catch(console.error.bind(console));
+  }, [props.identity]);
 
   const [projectLogo, setProjectLogo] = useState<string>("");
 
@@ -190,7 +181,7 @@ const Verification = React.memo(function Verification(props: {
           connector.approveRequest({
             id: request.id,
             result: {
-              merkleRoot: merkleRoot,
+              merkleRoot,
               nullifierHash: abi.encode(
                 ["uint256"],
                 [fullProof.publicSignals.nullifierHash],
@@ -215,7 +206,7 @@ const Verification = React.memo(function Verification(props: {
           });
         });
     }
-  }, [verificationState, props.approval, props.identity, props]);
+  }, [verificationState, props.approval, props.identity, props, merkleRoot]);
 
   const verify = React.useCallback(() => {
     return setVerificationState(VerificationState.Loading);
