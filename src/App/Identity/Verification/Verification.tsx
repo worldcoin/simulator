@@ -1,6 +1,7 @@
 import Button from "@/common/Button/Button";
 import { validateImageUrl } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
+import { getRoot } from "@/lib/sequencer-service";
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
@@ -18,13 +19,11 @@ import type {
   SemaphoreWitness,
   StrBigInt,
 } from "@zk-kit/protocols";
-import { generateMerkleProof, Semaphore } from "@zk-kit/protocols";
+import { Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { encodeIdentityCommitment } from "../Identity";
 import "./mask.css";
-
-const DEPTH_SEMAPHORE = 20;
-const ZERO_VALUE = BigInt(0);
 
 function hashBytes(signal: string) {
   return BigInt(keccak256(["bytes"], [signal])) >> BigInt(8);
@@ -75,6 +74,14 @@ const Verification = React.memo(function Verification(props: {
 }) {
   const [verificationState, setVerificationState] =
     React.useState<VerificationState>(VerificationState.Initial);
+
+  const [merkleRoot, setMerkleRoot] = React.useState("");
+
+  useEffect(() => {
+    getRoot(encodeIdentityCommitment(props.identity.commitment))
+      .then((merkleRoot) => setMerkleRoot(merkleRoot))
+      .catch(console.error.bind(console));
+  }, [props.identity]);
 
   const [projectLogo, setProjectLogo] = useState<string>("");
 
@@ -146,18 +153,20 @@ const Verification = React.memo(function Verification(props: {
 
       const [{ externalNullifier, proofSignal }] = request.params;
 
-      const leaves = identity.inclusionProof
+      const siblings = identity.inclusionProof
         .flatMap((v) => Object.values(v))
         .map((v) => BigNumber.from(v).toBigInt());
-      if (!leaves.includes(identity.commitment))
-        leaves.push(identity.commitment);
 
-      const merkleProof = generateMerkleProof(
-        DEPTH_SEMAPHORE,
-        ZERO_VALUE,
-        leaves,
-        identity.commitment,
-      );
+      const pathIndices = identity.inclusionProof
+        .flatMap((v) => Object.keys(v))
+        .map((v) => (v == "Left" ? 0 : 1));
+
+      const merkleProof: MerkleProof = {
+        root: null,
+        leaf: null,
+        siblings: siblings,
+        pathIndices: pathIndices,
+      };
 
       const witness = generateSemaphoreWitness(
         identity.trapdoor,
@@ -168,11 +177,11 @@ const Verification = React.memo(function Verification(props: {
       );
 
       void Semaphore.genProof(witness, wasmFilePath, finalZkeyPath)
-        .then((fullProof) =>
+        .then((fullProof) => {
           connector.approveRequest({
             id: request.id,
             result: {
-              merkleRoot: abi.encode(["uint256"], [merkleProof.root]),
+              merkleRoot,
               nullifierHash: abi.encode(
                 ["uint256"],
                 [fullProof.publicSignals.nullifierHash],
@@ -182,8 +191,8 @@ const Verification = React.memo(function Verification(props: {
                 [Semaphore.packToSolidityProof(fullProof.proof)],
               ),
             },
-          }),
-        )
+          });
+        })
         .catch((err) => {
           console.error(err);
           setVerificationState(VerificationState.Error);
@@ -197,7 +206,7 @@ const Verification = React.memo(function Verification(props: {
           });
         });
     }
-  }, [verificationState, props.approval, props.identity, props]);
+  }, [verificationState, props.approval, props.identity, props, merkleRoot]);
 
   const verify = React.useCallback(() => {
     return setVerificationState(VerificationState.Loading);

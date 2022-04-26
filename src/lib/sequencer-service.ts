@@ -51,3 +51,10 @@ export async function inclusionProof(
     env,
   );
 }
+
+export async function getRoot(
+  identityCommitment: EncodedCommitment,
+  env: Environment = Environment.STAGING,
+) {
+  return await postRequest<string>("getRoot", identityCommitment, env);
+}
