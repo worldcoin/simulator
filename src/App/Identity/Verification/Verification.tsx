@@ -1,7 +1,6 @@
 import Button from "@/common/Button/Button";
 import { validateImageUrl } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
-import { getRoot } from "@/lib/sequencer-service";
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
@@ -21,8 +20,7 @@ import type {
 } from "@zk-kit/protocols";
 import { Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
-import React, { useEffect, useState } from "react";
-import { encodeIdentityCommitment } from "../Identity";
+import React, { useState } from "react";
 import "./mask.css";
 
 function hashBytes(signal: string) {
@@ -74,14 +72,6 @@ const Verification = React.memo(function Verification(props: {
 }) {
   const [verificationState, setVerificationState] =
     React.useState<VerificationState>(VerificationState.Initial);
-
-  const [merkleRoot, setMerkleRoot] = React.useState("");
-
-  useEffect(() => {
-    getRoot(encodeIdentityCommitment(props.identity.commitment))
-      .then((merkleRoot) => setMerkleRoot(merkleRoot))
-      .catch(console.error.bind(console));
-  }, [props.identity]);
 
   const [projectLogo, setProjectLogo] = useState<string>("");
 
@@ -153,11 +143,16 @@ const Verification = React.memo(function Verification(props: {
 
       const [{ externalNullifier, proofSignal }] = request.params;
 
-      const siblings = identity.inclusionProof
+      if (!identity.inclusionProof) {
+        // TODO: Generate a dummy/empty proof so the dev can go through a failure case
+        throw "Inclusion proof not present";
+      }
+
+      const siblings = identity.inclusionProof.proof
         .flatMap((v) => Object.values(v))
         .map((v) => BigNumber.from(v).toBigInt());
 
-      const pathIndices = identity.inclusionProof
+      const pathIndices = identity.inclusionProof.proof
         .flatMap((v) => Object.keys(v))
         .map((v) => (v == "Left" ? 0 : 1));
 
@@ -181,7 +176,7 @@ const Verification = React.memo(function Verification(props: {
           connector.approveRequest({
             id: request.id,
             result: {
-              merkleRoot,
+              merkleRoot: identity.inclusionProof?.root,
               nullifierHash: abi.encode(
                 ["uint256"],
                 [fullProof.publicSignals.nullifierHash],
@@ -206,7 +201,7 @@ const Verification = React.memo(function Verification(props: {
           });
         });
     }
-  }, [verificationState, props.approval, props.identity, props, merkleRoot]);
+  }, [verificationState, props.approval, props.identity, props]);
 
   const verify = React.useCallback(() => {
     return setVerificationState(VerificationState.Loading);
