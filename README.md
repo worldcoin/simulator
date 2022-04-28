@@ -35,6 +35,10 @@ Full documentation for this repository can be found at [https://id.worldcoin.org
   npm run dev
   ```
 
+## 🗣 Feedback
+
+Please share all feedback on your experience. You can find us on [Discord](https://discord.gg/worldcoin), look for the [#world-id](https://discord.com/channels/956750052771127337/968523914638688306) channel. Additionally, feel free to open an issue or a PR directly on this repo.
+
 ## 🧑‍⚖️ License
 
 This repository is MIT licensed. Please review the LICENSE file in this repository.
