@@ -5,7 +5,7 @@ export interface Identity {
   readonly id: string;
   /** @default false */
   verified: boolean;
-  inclusionProof: Awaited<ReturnType<typeof inclusionProof>>;
+  inclusionProof: Awaited<ReturnType<typeof inclusionProof>> | null;
   /** identity commitment */
   readonly commitment: bigint;
   readonly trapdoor: bigint;

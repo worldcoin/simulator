@@ -2,6 +2,11 @@ import { Environment } from "@/types";
 
 type EncodedCommitment = string; // this should be a 64-padded hex-string
 
+interface InclusionProofResponse {
+  root: EncodedCommitment;
+  proof: Record<"Left" | "Right", string>[];
+}
+
 const SEQUENCER_ENDPOINT: Record<Environment, string> = {
   [Environment.STAGING]: "https://signup.stage-crypto.worldcoin.dev/",
   [Environment.PRODUCTION]: "https://signup.crypto.worldcoin.dev/",
@@ -45,16 +50,9 @@ export async function inclusionProof(
   identityCommitment: EncodedCommitment,
   env: Environment = Environment.STAGING,
 ) {
-  return await postRequest<Record<"Left" | "Right", string>[]>(
+  return await postRequest<InclusionProofResponse>(
     "inclusionProof",
     identityCommitment,
     env,
   );
-}
-
-export async function getRoot(
-  identityCommitment: EncodedCommitment,
-  env: Environment = Environment.STAGING,
-) {
-  return await postRequest<string>("getRoot", identityCommitment, env);
 }
