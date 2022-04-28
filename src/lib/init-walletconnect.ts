@@ -1,10 +1,10 @@
+import { defaultAbiCoder as abi } from "@ethersproject/abi";
+import { keccak256 } from "@ethersproject/solidity";
 import WalletConnect from "@walletconnect/client";
 import type { ISessionParams } from "@walletconnect/types";
 import type { VerificationRequest } from "@worldcoin/id";
 import { ErrorCodes } from "@worldcoin/id";
 import { fetchApprovalRequestMetadata } from "./get-metadata";
-import { defaultAbiCoder as abi } from "@ethersproject/abi";
-import { keccak256 } from "@ethersproject/solidity";
 
 export interface WalletConnectRequest extends VerificationRequest {
   code?: string;
@@ -118,11 +118,11 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
     );
   }
 
-  // decoding external Nullifier string
+  // decoding action ID string
   try {
     [callRequestPayload.code] = abi.decode(
       ["string"],
-      callRequestPayload.params[0].externalNullifier,
+      callRequestPayload.params[0].actionId,
     );
   } catch (err) {
     console.error(err);
@@ -130,7 +130,7 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
       id: callRequestPayload.id,
       error: {
         code: -32602,
-        message: ErrorCodes.InvalidExternalNullifier,
+        message: ErrorCodes.InvalidActionID,
       },
     });
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -140,7 +140,7 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
 
   // validating proof signal
   try {
-    keccak256(["bytes"], [callRequestPayload.params[0].proofSignal]);
+    keccak256(["bytes"], [callRequestPayload.params[0].signal]);
   } catch (err) {
     console.error(err);
     connector.rejectRequest({

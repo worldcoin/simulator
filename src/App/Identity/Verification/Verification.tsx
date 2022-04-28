@@ -36,8 +36,8 @@ function hashBytes(signal: string) {
  *
  * @param identityTrapdoor The identity trapdoor.
  * @param identityNullifier The identity nullifier.
- * @param merkleProof The Merkle proof that identity exists in Semaphore tree.
- * @param externalNullifier The topic on which vote should be broadcasted.
+ * @param merkleProof The Merkle proof that identity exists in Merkle tree of verified identities.
+ * @param actionId The unique identifier for the action (scope) of a proof.
  * @param signal The signal that should be broadcasted.
  * @returns The Semaphore witness.
  */
@@ -45,7 +45,7 @@ function generateSemaphoreWitness(
   identityTrapdoor: StrBigInt,
   identityNullifier: StrBigInt,
   merkleProof: MerkleProof,
-  externalNullifier: StrBigInt,
+  actionId: StrBigInt,
   signal: string,
 ): SemaphoreWitness {
   return {
@@ -53,7 +53,7 @@ function generateSemaphoreWitness(
     identityTrapdoor: identityTrapdoor,
     treePathIndices: merkleProof.pathIndices,
     treeSiblings: merkleProof.siblings as StrBigInt[],
-    externalNullifier: externalNullifier,
+    externalNullifier: actionId,
     signalHash: hashBytes(signal),
   };
 }
@@ -151,7 +151,7 @@ const Verification = React.memo(function Verification(props: {
       const wasmFilePath = "./semaphore.wasm";
       const finalZkeyPath = "./semaphore_final.zkey";
 
-      const [{ externalNullifier, proofSignal }] = request.params;
+      const [{ actionId, signal }] = request.params;
 
       const siblings = identity.inclusionProof
         .flatMap((v) => Object.values(v))
@@ -172,8 +172,8 @@ const Verification = React.memo(function Verification(props: {
         identity.trapdoor,
         identity.nullifier,
         merkleProof,
-        hashBytes(externalNullifier),
-        proofSignal,
+        hashBytes(actionId),
+        signal,
       );
 
       void Semaphore.genProof(witness, wasmFilePath, finalZkeyPath)
@@ -182,7 +182,7 @@ const Verification = React.memo(function Verification(props: {
             id: request.id,
             result: {
               merkleRoot,
-              nullifierHash: abi.encode(
+              uniquenessHash: abi.encode(
                 ["uint256"],
                 [fullProof.publicSignals.nullifierHash],
               ),

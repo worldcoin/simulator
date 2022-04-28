@@ -4,9 +4,9 @@ import type { WalletConnectRequest } from "./init-walletconnect";
 export async function fetchApprovalRequestMetadata(
   request: WalletConnectRequest,
 ): Promise<Partial<ApprovalRequestMetadata>> {
-  const [{ externalNullifier, appName, signalDescription }] = request.params;
+  const [{ actionId, appName, signalDescription }] = request.params;
   const meta: Partial<ApprovalRequestMetadata> = {
-    external_nullifer: externalNullifier,
+    actionId,
     project_name: appName,
     description: signalDescription,
   };
@@ -25,13 +25,11 @@ export async function fetchApprovalRequestMetadata(
         `Failed to fetch metadata service: ${req.statusText}`,
       );
     const content = (await req.json()) as Record<string, unknown>;
-    if (!(externalNullifier in content))
-      throw new ReferenceError(
-        `Unable to find ${externalNullifier} in metadata response: ${JSON.stringify(
-          content,
-        )}`,
-      );
-    Object.assign(meta, content[externalNullifier]);
+    if (!(actionId in content)) {
+      console.info(`"${actionId}" not found as a verified action.`);
+      return meta;
+    }
+    Object.assign(meta, content[actionId]);
     meta.validated = true;
   } catch (err) {
     console.error(err);
