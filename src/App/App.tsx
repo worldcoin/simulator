@@ -28,7 +28,7 @@ const App = React.memo(function App() {
   const [identity, setIdentity] = React.useState<IdentityType>({
     id: "",
     verified: false,
-    inclusionProof: [],
+    inclusionProof: null,
     commitment: BigInt("0000"),
     trapdoor: BigInt("0000"),
     nullifier: BigInt("0000"),
@@ -45,7 +45,7 @@ const App = React.memo(function App() {
     }
 
     let verified = false;
-    let proof: IdentityType["inclusionProof"] = [];
+    let proof: IdentityType["inclusionProof"] = null;
     inclusionProof(encodeIdentityCommitment(storedIdentity.commitment))
       .then((result) => {
         verified = true;

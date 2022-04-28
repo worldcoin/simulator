@@ -35,7 +35,7 @@ const Initial = React.memo(function Initial(props: {
 
       const id = encodedCommitment.slice(0, 10);
       let verified = false;
-      let proof: IdentityType["inclusionProof"] = [];
+      let proof: IdentityType["inclusionProof"] = null;
 
       try {
         proof = await inclusionProof(encodedCommitment);
