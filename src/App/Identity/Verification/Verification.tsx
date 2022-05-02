@@ -177,7 +177,7 @@ const Verification = React.memo(function Verification(props: {
             id: request.id,
             result: {
               merkleRoot: identity.inclusionProof?.root,
-              uniquenessHash: abi.encode(
+              nullifierHash: abi.encode(
                 ["uint256"],
                 [fullProof.publicSignals.nullifierHash],
               ),
