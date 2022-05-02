@@ -6,7 +6,7 @@
     "@ethersproject/solidity": "^5.6.0",
     "@walletconnect/client": "^1.7.7",
     "@walletconnect/types": "^1.7.7",
-    "@walletconnect/utils": "^1.7.7",
+    "@walletconnect/utils": "^1.7.8",
     "@walletconnect/web3-provider": "^1.7.7",
     "@zk-kit/identity": "^1.4.1",
     "@zk-kit/protocols": "^1.11.1",
