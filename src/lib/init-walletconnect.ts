@@ -126,7 +126,7 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
       id: callRequestPayload.id,
       error: {
         code: -32602,
-        message: ErrorCodes.InvalidProofSignal,
+        message: ErrorCodes.InvalidSignal,
       },
     });
     await new Promise((resolve) => setTimeout(resolve, 500));
