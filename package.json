@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.17.9",
-    "@babel/plugin-syntax-typescript": "^7.16.7",
+    "@babel/plugin-syntax-typescript": "^7.17.10",
     "@babel/plugin-transform-react-jsx-source": "^7.16.7",
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
     "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
