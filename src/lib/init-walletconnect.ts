@@ -1,4 +1,3 @@
-import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import { keccak256 } from "@ethersproject/solidity";
 import WalletConnect from "@walletconnect/client";
 import type { ISessionParams } from "@walletconnect/types";
@@ -116,26 +115,6 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
     throw new TypeError(
       `Unsupported request method: ${callRequestPayload.method}`,
     );
-  }
-
-  // decoding action ID string
-  try {
-    [callRequestPayload.code] = abi.decode(
-      ["string"],
-      callRequestPayload.params[0].actionId,
-    );
-  } catch (err) {
-    console.error(err);
-    connector.rejectRequest({
-      id: callRequestPayload.id,
-      error: {
-        code: -32602,
-        message: ErrorCodes.InvalidActionID,
-      },
-    });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    if (connector.connected) await connector.killSession();
-    throw err;
   }
 
   // validating proof signal
