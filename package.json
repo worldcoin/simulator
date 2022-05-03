@@ -29,7 +29,7 @@
     "@types/react-dom": "^18.0.2",
     "@typescript-eslint/eslint-plugin": "5.20.0",
     "@typescript-eslint/parser": "5.20.0",
-    "@worldcoin/id": "^0.0.1",
+    "@worldcoin/id": "^0.0.2",
     "autoprefixer": "^10.4.5",
     "browserslist": "^4.20.3",
     "cspell": "^5.19.7",
@@ -86,7 +86,8 @@
     "dev": "node esbuild/development.js",
     "lint": "eslint --report-unused-disable-directives --ext=.ts,.tsx src/",
     "postlint": "stylelint --report-invalid-scope-disables --report-needless-disables src/**/*.css",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "typescript:check": "tsc --noEmit --emitDeclarationOnly false --declaration false"
   },
   "type": "module",
   "version": "0.0.0"

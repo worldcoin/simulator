@@ -119,14 +119,14 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
 
   // validating proof signal
   try {
-    keccak256(["bytes"], [callRequestPayload.params[0].proofSignal]);
+    keccak256(["bytes"], [callRequestPayload.params[0].signal]);
   } catch (err) {
     console.error(err);
     connector.rejectRequest({
       id: callRequestPayload.id,
       error: {
         code: -32602,
-        message: ErrorCodes.InvalidProofSignal,
+        message: ErrorCodes.InvalidSignal,
       },
     });
     await new Promise((resolve) => setTimeout(resolve, 500));

@@ -1,7 +1,7 @@
 import type { VerificationRequestParams } from "@worldcoin/id";
 
 export interface ApprovalRequestMetadata {
-  external_nullifer: VerificationRequestParams["externalNullifier"];
+  actionId: VerificationRequestParams["actionId"];
   project_name: string;
   description: string;
   logo_image: string;

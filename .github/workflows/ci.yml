@@ -23,8 +23,8 @@ jobs:
 
     - run: npm run lint
 
-    - name: Types Check
-      run: npx tsc --noEmit
+    - name: Check Typescript
+      run: npm run typescript:check
 
     - run: npx prettier --check src/**
 

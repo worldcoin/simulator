@@ -18,7 +18,7 @@ import type {
   SemaphoreWitness,
   StrBigInt,
 } from "@zk-kit/protocols";
-import { Semaphore } from "@zk-kit/protocols";
+import { generateMerkleProof, Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
 import React, { useState } from "react";
 import "./mask.css";
@@ -34,8 +34,8 @@ function hashBytes(signal: string) {
  *
  * @param identityTrapdoor The identity trapdoor.
  * @param identityNullifier The identity nullifier.
- * @param merkleProof The Merkle proof that identity exists in Semaphore tree.
- * @param externalNullifier The topic on which vote should be broadcasted.
+ * @param merkleProof The Merkle proof that identity exists in Merkle tree of verified identities.
+ * @param actionId The unique identifier for the action (scope) of a proof.
  * @param signal The signal that should be broadcasted.
  * @returns The Semaphore witness.
  */
@@ -43,7 +43,7 @@ function generateSemaphoreWitness(
   identityTrapdoor: StrBigInt,
   identityNullifier: StrBigInt,
   merkleProof: MerkleProof,
-  externalNullifier: StrBigInt,
+  actionId: StrBigInt,
   signal: string,
 ): SemaphoreWitness {
   return {
@@ -51,7 +51,7 @@ function generateSemaphoreWitness(
     identityTrapdoor: identityTrapdoor,
     treePathIndices: merkleProof.pathIndices,
     treeSiblings: merkleProof.siblings as StrBigInt[],
-    externalNullifier: externalNullifier,
+    externalNullifier: actionId,
     signalHash: hashBytes(signal),
   };
 }
@@ -141,34 +141,44 @@ const Verification = React.memo(function Verification(props: {
       const wasmFilePath = "./semaphore.wasm";
       const finalZkeyPath = "./semaphore_final.zkey";
 
-      const [{ externalNullifier, proofSignal }] = request.params;
+      const [{ actionId, signal }] = request.params;
 
-      if (!identity.inclusionProof) {
-        // TODO: Generate a dummy/empty proof so the dev can go through a failure case
-        throw "Inclusion proof not present";
+      let merkleProof: MerkleProof | null = null;
+
+      if (identity.inclusionProof) {
+        const siblings = identity.inclusionProof.proof
+          .flatMap((v) => Object.values(v))
+          .map((v) => BigNumber.from(v).toBigInt());
+
+        const pathIndices = identity.inclusionProof.proof
+          .flatMap((v) => Object.keys(v))
+          .map((v) => (v == "Left" ? 0 : 1));
+
+        merkleProof = {
+          root: null,
+          leaf: null,
+          siblings: siblings,
+          pathIndices: pathIndices,
+        };
+      } else {
+        // Generate a dummy/empty proof so dev can go through a failure case
+        console.warn(
+          "Identity inclusion Merkle proof was not present, using dummy proof. Smart contract will reject identity. Use only to test failure use case.",
+        );
+        merkleProof = generateMerkleProof(
+          20,
+          BigInt(0),
+          [identity.commitment],
+          identity.commitment,
+        );
       }
-
-      const siblings = identity.inclusionProof.proof
-        .flatMap((v) => Object.values(v))
-        .map((v) => BigNumber.from(v).toBigInt());
-
-      const pathIndices = identity.inclusionProof.proof
-        .flatMap((v) => Object.keys(v))
-        .map((v) => (v == "Left" ? 0 : 1));
-
-      const merkleProof: MerkleProof = {
-        root: null,
-        leaf: null,
-        siblings: siblings,
-        pathIndices: pathIndices,
-      };
 
       const witness = generateSemaphoreWitness(
         identity.trapdoor,
         identity.nullifier,
         merkleProof,
-        hashBytes(externalNullifier),
-        proofSignal,
+        hashBytes(actionId),
+        signal,
       );
 
       void Semaphore.genProof(witness, wasmFilePath, finalZkeyPath)
@@ -176,7 +186,9 @@ const Verification = React.memo(function Verification(props: {
           connector.approveRequest({
             id: request.id,
             result: {
-              merkleRoot: identity.inclusionProof?.root,
+              merkleRoot:
+                identity.inclusionProof?.root ??
+                abi.encode(["uint256"], [merkleProof?.root]),
               nullifierHash: abi.encode(
                 ["uint256"],
                 [fullProof.publicSignals.nullifierHash],
