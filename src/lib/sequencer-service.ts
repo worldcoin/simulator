@@ -35,7 +35,7 @@ async function postRequest<T = unknown>(
     headers: {
       "Content-Type": "application/json",
       ...(authenticateRequest
-        ? { Authentication: `Basic ${btoa(`worldcoin:${SEQUENCER_PASSWORD}`)}` }
+        ? { Authorization: `Basic ${btoa(`worldcoin:${SEQUENCER_PASSWORD}`)}` }
         : {}),
     },
   });
