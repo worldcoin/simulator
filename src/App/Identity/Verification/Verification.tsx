@@ -15,12 +15,15 @@ import unverifiedSvg from "@static/unknown.svg";
 import { ErrorCodes } from "@worldcoin/id";
 import type {
   MerkleProof,
+  Proof,
+  SemaphorePublicSignals,
   SemaphoreWitness,
   StrBigInt,
 } from "@zk-kit/protocols";
 import { generateMerkleProof, Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
 import React, { useState } from "react";
+import verificationKey from "semaphore/verification_key.json";
 import "./mask.css";
 
 function hashBytes(signal: string) {
@@ -105,6 +108,31 @@ const Verification = React.memo(function Verification(props: {
     } else props.dismiss();
   }, [props]);
 
+  /**
+   * Verifies generated ZKP. Intended only to **exemplify** how to verify proofs on JS. The execution of this function
+   * is not required for the flow to generate the proof.
+   * @param proof
+   * @param publicSignals
+   */
+  const verifyProof = async (
+    proof: Proof,
+    publicSignals: SemaphorePublicSignals,
+  ): Promise<void> => {
+    const isValid = await Semaphore.verifyProof(
+      verificationKey as unknown as string,
+      {
+        proof,
+        publicSignals,
+      },
+    );
+
+    if (isValid) {
+      console.info("Generated proof is valid and verified!");
+    } else {
+      console.error("Generated proof failed to verify.");
+    }
+  };
+
   React.useEffect(() => {
     if (verificationState === VerificationState.Error) {
       setTimeout(() => {
@@ -177,12 +205,13 @@ const Verification = React.memo(function Verification(props: {
         identity.trapdoor,
         identity.nullifier,
         merkleProof,
-        hashBytes(actionId),
+        actionId,
         signal,
       );
 
       void Semaphore.genProof(witness, wasmFilePath, finalZkeyPath)
         .then((fullProof) => {
+          void verifyProof(fullProof.proof, fullProof.publicSignals);
           connector.approveRequest({
             id: request.id,
             result: {
