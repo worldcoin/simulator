@@ -29,11 +29,12 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
       setLoading(true);
 
       const result = await insertIdentity(input);
-      console.log("Identity insertion result:", result);
+      console.info("Identity successfully added.", result);
 
       setSubmitSuccess(true);
     } catch (err) {
       setSubmitSuccess(false);
+      console.error("Error inserting identity.", err);
     } finally {
       setLoading(false);
     }
@@ -109,7 +110,7 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
                 {submitSuccess === true &&
                   "Your identity was successfully added!"}
                 {submitSuccess === false &&
-                  "Looks like someting went wrong, please try again!"}
+                  "Looks like something went wrong, please check the console and try again."}
               </span>
 
               {submitSuccess !== null && (

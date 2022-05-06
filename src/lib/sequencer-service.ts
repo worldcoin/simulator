@@ -2,6 +2,8 @@ import { Environment } from "@/types";
 
 type EncodedCommitment = string; // this should be a 64-padded hex-string
 
+const SEQUENCER_PASSWORD = process.env.SEQUENCER_PASSWORD;
+
 interface InclusionProofResponse {
   root: EncodedCommitment;
   proof: Record<"Left" | "Right", string>[];
@@ -22,12 +24,19 @@ async function postRequest<T = unknown>(
   endpoint: string,
   identityCommitment: EncodedCommitment,
   env: Environment,
+  authenticateRequest?: boolean,
 ) {
+  if (authenticateRequest && !SEQUENCER_PASSWORD) {
+    throw "Sequencer password is not provided and this request requires authentication. Please set `SEQUENCER_PASSWORD` env var.";
+  }
   const res = await fetch(getUrl(endpoint, env).toString(), {
     method: "POST",
     body: JSON.stringify([1, identityCommitment]),
     headers: {
       "Content-Type": "application/json",
+      ...(authenticateRequest
+        ? { Authorization: `Basic ${btoa(`worldcoin:${SEQUENCER_PASSWORD}`)}` }
+        : {}),
     },
   });
   if (!res.ok)
@@ -43,7 +52,7 @@ export async function insertIdentity(
 ) {
   return await postRequest<{
     identityIndex: number;
-  }>("insertIdentity", identityCommitment, env);
+  }>("insertIdentity", identityCommitment, env, true);
 }
 
 export async function inclusionProof(

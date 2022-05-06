@@ -1,9 +1,10 @@
-import "dotenv/config";
+import { transformFileAsync as babelTransformFileAsync } from "@babel/core";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import autoprefixer from "autoprefixer";
 import browserslist from "browserslist";
 import cssnano from "cssnano";
+import "dotenv/config";
 import { resolveToEsbuildTarget } from "esbuild-plugin-browserslist";
 import { clean } from "esbuild-plugin-clean";
 import { copy } from "esbuild-plugin-copy";
@@ -13,7 +14,6 @@ import { fileURLToPath } from "node:url";
 import postcss from "postcss";
 import { optimize as optimizeSVG } from "svgo";
 import tailwindcss from "tailwindcss";
-import { transformFileAsync as babelTransformFileAsync } from "@babel/core";
 
 if (!process.env.INFURA_ID) {
   console.error(
@@ -158,5 +158,6 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
   define: {
     global: "window",
     "process.env.INFURA_ID": `"${process.env.INFURA_ID}"`,
+    "process.env.SEQUENCER_PASSWORD": `"${process.env.SEQUENCER_PASSWORD}"`,
   },
 });
