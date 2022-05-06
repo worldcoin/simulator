@@ -109,7 +109,8 @@ const Verification = React.memo(function Verification(props: {
   }, [props]);
 
   /**
-   * Verifies generated ZKP. Intended to exemplify how to verify proofs on JS.
+   * Verifies generated ZKP. Intended only to **exemplify** how to verify proofs on JS. The execution of this function
+   * is not required for the flow to generate the proof.
    * @param proof
    * @param publicSignals
    */
