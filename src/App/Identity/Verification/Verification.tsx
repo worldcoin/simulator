@@ -26,8 +26,8 @@ import React, { useState } from "react";
 import verificationKey from "semaphore/verification_key.json";
 import "./mask.css";
 
-function hashBytes(signal: string) {
-  return BigInt(keccak256(["bytes"], [signal])) >> BigInt(8);
+export function hashBytes(signal: string) {
+  return BigInt(keccak256(["bytes"], [Buffer.from(signal)])) >> BigInt(8);
 }
 
 /**
@@ -205,7 +205,7 @@ const Verification = React.memo(function Verification(props: {
         identity.trapdoor,
         identity.nullifier,
         merkleProof,
-        actionId,
+        hashBytes(actionId),
         signal,
       );
 

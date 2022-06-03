@@ -1,4 +1,4 @@
-import { keccak256 } from "@ethersproject/solidity";
+import { hashBytes } from "@/App/Identity/Verification/Verification";
 import WalletConnect from "@walletconnect/client";
 import type { ISessionParams } from "@walletconnect/types";
 import type { VerificationRequest } from "@worldcoin/id";
@@ -119,7 +119,7 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
 
   // validating proof signal
   try {
-    keccak256(["bytes"], [callRequestPayload.params[0].signal]);
+    hashBytes(callRequestPayload.params[0].signal);
   } catch (err) {
     console.error(err);
     connector.rejectRequest({
