@@ -133,7 +133,7 @@ const Verification = React.memo(function Verification(props: {
     }
   };
 
-  React.useEffect(() => {
+  const actionListener = async () => {
     if (verificationState === VerificationState.Error) {
       setTimeout(() => {
         setVerificationState(VerificationState.TryAgain);
@@ -209,40 +209,53 @@ const Verification = React.memo(function Verification(props: {
         signal,
       );
 
-      void Semaphore.genProof(witness, wasmFilePath, finalZkeyPath)
-        .then((fullProof) => {
-          void verifyProof(fullProof.proof, fullProof.publicSignals);
-          connector.approveRequest({
-            id: request.id,
-            result: {
-              merkleRoot:
-                identity.inclusionProof?.root ??
-                abi.encode(["uint256"], [merkleProof?.root]),
-              nullifierHash: abi.encode(
-                ["uint256"],
-                [fullProof.publicSignals.nullifierHash],
-              ),
-              proof: abi.encode(
-                ["uint256[8]"],
-                [Semaphore.packToSolidityProof(fullProof.proof)],
-              ),
-            },
-          });
-        })
-        .catch((err) => {
-          console.error(err);
-          setVerificationState(VerificationState.Error);
-          connector.off("disconnect");
-          connector.rejectRequest({
-            id: request.id,
-            error: {
-              code: -32602,
-              message: ErrorCodes.GenericError,
-            },
-          });
+      try {
+        const fullProof = await Semaphore.genProof(
+          witness,
+          wasmFilePath,
+          finalZkeyPath,
+        );
+        await verifyProof(fullProof.proof, fullProof.publicSignals);
+        connector.approveRequest({
+          id: request.id,
+          result: {
+            merkleRoot:
+              identity.inclusionProof?.root ??
+              abi.encode(["uint256"], [merkleProof?.root]),
+            nullifierHash: abi.encode(
+              ["uint256"],
+              [fullProof.publicSignals.nullifierHash],
+            ),
+            proof: abi.encode(
+              ["uint256[8]"],
+              [Semaphore.packToSolidityProof(fullProof.proof)],
+            ),
+          },
         });
+      } catch (err) {
+        console.error(err);
+        setVerificationState(VerificationState.Error);
+        connector.off("disconnect");
+        connector.rejectRequest({
+          id: request.id,
+          error: {
+            code: -32602,
+            message: ErrorCodes.GenericError,
+          },
+        });
+      }
     }
-  }, [verificationState, props.approval, props.identity, props]);
+  };
+
+  React.useEffect(() => {
+    void actionListener();
+  }, [
+    verificationState,
+    props.approval,
+    props.identity,
+    props,
+    actionListener,
+  ]);
 
   const verify = React.useCallback(() => {
     return setVerificationState(VerificationState.Loading);
