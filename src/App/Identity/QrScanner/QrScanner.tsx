@@ -1,5 +1,5 @@
 import Button from "@/common/Button/Button";
-import { validateWalletUri } from "@/common/helpers";
+import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import noCamera from "@static/no-camera.svg";
 import spinnerSvg from "@static/spinner.svg";
@@ -51,15 +51,15 @@ const QrScanner = React.memo(function QrScanner(props: {
         return;
       }
 
-      const validationResult = validateWalletUri(result.data);
+      const { valid, errorMessage, uri } = parseWorldIDQRCode(result.data);
 
-      if (!validationResult.valid) {
-        console.error(validationResult.message);
+      if (!valid || !uri) {
+        console.error(errorMessage);
         return;
       }
 
       try {
-        await props.applyURL(result.data);
+        await props.applyURL(uri);
       } catch (error) {
         closeModal();
       }

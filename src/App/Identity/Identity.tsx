@@ -1,7 +1,7 @@
 import Modal from "@/App/Identity/Modal/Modal";
 import QrScanner from "@/App/Identity/QrScanner/QrScanner";
 import Button from "@/common/Button/Button";
-import { validateWalletUri } from "@/common/helpers";
+import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import Tooltip from "@/common/Tooltip/Toolip";
 import { connectWallet } from "@/lib/init-walletconnect";
@@ -141,18 +141,18 @@ const Identity = React.memo(function Identity(props: {
   const onPaste = React.useCallback(
     async (event: React.ClipboardEvent) => {
       const data = event.clipboardData.getData("Text");
-      const validationResult = validateWalletUri(data);
+      const { valid, errorMessage, uri } = parseWorldIDQRCode(data);
 
-      if (!validationResult.valid) {
+      if (!valid || !uri) {
         setPasteError("Please provide a valid WalletConnect session URI");
         setTimeout(() => setInput(""), 500);
-        return console.error(validationResult.message);
+        return console.error(errorMessage);
       }
 
       setPasteError("");
 
       try {
-        await applyURL(data);
+        await applyURL(uri);
       } catch (error) {
         setApplyInProgress(false);
         setPasteError("Connection can't be established");
