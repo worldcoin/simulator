@@ -5,7 +5,6 @@ import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import { BigNumber } from "@ethersproject/bignumber";
-import { keccak256 } from "@ethersproject/solidity";
 import checkSvg from "@static/check.svg";
 import verifiedSvg from "@static/checkmark.svg";
 import crossSvg from "@static/cross.svg";
@@ -25,10 +24,6 @@ import cn from "classnames";
 import React, { useState } from "react";
 import verificationKey from "semaphore/verification_key.json";
 import "./mask.css";
-
-export function hashBytes(signal: string) {
-  return BigInt(keccak256(["bytes"], [Buffer.from(signal)])) >> BigInt(8);
-}
 
 /**
  * Creates a Semaphore witness for the Semaphore ZK proof.
@@ -55,7 +50,7 @@ function generateSemaphoreWitness(
     treePathIndices: merkleProof.pathIndices,
     treeSiblings: merkleProof.siblings as StrBigInt[],
     externalNullifier: actionId,
-    signalHash: hashBytes(signal),
+    signalHash: signal,
   };
 }
 
@@ -205,8 +200,8 @@ const Verification = React.memo(function Verification(props: {
         identity.trapdoor,
         identity.nullifier,
         merkleProof,
-        hashBytes(actionId),
-        signal,
+        actionId, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
+        signal, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
       );
 
       try {
