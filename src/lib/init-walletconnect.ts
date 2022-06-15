@@ -135,7 +135,7 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
 
   // validate action ID
   try {
-    BigInt(callRequestPayload.params[0].actionId);
+    BigInt(callRequestPayload.params[0].action_id);
   } catch (err) {
     console.error(err);
     connector.rejectRequest({

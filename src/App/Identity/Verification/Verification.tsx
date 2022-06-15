@@ -33,7 +33,7 @@ import "./mask.css";
  * @param identityTrapdoor The identity trapdoor.
  * @param identityNullifier The identity nullifier.
  * @param merkleProof The Merkle proof that identity exists in Merkle tree of verified identities.
- * @param actionId The unique identifier for the action (scope) of a proof.
+ * @param actionId The unique identifier for the action. This determines the scope of the proof. A single person cannot issue two proofs for the same action ID.
  * @param signal The signal that should be broadcasted.
  * @returns The Semaphore witness.
  */
@@ -164,7 +164,7 @@ const Verification = React.memo(function Verification(props: {
       const wasmFilePath = "./semaphore.wasm";
       const finalZkeyPath = "./semaphore_final.zkey";
 
-      const [{ actionId, signal }] = request.params;
+      const [{ action_id, signal }] = request.params;
 
       let merkleProof: MerkleProof | null = null;
 
@@ -200,7 +200,7 @@ const Verification = React.memo(function Verification(props: {
         identity.trapdoor,
         identity.nullifier,
         merkleProof,
-        actionId, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
+        action_id, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
         signal, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
       );
 
@@ -214,10 +214,10 @@ const Verification = React.memo(function Verification(props: {
         connector.approveRequest({
           id: request.id,
           result: {
-            merkleRoot:
+            merkle_root:
               identity.inclusionProof?.root ??
               abi.encode(["uint256"], [merkleProof?.root]),
-            nullifierHash: abi.encode(
+            nullifier_hash: abi.encode(
               ["uint256"],
               [fullProof.publicSignals.nullifierHash],
             ),

@@ -1,7 +1,7 @@
 import type { VerificationRequestParams } from "@worldcoin/id";
 
 export interface ApprovalRequestMetadata {
-  actionId: VerificationRequestParams["actionId"];
+  action_id: VerificationRequestParams["action_id"];
   project_name: string;
   description: string;
   logo_image: string;
