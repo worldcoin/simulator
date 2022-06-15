@@ -155,7 +155,7 @@ const Identity = React.memo(function Identity(props: {
         await applyURL(uri);
       } catch (error) {
         setApplyInProgress(false);
-        setPasteError("Connection can't be established");
+        setPasteError("Error with request. Check console.");
         setTimeout(() => setInput(""), 500);
       }
     },
