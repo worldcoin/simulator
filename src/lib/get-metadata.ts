@@ -4,11 +4,11 @@ import type { WalletConnectRequest } from "./init-walletconnect";
 export async function fetchApprovalRequestMetadata(
   request: WalletConnectRequest,
 ): Promise<Partial<ApprovalRequestMetadata>> {
-  const [{ action_id, appName, signalDescription }] = request.params;
+  const [{ action_id, app_name, signal_description }] = request.params;
   const meta: Partial<ApprovalRequestMetadata> = {
     action_id,
-    project_name: appName,
-    description: signalDescription,
+    project_name: app_name,
+    description: signal_description,
   };
 
   try {
