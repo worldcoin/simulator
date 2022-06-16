@@ -4,11 +4,11 @@ import type { WalletConnectRequest } from "./init-walletconnect";
 export async function fetchApprovalRequestMetadata(
   request: WalletConnectRequest,
 ): Promise<Partial<ApprovalRequestMetadata>> {
-  const [{ actionId, appName, signalDescription }] = request.params;
+  const [{ action_id, app_name, signal_description }] = request.params;
   const meta: Partial<ApprovalRequestMetadata> = {
-    actionId,
-    project_name: appName,
-    description: signalDescription,
+    action_id,
+    project_name: app_name,
+    description: signal_description,
   };
 
   try {
@@ -25,11 +25,11 @@ export async function fetchApprovalRequestMetadata(
         `Failed to fetch metadata service: ${req.statusText}`,
       );
     const content = (await req.json()) as Record<string, unknown>;
-    if (!(actionId in content)) {
-      console.info(`"${actionId}" not found as a verified action.`);
+    if (!(action_id in content)) {
+      console.info(`"${action_id}" not found as a verified action.`);
       return meta;
     }
-    Object.assign(meta, content[actionId]);
+    Object.assign(meta, content[action_id]);
     meta.validated = true;
   } catch (err) {
     console.error(err);

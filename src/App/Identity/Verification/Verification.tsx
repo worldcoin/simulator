@@ -5,7 +5,6 @@ import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import { BigNumber } from "@ethersproject/bignumber";
-import { keccak256 } from "@ethersproject/solidity";
 import checkSvg from "@static/check.svg";
 import verifiedSvg from "@static/checkmark.svg";
 import crossSvg from "@static/cross.svg";
@@ -26,10 +25,6 @@ import React, { useState } from "react";
 import verificationKey from "semaphore/verification_key.json";
 import "./mask.css";
 
-export function hashBytes(signal: string) {
-  return BigInt(keccak256(["bytes"], [Buffer.from(signal)])) >> BigInt(8);
-}
-
 /**
  * Creates a Semaphore witness for the Semaphore ZK proof.
  * '@zk-kit/protocols' witness implementation expects a bytes32 strings,
@@ -38,7 +33,7 @@ export function hashBytes(signal: string) {
  * @param identityTrapdoor The identity trapdoor.
  * @param identityNullifier The identity nullifier.
  * @param merkleProof The Merkle proof that identity exists in Merkle tree of verified identities.
- * @param actionId The unique identifier for the action (scope) of a proof.
+ * @param actionId The unique identifier for the action. This determines the scope of the proof. A single person cannot issue two proofs for the same action ID.
  * @param signal The signal that should be broadcasted.
  * @returns The Semaphore witness.
  */
@@ -55,7 +50,7 @@ function generateSemaphoreWitness(
     treePathIndices: merkleProof.pathIndices,
     treeSiblings: merkleProof.siblings as StrBigInt[],
     externalNullifier: actionId,
-    signalHash: hashBytes(signal),
+    signalHash: signal,
   };
 }
 
@@ -169,7 +164,7 @@ const Verification = React.memo(function Verification(props: {
       const wasmFilePath = "./semaphore.wasm";
       const finalZkeyPath = "./semaphore_final.zkey";
 
-      const [{ actionId, signal }] = request.params;
+      const [{ action_id, signal }] = request.params;
 
       let merkleProof: MerkleProof | null = null;
 
@@ -205,8 +200,8 @@ const Verification = React.memo(function Verification(props: {
         identity.trapdoor,
         identity.nullifier,
         merkleProof,
-        hashBytes(actionId),
-        signal,
+        action_id, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
+        signal, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
       );
 
       try {
@@ -219,10 +214,10 @@ const Verification = React.memo(function Verification(props: {
         connector.approveRequest({
           id: request.id,
           result: {
-            merkleRoot:
+            merkle_root:
               identity.inclusionProof?.root ??
               abi.encode(["uint256"], [merkleProof?.root]),
-            nullifierHash: abi.encode(
+            nullifier_hash: abi.encode(
               ["uint256"],
               [fullProof.publicSignals.nullifierHash],
             ),

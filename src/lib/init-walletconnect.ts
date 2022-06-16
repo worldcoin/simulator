@@ -1,4 +1,3 @@
-import { hashBytes } from "@/App/Identity/Verification/Verification";
 import WalletConnect from "@walletconnect/client";
 import type { ISessionParams } from "@walletconnect/types";
 import type { VerificationRequest } from "@worldcoin/id";
@@ -117,9 +116,9 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
     );
   }
 
-  // validating proof signal
+  // validate signal
   try {
-    hashBytes(callRequestPayload.params[0].signal);
+    BigInt(callRequestPayload.params[0].signal);
   } catch (err) {
     console.error(err);
     connector.rejectRequest({
@@ -127,6 +126,23 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
       error: {
         code: -32602,
         message: ErrorCodes.InvalidSignal,
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (connector.connected) await connector.killSession();
+    throw err;
+  }
+
+  // validate action ID
+  try {
+    BigInt(callRequestPayload.params[0].action_id);
+  } catch (err) {
+    console.error(err);
+    connector.rejectRequest({
+      id: callRequestPayload.id,
+      error: {
+        code: -32602,
+        message: ErrorCodes.InvalidActionID,
       },
     });
     await new Promise((resolve) => setTimeout(resolve, 500));
