@@ -72,7 +72,8 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
                 <span className="font-semibold text-4940e0"> World ID?</span>
               </div>
               <p>
-                Use the form below to include mock identities into our testnet.
+                Use the form below to include mock identities into the{" "}
+                <b>Staging network</b>.
               </p>
             </div>
             <p>
@@ -110,8 +111,7 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
                   { "text-4940e0": submitSuccess === true },
                 )}
               >
-                {submitSuccess === null &&
-                  "Obtained from the mock Worldcoin app"}
+                {submitSuccess === null && "Obtained from the simulator"}
                 {submitSuccess === true &&
                   "Your identity was successfully added!"}
                 {submitSuccess === false &&

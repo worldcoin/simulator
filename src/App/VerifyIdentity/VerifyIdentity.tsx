@@ -47,7 +47,7 @@ const VerifyIdentity = React.memo(function VerifyIdentity(props: {
             orb and verifying you are a unique human.
           </p>
           <p>
-            In this mock version, you can go to the faucet and just insert your
+            In the simulator, you can go to the faucet and just insert your
             identity.
           </p>
         </div>

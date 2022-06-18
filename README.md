@@ -1,4 +1,4 @@
-# World ID Mock App
+# Worldcoin Simulator
 
 This is a sample verification app that simulates the behavior of the Worldcoin app to use World ID in the [Test network](https://id.worldcoin.org/test). It works together with World ID's [Javascript Integration](https://id.worldcoin.org/docs/js).
 
