@@ -1,6 +1,18 @@
 import type { ApprovalRequestMetadata } from "@/types/metadata";
 import type { WalletConnectRequest } from "./init-walletconnect";
 
+interface ActionPayload {
+  id: string;
+  public_description: string;
+  name: string;
+  is_staging: boolean;
+  team: {
+    app_name: string;
+    is_verified: boolean;
+    verified_app_logo?: string;
+  };
+}
+
 export async function fetchApprovalRequestMetadata(
   request: WalletConnectRequest,
 ): Promise<Partial<ApprovalRequestMetadata>> {
@@ -13,24 +25,23 @@ export async function fetchApprovalRequestMetadata(
 
   try {
     const req = await fetch(
-      "https://gist.githubusercontent.com/paolodamico/82109c72601d80ba3bf04ba6da1469a5/raw/worldid-dev-metadata.json",
-      {
-        redirect: "follow",
-        // current gist does not support passing credentials https://stackoverflow.com/questions/8074665/cross-origin-resource-sharing-with-credentials
-        //  credentials: "include"
-      },
+      `https://developer.worldcoin.org/api/v1/precheck/${action_id}`,
     );
-    if (!req.ok)
-      throw new TypeError(
-        `Failed to fetch metadata service: ${req.statusText}`,
-      );
-    const content = (await req.json()) as Record<string, unknown>;
-    if (!(action_id in content)) {
-      console.info(`"${action_id}" not found as a verified action.`);
+    if (req.status === 404) {
+      console.info("Action is not registered in the dev portal.");
       return meta;
     }
-    Object.assign(meta, content[action_id]);
-    meta.validated = true;
+
+    if (!req.ok) {
+      throw new Error(`Failed to fetch metadata service: ${req.statusText}`);
+    }
+
+    const content = (await req.json()) as ActionPayload;
+
+    meta.description = content.public_description;
+    meta.project_name = content.team.app_name;
+    meta.logo_image = content.team.verified_app_logo;
+    meta.validated = content.team.is_verified || undefined;
   } catch (err) {
     console.error(err);
   }

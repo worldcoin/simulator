@@ -322,7 +322,8 @@ const Verification = React.memo(function Verification(props: {
 
         <div className="grid gap-y-1 text-14 text-777e90">
           <span className="font-semibold text-183c4a">
-            {props.approval.meta?.project_name ?? "A Project"}
+            {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
+            {props.approval.meta?.project_name || "A Project"}
           </span>{" "}
           <span>wants to verify you are only doing this once</span>
         </div>
