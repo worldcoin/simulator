@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@ethersproject/abi": "5.6.1",
+    "@ethersproject/abi": "5.6.4",
     "@ethersproject/bignumber": "^5.6.0",
     "@ethersproject/providers": "5.6.4",
     "@ethersproject/solidity": "^5.6.0",
