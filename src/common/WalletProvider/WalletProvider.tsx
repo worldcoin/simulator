@@ -25,8 +25,8 @@ export const WalletProvider = React.memo(function WalletProvider(props: {
       infuraId: process.env.INFURA_ID,
       storageId: "wallet-identity-connector",
       clientMeta: {
-        name: "World ID Mock App",
-        description: "World ID in the Test Network",
+        name: "Worldcoin Simulator",
+        description: "Test World ID",
         url: "https://id.worldcoin.org/test",
         icons: [
           document.head.querySelector<HTMLLinkElement>("link[rel~=icon]")!.href,

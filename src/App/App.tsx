@@ -111,16 +111,16 @@ const App = React.memo(function App() {
             className="h-10 w-10"
           />
           <p className="w-full text-777e90">
-            This is a mock app that simulates the behavior of the{" "}
+            This is a simulator of the{" "}
             <a
-              href="https://worldcoin.org"
+              href="https://worldcoin.org/download"
               target="_blank"
               className="text-4940e0"
               rel="noreferrer"
             >
-              Worldcoin
+              Worldcoin app
             </a>{" "}
-            app for the purposes of testing World ID.
+            intended for testing World ID.
           </p>
           <div>
             <a
