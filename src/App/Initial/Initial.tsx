@@ -4,7 +4,7 @@ import { inclusionProof } from "@/lib/sequencer-service";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
 import { Web3Provider } from "@ethersproject/providers";
-import { keccak256 } from "@ethersproject/solidity";
+import { utils } from "@worldcoin/id";
 import { Strategy, ZkIdentity } from "@zk-kit/identity";
 import cn from "classnames";
 import React, { useContext } from "react";
@@ -75,7 +75,8 @@ const Initial = React.memo(function Initial(props: {
         return signer.signMessage(message);
       })
       .then((signature) => {
-        const identitySeed = keccak256(["bytes"], [signature]);
+        const identitySeed = utils.keccak256(signature);
+
         return updateIdentity(new ZkIdentity(Strategy.MESSAGE, identitySeed));
       })
       .catch((error) =>
@@ -101,10 +102,10 @@ const Initial = React.memo(function Initial(props: {
     providerContext.createProvider();
   }, [providerContext]);
 
-  const createIdentity = React.useCallback(() => {
+  const createIdentity = () => {
     const identity = new ZkIdentity(Strategy.RANDOM);
     return updateIdentity(identity);
-  }, [updateIdentity]);
+  };
 
   return (
     <div
