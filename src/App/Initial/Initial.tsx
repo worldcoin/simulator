@@ -102,10 +102,10 @@ const Initial = React.memo(function Initial(props: {
     providerContext.createProvider();
   }, [providerContext]);
 
-  const createIdentity = React.useCallback(() => {
+  const createIdentity = () => {
     const identity = new ZkIdentity(Strategy.RANDOM);
     return updateIdentity(identity);
-  }, [updateIdentity]);
+  };
 
   return (
     <div
