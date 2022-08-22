@@ -45,7 +45,7 @@
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.4.0",
-    "eslint-plugin-tailwindcss": "^3.5.0",
+    "eslint-plugin-tailwindcss": "^3.6.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.4.1",
     "opener": "^1.5.2",
