@@ -1,17 +1,29 @@
+import type { Identity } from "@/types";
+import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import WalletConnect from "@walletconnect/client";
 import type { ISessionParams } from "@walletconnect/types";
 import type { VerificationRequest } from "@worldcoin/id";
 import { ErrorCodes } from "@worldcoin/id";
+import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
+import { getFullProof } from "./get-full-proof";
+import { getMerkleProof } from "./get-merkle-proof";
 import { fetchApprovalRequestMetadata } from "./get-metadata";
-
 export interface WalletConnectRequest extends VerificationRequest {
   code?: string;
 }
 
-export async function connectWallet({ uri }: { uri: string }): Promise<{
+export async function connectWallet({
+  uri,
+  identity,
+}: {
+  uri: string;
+  identity: Identity;
+}): Promise<{
   connector: WalletConnect;
   request: WalletConnectRequest;
   meta: Awaited<ReturnType<typeof fetchApprovalRequestMetadata>>;
+  merkleProof: MerkleProof;
+  fullProof: SemaphoreFullProof;
 }> {
   console.log("Initializing WalletConnect with uri:", uri);
   // we don't want persistent sessions
@@ -155,7 +167,28 @@ export async function connectWallet({ uri }: { uri: string }): Promise<{
     window.removeEventListener("beforeunload", rejectRequest);
   });
 
-  const meta = await fetchApprovalRequestMetadata(callRequestPayload);
+  const merkleProof = getMerkleProof(identity);
+  const fullProof = await getFullProof(
+    identity,
+    merkleProof,
+    callRequestPayload.params[0].action_id,
+    callRequestPayload.params[0].signal,
+  );
+  const nullifierHash = abi.encode(
+    ["uint256"],
+    [fullProof.publicSignals.nullifierHash],
+  );
 
-  return { connector, request: callRequestPayload, meta };
+  const meta = await fetchApprovalRequestMetadata(
+    callRequestPayload,
+    nullifierHash,
+  );
+
+  return {
+    connector,
+    request: callRequestPayload,
+    meta,
+    merkleProof,
+    fullProof,
+  };
 }

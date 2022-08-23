@@ -6,4 +6,5 @@ export interface ApprovalRequestMetadata {
   description: string;
   logo_image: string;
   validated?: true;
+  nullifiers: [{ nullifier_hash: string }];
 }

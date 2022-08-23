@@ -100,12 +100,12 @@ const Identity = React.memo(function Identity(props: {
 
       setIsScanModalVisible(false);
       setApplyInProgress(true);
-      const request = await connectWallet({ uri });
+      const request = await connectWallet({ uri, identity: props.identity });
       setToApprove({ ...approval, ...request });
       setApplyInProgress(false);
       setIsVerificationModalVisible(true);
     },
-    [approval],
+    [approval, props.identity],
   );
 
   const openVerification = React.useCallback(() => {
