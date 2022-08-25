@@ -184,12 +184,8 @@ const Verification = React.memo(function Verification(props: {
   ]);
 
   const verify = React.useCallback(() => {
-    if (verificationState === VerificationState.AlreadyVerified) {
-      dismiss();
-    } else {
-      return setVerificationState(VerificationState.Loading);
-    }
-  }, [dismiss, verificationState]);
+    return setVerificationState(VerificationState.Loading);
+  }, []);
 
   const icon = React.useMemo(() => {
     if (verificationState === VerificationState.Loading) {
@@ -208,10 +204,7 @@ const Verification = React.memo(function Verification(props: {
       return "Verified";
     }
 
-    if (
-      verificationState === VerificationState.TryAgain ||
-      verificationState === VerificationState.AlreadyVerified
-    ) {
+    if (verificationState === VerificationState.TryAgain) {
       return "Try Again";
     }
 
@@ -335,12 +328,12 @@ const Verification = React.memo(function Verification(props: {
             },
             {
               "w-full bg-4940e0/10":
-                verificationState === VerificationState.TryAgain ||
-                verificationState === VerificationState.AlreadyVerified,
+                verificationState === VerificationState.TryAgain,
             },
             {
               "w-full bg-4940e0":
-                verificationState === VerificationState.Success,
+                verificationState === VerificationState.Success ||
+                verificationState === VerificationState.AlreadyVerified,
             },
           )}
         >
@@ -357,8 +350,7 @@ const Verification = React.memo(function Verification(props: {
               },
               {
                 "w-full text-4940e0":
-                  verificationState === VerificationState.TryAgain ||
-                  verificationState === VerificationState.AlreadyVerified,
+                  verificationState === VerificationState.TryAgain,
               },
             )}
           >
