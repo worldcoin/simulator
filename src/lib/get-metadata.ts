@@ -26,7 +26,9 @@ export async function fetchApprovalRequestMetadata(
   };
 
   try {
-    const url = new URL(`http://localhost:3000/api/v1/precheck/${action_id}`);
+    const url = new URL(
+      `https://developer.worldcoin.org/api/v1/precheck/${action_id}`,
+    );
     if (nullifierHash) {
       url.searchParams.append("nullifier_hash", nullifierHash);
     }
