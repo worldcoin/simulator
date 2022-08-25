@@ -241,6 +241,8 @@ const Verification = React.memo(function Verification(props: {
               alt="Project Logo"
               className="mask h-full bg-f9f9f9 object-cover object-center"
               onError={onImageLoadError}
+              width={100}
+              height={100}
             />
 
             <div className="mask-border absolute inset-0 bg-dadada" />
