@@ -80,11 +80,6 @@ const IdentityFaucet = React.memo(function IdentityFaucet() {
               When you add your identity you will be able to sign World ID
               verification requests.
             </p>
-            <p className="text-ff6471">
-              Please note that verified identities will{" "}
-              <b>only be valid for ~1 hour</b>. Add the identity here again to
-              keep using it.
-            </p>
           </div>
 
           <div className="mt-2 grid gap-y-2">
