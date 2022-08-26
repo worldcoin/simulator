@@ -4,7 +4,6 @@ import { Icon } from "@/common/Icon";
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
-import { BigNumber } from "@ethersproject/bignumber";
 import checkSvg from "@static/check.svg";
 import verifiedSvg from "@static/checkmark.svg";
 import crossSvg from "@static/cross.svg";
@@ -12,51 +11,17 @@ import spinnerSvg from "@static/spinner.svg";
 import unknownProjectLogoSvg from "@static/unknown-project.svg";
 import unverifiedSvg from "@static/unknown.svg";
 import { ErrorCodes } from "@worldcoin/id";
-import type {
-  MerkleProof,
-  Proof,
-  SemaphorePublicSignals,
-  SemaphoreWitness,
-  StrBigInt,
-} from "@zk-kit/protocols";
-import { generateMerkleProof, Semaphore } from "@zk-kit/protocols";
+import type { Proof, SemaphorePublicSignals } from "@zk-kit/protocols";
+import { Semaphore } from "@zk-kit/protocols";
 import cn from "classnames";
 import React, { useState } from "react";
 import verificationKey from "semaphore/verification_key.json";
 import "./mask.css";
 
-/**
- * Creates a Semaphore witness for the Semaphore ZK proof.
- * '@zk-kit/protocols' witness implementation expects a bytes32 strings,
- * while both our contract and the SDK work with bytes.
- *
- * @param identityTrapdoor The identity trapdoor.
- * @param identityNullifier The identity nullifier.
- * @param merkleProof The Merkle proof that identity exists in Merkle tree of verified identities.
- * @param actionId The unique identifier for the action. This determines the scope of the proof. A single person cannot issue two proofs for the same action ID.
- * @param signal The signal that should be broadcasted.
- * @returns The Semaphore witness.
- */
-function generateSemaphoreWitness(
-  identityTrapdoor: StrBigInt,
-  identityNullifier: StrBigInt,
-  merkleProof: MerkleProof,
-  actionId: StrBigInt,
-  signal: string,
-): SemaphoreWitness {
-  return {
-    identityNullifier: identityNullifier,
-    identityTrapdoor: identityTrapdoor,
-    treePathIndices: merkleProof.pathIndices,
-    treeSiblings: merkleProof.siblings as StrBigInt[],
-    externalNullifier: actionId,
-    signalHash: signal,
-  };
-}
-
 enum VerificationState {
   Initial,
   Loading,
+  AlreadyVerified,
   Error,
   TryAgain,
   Success,
@@ -128,7 +93,14 @@ const Verification = React.memo(function Verification(props: {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const actionListener = async () => {
+    if (verificationState === VerificationState.Initial) {
+      if (props.approval.meta?.nullifiers?.length) {
+        setVerificationState(VerificationState.AlreadyVerified);
+      }
+    }
+
     if (verificationState === VerificationState.Error) {
       setTimeout(() => {
         setVerificationState(VerificationState.TryAgain);
@@ -145,6 +117,7 @@ const Verification = React.memo(function Verification(props: {
     }
 
     if (verificationState === VerificationState.Loading) {
+      const { identity } = props;
       const { connector, request } = props.approval;
       if (!connector || !request) {
         console.error("connector or request undefined", props.approval);
@@ -160,63 +133,21 @@ const Verification = React.memo(function Verification(props: {
         }
       });
 
-      const { identity } = props;
-      const wasmFilePath = "./semaphore.wasm";
-      const finalZkeyPath = "./semaphore_final.zkey";
-
-      const [{ action_id, signal }] = request.params;
-
-      let merkleProof: MerkleProof | null = null;
-
-      if (identity.inclusionProof) {
-        const siblings = identity.inclusionProof.proof
-          .flatMap((v) => Object.values(v))
-          .map((v) => BigNumber.from(v).toBigInt());
-
-        const pathIndices = identity.inclusionProof.proof
-          .flatMap((v) => Object.keys(v))
-          .map((v) => (v == "Left" ? 0 : 1));
-
-        merkleProof = {
-          root: null,
-          leaf: null,
-          siblings: siblings,
-          pathIndices: pathIndices,
-        };
-      } else {
-        // Generate a dummy/empty proof so dev can go through a failure case
-        console.warn(
-          "Identity inclusion Merkle proof was not present, using dummy proof. Smart contract will reject identity. Use only to test failure use case.",
-        );
-        merkleProof = generateMerkleProof(
-          20,
-          BigInt(0),
-          [identity.commitment],
-          identity.commitment,
-        );
-      }
-
-      const witness = generateSemaphoreWitness(
-        identity.trapdoor,
-        identity.nullifier,
-        merkleProof,
-        action_id, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
-        signal, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
-      );
-
       try {
-        const fullProof = await Semaphore.genProof(
-          witness,
-          wasmFilePath,
-          finalZkeyPath,
-        );
+        const { fullProof, merkleProof } = props.approval;
+
+        if (!fullProof || !merkleProof) {
+          setVerificationState(VerificationState.Error);
+          return;
+        }
+
         await verifyProof(fullProof.proof, fullProof.publicSignals);
         connector.approveRequest({
           id: request.id,
           result: {
             merkle_root:
               identity.inclusionProof?.root ??
-              abi.encode(["uint256"], [merkleProof?.root]),
+              abi.encode(["uint256"], [merkleProof.root]),
             nullifier_hash: abi.encode(
               ["uint256"],
               [fullProof.publicSignals.nullifierHash],
@@ -277,13 +208,18 @@ const Verification = React.memo(function Verification(props: {
       return "Try Again";
     }
 
+    if (verificationState === VerificationState.AlreadyVerified) {
+      return "Verify anyway";
+    }
+
     return "Verify";
   }, [verificationState]);
 
   const isError = React.useMemo(
     () =>
       verificationState === VerificationState.Error ||
-      verificationState === VerificationState.TryAgain,
+      verificationState === VerificationState.TryAgain ||
+      verificationState === VerificationState.AlreadyVerified,
     [verificationState],
   );
 
@@ -302,6 +238,8 @@ const Verification = React.memo(function Verification(props: {
               alt="Project Logo"
               className="mask h-full bg-f9f9f9 object-cover object-center"
               onError={onImageLoadError}
+              width={100}
+              height={100}
             />
 
             <div className="mask-border absolute inset-0 bg-dadada" />
@@ -365,8 +303,12 @@ const Verification = React.memo(function Verification(props: {
             </React.Fragment>
           )}
 
-          {isError &&
-            "Looks like you have already verified your identity for this particular action."}
+          {isError && (
+            <>
+              You have already verified your identity for this action.{" "}
+              <b>For testing purposes</b>, you may still continue.
+            </>
+          )}
         </div>
       </div>
 
@@ -398,7 +340,8 @@ const Verification = React.memo(function Verification(props: {
             },
             {
               "w-full bg-4940e0":
-                verificationState === VerificationState.Success,
+                verificationState === VerificationState.Success ||
+                verificationState === VerificationState.AlreadyVerified,
             },
           )}
         >
@@ -440,7 +383,8 @@ const Verification = React.memo(function Verification(props: {
               },
               {
                 "invisible w-0 opacity-0":
-                  verificationState === VerificationState.TryAgain,
+                  verificationState === VerificationState.TryAgain ||
+                  verificationState === VerificationState.AlreadyVerified,
               },
             )}
           />
