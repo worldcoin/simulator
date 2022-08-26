@@ -208,6 +208,10 @@ const Verification = React.memo(function Verification(props: {
       return "Try Again";
     }
 
+    if (verificationState === VerificationState.AlreadyVerified) {
+      return "Verify anyway";
+    }
+
     return "Verify";
   }, [verificationState]);
 
@@ -299,8 +303,12 @@ const Verification = React.memo(function Verification(props: {
             </React.Fragment>
           )}
 
-          {isError &&
-            "Looks like you have already verified your identity for this particular action."}
+          {isError && (
+            <>
+              You have already verified your identity for this action.{" "}
+              <b>For testing purposes</b>, you may still continue.
+            </>
+          )}
         </div>
       </div>
 
