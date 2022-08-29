@@ -139,7 +139,8 @@ module.exports = {
     },
 
     fontFamily: {
-      main: ["Inter", "sans-serif"],
+      rubik: ["Rubik", "sans-serif"],
+      sora: ["Sora", "sans-serif"],
     },
 
     fontSize: {
