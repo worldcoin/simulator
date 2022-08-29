@@ -66,6 +66,7 @@ module.exports = {
         "#191c20",
         "#4940e0",
         "#777e90",
+        "#858494",
         "#bbbec7",
         "#d1d3d4",
         "#dadada",
@@ -74,6 +75,7 @@ module.exports = {
         "#f9f9f9",
         "#f9fbfc",
         "#fbfbfb",
+        "#ff5a76",
         "#ff6471",
         "#ffffff",
       ]),
@@ -107,9 +109,9 @@ module.exports = {
       },
 
       keyframes: {
-        'fade-in': {
-          '0%': {opacity: 0, visibility: 'hidden'},
-          '100%': {opacity: 1, visibility: 'visible'}
+        "fade-in": {
+          "0%": { opacity: 0, visibility: "hidden" },
+          "100%": { opacity: 1, visibility: "visible" },
         },
       },
 
@@ -153,6 +155,7 @@ module.exports = {
       18: "calc(18 * 1rem / 16)",
       20: "calc(20 * 1rem / 16)",
       24: "calc(24 * 1rem / 16)",
+      30: "calc(30 * 1rem / 16)",
       32: "calc(32 * 1rem / 16)",
       40: "calc(40 * 1rem / 16)",
     },

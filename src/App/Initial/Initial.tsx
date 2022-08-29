@@ -1,9 +1,12 @@
+import Button from "@/common/Button/Button";
 import { useIdentityStorage } from "@/common/hooks/use-identity-storage";
 import { WalletProviderContext } from "@/common/WalletProvider/WalletProvider";
 import { inclusionProof } from "@/lib/sequencer-service";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
 import { Web3Provider } from "@ethersproject/providers";
+import smileSvg from "@static/smile-gradient.svg";
+import userSvg from "@static/user-gradient.svg";
 import { utils } from "@worldcoin/id";
 import { Strategy, ZkIdentity } from "@zk-kit/identity";
 import cn from "classnames";
@@ -108,30 +111,49 @@ const Initial = React.memo(function Initial(props: {
   };
 
   return (
-    <div
-      className={cn(
-        "grid content-start gap-y-12 pb-6 xs:pb-0",
-        props.className,
-      )}
-    >
-      <h1 className="z-10 text-24 font-semibold text-183c4a">Welcome</h1>
+    <div className={cn("grid content-between pb-6 xs:pb-0", props.className)}>
+      <div className="grid gap-y-8">
+        <h1 className="z-10 px-14 pb-4 text-center font-sora text-30 font-semibold text-183c4a">
+          World ID simulator
+        </h1>
 
-      <Card
-        heading="Generate or load identity"
-        text="Connect a real wallet through WalletConnect so your identity is persisted. If you go to an orb, you’ll be able to import your identity into the Worldcoin app in the future."
-        buttonText="Connect wallet"
-        buttonAction={connectWallet}
-        tooltipText="We’ll use your wallet to generate a seed for your identity. If you connect the same wallet again, your same identity will be retrieved."
-      />
+        <Card
+          heading="Generate or load identity"
+          text={
+            <span>
+              Connect <span className="font-semibold">any real wallet</span>{" "}
+              through WalletConnect so your identity is persisted. Every time
+              you connect the same wallet, the same World ID identity will be
+              used.
+            </span>
+          }
+          tooltipText="We’ll use your wallet to generate seed entropy for your identity. If you connect the same wallet again, the same identity will be used."
+          icon={userSvg}
+        />
 
-      <Card
-        className="mt-10"
-        heading="Disposable identity"
-        text="Create a disposable identity. Ideal for rapid testing and one-time verification flows."
-        buttonText="Create temporary identity"
-        buttonAction={createIdentity}
-        altButton
-      />
+        <Card
+          heading="Temporary identity"
+          text="Create a temporary identity, will only be stored on cache. Ideal for rapid testing and one-time verification flows."
+          icon={smileSvg}
+        />
+      </div>
+
+      <div className="grid justify-items-center gap-y-6">
+        <Button
+          onClick={connectWallet}
+          type="button"
+          className="w-full bg-4940e0 font-sora text-16 font-semibold text-ffffff"
+        >
+          CONNECT WALLET
+        </Button>
+
+        <Button
+          onClick={createIdentity}
+          className="!p-0 text-18 font-medium text-858494"
+        >
+          Create temporary identity
+        </Button>
+      </div>
     </div>
   );
 });

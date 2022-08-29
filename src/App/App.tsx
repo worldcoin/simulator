@@ -5,7 +5,6 @@ import type { Identity as IdentityType } from "@/types";
 import { Phase } from "@/types";
 import batterySvg from "@static/battery.svg";
 import bgFigureSvg from "@static/bg-figure.svg";
-import logoFullSvg from "@static/logo-full.svg";
 import logoSvg from "@static/logo.svg";
 import logoutIconSvg from "@static/logout.svg";
 import networkSvg from "@static/network.svg";
@@ -141,7 +140,7 @@ const App = React.memo(function App() {
           className={cn(
             "h-full w-full px-8 pt-4 xs:h-[718px] xs:w-[387px] xs:overflow-hidden xs:rounded-40 xs:border-6 xs:border-183c4a",
             "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center xs:grid-rows-auto/1fr/auto",
-            "gap-y-9 transition duration-500",
+            "gap-y-8 transition duration-500",
             { "bg-ffffff": phase !== Phase.Identity },
             { "bg-4940e0": phase === Phase.Identity },
           )}
@@ -171,7 +170,7 @@ const App = React.memo(function App() {
             <div className="col-span-2 hidden grid-flow-col content-center justify-between xs:grid">
               <span
                 className={cn(
-                  "font-medium leading-none transition-colors",
+                  "font-sora font-semibold leading-none transition-colors",
                   {
                     "text-191c20":
                       phase === Phase.Initial || phase === Phase.VerifyIdentity,
@@ -196,27 +195,17 @@ const App = React.memo(function App() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1fr/auto">
-              <Icon
-                data={logoFullSvg}
-                className={cn(
-                  "col-span-2 col-start-1 row-start-1 h-6 w-36 justify-self-center",
-                  { "text-183c4a": phase === Phase.VerifyIdentity },
-                )}
-              />
+            <button
+              onClick={logout}
+              className="ml-auto flex items-center gap-x-3 text-ff5a76"
+            >
+              <span className="font-medium">Sign Out</span>
 
-              {identity.id && phase !== Phase.Initial && (
-                <button
-                  onClick={logout}
-                  className="col-start-2 row-start-1 transition-opacity hover:opacity-70"
-                >
-                  <Icon
-                    data={logoutIconSvg}
-                    className="h-6 w-6"
-                  />
-                </button>
-              )}
-            </div>
+              <Icon
+                data={logoutIconSvg}
+                className="h-6 w-6"
+              />
+            </button>
           </header>
 
           {phase === Phase.Loading && (
@@ -240,7 +229,6 @@ const App = React.memo(function App() {
           {phase === Phase.Identity && (
             <Identity
               setPhase={setPhase}
-              className="z-20"
               identity={identity}
               setExtendedVerifyIdentity={setExtendedVerifyIdentity}
               verificationSkipped={verificationSkipped}

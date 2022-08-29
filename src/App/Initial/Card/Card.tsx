@@ -1,19 +1,17 @@
-import Button from "@/common/Button/Button";
 import { Icon } from "@/common/Icon";
 import Tooltip from "@/common/Tooltip/Toolip";
 import infoSvg from "@static/info.svg";
 import cn from "classnames";
+import type { ReactNode } from "react";
 import React from "react";
 import { usePopperTooltip } from "react-popper-tooltip";
 
 const Card = React.memo(function Card(props: {
   heading: string;
-  text: string;
-  buttonText: string;
-  buttonAction: () => void;
+  text: ReactNode | string;
   className?: string;
-  altButton?: boolean;
   tooltipText?: string;
+  icon: string;
 }) {
   const {
     getArrowProps,
@@ -27,10 +25,17 @@ const Card = React.memo(function Card(props: {
   });
 
   return (
-    <div className={cn("grid gap-y-3", props.className)}>
-      <h2 className="text-20 font-semibold text-183c4a">{props.heading}</h2>
+    <div
+      className={cn("grid grid-cols-auto/1fr gap-y-1 gap-x-4", props.className)}
+    >
+      <Icon
+        data={props.icon}
+        className="row-span-2 h-8 w-8"
+        noMask
+      />
+      <h2 className="text-16 font-semibold text-183c4a">{props.heading}</h2>
 
-      <div className="relative text-15 leading-5 tracking-[-0.01em] text-777e90">
+      <div className="relative text-14 leading-5 tracking-[-0.01em] text-777e90">
         {props.text}
         {props.tooltipText && (
           <span
@@ -41,7 +46,10 @@ const Card = React.memo(function Card(props: {
           >
             <Icon
               data={infoSvg}
-              className="absolute top-[2px] left-[2px] h-4 w-4 rotate-180"
+              className={cn(
+                "absolute top-[2px] left-[2px] h-4 w-4 rotate-180",
+                { "text-191c20": visible },
+              )}
             />
           </span>
         )}
@@ -50,29 +58,15 @@ const Card = React.memo(function Card(props: {
       {visible && (
         <Tooltip
           ref={setTooltipRef}
-          getTooltipProps={getTooltipProps({ className: "relative px-4" })}
+          getTooltipProps={getTooltipProps({ className: "relative px-4 z-50" })}
           getArrowProps={getArrowProps({
             className: "absolute bg-transparent w-4 h-4 -top-1.5",
           })}
-          backgroundColor="bg-183c4a"
+          backgroundColor="bg-191c20"
           className="text-ffffff"
           text={props.tooltipText ?? ""}
         />
       )}
-
-      <Button
-        onClick={props.buttonAction}
-        className={cn(
-          "mt-3",
-          { "bg-4940e0 text-ffffff hover:bg-4940e0/80": !props.altButton },
-          {
-            "border border-183c4a text-183c4a hover:opacity-70":
-              props.altButton,
-          },
-        )}
-      >
-        {props.buttonText}
-      </Button>
     </div>
   );
 });
