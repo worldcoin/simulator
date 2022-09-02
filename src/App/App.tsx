@@ -4,7 +4,6 @@ import { inclusionProof } from "@/lib/sequencer-service";
 import type { Identity as IdentityType } from "@/types";
 import { Phase } from "@/types";
 import batterySvg from "@static/battery.svg";
-import bgFigureSvg from "@static/bg-figure.svg";
 import logoSvg from "@static/logo.svg";
 import logoutIconSvg from "@static/logout.svg";
 import networkSvg from "@static/network.svg";
@@ -17,7 +16,6 @@ import { Background } from "./Background/Background";
 import Identity, { encodeIdentityCommitment } from "./Identity/Identity";
 import IdentityFaucet from "./IdentityFaucet/IdentityFaucet";
 import Initial from "./Initial/Initial";
-import Signature from "./Signature/Signature";
 import VerifyIdentity from "./VerifyIdentity/VerifyIdentity";
 
 const App = React.memo(function App() {
@@ -145,23 +143,6 @@ const App = React.memo(function App() {
             { "bg-4940e0": phase === Phase.Identity },
           )}
         >
-          <div className="absolute h-full w-full overflow-hidden xs:rounded-34">
-            <Icon
-              data={bgFigureSvg}
-              className={cn(
-                "absolute min-h-[607px] min-w-[649px] object-fill transition-position delay-200 duration-500 ease-in-out",
-                {
-                  "right-0 -top-36 text-f9f9f9 xs:-top-28":
-                    phase !== Phase.Identity,
-                },
-                {
-                  "-right-[calc((649px_-_100vw)_/_2)] -top-36 text-0d049a/10 xs:-right-[calc((649px_-_375px)_/_2)] xs:-top-24":
-                    phase === Phase.Identity,
-                },
-              )}
-            />
-          </div>
-
           <header
             className={cn("z-10 grid grid-cols-1fr/auto gap-y-8", {
               "text-ffffff": phase === Phase.Identity,
@@ -217,8 +198,9 @@ const App = React.memo(function App() {
             </div>
           )}
 
-          {phase === Phase.Initial && (
+          {(phase === Phase.Initial || phase === Phase.Signature) && (
             <Initial
+              phase={phase}
               setPhase={setPhase}
               className="z-10 mt-3.5"
               identity={identity}
@@ -242,13 +224,6 @@ const App = React.memo(function App() {
               className="z-30 pt-3.5 pb-6 xs:pb-0"
               setVerificationSkipped={setVerificationSkipped}
               identity={identity}
-            />
-          )}
-
-          {phase === Phase.Signature && (
-            <Signature
-              className="pb-6 xs:pb-0"
-              setPhase={setPhase}
             />
           )}
           <hr

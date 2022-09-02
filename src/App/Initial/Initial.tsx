@@ -1,20 +1,22 @@
 import Button from "@/common/Button/Button";
 import { useIdentityStorage } from "@/common/hooks/use-identity-storage";
+import { Icon } from "@/common/Icon";
 import { WalletProviderContext } from "@/common/WalletProvider/WalletProvider";
 import { inclusionProof } from "@/lib/sequencer-service";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
 import { Web3Provider } from "@ethersproject/providers";
-import smileSvg from "@static/smile-gradient.svg";
-import userSvg from "@static/user-gradient.svg";
+import spinnerSvg from "@static/spinner.svg";
 import { utils } from "@worldcoin/id";
 import { Strategy, ZkIdentity } from "@zk-kit/identity";
 import cn from "classnames";
 import React, { useContext } from "react";
 import { encodeIdentityCommitment } from "../Identity/Identity";
-import Card from "./Card/Card";
+import { Cards } from "./Cards/Cards";
+import { Signature } from "./Signature/Signature";
 
 const Initial = React.memo(function Initial(props: {
+  phase: Phase;
   setPhase: React.Dispatch<React.SetStateAction<Phase>>;
   className?: string;
   identity: IdentityType;
@@ -25,7 +27,7 @@ const Initial = React.memo(function Initial(props: {
 
   const provider = React.useMemo(
     () => providerContext.provider,
-    [providerContext],
+    [providerContext.provider],
   );
 
   const updateIdentity = React.useCallback(
@@ -107,51 +109,70 @@ const Initial = React.memo(function Initial(props: {
 
   const createIdentity = () => {
     const identity = new ZkIdentity(Strategy.RANDOM);
-    return updateIdentity(identity);
+    updateIdentity(identity)
+      .then(() => console.log("identity updated"))
+      .catch((err) => console.log(err));
   };
+
+  const goBack = React.useCallback(() => {
+    if (!provider) {
+      return console.error("Provider was not created");
+    }
+    provider.disconnect().catch(console.error.bind(console));
+
+    provider.connector.on("disconnect", () => {
+      console.log("Provider disconnected by user");
+      props.setPhase(Phase.Initial);
+    });
+  }, [props, provider]);
 
   return (
     <div className={cn("grid content-between pb-6 xs:pb-0", props.className)}>
-      <div className="grid gap-y-8">
-        <h1 className="z-10 px-14 pb-4 text-center font-sora text-30 font-semibold text-183c4a">
-          World ID simulator
+      <div className={cn("grid gap-y-6")}>
+        <h1
+          className={cn(
+            "z-10 text-center font-sora text-30 font-semibold text-183c4a",
+            { "px-14 pb-6": props.phase === Phase.Initial },
+          )}
+        >
+          {props.phase === Phase.Initial && "World ID simulator"}
+          {props.phase === Phase.Signature && "Confirm the signature request"}
         </h1>
 
-        <Card
-          heading="Generate or load identity"
-          text={
-            <span>
-              Connect <span className="font-semibold">any real wallet</span>{" "}
-              through WalletConnect so your identity is persisted. Every time
-              you connect the same wallet, the same World ID identity will be
-              used.
-            </span>
-          }
-          tooltipText="We’ll use your wallet to generate seed entropy for your identity. If you connect the same wallet again, the same identity will be used."
-          icon={userSvg}
-        />
-
-        <Card
-          heading="Temporary identity"
-          text="Create a temporary identity, will only be stored on cache. Ideal for rapid testing and one-time verification flows."
-          icon={smileSvg}
-        />
+        {props.phase === Phase.Initial && <Cards />}
+        {props.phase === Phase.Signature && <Signature />}
       </div>
 
       <div className="grid justify-items-center gap-y-6">
         <Button
-          onClick={connectWallet}
+          onClick={props.phase === Phase.Initial ? connectWallet : () => null}
           type="button"
-          className="w-full bg-4940e0 font-sora text-16 font-semibold text-ffffff"
+          isDisabled={props.phase === Phase.Signature}
+          className={cn(
+            "w-full bg-4940e0 font-sora text-16 font-semibold text-ffffff",
+            { "py-4": props.phase === Phase.Signature },
+          )}
         >
-          CONNECT WALLET
+          {props.phase === Phase.Initial && "CONNECT WALLET"}
+          {props.phase === Phase.Signature && (
+            <Icon
+              data={spinnerSvg}
+              className="pointer-events-none mx-auto h-6 w-6 animate-spin justify-self-center text-ffffff"
+            />
+          )}
         </Button>
 
         <Button
-          onClick={createIdentity}
+          onClick={
+            {
+              [`${Phase.Initial}`]: createIdentity,
+              [`${Phase.Signature}`]: goBack,
+            }[props.phase]
+          }
           className="!p-0 text-18 font-medium text-858494"
         >
-          Create temporary identity
+          {props.phase === Phase.Initial && "Create temporary identity"}
+          {props.phase === Phase.Signature && "Cancel"}
         </Button>
       </div>
     </div>
