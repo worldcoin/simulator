@@ -44,6 +44,7 @@ module.exports = {
       10: "calc(10 * 1rem / 16)",
       12: "calc(12 * 1rem / 16)",
       16: "calc(16 * 1rem / 16)",
+      18: "calc(18 * 1rem / 16)",
       24: "calc(24 * 1rem / 16)",
       30: "calc(30 * 1rem / 16)",
       34: "calc(34 * 1rem / 16)",
@@ -70,6 +71,7 @@ module.exports = {
         "#bbbec7",
         "#d1d3d4",
         "#dadada",
+        "#dde7ea",
         "#f0edf9",
         "#f1f2f2",
         "#f1f5f8",
@@ -94,6 +96,10 @@ module.exports = {
           "pulse 900ms 600ms cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "fade-in-short": "fade-in 500ms cubic-bezier(.53,.04,.68,.33) forwards",
         "fade-in-long": "fade-in 600ms cubic-bezier(.53,.04,.68,.33) forwards",
+        "circle-left":
+          "move-right 1.4s cubic-bezier(.38,.29,.28,1.59) forwards",
+        "circle-right":
+          "move-left 1.1s cubic-bezier(.38,.29,.28,1.59) forwards",
       },
 
       gridTemplateColumns: {
@@ -113,6 +119,16 @@ module.exports = {
         "fade-in": {
           "0%": { opacity: 0, visibility: "hidden" },
           "100%": { opacity: 1, visibility: "visible" },
+        },
+
+        "move-left": {
+          "0%": { right: "-120%", opacity: 0, transform: "rotate(360deg)" },
+          "100%": { right: "-30%", opacity: 1, transform: "rotate(0deg)" },
+        },
+
+        "move-right": {
+          "0%": { left: "-120%", opacity: 0, transform: "rotate(360deg)" },
+          "100%": { left: "-90px", opacity: 1, transform: "rotate(0deg)" },
         },
       },
 
@@ -156,6 +172,7 @@ module.exports = {
       18: "calc(18 * 1rem / 16)",
       20: "calc(20 * 1rem / 16)",
       24: "calc(24 * 1rem / 16)",
+      26: "calc(26 * 1rem / 16)",
       30: "calc(30 * 1rem / 16)",
       32: "calc(32 * 1rem / 16)",
       40: "calc(40 * 1rem / 16)",

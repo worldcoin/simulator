@@ -1,0 +1,48 @@
+<svg
+  width="38"
+  height="38"
+  viewBox="0 0 38 38"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <circle
+    opacity="0.1"
+    cx="19"
+    cy="19"
+    r="16"
+    stroke="#4A40E0"
+    stroke-width="6"
+  />
+  <path
+    d="M35 19C35 16.3388 34.3362 13.7196 33.0688 11.3796C31.8013 9.03961 29.9702 7.05271 27.7412 5.59883C25.5123 4.14494 22.9559 3.26998 20.3035 3.05319C17.6511 2.83639 14.9866 3.28459 12.5511 4.35722C10.1156 5.42985 7.98614 7.09301 6.35551 9.19612C4.72487 11.2992 3.64456 13.7759 3.2124 16.4018"
+    stroke="url(#paint0_linear_9996_50845)"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <defs>
+    <linearGradient
+      id="paint0_linear_9996_50845"
+      x1="37.9995"
+      y1="19"
+      x2="3.99988"
+      y2="17"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop
+        offset="0.140625"
+        stop-color="#FD5B29"
+      />
+      <stop
+        offset="0.723958"
+        stop-color="#4B41DF"
+        stop-opacity="0.321212"
+      />
+      <stop
+        offset="1"
+        stop-color="#4B41DF"
+        stop-opacity="0"
+      />
+    </linearGradient>
+  </defs>
+</svg>

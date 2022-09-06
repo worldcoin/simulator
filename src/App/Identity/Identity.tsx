@@ -1,24 +1,28 @@
 import Modal from "@/App/Identity/Modal/Modal";
 import QrScanner from "@/App/Identity/QrScanner/QrScanner";
-import Button from "@/common/Button/Button";
+import { GradientButton } from "@/common/GradientButton/GradientButton";
 import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import Tooltip from "@/common/Tooltip/Toolip";
 import { connectWallet } from "@/lib/init-walletconnect";
 import type { WalletConnectFlow } from "@/types";
-import { IdentityState } from "@/types";
+import { IdentityState, TabsType } from "@/types";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
 import checkmarkSvg from "@static/checkmark-alt.svg";
 import copySvg from "@static/copy.svg";
-import infoSvg from "@static/info.svg";
-import passportSvg from "@static/passport.svg";
-import spinnerSvg from "@static/spinner.svg";
+import humanSvg from "@static/human.svg";
+import logoutIconSvg from "@static/logout.svg";
+import qrSvg from "@static/qr.svg";
+import questionSvg from "@static/question.svg";
 import blockies from "blockies-ts";
 import cn from "classnames";
 import React from "react";
 import { usePopperTooltip } from "react-popper-tooltip";
-import Verification from "./Verification/Verification";
+import { Background } from "./Background/Background";
+import { IdentityVerification } from "./IdentityVerification/IdentityVerification";
+import { Tabs } from "./Tabs/Tabs";
+// import Verification from "./Verification/Verification";
 
 enum InputMode {
   Manual,
@@ -32,6 +36,7 @@ export const encodeIdentityCommitment = (
 };
 
 const Identity = React.memo(function Identity(props: {
+  phase: Phase;
   setPhase: React.Dispatch<React.SetStateAction<Phase>>;
   className?: string;
   identity: IdentityType;
@@ -42,6 +47,15 @@ const Identity = React.memo(function Identity(props: {
   const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Scan);
   const [pasteError, setPasteError] = React.useState<string>("");
   const [applyInProgress, setApplyInProgress] = React.useState(false);
+  const [tab, setTab] = React.useState<TabsType>(TabsType.Wallet);
+
+  const logout = React.useCallback(() => {
+    try {
+      sessionStorage.clear();
+      localStorage.clear();
+    } catch {}
+    location.reload();
+  }, []);
 
   const blockiesSrc = React.useMemo(() => {
     if (!props.identity.id) {
@@ -197,56 +211,103 @@ const Identity = React.memo(function Identity(props: {
   });
 
   return (
-    <div
-      className={cn(
-        "grid h-full content-between gap-y-16 pt-11 pb-6 xs:pt-0 xs:pb-0",
-        props.className,
-      )}
-    >
-      <div className="grid gap-y-12 text-ffffff">
-        <div className="relative grid gap-x-1 justify-self-center pt-3 pr-5">
-          <Icon
-            data={passportSvg}
-            className="h-[88px] w-16"
-          />
+    <div className="grid grid-rows-1fr/auto">
+      <div
+        className={cn(
+          "relative grid h-full content-start gap-y-8 pt-11 pb-6 xs:pt-0 xs:pb-0",
+          props.className,
+        )}
+      >
+        <Background
+          phase={props.phase}
+          className="absolute inset-0 z-[1] -mx-8 overflow-hidden"
+        />
 
-          <div
-            ref={setTriggerRef}
-            className="absolute right-0 top-0 self-start"
+        <div className="-mx-4 grid grid-flow-col justify-between">
+          <button
+            onClick={() => setIsScanModalVisible(true)}
+            className="flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 text-000000"
           >
             <Icon
-              data={infoSvg}
-              className="h-5 w-5 rotate-180"
+              data={qrSvg}
+              className="h-6 w-6"
             />
-          </div>
+
+            <span className="text-14">Enter or paste QR</span>
+          </button>
+
+          <button
+            onClick={logout}
+            className="ml-auto flex items-center gap-x-3 text-ff5a76"
+          >
+            <span className="font-medium">Sign Out</span>
+
+            <Icon
+              data={logoutIconSvg}
+              className="h-6 w-6"
+            />
+          </button>
         </div>
 
-        {visible && (
-          <Tooltip
-            ref={setTooltipRef}
-            getTooltipProps={getTooltipProps({ className: "relative px-4" })}
-            getArrowProps={getArrowProps({
-              className: "absolute bg-transparent w-4 h-4 -top-1.5",
-            })}
-            backgroundColor="bg-ffffff"
-            className="text-777e90"
-            text="This is just a representation of your current identity. It can let you know whether you’re using the same identity in multiple sessions. If you generate your identity with the same wallet, the same identity will be fetched."
-          />
-        )}
+        <div className="z-10 grid w-[250px] content-start justify-items-center gap-y-5 justify-self-center">
+          <div className="grid h-[350px] content-start gap-y-3 rounded-18 border border-d1d3d4 bg-f1f5f8 px-3 pt-3">
+            {visible && (
+              <Tooltip
+                ref={setTooltipRef}
+                getTooltipProps={getTooltipProps({
+                  className: "relative px-4 z-50",
+                })}
+                getArrowProps={getArrowProps({
+                  className: "absolute bg-transparent hidden w-4 h-4 -top-1.5",
+                })}
+                backgroundColor="bg-191c20"
+                className=" text-ffffff"
+                text="This is just a representation of your current identity. It can let you know whether you’re using the same identity in multiple sessions. If you generate your identity with the same wallet, the same identity will be fetched."
+              />
+            )}
 
-        <div className="grid justify-items-center gap-y-4 self-center">
-          <h2 className="text-24 font-semibold leading-none">
-            Your Identity hash
-          </h2>
-          <div className="grid w-full grid-cols-1fr/auto rounded-8 border border-ffffff/30">
-            <div className="grid grid-cols-auto/1fr/auto items-center gap-x-1.5 justify-self-center py-4.5">
+            <div ref={setTriggerRef}>
+              <Icon
+                data={questionSvg}
+                className="h-4.5 w-4.5 text-858494"
+              />
+            </div>
+            <Icon
+              data={humanSvg}
+              noMask
+              className="h-[118px] w-[118px] justify-self-center"
+            />
+
+            <h1 className="mt-4 px-4 text-center font-sora font-semibold">
+              Verify your identity to test World ID
+            </h1>
+
+            <p className="mt-0.5 text-center text-14 text-858494">
+              Orbs verify your biometrics in a privacy preserving way to make
+              sure everyone in the World gets only one World ID.
+            </p>
+          </div>
+
+          <GradientButton
+            onClick={() => setIsVerificationModalVisible(true)}
+            isVisible={!props.identity.verified}
+            className="h-[54px] w-full text-14"
+            gradientText
+          >
+            Verify your identity
+          </GradientButton>
+        </div>
+
+        <div className="grid justify-items-center gap-y-2 self-center">
+          <div className="grid w-full grid-cols-1fr/auto rounded-8 border border-d1d3d4">
+            <div className="grid grid-cols-auto/1fr/auto items-center gap-x-2 justify-self-start py-4.5 pl-6">
               <img
                 src={blockiesSrc}
                 alt="Blockies Avatar"
                 className="h-5 w-5 rounded-full"
               />
 
-              <p className="text-18 leading-none text-ffffff/60">
+              <p className="text-16 font-medium leading-none text-000000">
                 {props.identity.id}
               </p>
 
@@ -262,94 +323,39 @@ const Identity = React.memo(function Identity(props: {
             <button
               type="button"
               onClick={copyIdentity}
-              className="group border-l border-ffffff/30 p-4.5"
+              className="group border-l border-d1d3d4 p-4.5"
             >
               <Icon
                 data={copySvg}
-                className="h-5 w-5 transition-colors group-hover:text-ffffff/60"
+                className="h-5 w-5 text-4940e0 transition-colors group-hover:text-4940e0/60"
               />
             </button>
           </div>
+
+          <p className="text-center text-14 text-777e90">
+            This is a representation of your identity for debugging purposes.
+          </p>
         </div>
       </div>
 
-      <div className="relative">
-        {inputMode === InputMode.Scan && (
-          <div
-            className={cn("grid gap-y-4 pb-6 transition-visibility/opacity", {
-              "pointer-events-none invisible opacity-0": applyInProgress,
-            })}
-          >
-            <Button
-              onClick={verifyIdentity}
-              isInvisible={props.identity.verified}
-              className="border bg-ffffff text-4940e0 hover:opacity-80"
-            >
-              Verify your identity
-            </Button>
+      <Tabs
+        currentTab={tab}
+        setTab={setTab}
+      />
 
-            <Button
-              onClick={startScan}
-              className={cn(
-                {
-                  "border bg-ffffff text-4940e0 hover:opacity-80":
-                    props.identity.verified,
-                },
-                {
-                  "border border-ffffff/30 text-ffffff hover:opacity-80":
-                    !props.identity.verified,
-                },
-              )}
-            >
-              Scan QR code
-            </Button>
+      <Modal
+        isVisible={isVerificationModalVisible}
+        setIsVisible={setIsVerificationModalVisible}
+        className="px-6 !pb-3.5"
+      >
+        <IdentityVerification />
+      </Modal>
 
-            <Button
-              onClick={toggleInputMode}
-              className="self-start border border-ffffff/30 text-ffffff hover:opacity-80"
-            >
-              Enter or paste code
-            </Button>
-          </div>
-        )}
-
-        {inputMode === InputMode.Manual && !applyInProgress && (
-          <div className="grid gap-y-2">
-            <input
-              type="text"
-              placeholder="Enter your code"
-              className={cn(
-                "min-w-0 rounded-full bg-transparent py-4.5 px-6 text-center text-ffffff outline-none transition-all",
-                "shadow-[inset_0_0_0_1px_rgba(255,255,255,.3)] focus:shadow-[inset_0_0_0_2px_rgba(255,255,255,1)]",
-              )}
-              onPaste={onPaste}
-              onInput={onInput}
-              value={input}
-            />
-
-            <span
-              className={cn("text-center text-12 text-ff6471", {
-                "pointer-events-none invisible opacity-0": !pasteError,
-              })}
-            >
-              {pasteError ? pasteError : "error"}
-            </span>
-          </div>
-        )}
-
-        {applyInProgress && (
-          <div className="mb-28 grid content-center justify-center">
-            <div className="rounded-full bg-ffffff p-4.5">
-              <Icon
-                data={spinnerSvg}
-                className="h-5 w-5 animate-spin text-4940e0"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <Modal isVisible={isScanModalVisible}>
+      <Modal
+        isVisible={isScanModalVisible}
+        setIsVisible={setIsScanModalVisible}
+        className="!gap-y-4 px-4 !pb-3.5"
+      >
         {isScanModalVisible && (
           <QrScanner
             setIsModalVisible={setIsScanModalVisible}
@@ -358,7 +364,7 @@ const Identity = React.memo(function Identity(props: {
         )}
       </Modal>
 
-      <Modal isVisible={isVerificationModalVisible}>
+      {/* <Modal isVisible={isVerificationModalVisible}>
         {isVerificationModalVisible && (
           <Verification
             approval={approval}
@@ -366,7 +372,7 @@ const Identity = React.memo(function Identity(props: {
             dismiss={dismiss}
           />
         )}
-      </Modal>
+      </Modal> */}
     </div>
   );
 });

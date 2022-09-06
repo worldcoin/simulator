@@ -5,7 +5,6 @@ import type { Identity as IdentityType } from "@/types";
 import { Phase } from "@/types";
 import batterySvg from "@static/battery.svg";
 import logoSvg from "@static/logo.svg";
-import logoutIconSvg from "@static/logout.svg";
 import networkSvg from "@static/network.svg";
 import spinnerSvg from "@static/spinner.svg";
 import wifiSvg from "@static/wifi.svg";
@@ -81,14 +80,6 @@ const App = React.memo(function App() {
     return setVerificationSkipped(false);
   }, [identity.verified]);
 
-  const logout = React.useCallback(() => {
-    try {
-      sessionStorage.clear();
-      localStorage.clear();
-    } catch {}
-    location.reload();
-  }, []);
-
   return (
     <div className="fixed grid h-full w-full overflow-y-scroll bg-f9fbfc xs:min-h-screen">
       <Background
@@ -136,27 +127,18 @@ const App = React.memo(function App() {
       {phase !== Phase.IdentityFaucet && (
         <section
           className={cn(
-            "h-full w-full px-8 pt-4 xs:h-[718px] xs:w-[387px] xs:overflow-hidden xs:rounded-40 xs:border-6 xs:border-183c4a",
-            "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center xs:grid-rows-auto/1fr/auto",
-            "gap-y-8 transition duration-500",
-            { "bg-ffffff": phase !== Phase.Identity },
-            { "bg-4940e0": phase === Phase.Identity },
+            "h-full w-full px-8 pt-4 xs:h-[812px] xs:w-[381px] xs:overflow-hidden xs:rounded-40 xs:border-6 xs:border-183c4a",
+            "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
+            "gap-y-8 bg-ffffff transition duration-500",
+            { "xs:grid-rows-auto/1fr/auto": phase !== Phase.Identity },
+            { "pb-7 xs:grid-rows-auto/1fr": phase === Phase.Identity },
           )}
         >
-          <header
-            className={cn("z-10 grid grid-cols-1fr/auto gap-y-8", {
-              "text-ffffff": phase === Phase.Identity,
-            })}
-          >
+          <header className="z-10 grid grid-cols-1fr/auto">
             <div className="col-span-2 hidden grid-flow-col content-center justify-between xs:grid">
               <span
                 className={cn(
-                  "font-sora font-semibold leading-none transition-colors",
-                  {
-                    "text-191c20":
-                      phase === Phase.Initial || phase === Phase.VerifyIdentity,
-                  },
-                  { "text-ffffff": phase === Phase.Identity },
+                  "font-sora font-semibold leading-none text-191c20 transition-colors",
                 )}
               >
                 9:41
@@ -164,29 +146,18 @@ const App = React.memo(function App() {
               <div className="grid grid-flow-col items-center justify-center gap-x-1">
                 <Icon
                   data={networkSvg}
-                  className="z-50 h-[14px] w-5 transition-colors"
+                  className="z-50 h-[14px] w-5 text-191c20 transition-colors"
                 />
                 <Icon
                   data={wifiSvg}
-                  className="z-50 h-[14px] w-4 transition-colors"
+                  className="z-50 h-[14px] w-4 text-191c20 transition-colors"
                 />
                 <Icon
                   data={batterySvg}
-                  className="z-50 h-[14px] w-[25px] transition-colors"
+                  className="z-50 h-[14px] w-[25px] text-191c20 transition-colors"
                 />
               </div>
             </div>
-            <button
-              onClick={logout}
-              className="ml-auto flex items-center gap-x-3 text-ff5a76"
-            >
-              <span className="font-medium">Sign Out</span>
-
-              <Icon
-                data={logoutIconSvg}
-                className="h-6 w-6"
-              />
-            </button>
           </header>
 
           {phase === Phase.Loading && (
@@ -210,6 +181,7 @@ const App = React.memo(function App() {
 
           {phase === Phase.Identity && (
             <Identity
+              phase={phase}
               setPhase={setPhase}
               identity={identity}
               setExtendedVerifyIdentity={setExtendedVerifyIdentity}
@@ -228,9 +200,8 @@ const App = React.memo(function App() {
           )}
           <hr
             className={cn(
-              "mb-2 hidden h-1 w-full max-w-[134px] justify-self-center rounded-full border-none xs:block",
-              { "bg-ffffff": phase === Phase.Identity },
-              { "bg-000000/20": phase !== Phase.Identity },
+              "mb-2 hidden h-1 w-full max-w-[134px] justify-self-center rounded-full border-none bg-000000/20",
+              { "xs:block": phase !== Phase.Identity },
             )}
           />
         </section>

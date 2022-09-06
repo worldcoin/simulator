@@ -1,8 +1,8 @@
 import Button from "@/common/Button/Button";
 import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
+import gradientSpinnerSvg from "@static/gradient-spinner.svg";
 import noCamera from "@static/no-camera.svg";
-import spinnerSvg from "@static/spinner.svg";
 import cn from "classnames";
 import QrReader from "qr-scanner";
 import React from "react";
@@ -138,7 +138,7 @@ const QrScanner = React.memo(function QrScanner(props: {
         <div className="relative self-start overflow-hidden rounded-24 bg-000000 pb-full">
           <div className="absolute inset-0 grid items-center justify-center">
             <Icon
-              data={spinnerSvg}
+              data={gradientSpinnerSvg}
               className={cn(
                 "col-start-1 row-start-1 h-16 w-16 justify-self-center transition-visibility/opacity",
                 { "pointer-events-none invisible opacity-0": isScannerReady },
@@ -175,12 +175,24 @@ const QrScanner = React.memo(function QrScanner(props: {
         </div>
       )}
 
-      <Button
-        onClick={closeModal}
-        className="self-center text-777e90 hover:opacity-70"
-      >
-        Close
-      </Button>
+      <div className="grid justify-items-center">
+        <h2 className="mb-6 font-sora text-26 font-semibold">
+          Scan World ID QR
+        </h2>
+
+        <Icon
+          data={gradientSpinnerSvg}
+          className={cn("invisible h-8 w-8 animate-spin")}
+          noMask
+        />
+
+        <Button
+          onClick={closeModal}
+          className="mt-1.5 self-center font-medium text-858494 hover:opacity-70"
+        >
+          Dismiss
+        </Button>
+      </div>
     </div>
   );
 });
