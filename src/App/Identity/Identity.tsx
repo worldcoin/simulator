@@ -22,6 +22,7 @@ import { usePopperTooltip } from "react-popper-tooltip";
 import { Background } from "./Background/Background";
 import { IdentityVerification } from "./IdentityVerification/IdentityVerification";
 import { Tabs } from "./Tabs/Tabs";
+import QrInput from "@/App/Identity/QrInput/QrInput";
 // import Verification from "./Verification/Verification";
 
 enum InputMode {
@@ -44,7 +45,7 @@ const Identity = React.memo(function Identity(props: {
   verificationSkipped: boolean;
 }) {
   const [input, setInput] = React.useState<string>("");
-  const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Scan);
+  const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Manual);
   const [pasteError, setPasteError] = React.useState<string>("");
   const [applyInProgress, setApplyInProgress] = React.useState(false);
   const [tab, setTab] = React.useState<TabsType>(TabsType.Wallet);
@@ -226,14 +227,16 @@ const Identity = React.memo(function Identity(props: {
         <div className="-mx-4 grid grid-flow-col justify-between">
           <button
             onClick={() => setIsScanModalVisible(true)}
-            className="flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 text-000000"
+            className="flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000"
           >
             <Icon
               data={qrSvg}
               className="h-6 w-6"
             />
 
-            <span className="text-14">Enter or paste QR</span>
+            <span className="text-14 font-medium leading-1px">
+              Enter or paste QR
+            </span>
           </button>
 
           <button
@@ -354,12 +357,20 @@ const Identity = React.memo(function Identity(props: {
       <Modal
         isVisible={isScanModalVisible}
         setIsVisible={setIsScanModalVisible}
-        className="!gap-y-4 px-4 !pb-3.5"
+        className="!h-auto !gap-y-4 px-4 !pb-3.5"
       >
-        {isScanModalVisible && (
+        {isScanModalVisible && inputMode === InputMode.Scan && (
           <QrScanner
             setIsModalVisible={setIsScanModalVisible}
             applyURL={applyURL}
+          />
+        )}
+        {isScanModalVisible && inputMode === InputMode.Manual && (
+          <QrInput
+            setIsModalVisible={setIsScanModalVisible}
+            onSelectScan={toggleInputMode}
+            onPaste={onPaste}
+            onInput={onInput}
           />
         )}
       </Modal>

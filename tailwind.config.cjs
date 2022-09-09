@@ -155,6 +155,10 @@ module.exports = {
       width: {
         "max-content": "max-content",
       },
+
+      lineHeight: {
+        '1px': '1px'
+      }
     },
 
     fontFamily: {
