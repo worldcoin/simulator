@@ -1,9 +1,9 @@
 import Modal from "@/App/Identity/Modal/Modal";
+import QrInput from "@/App/Identity/QrInput/QrInput";
 import QrScanner from "@/App/Identity/QrScanner/QrScanner";
 import { GradientButton } from "@/common/GradientButton/GradientButton";
 import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
-import Tooltip from "@/common/Tooltip/Toolip";
 import { connectWallet } from "@/lib/init-walletconnect";
 import type { WalletConnectFlow } from "@/types";
 import { IdentityState, TabsType } from "@/types";
@@ -11,18 +11,15 @@ import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
 import checkmarkSvg from "@static/checkmark-alt.svg";
 import copySvg from "@static/copy.svg";
-import humanSvg from "@static/human.svg";
 import logoutIconSvg from "@static/logout.svg";
 import qrSvg from "@static/qr.svg";
-import questionSvg from "@static/question.svg";
 import blockies from "blockies-ts";
 import cn from "classnames";
 import React from "react";
-import { usePopperTooltip } from "react-popper-tooltip";
 import { Background } from "./Background/Background";
+import { Card } from "./Card";
 import { IdentityVerification } from "./IdentityVerification/IdentityVerification";
 import { Tabs } from "./Tabs/Tabs";
-import QrInput from "@/App/Identity/QrInput/QrInput";
 // import Verification from "./Verification/Verification";
 
 enum InputMode {
@@ -200,17 +197,6 @@ const Identity = React.memo(function Identity(props: {
       .catch((error) => console.error(error));
   }, [props.identity.commitment]);
 
-  const {
-    getArrowProps,
-    getTooltipProps,
-    setTooltipRef,
-    setTriggerRef,
-    visible,
-  } = usePopperTooltip({
-    placement: "bottom",
-    offset: [0, 8],
-  });
-
   return (
     <div className="grid grid-rows-1fr/auto">
       <div
@@ -251,45 +237,8 @@ const Identity = React.memo(function Identity(props: {
             />
           </button>
         </div>
-
-        <div className="z-10 grid w-[250px] content-start justify-items-center gap-y-5 justify-self-center">
-          <div className="grid h-[350px] content-start gap-y-3 rounded-18 border border-d1d3d4 bg-f1f5f8 px-3 pt-3">
-            {visible && (
-              <Tooltip
-                ref={setTooltipRef}
-                getTooltipProps={getTooltipProps({
-                  className: "relative px-4 z-50",
-                })}
-                getArrowProps={getArrowProps({
-                  className: "absolute bg-transparent hidden w-4 h-4 -top-1.5",
-                })}
-                backgroundColor="bg-191c20"
-                className=" text-ffffff"
-                text="This is just a representation of your current identity. It can let you know whether you’re using the same identity in multiple sessions. If you generate your identity with the same wallet, the same identity will be fetched."
-              />
-            )}
-
-            <div ref={setTriggerRef}>
-              <Icon
-                data={questionSvg}
-                className="h-4.5 w-4.5 text-858494"
-              />
-            </div>
-            <Icon
-              data={humanSvg}
-              noMask
-              className="h-[118px] w-[118px] justify-self-center"
-            />
-
-            <h1 className="mt-4 px-4 text-center font-sora font-semibold">
-              Verify your identity to test World ID
-            </h1>
-
-            <p className="mt-0.5 text-center text-14 text-858494">
-              Orbs verify your biometrics in a privacy preserving way to make
-              sure everyone in the World gets only one World ID.
-            </p>
-          </div>
+        <div className="z-10 grid w-[250px] content-end justify-items-center gap-y-5 justify-self-center">
+          <Card verified={props.identity.verified} />
 
           <GradientButton
             onClick={() => setIsVerificationModalVisible(true)}
@@ -298,6 +247,20 @@ const Identity = React.memo(function Identity(props: {
             gradientText
           >
             Verify your identity
+          </GradientButton>
+
+          <GradientButton
+            onClick={() => setIsVerificationModalVisible(true)}
+            isVisible={props.identity.verified}
+            className="h-[54px] w-full text-14"
+            gradientText
+            textClassName="flex gap-x-2 justify-center normal-case"
+          >
+            <Icon
+              data={qrSvg}
+              className="h-4.5 w-4.5 text-[#ff6848]"
+            />
+            Scan to use World ID
           </GradientButton>
         </div>
 
@@ -351,7 +314,9 @@ const Identity = React.memo(function Identity(props: {
         setIsVisible={setIsVerificationModalVisible}
         className="px-6 !pb-3.5"
       >
-        <IdentityVerification />
+        <IdentityVerification
+          onClose={() => setIsVerificationModalVisible(false)}
+        />
       </Modal>
 
       <Modal
