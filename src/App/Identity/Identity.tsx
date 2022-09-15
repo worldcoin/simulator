@@ -250,7 +250,7 @@ const Identity = React.memo(function Identity(props: {
           </GradientButton>
 
           <GradientButton
-            onClick={() => setIsVerificationModalVisible(true)}
+            onClick={startScan}
             isVisible={props.identity.verified}
             className="h-[54px] w-full text-14"
             gradientText
