@@ -8,7 +8,10 @@ export const GradientButton = React.memo(function GradientButton(props: {
   className?: string;
   withShadow?: boolean;
   gradientText?: boolean;
+  textClassName?: string;
 }) {
+  if (!props.isVisible) return null;
+
   return (
     <button
       onClick={props.onClick}
@@ -28,6 +31,7 @@ export const GradientButton = React.memo(function GradientButton(props: {
               props.gradientText,
           },
           { "text-ffffff": !props.gradientText },
+          props.textClassName,
         )}
       >
         {props.children}

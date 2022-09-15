@@ -128,7 +128,12 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
     ),
   ],
   outdir: DESTINATION_DIR,
-  loader: { ".svg": "dataurl", ".png": "dataurl", ".woff2": "file" },
+  loader: {
+    ".svg": "dataurl",
+    ".png": "dataurl",
+    ".woff2": "file",
+    ".jpg": "dataurl",
+  },
   logLevel: "info",
   plugins: [
     clean({
