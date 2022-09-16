@@ -13,9 +13,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { Background } from "./Background/Background";
 import Identity, { encodeIdentityCommitment } from "./Identity/Identity";
-import IdentityFaucet from "./IdentityFaucet/IdentityFaucet";
 import Initial from "./Initial/Initial";
-import VerifyIdentity from "./VerifyIdentity/VerifyIdentity";
 
 const App = React.memo(function App() {
   const routerLocation = useLocation();
