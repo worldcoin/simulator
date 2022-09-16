@@ -13,9 +13,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { Background } from "./Background/Background";
 import Identity, { encodeIdentityCommitment } from "./Identity/Identity";
-import IdentityFaucet from "./IdentityFaucet/IdentityFaucet";
 import Initial from "./Initial/Initial";
-import VerifyIdentity from "./VerifyIdentity/VerifyIdentity";
 
 const App = React.memo(function App() {
   const routerLocation = useLocation();
@@ -186,18 +184,11 @@ const App = React.memo(function App() {
               identity={identity}
               setExtendedVerifyIdentity={setExtendedVerifyIdentity}
               verificationSkipped={verificationSkipped}
+              setIdentity={setIdentity}
+              setVerificationSkipped={setVerificationSkipped}
             />
           )}
 
-          {phase === Phase.VerifyIdentity && (
-            <VerifyIdentity
-              extended={extendedVerifyIdentity}
-              setPhase={setPhase}
-              className="z-30 pt-3.5 pb-6 xs:pb-0"
-              setVerificationSkipped={setVerificationSkipped}
-              identity={identity}
-            />
-          )}
           <hr
             className={cn(
               "mb-2 hidden h-1 w-full max-w-[134px] justify-self-center rounded-full border-none bg-000000/20",
@@ -206,8 +197,6 @@ const App = React.memo(function App() {
           />
         </section>
       )}
-
-      {phase === Phase.IdentityFaucet && <IdentityFaucet />}
     </div>
   );
 });

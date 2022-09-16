@@ -40,6 +40,8 @@ const Identity = React.memo(function Identity(props: {
   identity: IdentityType;
   setExtendedVerifyIdentity: React.Dispatch<React.SetStateAction<boolean>>;
   verificationSkipped: boolean;
+  setIdentity: React.Dispatch<React.SetStateAction<IdentityType>>;
+  setVerificationSkipped: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [input, setInput] = React.useState<string>("");
   const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Manual);
@@ -211,7 +213,13 @@ const Identity = React.memo(function Identity(props: {
         <div className="-mx-4 grid grid-flow-col justify-between">
           <button
             onClick={() => setIsScanModalVisible(true)}
-            className="flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000"
+            className={cn(
+              "flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000",
+              {
+                invisible:
+                  !props.identity.verified && !props.verificationSkipped,
+              },
+            )}
           >
             <Icon
               data={qrSvg}
@@ -240,7 +248,7 @@ const Identity = React.memo(function Identity(props: {
 
           <GradientButton
             onClick={() => setIsVerificationModalVisible(true)}
-            isVisible={!props.identity.verified}
+            isVisible={!props.identity.verified && !props.verificationSkipped}
             className="h-[54px] w-full text-14"
             gradientText
           >
@@ -249,7 +257,7 @@ const Identity = React.memo(function Identity(props: {
 
           <GradientButton
             onClick={startScan}
-            isVisible={props.identity.verified}
+            isVisible={props.identity.verified || props.verificationSkipped}
             className="h-[54px] w-full text-14"
             gradientText
             textClassName="flex gap-x-2 justify-center normal-case"
@@ -313,7 +321,10 @@ const Identity = React.memo(function Identity(props: {
         className="px-6 !pb-3.5"
       >
         <IdentityVerification
+          identity={props.identity}
           onClose={() => setIsVerificationModalVisible(false)}
+          setIdentity={props.setIdentity}
+          setVerificationSkipped={props.setVerificationSkipped}
         />
       </Modal>
 
