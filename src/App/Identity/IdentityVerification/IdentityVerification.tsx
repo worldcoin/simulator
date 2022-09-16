@@ -1,7 +1,11 @@
 import Button from "@/common/Button/Button";
+import { Icon } from "@/common/Icon";
 import { insertIdentity } from "@/lib/sequencer-service";
 import type { Identity as IdentityType } from "@/types";
+import checkCircleGradient from "@static/check-circle-gradient.svg";
+import gradientSpinnerSvg from "@static/gradient-spinner-thin.svg";
 import orbPng from "@static/orb.png";
+import cn from "classnames";
 import React from "react";
 import { encodeIdentityCommitment } from "../Identity";
 
@@ -17,8 +21,6 @@ export const IdentityVerification = React.memo(
     const [loading, setLoading] = React.useState<boolean>(false);
 
     const verifyHandle = React.useCallback(async () => {
-      console.log("test");
-
       try {
         setLoading(true);
         const result = await insertIdentity(
@@ -38,20 +40,59 @@ export const IdentityVerification = React.memo(
     return (
       <div className="grid content-between">
         <div className="grid justify-items-center gap-y-4">
-          <div className="flex h-[100px] w-[100px] items-center justify-center rounded-full bg-dde7ea">
-            <img
-              src={orbPng}
-              alt="worldcoin orb"
-              className="h-15 w-15"
-            />
+          <div
+            className={cn(
+              "relative flex h-[100px] w-[100px] items-center justify-center rounded-full",
+              { "bg-f1f5f8": submitSuccess, "bg-dde7ea": !submitSuccess },
+            )}
+          >
+            {!submitSuccess && (
+              <React.Fragment>
+                <img
+                  src={orbPng}
+                  alt="worldcoin orb"
+                  className="h-15 w-15"
+                />
+
+                {loading && (
+                  <Icon
+                    data={gradientSpinnerSvg}
+                    noMask
+                    className="absolute inset-0 animate-spin"
+                  />
+                )}
+              </React.Fragment>
+            )}
+
+            {submitSuccess && (
+              <React.Fragment>
+                <Icon
+                  data={checkCircleGradient}
+                  noMask
+                  className="h-15 w-15"
+                />
+              </React.Fragment>
+            )}
           </div>
+
           <h2 className="pt-4 font-sora text-30 font-semibold">
-            Verify your identity
+            {!loading && !submitSuccess && "Verify your identity"}
+            {loading && !submitSuccess && "Verifying identity..."}
+            {submitSuccess && "Verification Successful!"}
           </h2>
 
           <p className="text-center text-18 leading-[1.3] text-858494">
-            Verifying your identity is the equivalent of going to a Worldcoin
-            orb and verifying you are a unique human.
+            {!loading &&
+              !submitSuccess &&
+              `Verifying your identity is the equivalent of going to a Worldcoin
+            orb and verifying you are a unique human.`}
+
+            {loading &&
+              !submitSuccess &&
+              "Generating verification, this can take up to a few seconds. Please don’t close this screen."}
+
+            {submitSuccess &&
+              "You have successfully verified.You can return back and scan QR code."}
           </p>
         </div>
 
@@ -61,7 +102,7 @@ export const IdentityVerification = React.memo(
               isDisabled={loading}
               onClick={verifyHandle}
               type="button"
-              className="bg-4940e0 font-sora uppercase text-ffffff"
+              className="bg-4940e0 font-sora text-ffffff"
             >
               {loading ? "verifying..." : "verify now"}
             </Button>
@@ -71,7 +112,7 @@ export const IdentityVerification = React.memo(
             <Button
               onClick={props.onClose}
               type="button"
-              className="bg-4940e0 font-sora uppercase text-ffffff"
+              className="bg-4940e0 font-sora text-ffffff"
             >
               done
             </Button>
