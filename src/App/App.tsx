@@ -185,6 +185,7 @@ const App = React.memo(function App() {
               setExtendedVerifyIdentity={setExtendedVerifyIdentity}
               verificationSkipped={verificationSkipped}
               setIdentity={setIdentity}
+              setVerificationSkipped={setVerificationSkipped}
             />
           )}
 

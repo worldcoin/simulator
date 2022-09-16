@@ -14,6 +14,7 @@ export const IdentityVerification = React.memo(
     onClose: () => void;
     identity: IdentityType;
     setIdentity: React.Dispatch<React.SetStateAction<IdentityType>>;
+    setVerificationSkipped: React.Dispatch<React.SetStateAction<boolean>>;
   }) {
     const [submitSuccess, setSubmitSuccess] = React.useState<boolean | null>(
       null,
@@ -35,6 +36,11 @@ export const IdentityVerification = React.memo(
       } finally {
         setLoading(false);
       }
+    }, [props]);
+
+    const handleSkipVerification = React.useCallback(() => {
+      props.setVerificationSkipped(true);
+      props.onClose();
     }, [props]);
 
     return (
@@ -120,7 +126,7 @@ export const IdentityVerification = React.memo(
 
           <Button
             isDisabled={loading || Boolean(submitSuccess)}
-            onClick={props.onClose}
+            onClick={handleSkipVerification}
             type="button"
             className="text-18 font-medium text-858494 disabled:opacity-20"
           >
