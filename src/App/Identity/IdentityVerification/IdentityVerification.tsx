@@ -75,7 +75,7 @@ export const IdentityVerification = React.memo(
             )}
           </div>
 
-          <h2 className="pt-4 font-sora text-30 font-semibold">
+          <h2 className="pt-4 text-center font-sora text-30 font-semibold">
             {!loading && !submitSuccess && "Verify your identity"}
             {loading && !submitSuccess && "Verifying identity..."}
             {submitSuccess && "Verification Successful!"}
@@ -102,7 +102,7 @@ export const IdentityVerification = React.memo(
               isDisabled={loading}
               onClick={verifyHandle}
               type="button"
-              className="bg-4940e0 font-sora text-ffffff"
+              className="bg-4940e0 font-sora text-ffffff disabled:opacity-30"
             >
               {loading ? "verifying..." : "verify now"}
             </Button>
@@ -122,7 +122,7 @@ export const IdentityVerification = React.memo(
             isDisabled={loading || Boolean(submitSuccess)}
             onClick={props.onClose}
             type="button"
-            className="text-18 font-medium text-858494"
+            className="text-18 font-medium text-858494 disabled:opacity-20"
           >
             Skip verification
           </Button>
