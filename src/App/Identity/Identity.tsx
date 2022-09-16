@@ -109,8 +109,6 @@ const Identity = React.memo(function Identity(props: {
         return;
       }
       console.log("uri", uri);
-
-      setIsScanModalVisible(false);
       setApplyInProgress(true);
       const request = await connectWallet({ uri, identity: props.identity });
       setToApprove({ ...approval, ...request });
@@ -322,7 +320,9 @@ const Identity = React.memo(function Identity(props: {
       <Modal
         isVisible={isScanModalVisible}
         setIsVisible={setIsScanModalVisible}
-        className="!h-auto !gap-y-4 px-4 !pb-3.5"
+        className={cn("!gap-y-4 px-4 !pb-3.5", {
+          "!h-auto": isScanModalVisible && inputMode === InputMode.Manual,
+        })}
       >
         {isScanModalVisible && inputMode === InputMode.Scan && (
           <QrScanner
