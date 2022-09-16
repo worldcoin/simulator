@@ -3,6 +3,7 @@ import { insertIdentity } from "@/lib/sequencer-service";
 import type { Identity as IdentityType } from "@/types";
 import orbPng from "@static/orb.png";
 import React from "react";
+import { encodeIdentityCommitment } from "../Identity";
 
 export const IdentityVerification = React.memo(
   function IdentityVerification(props: {
@@ -20,10 +21,8 @@ export const IdentityVerification = React.memo(
 
       try {
         setLoading(true);
-        console.log(props.identity);
-
         const result = await insertIdentity(
-          props.identity.commitment.toString(),
+          encodeIdentityCommitment(props.identity.commitment),
         );
         console.info("Identity successfully added.", result);
         props.setIdentity({ ...props.identity, verified: true });
