@@ -102,7 +102,7 @@ export const IdentityVerification = React.memo(
               isDisabled={loading}
               onClick={verifyHandle}
               type="button"
-              className="bg-4940e0 font-sora text-ffffff disabled:opacity-30"
+              className="bg-4940e0 font-sora uppercase text-ffffff disabled:opacity-30"
             >
               {loading ? "verifying..." : "verify now"}
             </Button>
@@ -112,7 +112,7 @@ export const IdentityVerification = React.memo(
             <Button
               onClick={props.onClose}
               type="button"
-              className="bg-4940e0 font-sora text-ffffff"
+              className="bg-4940e0 font-sora uppercase text-ffffff"
             >
               done
             </Button>
