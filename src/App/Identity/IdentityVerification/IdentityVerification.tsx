@@ -1,9 +1,41 @@
 import Button from "@/common/Button/Button";
+import { insertIdentity } from "@/lib/sequencer-service";
+import type { Identity as IdentityType } from "@/types";
 import orbPng from "@static/orb.png";
 import React from "react";
 
 export const IdentityVerification = React.memo(
-  function IdentityVerification(props: { onClose: () => void }) {
+  function IdentityVerification(props: {
+    onClose: () => void;
+    identity: IdentityType;
+    setIdentity: React.Dispatch<React.SetStateAction<IdentityType>>;
+  }) {
+    const [submitSuccess, setSubmitSuccess] = React.useState<boolean | null>(
+      null,
+    );
+    const [loading, setLoading] = React.useState<boolean>(false);
+
+    const verifyHandle = React.useCallback(async () => {
+      console.log("test");
+
+      try {
+        setLoading(true);
+        console.log(props.identity);
+
+        const result = await insertIdentity(
+          props.identity.commitment.toString(),
+        );
+        console.info("Identity successfully added.", result);
+        props.setIdentity({ ...props.identity, verified: true });
+        setSubmitSuccess(true);
+      } catch (err) {
+        setSubmitSuccess(false);
+        console.error("Error inserting identity.", err);
+      } finally {
+        setLoading(false);
+      }
+    }, [props]);
+
     return (
       <div className="grid content-between">
         <div className="grid justify-items-center gap-y-4">
@@ -25,15 +57,29 @@ export const IdentityVerification = React.memo(
         </div>
 
         <div className="grid">
-          <Button
-            onClick={() => null}
-            type="button"
-            className="bg-4940e0 font-sora uppercase text-ffffff"
-          >
-            verify now
-          </Button>
+          {!submitSuccess && (
+            <Button
+              isDisabled={loading}
+              onClick={verifyHandle}
+              type="button"
+              className="bg-4940e0 font-sora uppercase text-ffffff"
+            >
+              {loading ? "verifying..." : "verify now"}
+            </Button>
+          )}
+
+          {submitSuccess && (
+            <Button
+              onClick={props.onClose}
+              type="button"
+              className="bg-4940e0 font-sora uppercase text-ffffff"
+            >
+              done
+            </Button>
+          )}
 
           <Button
+            isDisabled={loading || Boolean(submitSuccess)}
             onClick={props.onClose}
             type="button"
             className="text-18 font-medium text-858494"

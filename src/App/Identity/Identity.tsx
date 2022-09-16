@@ -40,6 +40,7 @@ const Identity = React.memo(function Identity(props: {
   identity: IdentityType;
   setExtendedVerifyIdentity: React.Dispatch<React.SetStateAction<boolean>>;
   verificationSkipped: boolean;
+  setIdentity: React.Dispatch<React.SetStateAction<IdentityType>>;
 }) {
   const [input, setInput] = React.useState<string>("");
   const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Manual);
@@ -315,7 +316,9 @@ const Identity = React.memo(function Identity(props: {
         className="px-6 !pb-3.5"
       >
         <IdentityVerification
+          identity={props.identity}
           onClose={() => setIsVerificationModalVisible(false)}
+          setIdentity={props.setIdentity}
         />
       </Modal>
 
