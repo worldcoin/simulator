@@ -203,7 +203,6 @@ const Identity = React.memo(function Identity(props: {
   );
 
   const dismiss = React.useCallback(() => {
-    setInputMode(InputMode.Scan);
     if (approval.connector?.connected)
       void approval.connector.killSession().catch(console.error.bind(console));
     setIsVerificationModalVisible((prevState) => !prevState);
