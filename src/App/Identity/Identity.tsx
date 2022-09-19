@@ -121,6 +121,7 @@ const Identity = React.memo(function Identity(props: {
       setToApprove({ ...approval, ...request });
       setApplyInProgress(false);
       setIsVerificationModalVisible(true);
+      setIsScanModalVisible(false);
     },
     [approval, props.identity],
   );
@@ -195,6 +196,7 @@ const Identity = React.memo(function Identity(props: {
         setApplyInProgress(false);
         setPasteError("Error with request. Check console.");
         setTimeout(() => setInput(""), 500);
+        setIsScanModalVisible(false);
       }
     },
     [applyURL],
