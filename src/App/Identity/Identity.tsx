@@ -38,15 +38,11 @@ const Identity = React.memo(function Identity(props: {
   setPhase: React.Dispatch<React.SetStateAction<Phase>>;
   className?: string;
   identity: IdentityType;
-  setExtendedVerifyIdentity: React.Dispatch<React.SetStateAction<boolean>>;
   verificationSkipped: boolean;
   setIdentity: React.Dispatch<React.SetStateAction<IdentityType>>;
   setVerificationSkipped: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [input, setInput] = React.useState<string>("");
   const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Manual);
-  const [pasteError, setPasteError] = React.useState<string>("");
-  const [applyInProgress, setApplyInProgress] = React.useState(false);
   const [tab, setTab] = React.useState<TabsType>(TabsType.Wallet);
 
   const logout = React.useCallback(() => {
@@ -106,20 +102,14 @@ const Identity = React.memo(function Identity(props: {
     }
   }, []);
 
-  const verifyIdentity = React.useCallback(() => {
-    return props.setPhase(Phase.VerifyIdentity);
-  }, [props]);
-
   const applyURL = React.useCallback(
     async (uri: string) => {
       if (!uri) {
         return;
       }
       console.log("uri", uri);
-      setApplyInProgress(true);
       const request = await connectWallet({ uri, identity: props.identity });
       setToApprove({ ...approval, ...request });
-      setApplyInProgress(false);
       setIsVerificationModalVisible(true);
       setIsScanModalVisible(false);
     },
@@ -127,7 +117,6 @@ const Identity = React.memo(function Identity(props: {
   );
 
   const openVerification = React.useCallback(() => {
-    props.setExtendedVerifyIdentity(true);
     props.setPhase(Phase.VerifyIdentity);
   }, [props]);
 
@@ -151,41 +140,18 @@ const Identity = React.memo(function Identity(props: {
     setIsScanModalVisible(true);
   }, [openVerification, props.verificationSkipped]);
 
-  const toggleInputMode = React.useCallback(() => {
-    if (!props.verificationSkipped) {
-      sessionStorage.setItem(
-        "IdentityState",
-        JSON.stringify(IdentityState.paste),
-      );
-      return openVerification();
-    }
-
-    if (inputMode === InputMode.Scan) {
-      return setInputMode(InputMode.Manual);
-    }
-
-    return setInputMode(InputMode.Scan);
-  }, [inputMode, openVerification, props]);
-
   const onPaste = React.useCallback(
     async (event: React.ClipboardEvent) => {
       const data = event.clipboardData.getData("Text");
       const { valid, errorMessage, uri } = parseWorldIDQRCode(data);
 
       if (!valid || !uri) {
-        setPasteError("Please provide a valid WalletConnect session URI");
-        setTimeout(() => setInput(""), 500);
         return console.error(errorMessage);
       }
-
-      setPasteError("");
 
       try {
         await applyURL(uri);
       } catch (error) {
-        setApplyInProgress(false);
-        setPasteError("Error with request. Check console.");
-        setTimeout(() => setInput(""), 500);
         setIsScanModalVisible(false);
       }
     },
@@ -194,7 +160,6 @@ const Identity = React.memo(function Identity(props: {
 
   const onInput = React.useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      setInput(event.target.value);
       const { valid, uri } = parseWorldIDQRCode(event.target.value);
 
       if (!valid || !uri) {
@@ -204,9 +169,6 @@ const Identity = React.memo(function Identity(props: {
       try {
         await applyURL(uri);
       } catch (error) {
-        setApplyInProgress(false);
-        setPasteError("Error with request. Check console.");
-        setTimeout(() => setInput(""), 500);
         setIsScanModalVisible(false);
       }
     },
@@ -217,8 +179,6 @@ const Identity = React.memo(function Identity(props: {
     if (approval.connector?.connected)
       void approval.connector.killSession().catch(console.error.bind(console));
     setIsVerificationModalVisible((prevState) => !prevState);
-
-    setInput("");
   }, [approval.connector]);
 
   const copyIdentity = React.useCallback(() => {

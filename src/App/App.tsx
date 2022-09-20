@@ -63,9 +63,6 @@ const App = React.memo(function App() {
 
   const [phase, setPhase] = React.useState<Phase>(Phase.Loading);
 
-  const [extendedVerifyIdentity, setExtendedVerifyIdentity] =
-    React.useState(false);
-
   const [verificationSkipped, setVerificationSkipped] = React.useState(
     identity.verified ? true : false,
   );
@@ -182,7 +179,6 @@ const App = React.memo(function App() {
               phase={phase}
               setPhase={setPhase}
               identity={identity}
-              setExtendedVerifyIdentity={setExtendedVerifyIdentity}
               verificationSkipped={verificationSkipped}
               setIdentity={setIdentity}
               setVerificationSkipped={setVerificationSkipped}
