@@ -1,12 +1,12 @@
 import Button from "@/common/Button/Button";
 import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
+import Status from "@/common/Status";
 import gradientSpinnerSvg from "@static/gradient-spinner.svg";
 import noCamera from "@static/no-camera.svg";
 import noQr from "@static/no-qr.svg";
 import Scanner from "qr-scanner";
 import React from "react";
-import Status from "@/common/Status";
 
 const QrScanner = React.memo(function QrScanner(props: {
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,6 +37,8 @@ const QrScanner = React.memo(function QrScanner(props: {
     Scanner.hasCamera()
       .then((hasCamera) => {
         if (!hasCamera) {
+          setChecking(false);
+          setCheckingError("No camera");
           return false;
         }
         return navigator.mediaDevices
@@ -47,6 +49,8 @@ const QrScanner = React.memo(function QrScanner(props: {
             return stream.active;
           })
           .catch(() => {
+            setChecking(false);
+            setCheckingError("No camera");
             return false;
           });
       })
