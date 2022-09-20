@@ -375,7 +375,6 @@ const Identity = React.memo(function Identity(props: {
         {isScanModalVisible && inputMode === InputMode.Manual && (
           <QrInput
             setIsModalVisible={setIsScanModalVisible}
-            onSelectScan={toggleInputMode}
             onPaste={onPaste}
             onInput={onInput}
           />
