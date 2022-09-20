@@ -4,6 +4,7 @@ import { validateImageUrl } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import type { ApprovalRequestMetadata } from "@/types/metadata";
 import checkBadgeSvg from "@static/check-badge.svg";
+import cn from "classnames";
 import React from "react";
 import "./mask.css";
 
@@ -30,7 +31,15 @@ export const Verify = React.memo(function Verify(props: {
     <div className="grid items-center gap-11 text-center">
       <div className="grid items-center gap-4">
         <div className="relative grid justify-center">
-          <div className="mask relative grid h-25 w-25 place-content-center bg-gradient-to-r from-[#fff0ed] to-[#edecfc]">
+          <div
+            className={cn(
+              "mask relative grid h-25 w-25 place-content-center bg-gradient-to-r",
+              {
+                "bg-191c20": projectLogo,
+                "from-[#fff0ed] to-[#edecfc]": !projectLogo,
+              },
+            )}
+          >
             {projectLogo && (
               <img
                 src={projectLogo}
@@ -44,6 +53,7 @@ export const Verify = React.memo(function Verify(props: {
                 ?
               </span>
             )}
+            <span className="mask-border absolute inset-0 bg-[#3c4040]"></span>
           </div>
           <span className="absolute left-1/2 bottom-0 -translate-x-1/2">
             {props.meta?.validated && (
