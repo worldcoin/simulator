@@ -132,6 +132,17 @@ const Identity = React.memo(function Identity(props: {
   }, [props]);
 
   const startScan = React.useCallback(() => {
+    setInputMode(InputMode.Scan);
+    if (!props.verificationSkipped) {
+      sessionStorage.setItem("IdentityState", JSON.stringify(IdentityState.QR));
+      return openVerification();
+    }
+
+    setIsScanModalVisible(true);
+  }, [openVerification, props.verificationSkipped]);
+
+  const startInputQR = React.useCallback(() => {
+    setInputMode(InputMode.Manual);
     if (!props.verificationSkipped) {
       sessionStorage.setItem("IdentityState", JSON.stringify(IdentityState.QR));
       return openVerification();
@@ -232,7 +243,7 @@ const Identity = React.memo(function Identity(props: {
 
         <div className="-mx-4 grid grid-flow-col justify-between">
           <button
-            onClick={() => setIsScanModalVisible(true)}
+            onClick={startInputQR}
             className={cn(
               "flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000",
               {
