@@ -10,7 +10,7 @@ export const Verified = React.memo(function Verified() {
       <span
         className={cn(
           "absolute inset-0 bg-000000/[.04] opacity-80 mix-blend-overlay",
-          "shadow-[inset_1px_1px_1px_#ffffff,_inest_0_0_-1px_rgba(0,_0,_0,_0.4)]",
+          "shadow-[inset_1px_1px_1px_#ffffff,_inset_0_0_-1px_rgba(0,_0,_0,_0.4)]",
         )}
       />
 

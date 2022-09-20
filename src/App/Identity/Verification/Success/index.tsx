@@ -21,11 +21,12 @@ export const Success = React.memo(function Success(props: {
         <div className="grid gap-6">
           <div className="grid gap-4">
             <p className="font-sora text-26 font-semibold">
-              Verification Succesful
+              Verification Successful
             </p>
 
             <p className="text-18">
-              You have succesfuly verified.You can return to Gitlab to continue.
+              You have successfully verified.You can return to Gitlab to
+              continue.
             </p>
           </div>
 
