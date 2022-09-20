@@ -50,7 +50,8 @@ export const Verify = React.memo(function Verify(props: {
               <span className="flex gap-1 rounded-8 border px-2 py-1">
                 <Icon
                   data={checkBadgeSvg}
-                  className="h-16 w-16"
+                  className="h-4 w-4"
+                  noMask
                 />
                 Verified
               </span>
@@ -63,33 +64,6 @@ export const Verify = React.memo(function Verify(props: {
           </span>
         </div>
 
-        {/* <div className="relative grid h-25 w-25 justify-items-center justify-self-center">
-          {projectLogo && (
-            <img
-              src={projectLogo}
-              alt={props.meta?.project_name ?? "Project Logo"}
-              className="absolute inset-4"
-              onError={onImageLoadError}
-              width={100}
-              height={100}
-            />
-          )}
-          {!projectLogo && (
-            <span className="mask h-full w-full bg-f9f9f9">?</span>
-          )}
-          <div className="mask-border absolute inset-0 bg-dadada" />
-
-          <div className="mask absolute bottom-1 left-1/2 z-10 grid -translate-x-1/2 rounded-full bg-ffffff p-[3px]">
-            <Icon
-              data={props.meta?.validated ? verifiedSvg : unverifiedSvg}
-              className={cn(
-                "h-6 w-6",
-                props.meta?.validated ? "text-4940e0" : "text-dadada",
-              )}
-            />
-          </div>
-        </div> */}
-
         <div className="text-26 text-858494">
           <span className="text-ffffff">
             {props.meta?.project_name ?? "A Project"}
@@ -100,9 +74,7 @@ export const Verify = React.memo(function Verify(props: {
 
       <div className="bg-gradient-to-r from-transparent via-858494 to-transparent py-[1px] font-medium text-dde7ea">
         <span className="relative block bg-[#0c0e10] py-5">
-          {props.meta?.description
-            ? props.meta.description
-            : "No description provided"}
+          {props.meta?.description ?? "No description provided"}
         </span>
       </div>
 
