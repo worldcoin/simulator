@@ -386,7 +386,7 @@ const Identity = React.memo(function Identity(props: {
         // FIXME: temporary set modal black
         className="bg-[#0c0e10] text-f1f5f8"
         isVisible={isVerificationModalVisible}
-        setIsVisible={setIsScanModalVisible}
+        setIsVisible={setIsVerificationModalVisible}
       >
         {isVerificationModalVisible && (
           <Verification
