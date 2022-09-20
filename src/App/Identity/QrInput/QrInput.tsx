@@ -3,7 +3,6 @@ import Button from "@/common/Button/Button";
 
 const QrInput = React.memo(function QrInput(props: {
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  onSelectScan: () => void;
   onInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPaste: (event: React.ClipboardEvent) => void;
 }) {
@@ -21,12 +20,6 @@ const QrInput = React.memo(function QrInput(props: {
         onInput={props.onInput}
         onPaste={props.onPaste}
       />
-      <Button
-        onClick={props.onSelectScan}
-        className="mt-1.5 self-center font-medium text-858494 hover:opacity-70"
-      >
-        Scan QR code
-      </Button>
       <Button
         onClick={closeModal}
         className="mt-1.5 self-center font-medium text-858494 hover:opacity-70"
