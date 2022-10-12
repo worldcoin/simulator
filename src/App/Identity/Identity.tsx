@@ -20,7 +20,7 @@ import { Background } from "./Background/Background";
 import { Card } from "./Card";
 import { IdentityVerification } from "./IdentityVerification/IdentityVerification";
 import { Tabs } from "./Tabs/Tabs";
-// import Verification from "./Verification/Verification";
+import Verification from "./Verification/Verification";
 
 enum InputMode {
   Manual,
@@ -38,13 +38,11 @@ const Identity = React.memo(function Identity(props: {
   setPhase: React.Dispatch<React.SetStateAction<Phase>>;
   className?: string;
   identity: IdentityType;
-  setExtendedVerifyIdentity: React.Dispatch<React.SetStateAction<boolean>>;
   verificationSkipped: boolean;
+  setIdentity: React.Dispatch<React.SetStateAction<IdentityType>>;
+  setVerificationSkipped: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [input, setInput] = React.useState<string>("");
   const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Manual);
-  const [pasteError, setPasteError] = React.useState<string>("");
-  const [applyInProgress, setApplyInProgress] = React.useState(false);
   const [tab, setTab] = React.useState<TabsType>(TabsType.Wallet);
 
   const logout = React.useCallback(() => {
@@ -70,6 +68,11 @@ const Identity = React.memo(function Identity(props: {
 
   const [isVerificationModalVisible, setIsVerificationModalVisible] =
     React.useState<boolean>(false);
+
+  const [
+    isIdentityVerificationModalVisible,
+    setIsIdentityVerificationModalVisible,
+  ] = React.useState<boolean>(false);
 
   const [approval, setToApprove] = React.useState<WalletConnectFlow>({
     connector: {},
@@ -99,33 +102,26 @@ const Identity = React.memo(function Identity(props: {
     }
   }, []);
 
-  const verifyIdentity = React.useCallback(() => {
-    return props.setPhase(Phase.VerifyIdentity);
-  }, [props]);
-
   const applyURL = React.useCallback(
     async (uri: string) => {
       if (!uri) {
         return;
       }
       console.log("uri", uri);
-
-      setIsScanModalVisible(false);
-      setApplyInProgress(true);
       const request = await connectWallet({ uri, identity: props.identity });
       setToApprove({ ...approval, ...request });
-      setApplyInProgress(false);
       setIsVerificationModalVisible(true);
+      setIsScanModalVisible(false);
     },
     [approval, props.identity],
   );
 
   const openVerification = React.useCallback(() => {
-    props.setExtendedVerifyIdentity(true);
     props.setPhase(Phase.VerifyIdentity);
   }, [props]);
 
   const startScan = React.useCallback(() => {
+    setInputMode(InputMode.Scan);
     if (!props.verificationSkipped) {
       sessionStorage.setItem("IdentityState", JSON.stringify(IdentityState.QR));
       return openVerification();
@@ -134,21 +130,15 @@ const Identity = React.memo(function Identity(props: {
     setIsScanModalVisible(true);
   }, [openVerification, props.verificationSkipped]);
 
-  const toggleInputMode = React.useCallback(() => {
+  const startInputQR = React.useCallback(() => {
+    setInputMode(InputMode.Manual);
     if (!props.verificationSkipped) {
-      sessionStorage.setItem(
-        "IdentityState",
-        JSON.stringify(IdentityState.paste),
-      );
+      sessionStorage.setItem("IdentityState", JSON.stringify(IdentityState.QR));
       return openVerification();
     }
 
-    if (inputMode === InputMode.Scan) {
-      return setInputMode(InputMode.Manual);
-    }
-
-    return setInputMode(InputMode.Scan);
-  }, [inputMode, openVerification, props]);
+    setIsScanModalVisible(true);
+  }, [openVerification, props.verificationSkipped]);
 
   const onPaste = React.useCallback(
     async (event: React.ClipboardEvent) => {
@@ -156,38 +146,39 @@ const Identity = React.memo(function Identity(props: {
       const { valid, errorMessage, uri } = parseWorldIDQRCode(data);
 
       if (!valid || !uri) {
-        setPasteError("Please provide a valid WalletConnect session URI");
-        setTimeout(() => setInput(""), 500);
         return console.error(errorMessage);
       }
-
-      setPasteError("");
 
       try {
         await applyURL(uri);
       } catch (error) {
-        setApplyInProgress(false);
-        setPasteError("Error with request. Check console.");
-        setTimeout(() => setInput(""), 500);
+        setIsScanModalVisible(false);
       }
     },
     [applyURL],
   );
 
   const onInput = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setInput(event.target.value);
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { valid, uri } = parseWorldIDQRCode(event.target.value);
+
+      if (!valid || !uri) {
+        return;
+      }
+
+      try {
+        await applyURL(uri);
+      } catch (error) {
+        setIsScanModalVisible(false);
+      }
     },
-    [],
+    [applyURL],
   );
 
   const dismiss = React.useCallback(() => {
-    setInputMode(InputMode.Scan);
     if (approval.connector?.connected)
       void approval.connector.killSession().catch(console.error.bind(console));
     setIsVerificationModalVisible((prevState) => !prevState);
-
-    setInput("");
   }, [approval.connector]);
 
   const copyIdentity = React.useCallback(() => {
@@ -212,8 +203,14 @@ const Identity = React.memo(function Identity(props: {
 
         <div className="-mx-4 grid grid-flow-col justify-between">
           <button
-            onClick={() => setIsScanModalVisible(true)}
-            className="flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000 dark:bg-3c4040 dark:text-ffffff"
+            onClick={startInputQR}
+            className={cn(
+              "flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000",
+              {
+                invisible:
+                  !props.identity.verified && !props.verificationSkipped,
+              },
+            )}
           >
             <Icon
               data={qrSvg}
@@ -241,8 +238,8 @@ const Identity = React.memo(function Identity(props: {
           <Card verified={props.identity.verified} />
 
           <GradientButton
-            onClick={() => setIsVerificationModalVisible(true)}
-            isVisible={!props.identity.verified}
+            onClick={() => setIsIdentityVerificationModalVisible(true)}
+            isVisible={!props.identity.verified && !props.verificationSkipped}
             className="h-[54px] w-full text-14"
             gradientText
             withShadow
@@ -252,7 +249,7 @@ const Identity = React.memo(function Identity(props: {
 
           <GradientButton
             onClick={startScan}
-            isVisible={props.identity.verified}
+            isVisible={props.identity.verified || props.verificationSkipped}
             className="h-[54px] w-full text-14"
             gradientText
             textClassName="flex gap-x-2 justify-center normal-case"
@@ -311,19 +308,24 @@ const Identity = React.memo(function Identity(props: {
       />
 
       <Modal
-        isVisible={isVerificationModalVisible}
-        setIsVisible={setIsVerificationModalVisible}
+        isVisible={isIdentityVerificationModalVisible}
+        setIsVisible={setIsIdentityVerificationModalVisible}
         className="px-6 !pb-3.5"
       >
         <IdentityVerification
-          onClose={() => setIsVerificationModalVisible(false)}
+          identity={props.identity}
+          onClose={() => setIsIdentityVerificationModalVisible(false)}
+          setIdentity={props.setIdentity}
+          setVerificationSkipped={props.setVerificationSkipped}
         />
       </Modal>
 
       <Modal
         isVisible={isScanModalVisible}
         setIsVisible={setIsScanModalVisible}
-        className="!h-auto !gap-y-4 px-4 !pb-3.5"
+        className={cn("!gap-y-4 px-4 !pb-3.5", {
+          "!h-auto": isScanModalVisible && inputMode === InputMode.Manual,
+        })}
       >
         {isScanModalVisible && inputMode === InputMode.Scan && (
           <QrScanner
@@ -334,14 +336,18 @@ const Identity = React.memo(function Identity(props: {
         {isScanModalVisible && inputMode === InputMode.Manual && (
           <QrInput
             setIsModalVisible={setIsScanModalVisible}
-            onSelectScan={toggleInputMode}
             onPaste={onPaste}
             onInput={onInput}
           />
         )}
       </Modal>
 
-      {/* <Modal isVisible={isVerificationModalVisible}>
+      <Modal
+        // FIXME: temporary set modal black
+        className="bg-[#0c0e10] text-f1f5f8"
+        isVisible={isVerificationModalVisible}
+        setIsVisible={setIsVerificationModalVisible}
+      >
         {isVerificationModalVisible && (
           <Verification
             approval={approval}
@@ -349,7 +355,7 @@ const Identity = React.memo(function Identity(props: {
             dismiss={dismiss}
           />
         )}
-      </Modal> */}
+      </Modal>
     </div>
   );
 });
