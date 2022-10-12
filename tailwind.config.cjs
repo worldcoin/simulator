@@ -22,6 +22,7 @@ const mirrorHexColors = (colors) =>
   );
 
 module.exports = {
+  darkMode: ["class", '[data-theme="dark"]'],
   content: ["./src/**/*.tsx"],
 
   plugins: [
@@ -48,6 +49,7 @@ module.exports = {
       24: "calc(24 * 1rem / 16)",
       30: "calc(30 * 1rem / 16)",
       34: "calc(34 * 1rem / 16)",
+      36: "calc(36 * 1rem / 16)",
       40: "calc(40 * 1rem / 16)",
       full: "9999px",
       none: "0",
@@ -56,15 +58,18 @@ module.exports = {
     borderWidth: {
       DEFAULT: "1px",
       2: "2px",
+      4: "4px",
       6: "6px",
     },
 
     colors: {
       ...mirrorHexColors([
         "#000000",
+        "#0c0e10",
         "#0d049a",
         "#183c4a",
         "#191c20",
+        "#3c4040",
         "#4940e0",
         "#777e90",
         "#858494",
@@ -79,6 +84,7 @@ module.exports = {
         "#f9fbfc",
         "#fbfbfb",
         "#ff5a76",
+        "#ff5b26",
         "#ff6471",
         "#ffffff",
       ]),
@@ -157,8 +163,8 @@ module.exports = {
       },
 
       lineHeight: {
-        '1px': '1px'
-      }
+        "1px": "1px",
+      },
     },
 
     fontFamily: {

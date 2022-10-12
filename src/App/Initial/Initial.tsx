@@ -1,7 +1,7 @@
 import Button from "@/common/Button/Button";
+import { WalletProviderContext } from "@/common/contexts/WalletProvider/WalletProvider";
 import { useIdentityStorage } from "@/common/hooks/use-identity-storage";
 import { Icon } from "@/common/Icon";
-import { WalletProviderContext } from "@/common/WalletProvider/WalletProvider";
 import { inclusionProof } from "@/lib/sequencer-service";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
@@ -131,7 +131,7 @@ const Initial = React.memo(function Initial(props: {
       <div className={cn("grid gap-y-6")}>
         <h1
           className={cn(
-            "z-10 text-center font-sora text-30 font-semibold text-183c4a",
+            "z-10 text-center font-sora text-30 font-semibold text-183c4a dark:text-ffffff",
             { "px-14 pb-6": props.phase === Phase.Initial },
           )}
         >

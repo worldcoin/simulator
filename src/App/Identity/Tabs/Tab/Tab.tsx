@@ -13,9 +13,12 @@ export const Tab = React.memo(function Tab(props: {
   return (
     <button
       onClick={() => props.setTab(props.tab)}
-      className={cn("flex select-none flex-col items-center gap-y-2", {
-        "opacity-40": !props.active,
-      })}
+      className={cn(
+        "flex select-none flex-col items-center gap-y-2 text-000000 dark:text-ffffff",
+        {
+          "opacity-40": !props.active,
+        },
+      )}
     >
       <Icon
         data={props.icon}

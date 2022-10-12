@@ -38,7 +38,8 @@ export const Card = React.memo(function Card(props: { verified: boolean }) {
         className={cn(
           "relative grid h-[350px] w-[249px] content-end overflow-hidden rounded-18 ",
           {
-            "border border-d1d3d4 bg-f1f5f8 p-3 pb-10": !props.verified,
+            "border border-d1d3d4 bg-f1f5f8 p-3 pb-10 dark:bg-191c20":
+              !props.verified,
             "bg-[#2d2e36] p-5 pb-7": props.verified,
           },
         )}

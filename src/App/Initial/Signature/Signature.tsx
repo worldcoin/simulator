@@ -1,6 +1,6 @@
+import { WalletProviderContext } from "@/common/contexts/WalletProvider/WalletProvider";
 import { validateImageUrl } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
-import { WalletProviderContext } from "@/common/WalletProvider/WalletProvider";
 import unknownSvg from "@static/unknown-wallet.svg";
 import React from "react";
 
@@ -41,7 +41,7 @@ export const Signature = React.memo(function Signature() {
         ID identity.
       </p>
 
-      <div className="grid w-full rounded-12 bg-f1f5f8 p-4">
+      <div className="grid w-full rounded-12 bg-f1f5f8 p-4 dark:bg-3c4040">
         <div className="grid grid-cols-auto/1fr items-center justify-center gap-x-4">
           {!icon && (
             <div className="rounded-full bg-0d049a p-2">
@@ -62,7 +62,7 @@ export const Signature = React.memo(function Signature() {
             />
           )}
 
-          <span className="font-semibold text-858494">
+          <span className="font-semibold text-858494 dark:text-ffffff">
             Confirming Signature
             <span className="animate-pulse-short">.</span>
             <span className="animate-pulse-short-delay-300">.</span>

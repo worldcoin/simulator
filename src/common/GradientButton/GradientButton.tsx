@@ -23,19 +23,21 @@ export const GradientButton = React.memo(function GradientButton(props: {
         props.className,
       )}
     >
-      <span
-        className={cn(
-          "font-sora font-semibold uppercase",
-          {
-            "bg-[linear-gradient(to_right,#FF6848,#4940E0)] bg-clip-text text-transparent":
-              props.gradientText,
-          },
-          { "text-ffffff": !props.gradientText },
-          props.textClassName,
-        )}
-      >
-        {props.children}
-      </span>
+      <div className="flex h-full w-full items-center justify-center rounded-10 bg-ffffff dark:bg-191c20">
+        <span
+          className={cn(
+            "bg-ffffff font-sora font-semibold uppercase",
+            {
+              "bg-[linear-gradient(to_right,#FF6848,#4940E0)] bg-clip-text text-transparent":
+                props.gradientText,
+            },
+            { "text-ffffff": !props.gradientText },
+            props.textClassName,
+          )}
+        >
+          {props.children}
+        </span>
+      </div>
     </button>
   );
 });

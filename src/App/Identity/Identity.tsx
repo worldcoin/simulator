@@ -207,13 +207,13 @@ const Identity = React.memo(function Identity(props: {
       >
         <Background
           phase={props.phase}
-          className="absolute inset-0 z-[1] -mx-8 overflow-hidden"
+          className="absolute inset-0 z-[1] -mx-8 overflow-hidden dark:hidden"
         />
 
         <div className="-mx-4 grid grid-flow-col justify-between">
           <button
             onClick={() => setIsScanModalVisible(true)}
-            className="flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000"
+            className="flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000 dark:bg-3c4040 dark:text-ffffff"
           >
             <Icon
               data={qrSvg}
@@ -245,6 +245,7 @@ const Identity = React.memo(function Identity(props: {
             isVisible={!props.identity.verified}
             className="h-[54px] w-full text-14"
             gradientText
+            withShadow
           >
             Verify your identity
           </GradientButton>
@@ -273,7 +274,7 @@ const Identity = React.memo(function Identity(props: {
                 className="h-5 w-5 rounded-full"
               />
 
-              <p className="text-16 font-medium leading-none text-000000">
+              <p className="text-16 font-medium leading-none text-000000 dark:text-ffffff">
                 {props.identity.id}
               </p>
 
