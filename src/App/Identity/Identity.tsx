@@ -199,7 +199,7 @@ const Identity = React.memo(function Identity(props: {
       >
         <Background
           phase={props.phase}
-          className="absolute inset-0 z-[1] -mx-8 overflow-hidden dark:hidden"
+          className="absolute inset-0 z-[1] -mx-8 overflow-hidden dark:mix-blend-soft-light"
         />
 
         <div className="-mx-4 grid grid-flow-col justify-between">
