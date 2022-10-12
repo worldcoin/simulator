@@ -16,7 +16,7 @@ const QrInput = React.memo(function QrInput(props: {
         Enter or paste QR
       </h2>
       <input
-        className="mb-4 w-full rounded-10 border border-191c20 p-4 text-center dark:bg-191c20"
+        className="mb-4 w-full rounded-10 border border-191c20 p-4 text-center text-000000 dark:bg-191c20 dark:text-ffffff"
         onInput={props.onInput}
         onPaste={props.onPaste}
       />

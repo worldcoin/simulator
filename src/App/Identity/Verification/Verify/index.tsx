@@ -75,33 +75,32 @@ export const Verify = React.memo(function Verify(props: {
         </div>
 
         <div className="text-26 text-858494">
-          <span className="text-ffffff">
+          <span className="text-000000 dark:text-ffffff">
             {props.meta?.project_name ?? "A Project"}
           </span>{" "}
           wants to verify that you haven’t done this before
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-transparent via-858494 to-transparent py-[1px] font-medium text-dde7ea">
-        <span className="relative block bg-[#0c0e10] py-5">
+      <div className="bg-gradient-to-r from-transparent via-858494 to-transparent py-[1px] font-medium text-3c4040 dark:text-dde7ea">
+        <span className="relative block bg-ffffff py-5 dark:bg-[#0c0e10]">
           {props.meta?.description ?? "No description provided"}
         </span>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-y-4">
         <GradientButton
           isVisible
           withShadow
           onClick={props.onVerify}
-          bgColor="#191c20"
           className="font-sora text-16 font-semibold uppercase"
-          textClassName="block p-5"
+          textClassName="block p-5 text-000000 dark:text-ffffff"
         >
           Verify with World ID
         </GradientButton>
 
         <Button
-          className="text-18 font-medium text-d1d3d4"
+          className="py-2 text-18 font-medium text-d1d3d4"
           onClick={props.onDismiss}
         >
           Dismiss

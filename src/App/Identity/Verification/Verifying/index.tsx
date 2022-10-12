@@ -4,7 +4,7 @@ import React from "react";
 
 export const Verifying = React.memo(function Verifying() {
   return (
-    <div className="grid h-full place-items-center content-center gap-15 text-center">
+    <div className="grid h-full place-items-center content-center gap-15 py-32 text-center">
       <Icon
         noMask
         data={gradientSpinnerSvg}

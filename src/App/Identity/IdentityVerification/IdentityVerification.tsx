@@ -17,7 +17,7 @@ export const IdentityVerification = React.memo(
     setVerificationSkipped: React.Dispatch<React.SetStateAction<boolean>>;
   }) {
     const [submitSuccess, setSubmitSuccess] = React.useState<boolean | null>(
-      null,
+      false,
     );
     const [loading, setLoading] = React.useState<boolean>(false);
 
@@ -44,12 +44,15 @@ export const IdentityVerification = React.memo(
     }, [props]);
 
     return (
-      <div className="grid content-between">
+      <div className="grid content-end gap-y-8">
         <div className="grid justify-items-center gap-y-4">
           <div
             className={cn(
               "relative flex h-[100px] w-[100px] items-center justify-center rounded-full",
-              { "bg-f1f5f8": submitSuccess, "bg-dde7ea": !submitSuccess },
+              {
+                "bg-f1f5f8 dark:bg-191c20": submitSuccess,
+                "bg-dde7ea dark:bg-191c20": !submitSuccess,
+              },
             )}
           >
             {!submitSuccess && (

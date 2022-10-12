@@ -9,7 +9,7 @@ export const Success = React.memo(function Success(props: {
 }) {
   return (
     <div className="grid h-full place-items-center content-end gap-8 text-center">
-      <span className="relative h-25 w-25 rounded-full bg-191c20">
+      <span className="relative h-25 w-25 rounded-full bg-dde7ea dark:bg-191c20">
         <Icon
           data={checkSvg}
           className="absolute inset-5"
@@ -20,17 +20,17 @@ export const Success = React.memo(function Success(props: {
       <div className="grid gap-25">
         <div className="grid gap-6">
           <div className="grid gap-4">
-            <p className="font-sora text-26 font-semibold">
+            <p className="font-sora text-26 font-semibold text-000000 dark:text-ffffff">
               Verification Successful
             </p>
 
-            <p className="text-18">
+            <p className="text-18 text-858494">
               You have successfully verified.You can return to Gitlab to
               continue.
             </p>
           </div>
 
-          <p className="rounded-8 border border-[#3c4040] bg-191c20 p-4">
+          <p className="rounded-8 border border-[#3c4040] bg-ffffff p-4 text-000000 dark:bg-191c20 dark:text-ffffff">
             {props.description}
           </p>
         </div>
@@ -38,7 +38,7 @@ export const Success = React.memo(function Success(props: {
         <div className="grid gap-4">
           <Button
             onClick={props.onDismiss}
-            className="py-0 text-18 font-medium"
+            className="py-0 text-18 font-medium text-858494"
           >
             Dismiss
           </Button>

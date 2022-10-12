@@ -8,7 +8,7 @@ const Status = React.memo(function Status(props: {
   return (
     <div
       className={cn(
-        "grid h-[100px] w-[100px] items-center justify-center rounded-full bg-f1f5f8",
+        "grid h-[100px] w-[100px] items-center justify-center rounded-full bg-f1f5f8 dark:bg-191c20",
         props.className,
       )}
     >

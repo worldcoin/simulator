@@ -152,6 +152,7 @@ const Identity = React.memo(function Identity(props: {
       try {
         await applyURL(uri);
       } catch (error) {
+        console.log(error);
         setIsScanModalVisible(false);
       }
     },
@@ -205,7 +206,7 @@ const Identity = React.memo(function Identity(props: {
           <button
             onClick={startInputQR}
             className={cn(
-              "flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000",
+              "flex items-center gap-x-2 rounded-full bg-f1f5f8 p-2 pr-3 text-000000 dark:bg-191c20 dark:text-ffffff",
               {
                 invisible:
                   !props.identity.verified && !props.verificationSkipped,
@@ -263,7 +264,7 @@ const Identity = React.memo(function Identity(props: {
         </div>
 
         <div className="grid justify-items-center gap-y-2 self-center">
-          <div className="grid w-full grid-cols-1fr/auto rounded-8 border border-d1d3d4">
+          <div className="grid w-full grid-cols-1fr/auto rounded-8 border border-d1d3d4 dark:border-d1d3d4/40">
             <div className="grid grid-cols-auto/1fr/auto items-center gap-x-2 justify-self-start py-4.5 pl-6">
               <img
                 src={blockiesSrc}
@@ -287,7 +288,7 @@ const Identity = React.memo(function Identity(props: {
             <button
               type="button"
               onClick={copyIdentity}
-              className="group border-l border-d1d3d4 p-4.5"
+              className="group border-l border-d1d3d4 p-4.5 dark:border-d1d3d4/40"
             >
               <Icon
                 data={copySvg}
@@ -310,7 +311,7 @@ const Identity = React.memo(function Identity(props: {
       <Modal
         isVisible={isIdentityVerificationModalVisible}
         setIsVisible={setIsIdentityVerificationModalVisible}
-        className="px-6 !pb-3.5"
+        className="!h-auto px-6 !pb-3.5"
       >
         <IdentityVerification
           identity={props.identity}
@@ -343,8 +344,6 @@ const Identity = React.memo(function Identity(props: {
       </Modal>
 
       <Modal
-        // FIXME: temporary set modal black
-        className="bg-[#0c0e10] text-f1f5f8"
         isVisible={isVerificationModalVisible}
         setIsVisible={setIsVerificationModalVisible}
       >
