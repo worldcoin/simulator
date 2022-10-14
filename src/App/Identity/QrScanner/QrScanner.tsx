@@ -109,6 +109,8 @@ const QrScanner = React.memo(function QrScanner(props: {
         }),
       },
     );
+    qrScanner.setInversionMode("both");
+
     qrScanner
       .start()
       .then(() => {
@@ -132,7 +134,7 @@ const QrScanner = React.memo(function QrScanner(props: {
   return (
     <div className="grid grid-rows-1fr/auto">
       {checking && (
-        <div className="grid items-center justify-center">
+        <div className="grid items-center justify-center py-32">
           <Icon
             className="h-8 w-8 animate-spin"
             data={gradientSpinnerSvg}
@@ -141,18 +143,18 @@ const QrScanner = React.memo(function QrScanner(props: {
         </div>
       )}
       {(!!checkingError || !!startingError) && (
-        <div className="flex flex-col items-center justify-start gap-y-4 text-center">
-          <Status className="mt-15">
+        <div className="flex flex-col items-center justify-center gap-y-4 text-center">
+          <Status className="mt-7 mb-3">
             <Icon
               data={noCamera}
               className="h-[38px] w-[38px]"
               noMask
             />
           </Status>
-          <div className="mt-4 font-sora text-26 font-semibold">
+          <div className="mt-4 font-sora text-26 font-semibold text-000000 dark:text-ffffff">
             No camera found
           </div>
-          <div className="text-18 leading-tight">
+          <div className="text-18 leading-tight text-000000 dark:text-858494">
             If you want to use a camera to scan a QR code, make sure that the
             application has the required privacy settings or try again later.
           </div>
@@ -160,17 +162,17 @@ const QrScanner = React.memo(function QrScanner(props: {
       )}
       {started && invalid && (
         <div className="flex flex-col items-center justify-start gap-y-4 text-center">
-          <Status className="mt-15">
+          <Status className="mt-7 mb-3">
             <Icon
               data={noQr}
               className="h-[33px] w-[33px]"
               noMask
             />
           </Status>
-          <div className="mt-4 font-sora text-26 font-semibold">
+          <div className="mt-4 font-sora text-26 font-semibold text-000000 dark:text-ffffff">
             QR not supported
           </div>
-          <div className="grow text-18 leading-tight">
+          <div className="grow text-18 leading-tight text-000000 dark:text-858494">
             It seems you are trying to scan different type of QR code that we
             are supporting.
           </div>
@@ -201,7 +203,7 @@ const QrScanner = React.memo(function QrScanner(props: {
               )}
             </div>
           </div>
-          <h2 className="mt-8 text-center font-sora text-26 font-semibold">
+          <h2 className="mt-8 text-center font-sora text-26 font-semibold text-000000 dark:text-ffffff">
             {applying ? "Done" : "Scan World ID QR"}
           </h2>
           {applying && (
@@ -217,7 +219,7 @@ const QrScanner = React.memo(function QrScanner(props: {
       )}
       <Button
         onClick={closeModal}
-        className="mt-1.5 self-end font-medium text-858494 hover:opacity-70"
+        className="mt-6 self-end font-medium text-858494 hover:opacity-70"
       >
         Dismiss
       </Button>

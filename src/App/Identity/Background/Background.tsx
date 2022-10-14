@@ -23,7 +23,7 @@ export const Background = React.memo(function Background(props: {
       <Icon
         data={ellipseRightSvg}
         className={cn(
-          "absolute  h-[257px] w-[257px] animate-circle-right",
+          "absolute h-[257px] w-[257px] animate-circle-right",
           { "right-[-120%]": props.phase !== Phase.Identity },
           { "right-[-30%]": props.phase === Phase.Identity },
         )}

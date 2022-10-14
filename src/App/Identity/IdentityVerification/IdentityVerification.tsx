@@ -17,7 +17,7 @@ export const IdentityVerification = React.memo(
     setVerificationSkipped: React.Dispatch<React.SetStateAction<boolean>>;
   }) {
     const [submitSuccess, setSubmitSuccess] = React.useState<boolean | null>(
-      null,
+      false,
     );
     const [loading, setLoading] = React.useState<boolean>(false);
 
@@ -44,12 +44,15 @@ export const IdentityVerification = React.memo(
     }, [props]);
 
     return (
-      <div className="grid content-between">
+      <div className="grid content-end gap-y-8">
         <div className="grid justify-items-center gap-y-4">
           <div
             className={cn(
               "relative flex h-[100px] w-[100px] items-center justify-center rounded-full",
-              { "bg-f1f5f8": submitSuccess, "bg-dde7ea": !submitSuccess },
+              {
+                "bg-f1f5f8 dark:bg-191c20": submitSuccess,
+                "bg-dde7ea dark:bg-191c20": !submitSuccess,
+              },
             )}
           >
             {!submitSuccess && (
@@ -81,7 +84,7 @@ export const IdentityVerification = React.memo(
             )}
           </div>
 
-          <h2 className="pt-4 text-center font-sora text-30 font-semibold">
+          <h2 className="pt-4 text-center font-sora text-30 font-semibold text-000000 dark:text-ffffff">
             {!loading && !submitSuccess && "Verify your identity"}
             {loading && !submitSuccess && "Verifying identity..."}
             {submitSuccess && "Verification Successful!"}
@@ -108,7 +111,7 @@ export const IdentityVerification = React.memo(
               isDisabled={loading}
               onClick={verifyHandle}
               type="button"
-              className="bg-4940e0 font-sora uppercase text-ffffff disabled:opacity-30"
+              className="bg-4940e0 font-sora uppercase text-ffffff disabled:opacity-30 dark:shadow-[0px_10px_20px_rgba(83,67,212,0.2),inset_0px_-1px_1px_rgba(0,0,0,0.3),inset_0px_1px_1px_rgba(255,255,255,0.2)]"
             >
               {loading ? "verifying..." : "verify now"}
             </Button>

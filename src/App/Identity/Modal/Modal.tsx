@@ -21,7 +21,7 @@ const Modal = React.memo(function Modal(props: {
       />
       <div
         className={cn(
-          "absolute bottom-0 left-0 z-50 grid h-[75%] w-full grid-rows-auto/1fr gap-y-8 rounded-t-30 bg-ffffff pt-2 pb-8 transition-all xs:rounded-b-34",
+          "absolute bottom-0 left-0 z-50 grid h-auto w-full grid-rows-auto/1fr gap-y-8 rounded-t-30 bg-ffffff pt-2 pb-8 transition-all dark:bg-0c0e10 xs:rounded-b-34",
           { "pointer-events-none invisible h-0 opacity-0": !props.isVisible },
           props.className,
         )}

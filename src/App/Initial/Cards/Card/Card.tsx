@@ -33,9 +33,11 @@ const Card = React.memo(function Card(props: {
         className="row-span-2 h-8 w-8"
         noMask
       />
-      <h2 className="text-16 font-semibold text-183c4a">{props.heading}</h2>
+      <h2 className="text-16 font-semibold text-183c4a dark:text-ffffff">
+        {props.heading}
+      </h2>
 
-      <div className="relative text-14 leading-5 tracking-[-0.01em] text-777e90">
+      <div className="relative text-14 leading-5 tracking-[-0.01em] text-777e90 dark:text-858494">
         {props.text}
         {props.tooltipText && (
           <span

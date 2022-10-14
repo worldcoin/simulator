@@ -36,9 +36,10 @@ export const Card = React.memo(function Card(props: { verified: boolean }) {
       <div
         ref={reference}
         className={cn(
-          "relative grid h-[350px] w-[249px] content-end overflow-hidden rounded-18 ",
+          "relative grid h-[350px] w-[249px] overflow-hidden rounded-[20px] ",
           {
-            "border border-d1d3d4 bg-f1f5f8 p-3 pb-10": !props.verified,
+            "border border-d1d3d4 bg-f1f5f8 p-3 pb-10 dark:border-d1d3d4/40 dark:bg-191c20":
+              !props.verified,
             "bg-[#2d2e36] p-5 pb-7": props.verified,
           },
         )}
@@ -73,6 +74,7 @@ export const Card = React.memo(function Card(props: { verified: boolean }) {
         <svg
           width="0"
           height="0"
+          className="translate-x-10"
         >
           <defs>
             <clipPath id="cardHuman">
@@ -82,16 +84,16 @@ export const Card = React.memo(function Card(props: { verified: boolean }) {
         </svg>
         <span
           className={cn(
-            "absolute left-1/2 top-[55px] grid h-[120px] w-[120px] -translate-x-1/2 items-center overflow-hidden rounded-full p-5",
+            "col-start-1 row-start-1 grid h-[120px] w-[120px] items-center justify-items-center self-center justify-self-center overflow-hidden rounded-full p-5",
             {
-              "bg-ffffff": !props.verified,
+              "bg-ffffff dark:bg-3c4040": !props.verified,
               "bg-[#3f414a]": props.verified,
             },
           )}
         >
           <span
             className={cn(
-              "relative z-10 h-full w-full bg-[url('./static/card-iridescent.jpg')]",
+              "relative z-10 h-full w-full translate-x-0.5 bg-[url('./static/card-iridescent.jpg')]",
               "bg-[length:700px]",
               "bg-[position:var(--cardTilt)_0] [clip-path:_url('#cardHuman')]",
             )}

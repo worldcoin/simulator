@@ -3,7 +3,7 @@ import React from "react";
 export const Verify = React.memo(function Verify() {
   return (
     <div className="grid gap-y-3">
-      <h1 className="mt-4 px-4 text-center font-sora font-semibold">
+      <h1 className="mt-4 px-4 text-center font-sora font-semibold text-000000 dark:text-ffffff">
         Verify your identity to test World ID
       </h1>
 
