@@ -106,7 +106,7 @@ function reactComponentsStackTrace() {
         const result = await babelTransformFileAsync(args.path, {
           plugins: [
             // adds React components sources
-            "@babel/plugin-transform-react-jsx-source",
+            // "@babel/plugin-transform-react-jsx-source",
             // Allow Babel to parse TypeScript without transforming it
             ["@babel/plugin-syntax-typescript", { isTSX: true }],
           ],
@@ -128,7 +128,12 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
     ),
   ],
   outdir: DESTINATION_DIR,
-  loader: { ".svg": "dataurl", ".png": "dataurl", ".woff2": "file" },
+  loader: {
+    ".svg": "dataurl",
+    ".png": "dataurl",
+    ".woff2": "file",
+    ".jpg": "dataurl",
+  },
   logLevel: "info",
   plugins: [
     clean({

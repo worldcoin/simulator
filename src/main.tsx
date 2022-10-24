@@ -2,7 +2,8 @@ import React from "react";
 import * as ReactDOMClient from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import App from "./App/App";
-import { WalletProvider } from "./common/WalletProvider/WalletProvider";
+import { ThemeProvider } from "./common/contexts/ThemeContext/ThemeContext";
+import { WalletProvider } from "./common/contexts/WalletProvider/WalletProvider";
 import "./index.css";
 
 const container = document.getElementById("root");
@@ -11,25 +12,22 @@ if (!container) throw new ReferenceError(`Unable to found root element`);
 const root = ReactDOMClient.createRoot(container);
 root.render(
   <React.StrictMode>
-    <WalletProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={<App />}
-          >
+    <ThemeProvider>
+      <WalletProvider>
+        <BrowserRouter>
+          <Routes>
             <Route
-              path="identity-faucet"
+              path="/"
               element={<App />}
             >
               <Route
-                path="test"
-                element={<div>test</div>}
+                path="identity-faucet"
+                element={<App />}
               />
             </Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </WalletProvider>
+          </Routes>
+        </BrowserRouter>
+      </WalletProvider>
+    </ThemeProvider>
   </React.StrictMode>,
 );

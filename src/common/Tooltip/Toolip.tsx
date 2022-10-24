@@ -30,7 +30,7 @@ const Tooltip = React.forwardRef<HTMLDivElement, Props>((props, ref) => (
 
     <div
       className={cn(
-        "h-full w-full max-w-[256px] rounded-10 p-3 text-11 leading-4 tracking-[-0.01em]",
+        "h-full w-full max-w-[256px] rounded-10 p-3 text-12 leading-4 tracking-[-0.01em]",
         props.className,
         props.backgroundColor,
       )}

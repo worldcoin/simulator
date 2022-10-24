@@ -4,10 +4,7 @@ import { inclusionProof } from "@/lib/sequencer-service";
 import type { Identity as IdentityType } from "@/types";
 import { Phase } from "@/types";
 import batterySvg from "@static/battery.svg";
-import bgFigureSvg from "@static/bg-figure.svg";
-import logoFullSvg from "@static/logo-full.svg";
 import logoSvg from "@static/logo.svg";
-import logoutIconSvg from "@static/logout.svg";
 import networkSvg from "@static/network.svg";
 import spinnerSvg from "@static/spinner.svg";
 import wifiSvg from "@static/wifi.svg";
@@ -16,10 +13,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { Background } from "./Background/Background";
 import Identity, { encodeIdentityCommitment } from "./Identity/Identity";
-import IdentityFaucet from "./IdentityFaucet/IdentityFaucet";
 import Initial from "./Initial/Initial";
-import Signature from "./Signature/Signature";
-import VerifyIdentity from "./VerifyIdentity/VerifyIdentity";
 
 const App = React.memo(function App() {
   const routerLocation = useLocation();
@@ -69,9 +63,6 @@ const App = React.memo(function App() {
 
   const [phase, setPhase] = React.useState<Phase>(Phase.Loading);
 
-  const [extendedVerifyIdentity, setExtendedVerifyIdentity] =
-    React.useState(false);
-
   const [verificationSkipped, setVerificationSkipped] = React.useState(
     identity.verified ? true : false,
   );
@@ -83,14 +74,6 @@ const App = React.memo(function App() {
 
     return setVerificationSkipped(false);
   }, [identity.verified]);
-
-  const logout = React.useCallback(() => {
-    try {
-      sessionStorage.clear();
-      localStorage.clear();
-    } catch {}
-    location.reload();
-  }, []);
 
   return (
     <div className="fixed grid h-full w-full overflow-y-scroll bg-f9fbfc xs:min-h-screen">
@@ -139,44 +122,18 @@ const App = React.memo(function App() {
       {phase !== Phase.IdentityFaucet && (
         <section
           className={cn(
-            "h-full w-full px-8 pt-4 xs:h-[718px] xs:w-[387px] xs:overflow-hidden xs:rounded-40 xs:border-6 xs:border-183c4a",
-            "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center xs:grid-rows-auto/1fr/auto",
-            "gap-y-9 transition duration-500",
-            { "bg-ffffff": phase !== Phase.Identity },
-            { "bg-4940e0": phase === Phase.Identity },
+            "h-full w-full px-8 pt-4 xs:h-[812px] xs:w-[381px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-183c4a",
+            "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
+            "gap-y-8 bg-ffffff transition duration-500 dark:bg-0c0e10",
+            { "xs:grid-rows-auto/1fr/auto": phase !== Phase.Identity },
+            { "pb-7 xs:grid-rows-auto/1fr": phase === Phase.Identity },
           )}
         >
-          <div className="absolute h-full w-full overflow-hidden xs:rounded-34">
-            <Icon
-              data={bgFigureSvg}
-              className={cn(
-                "absolute min-h-[607px] min-w-[649px] object-fill transition-position delay-200 duration-500 ease-in-out",
-                {
-                  "right-0 -top-36 text-f9f9f9 xs:-top-28":
-                    phase !== Phase.Identity,
-                },
-                {
-                  "-right-[calc((649px_-_100vw)_/_2)] -top-36 text-0d049a/10 xs:-right-[calc((649px_-_375px)_/_2)] xs:-top-24":
-                    phase === Phase.Identity,
-                },
-              )}
-            />
-          </div>
-
-          <header
-            className={cn("z-10 grid grid-cols-1fr/auto gap-y-8", {
-              "text-ffffff": phase === Phase.Identity,
-            })}
-          >
+          <header className="z-10 grid grid-cols-1fr/auto">
             <div className="col-span-2 hidden grid-flow-col content-center justify-between xs:grid">
               <span
                 className={cn(
-                  "font-medium leading-none transition-colors",
-                  {
-                    "text-191c20":
-                      phase === Phase.Initial || phase === Phase.VerifyIdentity,
-                  },
-                  { "text-ffffff": phase === Phase.Identity },
+                  "font-sora font-semibold leading-none text-191c20 transition-colors dark:text-ffffff",
                 )}
               >
                 9:41
@@ -184,38 +141,17 @@ const App = React.memo(function App() {
               <div className="grid grid-flow-col items-center justify-center gap-x-1">
                 <Icon
                   data={networkSvg}
-                  className="z-50 h-[14px] w-5 transition-colors"
+                  className="z-50 h-[14px] w-5 text-191c20 transition-colors dark:text-ffffff"
                 />
                 <Icon
                   data={wifiSvg}
-                  className="z-50 h-[14px] w-4 transition-colors"
+                  className="z-50 h-[14px] w-4 text-191c20 transition-colors dark:text-ffffff"
                 />
                 <Icon
                   data={batterySvg}
-                  className="z-50 h-[14px] w-[25px] transition-colors"
+                  className="z-50 h-[14px] w-[25px] text-191c20 transition-colors dark:text-ffffff"
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-1fr/auto">
-              <Icon
-                data={logoFullSvg}
-                className={cn(
-                  "col-span-2 col-start-1 row-start-1 h-6 w-36 justify-self-center",
-                  { "text-183c4a": phase === Phase.VerifyIdentity },
-                )}
-              />
-
-              {identity.id && phase !== Phase.Initial && (
-                <button
-                  onClick={logout}
-                  className="col-start-2 row-start-1 transition-opacity hover:opacity-70"
-                >
-                  <Icon
-                    data={logoutIconSvg}
-                    className="h-6 w-6"
-                  />
-                </button>
-              )}
             </div>
           </header>
 
@@ -228,8 +164,9 @@ const App = React.memo(function App() {
             </div>
           )}
 
-          {phase === Phase.Initial && (
+          {(phase === Phase.Initial || phase === Phase.Signature) && (
             <Initial
+              phase={phase}
               setPhase={setPhase}
               className="z-10 mt-3.5"
               identity={identity}
@@ -239,41 +176,23 @@ const App = React.memo(function App() {
 
           {phase === Phase.Identity && (
             <Identity
+              phase={phase}
               setPhase={setPhase}
-              className="z-20"
               identity={identity}
-              setExtendedVerifyIdentity={setExtendedVerifyIdentity}
               verificationSkipped={verificationSkipped}
-            />
-          )}
-
-          {phase === Phase.VerifyIdentity && (
-            <VerifyIdentity
-              extended={extendedVerifyIdentity}
-              setPhase={setPhase}
-              className="z-30 pt-3.5 pb-6 xs:pb-0"
+              setIdentity={setIdentity}
               setVerificationSkipped={setVerificationSkipped}
-              identity={identity}
             />
           )}
 
-          {phase === Phase.Signature && (
-            <Signature
-              className="pb-6 xs:pb-0"
-              setPhase={setPhase}
-            />
-          )}
           <hr
             className={cn(
-              "mb-2 hidden h-1 w-full max-w-[134px] justify-self-center rounded-full border-none xs:block",
-              { "bg-ffffff": phase === Phase.Identity },
-              { "bg-000000/20": phase !== Phase.Identity },
+              "mb-2 hidden h-1 w-full max-w-[134px] justify-self-center rounded-full border-none bg-000000/20",
+              { "xs:block": phase !== Phase.Identity },
             )}
           />
         </section>
       )}
-
-      {phase === Phase.IdentityFaucet && <IdentityFaucet />}
     </div>
   );
 });

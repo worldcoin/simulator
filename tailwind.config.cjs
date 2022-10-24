@@ -22,6 +22,7 @@ const mirrorHexColors = (colors) =>
   );
 
 module.exports = {
+  darkMode: ["class", '[data-theme="dark"]'],
   content: ["./src/**/*.tsx"],
 
   plugins: [
@@ -44,9 +45,11 @@ module.exports = {
       10: "calc(10 * 1rem / 16)",
       12: "calc(12 * 1rem / 16)",
       16: "calc(16 * 1rem / 16)",
+      18: "calc(18 * 1rem / 16)",
       24: "calc(24 * 1rem / 16)",
       30: "calc(30 * 1rem / 16)",
       34: "calc(34 * 1rem / 16)",
+      36: "calc(36 * 1rem / 16)",
       40: "calc(40 * 1rem / 16)",
       full: "9999px",
       none: "0",
@@ -55,25 +58,35 @@ module.exports = {
     borderWidth: {
       DEFAULT: "1px",
       2: "2px",
+      4: "4px",
       6: "6px",
     },
 
     colors: {
       ...mirrorHexColors([
         "#000000",
+        "#0c0e10",
         "#0d049a",
         "#183c4a",
         "#191c20",
+        "#3c4040",
         "#4940e0",
+        "#5743d6",
         "#777e90",
+        "#858494",
         "#bbbec7",
         "#d1d3d4",
         "#dadada",
+        "#dde7ea",
         "#f0edf9",
         "#f1f2f2",
+        "#f1f5f8",
+        "#f66751",
         "#f9f9f9",
         "#f9fbfc",
         "#fbfbfb",
+        "#ff5a76",
+        "#ff5b26",
         "#ff6471",
         "#ffffff",
       ]),
@@ -91,6 +104,10 @@ module.exports = {
           "pulse 900ms 600ms cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "fade-in-short": "fade-in 500ms cubic-bezier(.53,.04,.68,.33) forwards",
         "fade-in-long": "fade-in 600ms cubic-bezier(.53,.04,.68,.33) forwards",
+        "circle-left":
+          "move-right 1.4s cubic-bezier(.38,.29,.28,1.59) forwards",
+        "circle-right":
+          "move-left 1.1s cubic-bezier(.38,.29,.28,1.59) forwards",
       },
 
       gridTemplateColumns: {
@@ -107,9 +124,19 @@ module.exports = {
       },
 
       keyframes: {
-        'fade-in': {
-          '0%': {opacity: 0, visibility: 'hidden'},
-          '100%': {opacity: 1, visibility: 'visible'}
+        "fade-in": {
+          "0%": { opacity: 0, visibility: "hidden" },
+          "100%": { opacity: 1, visibility: "visible" },
+        },
+
+        "move-left": {
+          "0%": { right: "-120%", opacity: 0, transform: "rotate(360deg)" },
+          "100%": { right: "-30%", opacity: 1, transform: "rotate(0deg)" },
+        },
+
+        "move-right": {
+          "0%": { left: "-120%", opacity: 0, transform: "rotate(360deg)" },
+          "100%": { left: "-90px", opacity: 1, transform: "rotate(0deg)" },
         },
       },
 
@@ -136,10 +163,15 @@ module.exports = {
       width: {
         "max-content": "max-content",
       },
+
+      lineHeight: {
+        "1px": "1px",
+      },
     },
 
     fontFamily: {
-      main: ["Inter", "sans-serif"],
+      rubik: ["Rubik", "sans-serif"],
+      sora: ["Sora", "sans-serif"],
     },
 
     fontSize: {
@@ -152,6 +184,8 @@ module.exports = {
       18: "calc(18 * 1rem / 16)",
       20: "calc(20 * 1rem / 16)",
       24: "calc(24 * 1rem / 16)",
+      26: "calc(26 * 1rem / 16)",
+      30: "calc(30 * 1rem / 16)",
       32: "calc(32 * 1rem / 16)",
       40: "calc(40 * 1rem / 16)",
     },
