@@ -1,6 +1,5 @@
 import React from "react";
 import * as ReactDOMClient from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
 import App from "./App/App";
 import { ThemeProvider } from "./common/contexts/ThemeContext/ThemeContext";
 import { WalletProvider } from "./common/contexts/WalletProvider/WalletProvider";
@@ -14,19 +13,7 @@ root.render(
   <React.StrictMode>
     <ThemeProvider>
       <WalletProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path="/"
-              element={<App />}
-            >
-              <Route
-                path="identity-faucet"
-                element={<App />}
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <App />
       </WalletProvider>
     </ThemeProvider>
   </React.StrictMode>,
