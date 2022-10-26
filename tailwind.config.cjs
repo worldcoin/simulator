@@ -41,6 +41,7 @@ module.exports = {
     borderRadius: {
       2.5: "calc(2.5 * 1rem / 16)",
       8: "calc(8 * 1rem / 16)",
+      9: "calc(9 * 1rem / 16)",
       4: "calc(4 * 1rem / 16)",
       10: "calc(10 * 1rem / 16)",
       12: "calc(12 * 1rem / 16)",
@@ -75,7 +76,10 @@ module.exports = {
         "#777e90",
         "#858494",
         "#bbbec7",
+        "#cee2f5",
+        "#cfdce1",
         "#d1d3d4",
+        "#d1dbe1",
         "#dadada",
         "#dde7ea",
         "#f0edf9",
