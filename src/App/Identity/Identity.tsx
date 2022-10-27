@@ -202,7 +202,7 @@ const Identity = React.memo(function Identity(props: {
           className="absolute inset-0 z-[1] -mx-8 overflow-hidden dark:mix-blend-soft-light"
         />
 
-        <div className="-mx-4 grid grid-flow-col justify-between">
+        <div className="grid grid-flow-col justify-between">
           <button
             onClick={startInputQR}
             className={cn(
@@ -263,7 +263,7 @@ const Identity = React.memo(function Identity(props: {
           </GradientButton>
         </div>
 
-        <div className="grid justify-items-center gap-y-2 self-center">
+        <div className="mx-2 grid justify-items-center gap-y-2 self-center">
           <div className="grid w-full grid-cols-1fr/auto rounded-8 border border-d1d3d4 dark:border-d1d3d4/40">
             <div className="grid grid-cols-auto/1fr/auto items-center gap-x-2 justify-self-start py-4.5 pl-6">
               <img

@@ -127,7 +127,9 @@ const Initial = React.memo(function Initial(props: {
   }, [props, provider]);
 
   return (
-    <div className={cn("grid content-between pb-6 xs:pb-0", props.className)}>
+    <div
+      className={cn("grid content-between px-2 pb-6 xs:pb-0", props.className)}
+    >
       <div className={cn("grid gap-y-6")}>
         <h1
           className={cn(
