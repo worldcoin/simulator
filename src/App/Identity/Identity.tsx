@@ -2,7 +2,6 @@ import Modal from "@/App/Identity/Modal/Modal";
 import QrInput from "@/App/Identity/QrInput/QrInput";
 import QrScanner from "@/App/Identity/QrScanner/QrScanner";
 import { GradientButton } from "@/common/GradientButton/GradientButton";
-import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import { connectWallet } from "@/lib/init-walletconnect";
 import type { WalletConnectFlow } from "@/types";
@@ -139,42 +138,6 @@ const Identity = React.memo(function Identity(props: {
 
     setIsScanModalVisible(true);
   }, [openVerification, props.verificationSkipped]);
-
-  const onPaste = React.useCallback(
-    async (event: React.ClipboardEvent) => {
-      const data = event.clipboardData.getData("Text");
-      const { valid, errorMessage, uri } = parseWorldIDQRCode(data);
-
-      if (!valid || !uri) {
-        return console.error(errorMessage);
-      }
-
-      try {
-        await applyURL(uri);
-      } catch (error) {
-        console.log(error);
-        setIsScanModalVisible(false);
-      }
-    },
-    [applyURL],
-  );
-
-  const onInput = React.useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { valid, uri } = parseWorldIDQRCode(event.target.value);
-
-      if (!valid || !uri) {
-        return;
-      }
-
-      try {
-        await applyURL(uri);
-      } catch (error) {
-        setIsScanModalVisible(false);
-      }
-    },
-    [applyURL],
-  );
 
   const dismiss = React.useCallback(() => {
     if (approval.connector?.connected)
@@ -337,8 +300,7 @@ const Identity = React.memo(function Identity(props: {
         {isScanModalVisible && inputMode === InputMode.Manual && (
           <QrInput
             setIsModalVisible={setIsScanModalVisible}
-            onPaste={onPaste}
-            onInput={onInput}
+            applyURL={applyURL}
           />
         )}
       </Modal>
