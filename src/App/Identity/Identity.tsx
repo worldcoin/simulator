@@ -15,6 +15,7 @@ import qrSvg from "@static/qr.svg";
 import blockies from "blockies-ts";
 import cn from "classnames";
 import React from "react";
+import { toast } from "react-toastify";
 import { Background } from "./Background/Background";
 import { Card } from "./Card";
 import { IdentityVerification } from "./IdentityVerification/IdentityVerification";
@@ -42,7 +43,11 @@ const Identity = React.memo(function Identity(props: {
   setVerificationSkipped: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [inputMode, setInputMode] = React.useState<InputMode>(InputMode.Manual);
-  const [tab, setTab] = React.useState<TabsType>(TabsType.Wallet);
+  const handleChangeTab = React.useCallback((tab: TabsType) => {
+    if (tab !== TabsType.Wallet) {
+      toast("This tab is not available in the simulator", { type: "info" });
+    }
+  }, []);
 
   const logout = React.useCallback(() => {
     try {
@@ -267,8 +272,8 @@ const Identity = React.memo(function Identity(props: {
       </div>
 
       <Tabs
-        currentTab={tab}
-        setTab={setTab}
+        currentTab={TabsType.Wallet}
+        setTab={handleChangeTab}
       />
 
       <Modal

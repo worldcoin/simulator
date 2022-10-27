@@ -7,7 +7,7 @@ import { Tab } from "./Tab/Tab";
 
 export const Tabs = React.memo(function Tabs(props: {
   currentTab: TabsType;
-  setTab: React.Dispatch<React.SetStateAction<TabsType>>;
+  setTab: (tab: TabsType) => void;
 }) {
   return (
     <div className="grid grid-cols-3 justify-items-center">
