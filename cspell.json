@@ -12,7 +12,7 @@
     "yaml",
     "json"
   ],
-  "ignorePaths": [".gitignore"],
+  "ignorePaths": [".gitignore", "node_modules", "semaphore", "dist"],
   "words": [
     "bbbec",
     "binded",
