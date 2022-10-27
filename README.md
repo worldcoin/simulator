@@ -77,11 +77,11 @@ We have comprehensive docs for World ID at https://id.worldcoin.org/docs.
 - Install dependencies
 
   ```bash
-  npm ci
+  yarn
   ```
 
 - Run app locally
 
   ```bash
-  npm run dev
+  yarn dev
   ```
