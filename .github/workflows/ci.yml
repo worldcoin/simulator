@@ -33,4 +33,4 @@ jobs:
         env:
           INFURA_ID: ${{ secrets.INFURA_ID }}
 
-      - run: yarn test --if-present
+      # - run: yarn test --if-present
