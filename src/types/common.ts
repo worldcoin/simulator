@@ -3,7 +3,6 @@ export enum Phase {
   Identity,
   VerifyIdentity,
   Signature,
-  IdentityFaucet,
   Loading,
 }
 

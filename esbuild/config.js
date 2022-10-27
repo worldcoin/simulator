@@ -8,11 +8,11 @@ import "dotenv/config";
 import { resolveToEsbuildTarget } from "esbuild-plugin-browserslist";
 import { clean } from "esbuild-plugin-clean";
 import { copy } from "esbuild-plugin-copy";
+import imageminPlugin from "esbuild-plugin-imagemin";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import postcss from "postcss";
-import { optimize as optimizeSVG } from "svgo";
 import tailwindcss from "tailwindcss";
 
 if (!process.env.INFURA_ID) {
@@ -73,26 +73,6 @@ function postCSS() {
 }
 
 /**
- * @returns {import('esbuild').Plugin}
- */
-function svgo() {
-  return {
-    name: "svgo",
-    setup(build) {
-      if (!build.initialOptions.minify) return;
-
-      build.onLoad({ filter: /\.svg$/i }, async ({ path }) => {
-        const raw = await readFile(path, "utf-8");
-        const result = optimizeSVG(raw);
-        if ("data" in result)
-          return { contents: result.data, loader: "dataurl" };
-        throw new Error(result.error);
-      });
-    },
-  };
-}
-
-/**
  * @see {@link https://reactjs.org/docs/error-boundaries.html#component-stack-traces}
  * @returns {import('esbuild').Plugin}
  */
@@ -146,7 +126,7 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
     }),
     NodeModulesPolyfillPlugin(),
     postCSS(),
-    svgo(),
+    imageminPlugin(),
     copy({
       verbose: false,
       once: true,
