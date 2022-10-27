@@ -8,6 +8,6 @@ try {
     minify: true,
   });
 } catch (err) {
-  console.error(err);
+  console.error(JSON.stringify(err, null, 2));
   process.exit(1);
 }
