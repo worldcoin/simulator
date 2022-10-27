@@ -115,14 +115,14 @@ const App = React.memo(function App() {
 
       <section
         className={cn(
-          "h-full w-full px-8 pt-4 xs:h-[812px] xs:w-[381px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-183c4a",
+          "h-full w-full p-4 pb-8 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-183c4a",
           "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
-          "gap-y-8 bg-ffffff transition duration-500 dark:bg-0c0e10",
+          "gap-y-3 bg-ffffff transition duration-500 dark:bg-0c0e10 md:[zoom:initial] xs:[zoom:.9]",
           { "xs:grid-rows-auto/1fr/auto": phase !== Phase.Identity },
           { "pb-7 xs:grid-rows-auto/1fr": phase === Phase.Identity },
         )}
       >
-        <header className="z-10 grid grid-cols-1fr/auto">
+        <header className="z-10 grid grid-cols-1fr/auto px-4">
           <div className="col-span-2 hidden grid-flow-col content-center justify-between xs:grid">
             <span
               className={cn(

@@ -2,7 +2,6 @@ import Modal from "@/App/Identity/Modal/Modal";
 import QrInput from "@/App/Identity/QrInput/QrInput";
 import QrScanner from "@/App/Identity/QrScanner/QrScanner";
 import { GradientButton } from "@/common/GradientButton/GradientButton";
-import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import { connectWallet } from "@/lib/init-walletconnect";
 import type { WalletConnectFlow } from "@/types";
@@ -140,42 +139,6 @@ const Identity = React.memo(function Identity(props: {
     setIsScanModalVisible(true);
   }, [openVerification, props.verificationSkipped]);
 
-  const onPaste = React.useCallback(
-    async (event: React.ClipboardEvent) => {
-      const data = event.clipboardData.getData("Text");
-      const { valid, errorMessage, uri } = parseWorldIDQRCode(data);
-
-      if (!valid || !uri) {
-        return console.error(errorMessage);
-      }
-
-      try {
-        await applyURL(uri);
-      } catch (error) {
-        console.log(error);
-        setIsScanModalVisible(false);
-      }
-    },
-    [applyURL],
-  );
-
-  const onInput = React.useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { valid, uri } = parseWorldIDQRCode(event.target.value);
-
-      if (!valid || !uri) {
-        return;
-      }
-
-      try {
-        await applyURL(uri);
-      } catch (error) {
-        setIsScanModalVisible(false);
-      }
-    },
-    [applyURL],
-  );
-
   const dismiss = React.useCallback(() => {
     if (approval.connector?.connected)
       void approval.connector.killSession().catch(console.error.bind(console));
@@ -202,7 +165,7 @@ const Identity = React.memo(function Identity(props: {
           className="absolute inset-0 z-[1] -mx-8 overflow-hidden dark:mix-blend-soft-light"
         />
 
-        <div className="-mx-4 grid grid-flow-col justify-between">
+        <div className="grid grid-flow-col justify-between">
           <button
             onClick={startInputQR}
             className={cn(
@@ -263,7 +226,7 @@ const Identity = React.memo(function Identity(props: {
           </GradientButton>
         </div>
 
-        <div className="grid justify-items-center gap-y-2 self-center">
+        <div className="mx-2 grid justify-items-center gap-y-2 self-center">
           <div className="grid w-full grid-cols-1fr/auto rounded-8 border border-d1d3d4 dark:border-d1d3d4/40">
             <div className="grid grid-cols-auto/1fr/auto items-center gap-x-2 justify-self-start py-4.5 pl-6">
               <img
@@ -337,8 +300,7 @@ const Identity = React.memo(function Identity(props: {
         {isScanModalVisible && inputMode === InputMode.Manual && (
           <QrInput
             setIsModalVisible={setIsScanModalVisible}
-            onPaste={onPaste}
-            onInput={onInput}
+            applyURL={applyURL}
           />
         )}
       </Modal>
