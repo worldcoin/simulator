@@ -84,10 +84,12 @@ export const Verified = React.memo(function Verified() {
 
         <button
           className={cn(
-            "rounded-[9px] px-3 py-2 font-sora text-10 text-[#d1dbe1]",
-            "border-x-[1px] border-r-[#cee2f5] border-l-transparent",
-            "bg-[color:rgba(207,_220,_225,_0.1)] bg-[length:100%_1px] bg-[position:0_0,_0_100%] bg-no-repeat",
-            "bg-[image:linear-gradient(90deg,_transparent,_#cee2f5),_linear-gradient(90deg,_transparent,_#cee2f5)]",
+            // cspell:disable-next-line
+            "relative rounded-9 bg-cfdce1/10 px-3 py-2 font-sora text-10 text-d1dbe1",
+            "after:absolute after:inset-0 after:rounded-[inherit] after:p-px",
+            "after:bg-gradient-to-r after:from-transparent after:to-cee2f5",
+            "after:[-webkit-mask:_linear-gradient(#fff_0_0)_content-box,_linear-gradient(#fff_0_0)]",
+            "after:[-webkit-mask-composite:_xor]",
           )}
         >
           Issued at an Orb
