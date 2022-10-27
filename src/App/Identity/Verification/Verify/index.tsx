@@ -43,7 +43,7 @@ export const Verify = React.memo(function Verify(props: {
             {projectLogo && (
               <img
                 src={projectLogo}
-                className="absolute inset-4 object-contain"
+                className="absolute inset-0 p-4"
                 alt={props.meta?.project_name ?? "A Project"}
                 onError={onImageLoadError}
               />
