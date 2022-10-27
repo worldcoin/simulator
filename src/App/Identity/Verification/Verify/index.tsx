@@ -97,7 +97,7 @@ export const Verify = React.memo(function Verify(props: {
           withShadow
           onClick={props.onVerify}
           className="font-sora text-16 font-semibold uppercase"
-          textClassName="block p-5 text-000000 dark:text-ffffff"
+          textClassName="block p-5 !text-000000 !dark:text-ffffff"
         >
           Verify with World ID
         </GradientButton>
