@@ -5,7 +5,7 @@ import { Icon } from "@/common/Icon";
 import type { ApprovalRequestMetadata } from "@/types/metadata";
 import checkBadgeSvg from "@static/check-badge.svg";
 import cn from "classnames";
-import React from "react";
+import React, { Fragment } from "react";
 import "./mask.css";
 
 export const Verify = React.memo(function Verify(props: {
@@ -41,19 +41,22 @@ export const Verify = React.memo(function Verify(props: {
             )}
           >
             {projectLogo && (
-              <img
-                src={projectLogo}
-                className="absolute inset-4 object-contain"
-                alt={props.meta?.project_name ?? "A Project"}
-                onError={onImageLoadError}
-              />
+              <Fragment>
+                <img
+                  src={projectLogo}
+                  className="absolute inset-0 p-4"
+                  alt={props.meta?.project_name ?? "A Project"}
+                  onError={onImageLoadError}
+                />
+
+                <span className="mask-border absolute inset-0 bg-[#3c4040]" />
+              </Fragment>
             )}
             {!projectLogo && (
               <span className="bg-gradient-to-r from-[#ff6848] to-4940e0 bg-clip-text font-sora text-30 font-semibold text-transparent">
                 ?
               </span>
             )}
-            <span className="mask-border absolute inset-0 bg-[#3c4040]"></span>
           </div>
           <span className="absolute left-1/2 bottom-0 -translate-x-1/2">
             {props.meta?.validated && (
@@ -94,7 +97,7 @@ export const Verify = React.memo(function Verify(props: {
           withShadow
           onClick={props.onVerify}
           className="font-sora text-16 font-semibold uppercase"
-          textClassName="block p-5 text-000000 dark:text-ffffff"
+          textClassName="block p-5 !text-000000 !dark:text-ffffff"
         >
           Verify with World ID
         </GradientButton>
