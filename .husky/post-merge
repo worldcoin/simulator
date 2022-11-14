@@ -12,7 +12,7 @@ function changed {
 
 if changed 'yarn.lock'; then
   warning "yarn.lock has changed, running 'yarn'..."
-  yarn
+  yarn --frozen-lockfile
 fi
 
 exit 0
