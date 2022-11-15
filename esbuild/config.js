@@ -5,9 +5,9 @@ import autoprefixer from "autoprefixer";
 import browserslist from "browserslist";
 import cssnano from "cssnano";
 import "dotenv/config";
+import copy from "esbuild-copy-files-plugin";
 import { resolveToEsbuildTarget } from "esbuild-plugin-browserslist";
 import { clean } from "esbuild-plugin-clean";
-import { copy } from "esbuild-plugin-copy";
 import imageminPlugin from "esbuild-plugin-imagemin";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -128,12 +128,9 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
     postCSS(),
     imageminPlugin(),
     copy({
-      verbose: false,
-      once: true,
-      assets: {
-        from: ["./src/static/*", "./semaphore/*"],
-        to: ".",
-      },
+      source: ["./src/static/*", "./semaphore/*"],
+      target: ".",
+      copyWithFolder: true,
     }),
   ],
   sourcemap: true,

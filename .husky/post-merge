@@ -10,9 +10,9 @@ function changed {
   git diff --name-only HEAD@{2} HEAD | grep "^$1" >/dev/null 2>&1
 }
 
-if changed 'package-lock.json'; then
-  warning "package-lock.json has changed, running 'npm ci'..."
-  npm ci
+if changed 'yarn.lock'; then
+  warning "yarn.lock has changed, running 'yarn'..."
+  yarn --frozen-lockfile
 fi
 
 exit 0

@@ -2,36 +2,35 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   lint-and-build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
+      - uses: actions/checkout@v3
+        with:
           persist-credentials: false
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 16
-        cache: 'npm'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "yarn"
 
-    - run: npm ci
+      - run: yarn
 
-    - run: npm run lint
+      - run: yarn lint
 
-    - name: Check Typescript
-      run: npm run typescript:check
+      - name: Check Typescript
+        run: yarn typescript:check
 
-    - run: npx prettier --check src/**
+      - run: npx prettier --check src/**
 
-    - uses: streetsidesoftware/cspell-action@v1
+      - uses: streetsidesoftware/cspell-action@v1
 
-    - run: npm run build
-      env:
-        INFURA_ID: ${{ secrets.INFURA_ID }}
+      - run: yarn build
+        env:
+          INFURA_ID: ${{ secrets.INFURA_ID }}
 
-    - run: npm run test --if-present
+      # - run: yarn test --if-present

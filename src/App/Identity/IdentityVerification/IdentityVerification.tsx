@@ -1,6 +1,6 @@
 import Button from "@/common/Button/Button";
 import { Icon } from "@/common/Icon";
-import { insertIdentity } from "@/lib/sequencer-service";
+import { inclusionProof, insertIdentity } from "@/lib/sequencer-service";
 import type { Identity as IdentityType } from "@/types";
 import checkCircleGradient from "@static/check-circle-gradient.svg";
 import gradientSpinnerSvg from "@static/gradient-spinner-thin.svg";
@@ -24,11 +24,30 @@ export const IdentityVerification = React.memo(
     const verifyHandle = React.useCallback(async () => {
       try {
         setLoading(true);
-        const result = await insertIdentity(
-          encodeIdentityCommitment(props.identity.commitment),
+        const encodedCommitment = encodeIdentityCommitment(
+          props.identity.commitment,
         );
+        const result = await insertIdentity(encodedCommitment);
+
         console.info("Identity successfully added.", result);
-        props.setIdentity({ ...props.identity, verified: true });
+
+        let verified: boolean;
+        let proof: IdentityType["inclusionProof"];
+        inclusionProof(encodedCommitment)
+          .then((result) => {
+            verified = true;
+            proof = result;
+          })
+          .catch((error) => {
+            console.error(error);
+          })
+          .finally(() => {
+            props.setIdentity((identity) => ({
+              ...identity,
+              verified,
+              inclusionProof: proof,
+            }));
+          });
         setSubmitSuccess(true);
       } catch (err) {
         setSubmitSuccess(false);
