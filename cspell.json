@@ -19,18 +19,19 @@
     "blockies",
     "CEST",
     "ESBUILD",
+    "fbfbfb",
     "fbfc",
+    "groth",
     "ihswe",
     "keccak",
     "merkle",
     "Nullifer",
     "qrcode",
     "TINO",
+    "toastify",
     "txreceipt",
     "walletconnect",
     "worldid",
-    "zkey",
-    "fbfbfb",
-    "groth"
+    "zkey"
   ]
 }

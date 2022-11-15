@@ -4,18 +4,23 @@ import { inclusionProof } from "@/lib/sequencer-service";
 import type { Identity as IdentityType } from "@/types";
 import { Phase } from "@/types";
 import batterySvg from "@static/battery.svg";
+import crossSvg from "@static/cross.svg";
 import logoSvg from "@static/logo.svg";
 import networkSvg from "@static/network.svg";
 import spinnerSvg from "@static/spinner.svg";
 import wifiSvg from "@static/wifi.svg";
 import cn from "classnames";
 import React from "react";
+import { ToastContainer } from "react-toastify";
+import { useMediaQuery } from "usehooks-ts";
 import { Background } from "./Background/Background";
 import Identity, { encodeIdentityCommitment } from "./Identity/Identity";
 import Initial from "./Initial/Initial";
 
 const App = React.memo(function App() {
   const { getIdentity } = useIdentityStorage();
+  const isMobile = useMediaQuery("(max-width: 499px)");
+  const isDark = useMediaQuery("(prefers-color-scheme: dark)");
 
   const [identity, setIdentity] = React.useState<IdentityType>({
     id: "",
@@ -185,6 +190,25 @@ const App = React.memo(function App() {
           )}
         />
       </section>
+
+      <ToastContainer
+        position={isMobile ? "bottom-center" : "top-right"}
+        autoClose={3500}
+        hideProgressBar
+        pauseOnHover
+        theme={isDark ? "dark" : "light"}
+        closeButton={({ closeToast }) => (
+          <button
+            className="border-l border-f0edf9 p-4"
+            onClick={closeToast}
+          >
+            <Icon
+              data={crossSvg}
+              className="h-5 w-5 text-191c20 dark:text-ffffff"
+            />
+          </button>
+        )}
+      />
     </div>
   );
 });

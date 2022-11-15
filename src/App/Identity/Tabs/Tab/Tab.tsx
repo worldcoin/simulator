@@ -7,7 +7,7 @@ export const Tab = React.memo(function Tab(props: {
   icon: string;
   name: string;
   tab: TabsType;
-  setTab: React.Dispatch<React.SetStateAction<TabsType>>;
+  setTab: (tab: TabsType) => void;
   active: boolean;
 }) {
   return (

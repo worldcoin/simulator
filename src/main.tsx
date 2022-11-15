@@ -3,7 +3,10 @@ import * as ReactDOMClient from "react-dom/client";
 import App from "./App/App";
 import { ThemeProvider } from "./common/contexts/ThemeContext/ThemeContext";
 import { WalletProvider } from "./common/contexts/WalletProvider/WalletProvider";
+
+import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
+import "./react-toastify.css";
 
 const container = document.getElementById("root");
 if (!container) throw new ReferenceError(`Unable to found root element`);

@@ -1,0 +1,37 @@
+:root {
+  --toastify-color-light: #fff;
+  --toastify-color-dark: #0c0e10;
+  --toastify-color-info: #5e54ff;
+  --toastify-color-success: #00c313;
+  --toastify-color-warning: #ec2900;
+  --toastify-color-error: #ec2900;
+  --toastify-color-transparent: rgb(255 255 255 / 70%);
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+  --toastify-toast-width: 320px;
+  --toastify-toast-background: #fff;
+  --toastify-toast-min-height: 64px;
+  --toastify-toast-max-height: 800px;
+  --toastify-font-family: rubik, sans-serif;
+  --toastify-z-index: 9999;
+  --toastify-text-color-light: #010101;
+  --toastify-text-color-dark: #fff;
+}
+
+.Toastify {
+  @apply absolute;
+}
+
+.Toastify__toast-container {
+  @apply px-6 pb-12 md:px-0 md:pb-0;
+}
+
+.Toastify__toast {
+  @apply grid grid-cols-1fr/auto items-center rounded-12 border border-f0edf9 dark:border-858494;
+}
+
+.Toastify__close-button {
+  @apply relative p-5 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-f0edf9;
+}
