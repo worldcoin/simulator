@@ -128,9 +128,9 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
     postCSS(),
     imageminPlugin(),
     copy({
-      source: ["./src/static/*", "./semaphore/*"],
-      target: ".",
-      copyWithFolder: true,
+      source: ["./src/static", "./semaphore"],
+      target: "./dist",
+      copyWithFolder: false,
     }),
   ],
   sourcemap: true,
