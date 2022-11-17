@@ -157,6 +157,11 @@ const Identity = React.memo(function Identity(props: {
       .catch((error) => console.error(error));
   }, [props.identity.commitment]);
 
+  const handleVerify = React.useCallback(
+    () => setIsIdentityVerificationModalVisible(true),
+    [],
+  );
+
   return (
     <div className="grid grid-rows-1fr/auto">
       <div
@@ -204,10 +209,14 @@ const Identity = React.memo(function Identity(props: {
           </button>
         </div>
         <div className="z-10 grid w-[250px] content-end justify-items-center gap-y-5 justify-self-center">
-          <Card verified={props.identity.verified} />
+          <Card
+            verified={props.identity.verified}
+            skippedVerification={props.verificationSkipped}
+            onVerify={handleVerify}
+          />
 
           <GradientButton
-            onClick={() => setIsIdentityVerificationModalVisible(true)}
+            onClick={handleVerify}
             isVisible={!props.identity.verified && !props.verificationSkipped}
             className="h-[54px] w-full text-14"
             gradientText

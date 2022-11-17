@@ -7,7 +7,11 @@ import { usePopperTooltip } from "react-popper-tooltip";
 import { Verified } from "./Verified";
 import { Verify } from "./Verify";
 
-export const Card = React.memo(function Card(props: { verified: boolean }) {
+export const Card = React.memo(function Card(props: {
+  verified: boolean;
+  skippedVerification?: boolean;
+  onVerify?: () => void;
+}) {
   const reference = useRef<HTMLDivElement>(null);
   const {
     getArrowProps,
@@ -100,7 +104,14 @@ export const Card = React.memo(function Card(props: { verified: boolean }) {
           />
         </span>
 
-        {props.verified ? <Verified /> : <Verify />}
+        {props.verified ? (
+          <Verified />
+        ) : (
+          <Verify
+            skippedVerification={props.skippedVerification}
+            onVerify={props.onVerify}
+          />
+        )}
       </div>
     </React.Fragment>
   );
