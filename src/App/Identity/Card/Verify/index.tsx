@@ -21,7 +21,7 @@ export const Verify = React.memo(function Verify(props: {
           onClick={() => props.onVerify?.()}
           className="mt-auto px-3 py-2 text-14 text-4940e0 transition-opacity hover:opacity-75"
         >
-          verify now
+          Verify now
         </Button>
       )}
     </div>
