@@ -13,23 +13,29 @@ export const parseWorldIDQRCode = (data: string): ParseWorldIDQRCodeOutput => {
   if (data.startsWith("https://worldcoin.org/verify")) {
     // New version of World ID QR code
     const parsedUrl = new URL(data);
-    const key = parsedUrl.searchParams.get("k");
-    const bridge = parsedUrl.searchParams.get("b");
-    const handshakeTopic = parsedUrl.searchParams.get("t");
-    const version = parsedUrl.searchParams.get("v");
+    const uri = parsedUrl.searchParams.get("u");
 
-    console.log(key, bridge, handshakeTopic, version);
+    console.log("data:", data);
+    console.log("uri:", uri);
 
-    if (!key || !bridge || !handshakeTopic || !version) {
-      return {
-        valid: false,
-        errorMessage: "Improperly formed World ID QR code. Parameters missing.",
-      };
-    }
+    // const key = parsedUrl.searchParams.get("k");
+    // const bridge = parsedUrl.searchParams.get("b");
+    // const handshakeTopic = parsedUrl.searchParams.get("t");
+    // const version = parsedUrl.searchParams.get("v");
 
-    const encodedBridge = encodeURIComponent(`https://${bridge}`);
+    // console.log(key, bridge, handshakeTopic, version);
+
+    // if (!key || !bridge || !handshakeTopic || !version) {
+    //   return {
+    //     valid: false,
+    //     errorMessage: "Improperly formed World ID QR code. Parameters missing.",
+    //   };
+    // }
+
+    // const encodedBridge = encodeURIComponent(`https://${bridge}`);
     return {
-      uri: `wc:${handshakeTopic}@${version}?bridge=${encodedBridge}&key=${key}`,
+      uri: uri,
+      // uri: `wc:${handshakeTopic}@${version}?bridge=${encodedBridge}&key=${key}`,
       valid: true,
     };
   }

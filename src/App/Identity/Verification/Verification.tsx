@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
@@ -30,18 +32,30 @@ const Verification = React.memo(function Verification(props: {
     React.useState<VerificationState>(VerificationState.Initial);
 
   const dismiss = React.useCallback(() => {
-    const { connector, request } = props.approval;
-    if (connector?.connected) {
-      connector.on("disconnect", () => props.dismiss());
-      if (request?.id)
-        void connector.rejectRequest({
+    const { client, request } = props.approval;
+    if (client) {
+      client.on("session_delete", () => props.dismiss());
+      if (request?.id) {
+        client.reject({
           id: request.id,
-          error: {
+          reason: {
             code: -32100,
             message: ErrorCodes.VerificationRejected,
           },
         });
-    } else props.dismiss();
+      } else props.dismiss();
+    }
+    // if (connector?.connected) {
+    //   connector.on("disconnect", () => props.dismiss());
+    //   if (request?.id)
+    //     void connector.rejectRequest({
+    //       id: request.id,
+    //       error: {
+    //         code: -32100,
+    //         message: ErrorCodes.VerificationRejected,
+    //       },
+    //     });
+    // } else props.dismiss();
   }, [props]);
 
   const handleReset = React.useCallback(() => {
@@ -83,20 +97,30 @@ const Verification = React.memo(function Verification(props: {
 
     if (verificationState === VerificationState.Loading) {
       const { identity } = props;
-      const { connector, request } = props.approval;
-      if (!connector || !request) {
+      const { client, request } = props.approval;
+      if (!client || !request) {
         console.error("connector or request undefined", props.approval);
         setVerificationState(VerificationState.Error);
         return;
       }
 
-      connector.on("disconnect", (err) => {
-        if (err) {
-          setVerificationState(VerificationState.Error);
-        } else {
+      client.on("session_delete", (event) => {
+        console.log("event:", event);
+
+        if (event) {
           setVerificationState(VerificationState.Success);
+        } else {
+          setVerificationState(VerificationState.Error);
         }
       });
+
+      // connector.on("disconnect", (err) => {
+      //   if (err) {
+      //     setVerificationState(VerificationState.Error);
+      //   } else {
+      //     setVerificationState(VerificationState.Success);
+      //   }
+      // });
 
       try {
         const { fullProof, merkleProof } = props.approval;
@@ -107,33 +131,65 @@ const Verification = React.memo(function Verification(props: {
         }
 
         await verifyProof(fullProof.proof, fullProof.publicSignals);
-        connector.approveRequest({
-          id: request.id,
-          result: {
-            merkle_root:
-              identity.inclusionProof?.root ??
-              abi.encode(["uint256"], [merkleProof.root]),
-            nullifier_hash: abi.encode(
-              ["uint256"],
-              [fullProof.publicSignals.nullifierHash],
-            ),
-            proof: abi.encode(
-              ["uint256[8]"],
-              [Semaphore.packToSolidityProof(fullProof.proof)],
-            ),
+
+        console.log("client:", client);
+        console.log("request:", request);
+
+        await client.respond({
+          topic: request.topic,
+          response: {
+            id: request.id,
+            jsonrpc: "2.0",
+            result: {
+              merkle_root:
+                identity.inclusionProof?.root ??
+                abi.encode(["uint256"], [merkleProof.root]),
+              nullifier_hash: abi.encode(
+                ["uint256"],
+                [fullProof.publicSignals.nullifierHash],
+              ),
+              proof: abi.encode(
+                ["uint256[8]"],
+                [Semaphore.packToSolidityProof(fullProof.proof)],
+              ),
+            },
           },
         });
+        // connector.approveRequest({
+        //   id: request.id,
+        //   result: {
+        //     merkle_root:
+        //       identity.inclusionProof?.root ??
+        //       abi.encode(["uint256"], [merkleProof.root]),
+        //     nullifier_hash: abi.encode(
+        //       ["uint256"],
+        //       [fullProof.publicSignals.nullifierHash],
+        //     ),
+        //     proof: abi.encode(
+        //       ["uint256[8]"],
+        //       [Semaphore.packToSolidityProof(fullProof.proof)],
+        //     ),
+        //   },
+        // });
       } catch (err) {
+        console.error("catch err");
         console.error(err);
         setVerificationState(VerificationState.Error);
-        connector.off("disconnect");
-        connector.rejectRequest({
+        // connector.off("disconnect");
+        client.reject({
           id: request.id,
-          error: {
+          reason: {
             code: -32602,
             message: ErrorCodes.GenericError,
           },
         });
+        // connector.rejectRequest({
+        //   id: request.id,
+        //   error: {
+        //     code: -32602,
+        //     message: ErrorCodes.GenericError,
+        //   },
+        // });
       }
     }
   };
