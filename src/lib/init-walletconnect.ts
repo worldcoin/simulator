@@ -2,13 +2,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import type { Identity } from "@/types";
-// import WalletConnect from "@walletconnect/client";
-import Client from "@walletconnect/sign-client";
-// import { SignClientTypes } from '@walletconnect/types';
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
+import Client from "@walletconnect/sign-client";
+import { getSdkError } from "@walletconnect/utils";
 import type { VerificationRequest } from "@worldcoin/id";
+import { ErrorCodes } from "@worldcoin/id";
 import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
 import { getFullProof } from "./get-full-proof";
 import { getMerkleProof } from "./get-merkle-proof";
@@ -24,8 +23,7 @@ export async function connectWallet({
   uri: string;
   identity: Identity;
 }): Promise<{
-  client: Client;
-  // connector: WalletConnect;
+  client: Client | undefined;
   request;
   meta: Awaited<ReturnType<typeof fetchApprovalRequestMetadata>>;
   merkleProof: MerkleProof;
@@ -40,6 +38,7 @@ export async function connectWallet({
     localStorage.removeItem(STORAGE_KEY);
   } catch {}
 
+  // TODO: Move metadata to .env vars
   const client = await Client.init({
     projectId: "519e139c1286fc1d35acfc4e526b5ba6",
     metadata: {
@@ -90,36 +89,6 @@ export async function connectWallet({
 
   await client.core.pairing.pair({ uri });
 
-  // const connector = new WalletConnect({
-  //   uri,
-  //   storageId: STORAGE_KEY,
-  //   storage: {
-  //     getSession: () => null,
-  //     setSession: (s) => s,
-  //     removeSession() {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  //   },
-  // });
-  // connector.on("session_update", (error, _payload) => {
-  //   console.log("EVENT", "session_update");
-  //   if (error) throw error;
-  // });
-  // connector.on("wc_sessionRequest", (error, _payload) => {
-  //   console.log("EVENT", "wc_sessionRequest");
-  //   if (error) throw error;
-  // });
-  // connector.on("wc_sessionUpdate", (error, _payload) => {
-  //   console.log("EVENT", "wc_sessionUpdate");
-  //   if (error) throw error;
-  // });
-  // connector.on("connect", (error, _payload) => {
-  //   console.log("EVENT", "connect");
-  //   if (error) throw error;
-  // });
-  // connector.on("disconnect", (error, _payload) => {
-  //   console.log("EVENT", "disconnect");
-  //   if (error) throw error;
-  // });
-
   // we should immediately receive session request from SDK
   // const sessionRequestPayload = await new Promise<ISessionParams>(
   //   (resolve, reject) =>
@@ -136,11 +105,11 @@ export async function connectWallet({
 
   const disconnectSessionOnUnload = () => {
     console.log("disconnectSessionOnUnload()");
-    // if (client)
-    //   await client.disconnect({
-    //     topic: callRequestPayload.topic,
-    //     reason: getSdkError("USER_DISCONNECTED"),
-    //   });
+    if (client)
+      client.disconnect({
+        topic: callRequestPayload.topic,
+        reason: getSdkError("USER_DISCONNECTED"),
+      });
   };
   window.addEventListener("beforeunload", disconnectSessionOnUnload);
 
@@ -212,20 +181,25 @@ export async function connectWallet({
     BigInt(callRequestPayload.params.request.params[0].signal as string);
   } catch (error) {
     console.error(error);
-    // await client.reject({
-    //   id: callRequestPayload.id,
-    //   reason: {
-    //     code: -32602,
-    //     message: ErrorCodes.InvalidSignal,
-    //   },
-    // });
+    await client.respond({
+      topic: callRequestPayload.topic,
+      response: {
+        id: callRequestPayload.id,
+        jsonrpc: "2.0",
+        error: {
+          code: -32602,
+          message: ErrorCodes.InvalidSignal,
+        },
+      },
+    });
     await new Promise((resolve) => setTimeout(resolve, 500));
-    // if (client)
-    //   await client.disconnect({
-    //     topic: callRequestPayload.topic,
-    //     reason: getSdkError("USER_DISCONNECTED"),
-    //   });
-    throw error;
+    if (client) {
+      await client.disconnect({
+        topic: callRequestPayload.topic,
+        reason: getSdkError("USER_DISCONNECTED"),
+      });
+      throw error;
+    }
   }
 
   // validate action ID
@@ -237,20 +211,25 @@ export async function connectWallet({
     BigInt(callRequestPayload.params.request.params[0].action_id as string);
   } catch (error) {
     console.error(error);
-    // await client.reject({
-    //   id: callRequestPayload.id,
-    //   reason: {
-    //     code: -32602,
-    //     message: ErrorCodes.InvalidActionID,
-    //   },
-    // });
+    await client.respond({
+      topic: callRequestPayload.topic,
+      response: {
+        id: callRequestPayload.id,
+        jsonrpc: "2.0",
+        error: {
+          code: -32602,
+          message: ErrorCodes.InvalidActionID,
+        },
+      },
+    });
     await new Promise((resolve) => setTimeout(resolve, 500));
-    // if (client)
-    //   await client.disconnect({
-    //     topic: callRequestPayload.topic,
-    //     reason: getSdkError("USER_DISCONNECTED"),
-    //   });
-    throw error;
+    if (client) {
+      await client.disconnect({
+        topic: callRequestPayload.topic,
+        reason: getSdkError("USER_DISCONNECTED"),
+      });
+      throw error;
+    }
   }
 
   // window.addEventListener("beforeunload", rejectRequest);
