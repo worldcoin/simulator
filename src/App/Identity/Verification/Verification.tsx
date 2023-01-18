@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
@@ -31,31 +29,22 @@ const Verification = React.memo(function Verification(props: {
   const [verificationState, setVerificationState] =
     React.useState<VerificationState>(VerificationState.Initial);
 
-  const dismiss = React.useCallback(() => {
+  const dismiss = React.useCallback(async () => {
     const { client, request } = props.approval;
-    if (client) {
-      client.on("session_delete", () => props.dismiss());
-      if (request?.id) {
-        client.reject({
+    if (client && request) {
+      try {
+        await client.reject({
           id: request.id,
           reason: {
             code: -32100,
             message: ErrorCodes.VerificationRejected,
           },
         });
-      } else props.dismiss();
+      } catch (error) {}
     }
-    // if (connector?.connected) {
-    //   connector.on("disconnect", () => props.dismiss());
-    //   if (request?.id)
-    //     void connector.rejectRequest({
-    //       id: request.id,
-    //       error: {
-    //         code: -32100,
-    //         message: ErrorCodes.VerificationRejected,
-    //       },
-    //     });
-    // } else props.dismiss();
+    if (client) {
+      props.dismiss();
+    }
   }, [props]);
 
   const handleReset = React.useCallback(() => {
@@ -99,28 +88,15 @@ const Verification = React.memo(function Verification(props: {
       const { identity } = props;
       const { client, request } = props.approval;
       if (!client || !request) {
-        console.error("connector or request undefined", props.approval);
+        console.error("client or request undefined", props.approval);
         setVerificationState(VerificationState.Error);
         return;
       }
 
       client.on("session_delete", (event) => {
         console.log("event:", event);
-
-        if (event) {
-          setVerificationState(VerificationState.Success);
-        } else {
-          setVerificationState(VerificationState.Error);
-        }
+        setVerificationState(VerificationState.Success);
       });
-
-      // connector.on("disconnect", (err) => {
-      //   if (err) {
-      //     setVerificationState(VerificationState.Error);
-      //   } else {
-      //     setVerificationState(VerificationState.Success);
-      //   }
-      // });
 
       try {
         const { fullProof, merkleProof } = props.approval;
@@ -135,6 +111,7 @@ const Verification = React.memo(function Verification(props: {
         console.log("client:", client);
         console.log("request:", request);
 
+        // Emits 'No matching key' error, https://github.com/WalletConnect/walletconnect-monorepo/issues/1514
         await client.respond({
           topic: request.topic,
           response: {
@@ -155,41 +132,18 @@ const Verification = React.memo(function Verification(props: {
             },
           },
         });
-        // connector.approveRequest({
-        //   id: request.id,
-        //   result: {
-        //     merkle_root:
-        //       identity.inclusionProof?.root ??
-        //       abi.encode(["uint256"], [merkleProof.root]),
-        //     nullifier_hash: abi.encode(
-        //       ["uint256"],
-        //       [fullProof.publicSignals.nullifierHash],
-        //     ),
-        //     proof: abi.encode(
-        //       ["uint256[8]"],
-        //       [Semaphore.packToSolidityProof(fullProof.proof)],
-        //     ),
-        //   },
-        // });
       } catch (err) {
         console.error("catch err");
         console.error(err);
         setVerificationState(VerificationState.Error);
-        // connector.off("disconnect");
-        client.reject({
+        console.log("actionListener():", request);
+        await client.reject({
           id: request.id,
           reason: {
             code: -32602,
             message: ErrorCodes.GenericError,
           },
         });
-        // connector.rejectRequest({
-        //   id: request.id,
-        //   error: {
-        //     code: -32602,
-        //     message: ErrorCodes.GenericError,
-        //   },
-        // });
       }
     }
   };
