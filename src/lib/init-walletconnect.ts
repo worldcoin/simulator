@@ -37,8 +37,8 @@ export async function connectWallet({
     projectId: process.env.WALLETCONNECT_PID,
     metadata: {
       name: "World ID Simulator",
-      description: "The staging simulator for testing World ID",
-      url: "http://worldcoin.org/verify",
+      description: "The simulator for testing the Orb credential in World ID.",
+      url: "https://id.worldcoin.org/test",
       icons: ["https://worldcoin.org/icons/logo-small.svg"],
     },
   });
@@ -76,13 +76,17 @@ export async function connectWallet({
 
   await client.core.pairing.pair({ uri });
 
-  const disconnectSessionOnUnload = async () => {
+  const _disconnectSessionOnUnloadPromise = async () => {
     if (sessionProposal.params.pairingTopic)
       await client.disconnect({
         topic: sessionProposal.params.pairingTopic,
         reason: getSdkError("USER_DISCONNECTED"),
       });
   };
+
+  const disconnectSessionOnUnload = () =>
+    void _disconnectSessionOnUnloadPromise();
+
   window.addEventListener("beforeunload", disconnectSessionOnUnload);
 
   // we should immediately receive session request from SDK
@@ -196,7 +200,7 @@ export async function connectWallet({
     }
   };
 
-  const rejectRequest = async () => {
+  const _rejectRequestPromise = async () => {
     await client.reject({
       id: sessionRequest.id,
       reason: {
@@ -205,6 +209,8 @@ export async function connectWallet({
       },
     });
   };
+
+  const rejectRequest = () => void _rejectRequestPromise();
 
   window.addEventListener("beforeunload", rejectRequest);
   client.on("session_delete", () => {
