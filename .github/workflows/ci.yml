@@ -1,8 +1,7 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [main]
+  - pull_request
 
 jobs:
   lint-and-build:
@@ -31,6 +30,7 @@ jobs:
 
       - run: yarn build
         env:
-          INFURA_ID: ${{ secrets.INFURA_ID }}
+          INFURA_ID: "unsafe_test_id"
+          WALLETCONNECT_PID: "unsafe_test_pid"
 
       # - run: yarn test --if-present
