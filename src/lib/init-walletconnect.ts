@@ -44,7 +44,7 @@ export async function connectWallet({
   });
 
   client.on("session_proposal", async (event) => {
-    const { topic, acknowledged } = await client.approve({
+    const { acknowledged } = await client.approve({
       id: event.id,
       namespaces: {
         eip155: {
