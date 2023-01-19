@@ -12,6 +12,7 @@ import checkmarkSvg from "@static/checkmark-alt.svg";
 import copySvg from "@static/copy.svg";
 import logoutIconSvg from "@static/logout.svg";
 import qrSvg from "@static/qr.svg";
+import { getSdkError } from "@walletconnect/utils";
 import blockies from "blockies-ts";
 import cn from "classnames";
 import React from "react";
@@ -79,7 +80,8 @@ const Identity = React.memo(function Identity(props: {
   ] = React.useState<boolean>(false);
 
   const [approval, setToApprove] = React.useState<WalletConnectFlow>({
-    connector: {},
+    client: {},
+    proposal: {},
     request: {},
     meta: {},
   } as WalletConnectFlow);
@@ -111,7 +113,7 @@ const Identity = React.memo(function Identity(props: {
       if (!uri) {
         return;
       }
-      console.log("uri", uri);
+
       const request = await connectWallet({ uri, identity: props.identity });
       setToApprove({ ...approval, ...request });
       setIsVerificationModalVisible(true);
@@ -144,11 +146,17 @@ const Identity = React.memo(function Identity(props: {
     setIsScanModalVisible(true);
   }, [openVerification, props.verificationSkipped]);
 
-  const dismiss = React.useCallback(() => {
-    if (approval.connector?.connected)
-      void approval.connector.killSession().catch(console.error.bind(console));
+  const dismiss = React.useCallback(async () => {
+    if (approval.client && approval.proposal?.params.pairingTopic) {
+      await approval.client
+        .disconnect({
+          topic: approval.proposal.params.pairingTopic,
+          reason: getSdkError("USER_DISCONNECTED"),
+        })
+        .catch(console.error.bind(console));
+    }
     setIsVerificationModalVisible((prevState) => !prevState);
-  }, [approval.connector]);
+  }, [approval.client, approval.proposal]);
 
   const copyIdentity = React.useCallback(() => {
     navigator.clipboard
