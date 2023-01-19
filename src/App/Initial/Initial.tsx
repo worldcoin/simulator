@@ -89,16 +89,17 @@ const Initial = React.memo(function Initial(props: {
       )
       .finally(() => {
         provider.qrcodeModal.close();
+
         // we should wait for some event and then disconnect, to avoid error on the client
         // but for now we will just wait 2 seconds
-        // const cleanup = setTimeout(() => {
-        //   if (provider.connected)
-        //     provider.disconnect().catch(console.error.bind(console));
-        // }, 2000);
-        // provider.connector.on("disconnect", () => {
-        //   console.log("Provider disconnected by user");
-        //   clearTimeout(cleanup);
-        // });
+        const cleanup = setTimeout(() => {
+          if (provider.connected)
+            provider.disconnect().catch(console.error.bind(console));
+        }, 2000);
+        provider.connector.on("disconnect", () => {
+          console.log("Provider disconnected by user");
+          clearTimeout(cleanup);
+        });
       });
   }, [props, provider, updateIdentity]);
 

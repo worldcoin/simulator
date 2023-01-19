@@ -93,8 +93,7 @@ const Verification = React.memo(function Verification(props: {
         return;
       }
 
-      client.on("session_delete", (event) => {
-        console.log("event:", event);
+      client.on("session_delete", () => {
         setVerificationState(VerificationState.Success);
       });
 
@@ -107,9 +106,6 @@ const Verification = React.memo(function Verification(props: {
         }
 
         await verifyProof(fullProof.proof, fullProof.publicSignals);
-
-        console.log("client:", client);
-        console.log("request:", request);
 
         // Emits 'No matching key' error, https://github.com/WalletConnect/walletconnect-monorepo/issues/1514
         await client.respond({

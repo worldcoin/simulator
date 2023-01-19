@@ -113,7 +113,7 @@ const Identity = React.memo(function Identity(props: {
       if (!uri) {
         return;
       }
-      console.log("uri", uri);
+
       const request = await connectWallet({ uri, identity: props.identity });
       setToApprove({ ...approval, ...request });
       setIsVerificationModalVisible(true);
@@ -146,10 +146,9 @@ const Identity = React.memo(function Identity(props: {
     setIsScanModalVisible(true);
   }, [openVerification, props.verificationSkipped]);
 
-  const dismiss = React.useCallback(() => {
-    console.log("session:", approval.proposal);
+  const dismiss = React.useCallback(async () => {
     if (approval.client && approval.proposal?.params.pairingTopic) {
-      void approval.client
+      await approval.client
         .disconnect({
           topic: approval.proposal.params.pairingTopic,
           reason: getSdkError("USER_DISCONNECTED"),
