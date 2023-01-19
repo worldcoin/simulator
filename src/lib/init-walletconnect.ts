@@ -33,9 +33,8 @@ export async function connectWallet({
     localStorage.removeItem(STORAGE_KEY);
   } catch {}
 
-  // TODO: Move metadata to .env vars
   const client = await Client.init({
-    projectId: "519e139c1286fc1d35acfc4e526b5ba6",
+    projectId: process.env.WALLETCONNECT_PID,
     metadata: {
       name: "World ID Simulator",
       description: "The staging simulator for testing World ID",

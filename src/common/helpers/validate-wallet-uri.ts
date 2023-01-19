@@ -12,8 +12,6 @@ export const parseWorldIDQRCode = (data: string): ParseWorldIDQRCodeOutput => {
   const relay = parsedUrl.searchParams.get("r");
   const key = parsedUrl.searchParams.get("k");
 
-  console.log("data:", data);
-
   if (!topic || !version || !relay || !key) {
     return {
       valid: false,
