@@ -1,7 +1,8 @@
 name: CI
 
 on:
-  - pull_request
+  pull_request:
+    branches: [main]
 
 jobs:
   lint-and-build:
@@ -14,7 +15,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 16
           cache: "yarn"
 
       - run: yarn
@@ -30,7 +31,6 @@ jobs:
 
       - run: yarn build
         env:
-          INFURA_ID: "unsafe_test_id"
-          WALLETCONNECT_PID: "unsafe_test_pid"
+          INFURA_ID: ${{ secrets.INFURA_ID }}
 
       # - run: yarn test --if-present

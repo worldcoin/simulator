@@ -29,22 +29,19 @@ const Verification = React.memo(function Verification(props: {
   const [verificationState, setVerificationState] =
     React.useState<VerificationState>(VerificationState.Initial);
 
-  const dismiss = React.useCallback(async () => {
-    const { client, request } = props.approval;
-    if (client && request) {
-      try {
-        await client.reject({
+  const dismiss = React.useCallback(() => {
+    const { connector, request } = props.approval;
+    if (connector?.connected) {
+      connector.on("disconnect", () => props.dismiss());
+      if (request?.id)
+        void connector.rejectRequest({
           id: request.id,
-          reason: {
+          error: {
             code: -32100,
             message: ErrorCodes.VerificationRejected,
           },
         });
-      } catch (error) {}
-    }
-    if (client) {
-      props.dismiss();
-    }
+    } else props.dismiss();
   }, [props]);
 
   const handleReset = React.useCallback(() => {
@@ -86,15 +83,19 @@ const Verification = React.memo(function Verification(props: {
 
     if (verificationState === VerificationState.Loading) {
       const { identity } = props;
-      const { client, request } = props.approval;
-      if (!client || !request) {
-        console.error("client or request undefined", props.approval);
+      const { connector, request } = props.approval;
+      if (!connector || !request) {
+        console.error("connector or request undefined", props.approval);
         setVerificationState(VerificationState.Error);
         return;
       }
 
-      client.on("session_delete", () => {
-        setVerificationState(VerificationState.Success);
+      connector.on("disconnect", (err) => {
+        if (err) {
+          setVerificationState(VerificationState.Error);
+        } else {
+          setVerificationState(VerificationState.Success);
+        }
       });
 
       try {
@@ -106,36 +107,29 @@ const Verification = React.memo(function Verification(props: {
         }
 
         await verifyProof(fullProof.proof, fullProof.publicSignals);
-
-        // Emits 'No matching key' error, https://github.com/WalletConnect/walletconnect-monorepo/issues/1514
-        await client.respond({
-          topic: request.topic,
-          response: {
-            id: request.id,
-            jsonrpc: "2.0",
-            result: {
-              merkle_root:
-                identity.inclusionProof?.root ??
-                abi.encode(["uint256"], [merkleProof.root]),
-              nullifier_hash: abi.encode(
-                ["uint256"],
-                [fullProof.publicSignals.nullifierHash],
-              ),
-              proof: abi.encode(
-                ["uint256[8]"],
-                [Semaphore.packToSolidityProof(fullProof.proof)],
-              ),
-            },
+        connector.approveRequest({
+          id: request.id,
+          result: {
+            merkle_root:
+              identity.inclusionProof?.root ??
+              abi.encode(["uint256"], [merkleProof.root]),
+            nullifier_hash: abi.encode(
+              ["uint256"],
+              [fullProof.publicSignals.nullifierHash],
+            ),
+            proof: abi.encode(
+              ["uint256[8]"],
+              [Semaphore.packToSolidityProof(fullProof.proof)],
+            ),
           },
         });
       } catch (err) {
-        console.error("catch err");
         console.error(err);
         setVerificationState(VerificationState.Error);
-        console.log("actionListener():", request);
-        await client.reject({
+        connector.off("disconnect");
+        connector.rejectRequest({
           id: request.id,
-          reason: {
+          error: {
             code: -32602,
             message: ErrorCodes.GenericError,
           },
