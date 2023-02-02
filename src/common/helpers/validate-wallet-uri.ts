@@ -9,7 +9,7 @@ export const parseWorldIDQRCode = (data: string): ParseWorldIDQRCodeOutput => {
   const parsedUrl = new URL(data);
   const topic = parsedUrl.searchParams.get("t");
   const version = parsedUrl.searchParams.get("v");
-  const relay = parsedUrl.searchParams.get("r");
+  const relay = parsedUrl.searchParams.get("p");
   const key = parsedUrl.searchParams.get("k");
 
   if (!topic || !version || !relay || !key) {
