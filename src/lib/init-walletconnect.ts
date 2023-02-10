@@ -48,7 +48,7 @@ export async function connectWallet({
       id: event.id,
       namespaces: {
         eip155: {
-          accounts: ["eip155:0:0"],
+          accounts: ["eip155:1:0"],
           methods: ["wld_worldIDVerification"],
           events: ["chainChanged", "accountsChanged"],
         },
