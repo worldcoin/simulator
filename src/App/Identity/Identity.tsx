@@ -114,7 +114,10 @@ const Identity = React.memo(function Identity(props: {
         return;
       }
 
+      console.log("applyURL()");
       const request = await connectWallet({ uri, identity: props.identity });
+      console.log(`request: ${request}`); // DEBUG
+
       setToApprove({ ...approval, ...request });
       setIsVerificationModalVisible(true);
       setIsScanModalVisible(false);
@@ -147,7 +150,11 @@ const Identity = React.memo(function Identity(props: {
   }, [openVerification, props.verificationSkipped]);
 
   const dismiss = React.useCallback(async () => {
+    console.log("dismiss()"); // DEBUG
+    console.log("approval:", approval);
+
     if (approval.client && approval.proposal?.params.pairingTopic) {
+      console.log("approval.client.disconnect()");
       await approval.client
         .disconnect({
           topic: approval.proposal.params.pairingTopic,

@@ -13,6 +13,19 @@ export interface WalletConnectRequest extends VerificationRequest {
   code?: string;
 }
 
+// export let client: Client
+// export async function createClient() {
+//   client = await Client.init({
+//     projectId: process.env.WALLETCONNECT_PID,
+//     metadata: {
+//       name: "World ID Simulator",
+//       description: "The simulator for testing verification with World ID.",
+//       url: "https://id.worldcoin.org/test",
+//       icons: ["https://worldcoin.org/icons/logo-small.svg"],
+//     },
+//   });
+// }
+
 export async function connectWallet({
   uri,
   identity,
@@ -37,7 +50,7 @@ export async function connectWallet({
     projectId: process.env.WALLETCONNECT_PID,
     metadata: {
       name: "World ID Simulator",
-      description: "The simulator for testing the Orb credential in World ID.",
+      description: "The simulator for testing verification with World ID.",
       url: "https://id.worldcoin.org/test",
       icons: ["https://worldcoin.org/icons/logo-small.svg"],
     },
@@ -58,30 +71,38 @@ export async function connectWallet({
     await acknowledged();
   });
 
-  // client.on("session_event", (event) => {
-  //   console.log("session_event:", event);
-  // });
+  client.on("session_proposal", (event) => {
+    console.log("session_proposal:", event);
+  });
 
-  // client.on("session_request", (event) => {
-  //   console.log("session_request:", event);
-  // });
+  client.on("session_event", (event) => {
+    console.log("session_event:", event);
+  });
 
-  // client.on("session_ping", (event) => {
-  //   console.log("session_ping:", event);
-  // });
+  client.on("session_request", (event) => {
+    console.log("session_request:", event);
+  });
 
-  // client.on("session_delete", (event) => {
-  //   console.log("session_delete:", event);
-  // });
+  client.on("session_ping", (event) => {
+    console.log("session_ping:", event);
+  });
+
+  client.on("session_delete", (event) => {
+    console.log("session_delete:", event);
+  });
 
   await client.core.pairing.pair({ uri });
 
   const _disconnectSessionOnUnloadPromise = async () => {
-    if (sessionProposal.params.pairingTopic)
+    console.log("_disconnectSessionOnUnloadPromise()");
+
+    if (sessionProposal.params.pairingTopic) {
+      console.log("client.disconnect()");
       await client.disconnect({
         topic: sessionProposal.params.pairingTopic,
         reason: getSdkError("USER_DISCONNECTED"),
       });
+    }
   };
 
   const disconnectSessionOnUnload = () =>
@@ -126,6 +147,8 @@ export async function connectWallet({
     });
     await new Promise((resolve) => setTimeout(resolve, 500));
     if (sessionProposal.params.pairingTopic) {
+      console.log("client.disconnect()");
+
       await client.disconnect({
         topic: sessionProposal.params.pairingTopic,
         reason: getSdkError("USER_DISCONNECTED"),
@@ -137,6 +160,8 @@ export async function connectWallet({
   }
 
   const validateSignal = async () => {
+    console.log("validateSignal()");
+
     try {
       const params = sessionRequest.params.request.params as Record<
         string,
@@ -146,6 +171,7 @@ export async function connectWallet({
       return params[0].signal;
     } catch (error) {
       console.error(error);
+      console.log("client.respond()");
       await client.respond({
         topic: sessionRequest.topic,
         response: {
@@ -159,6 +185,8 @@ export async function connectWallet({
       });
       await new Promise((resolve) => setTimeout(resolve, 500));
       if (sessionProposal.params.pairingTopic) {
+        console.log("client.disconnect()");
+
         await client.disconnect({
           topic: sessionProposal.params.pairingTopic,
           reason: getSdkError("USER_DISCONNECTED"),
@@ -169,6 +197,8 @@ export async function connectWallet({
   };
 
   const validateActionId = async () => {
+    console.log("validateActionId()");
+
     try {
       const params = sessionRequest.params.request.params as Record<
         string,
@@ -178,6 +208,7 @@ export async function connectWallet({
       return params[0].action_id;
     } catch (error) {
       console.error(error);
+      console.log("client.respond()");
       await client.respond({
         topic: sessionRequest.topic,
         response: {
@@ -191,6 +222,7 @@ export async function connectWallet({
       });
       await new Promise((resolve) => setTimeout(resolve, 500));
       if (sessionProposal.params.pairingTopic) {
+        console.log("client.disconnect()");
         await client.disconnect({
           topic: sessionProposal.params.pairingTopic,
           reason: getSdkError("USER_DISCONNECTED"),
@@ -201,6 +233,9 @@ export async function connectWallet({
   };
 
   const _rejectRequestPromise = async () => {
+    console.log("_rejectRequestPromise()");
+    console.log("client.reject()");
+
     await client.reject({
       id: sessionRequest.id,
       reason: {
