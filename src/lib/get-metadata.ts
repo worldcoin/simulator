@@ -16,25 +16,24 @@ interface ActionPayload {
 
 export async function fetchApprovalRequestMetadata(
   request: WalletConnectRequest,
-  nullifierHash?: string,
+  // nullifierHash?: string,
 ): Promise<Partial<ApprovalRequestMetadata>> {
-  const [{ action_id, app_name, signal_description }] = request.params;
+  const [{ action_id: app_id, app_name, signal_description }] = request.params;
   const meta: Partial<ApprovalRequestMetadata> = {
-    action_id,
+    app_id,
     project_name: app_name,
     description: signal_description,
   };
 
   try {
-    const url = new URL(
-      `https://developer.worldcoin.org/api/v1/precheck/${action_id}`,
-    );
-    if (nullifierHash) {
-      url.searchParams.append("nullifier_hash", nullifierHash);
-    }
+    const url = new URL(`https://dev2.worldcoin.org/api/v1/precheck/${app_id}`);
+    // if (nullifierHash) {
+    //   url.searchParams.append("nullifier_hash", nullifierHash);
+    // }
+
     const req = await fetch(url.toString());
     if (req.status === 404) {
-      console.info("Action is not registered in the dev portal.");
+      console.info("App is not registered in the dev portal.");
       return meta;
     }
 
@@ -43,6 +42,7 @@ export async function fetchApprovalRequestMetadata(
     }
 
     const content = (await req.json()) as ActionPayload;
+    console.log("content:", content);
 
     meta.description = content.public_description;
     meta.project_name = content.team.app_name;

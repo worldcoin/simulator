@@ -62,8 +62,8 @@ export async function connectWallet({
       namespaces: {
         eip155: {
           accounts: ["eip155:1:0"],
-          methods: ["wld_worldIDVerification"],
-          events: ["chainChanged", "accountsChanged"],
+          methods: ["world_id_v1"],
+          events: ["accountsChanged"],
         },
       },
     });
@@ -133,7 +133,7 @@ export async function connectWallet({
   console.log("WalletConnect connected");
 
   // validate method
-  if (sessionRequest.params.request.method !== "wld_worldIDVerification") {
+  if (sessionRequest.params.request.method !== "world_id_v1") {
     console.error(
       "Unknown request method:",
       sessionRequest.params.request.method,
@@ -196,16 +196,16 @@ export async function connectWallet({
     }
   };
 
-  const validateActionId = async () => {
-    console.log("validateActionId()");
+  const validateExternalNullifier = async () => {
+    console.log("validateExternalNullifier()");
 
     try {
       const params = sessionRequest.params.request.params as Record<
         string,
         string
       >[];
-      BigInt(params[0].action_id);
-      return params[0].action_id;
+      BigInt(params[0].external_nullifier);
+      return params[0].external_nullifier;
     } catch (error) {
       console.error(error);
       console.log("client.respond()");
@@ -216,7 +216,7 @@ export async function connectWallet({
           jsonrpc: "2.0",
           error: {
             code: -32602,
-            message: ErrorCodes.InvalidActionID,
+            message: "invalid_app_id", // ErrorCodes.InvalidActionID // TODO: Need to update ErrorCodes in @worldcoin/id
           },
         },
       });
@@ -256,8 +256,8 @@ export async function connectWallet({
   const fullProof = await getFullProof(
     identity,
     merkleProof,
-    await validateActionId(), // callRequestPayload.params.request.params[0].action_id as string,
-    await validateSignal(), // callRequestPayload.params.request.params[0].signal as string,
+    await validateExternalNullifier(),
+    await validateSignal(),
   );
   const nullifierHash = abi.encode(
     ["uint256"],
@@ -266,7 +266,7 @@ export async function connectWallet({
 
   const meta = await fetchApprovalRequestMetadata(
     sessionRequest.params.request as WalletConnectRequest,
-    nullifierHash,
+    // nullifierHash,
   );
 
   return {

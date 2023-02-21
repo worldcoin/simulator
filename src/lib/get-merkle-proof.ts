@@ -5,6 +5,7 @@ import { generateMerkleProof } from "@zk-kit/protocols";
 
 export const getMerkleProof = (identity: Identity): MerkleProof => {
   if (identity.inclusionProof) {
+    console.log("identity:", identity);
     const siblings = identity.inclusionProof.proof
       .flatMap((v) => Object.values(v))
       .map((v) => BigNumber.from(v).toBigInt());
