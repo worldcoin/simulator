@@ -113,8 +113,8 @@ const Identity = React.memo(function Identity(props: {
       if (!uri) {
         return;
       }
-
       const request = await connectWallet({ uri, identity: props.identity });
+
       setToApprove({ ...approval, ...request });
       setIsVerificationModalVisible(true);
       setIsScanModalVisible(false);

@@ -15,7 +15,7 @@ import { Semaphore } from "@zk-kit/protocols";
  * @param identityTrapdoor The identity trapdoor.
  * @param identityNullifier The identity nullifier.
  * @param merkleProof The Merkle proof that identity exists in Merkle tree of verified identities.
- * @param actionId The unique identifier for the action. This determines the scope of the proof. A single person cannot issue two proofs for the same action ID.
+ * @param externalNullifier The hash of the app_id and action parameter.  This determines the scope of the proof.
  * @param signal The signal that should be broadcasted.
  * @returns The Semaphore witness.
  */
@@ -23,7 +23,7 @@ function generateSemaphoreWitness(
   identityTrapdoor: StrBigInt,
   identityNullifier: StrBigInt,
   merkleProof: MerkleProof,
-  actionId: StrBigInt,
+  externalNullifier: StrBigInt,
   signal: string,
 ): SemaphoreWitness {
   return {
@@ -31,7 +31,7 @@ function generateSemaphoreWitness(
     identityTrapdoor: identityTrapdoor,
     treePathIndices: merkleProof.pathIndices,
     treeSiblings: merkleProof.siblings as StrBigInt[],
-    externalNullifier: actionId,
+    externalNullifier,
     signalHash: signal,
   };
 }
@@ -39,7 +39,7 @@ function generateSemaphoreWitness(
 export const getFullProof = async (
   identity: Identity,
   merkleProof: MerkleProof,
-  action_id: string,
+  external_nullifier: string,
   signal: string,
 ): Promise<SemaphoreFullProof> => {
   const wasmFilePath = "./semaphore.wasm";
@@ -49,8 +49,8 @@ export const getFullProof = async (
     identity.trapdoor,
     identity.nullifier,
     merkleProof,
-    action_id, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
-    signal, // Encoding & hashing happen on the widget (or delegated to the dapp upstream)
+    external_nullifier, // Encoding & hashing happens on the widget
+    signal, // Encoding & hashing happens on the widget
   );
 
   return await Semaphore.genProof(witness, wasmFilePath, finalZkeyPath);

@@ -108,6 +108,7 @@ const Verification = React.memo(function Verification(props: {
         await verifyProof(fullProof.proof, fullProof.publicSignals);
 
         // Emits 'No matching key' error, https://github.com/WalletConnect/walletconnect-monorepo/issues/1514
+        await new Promise((r) => setTimeout(r, 1000));
         await client.respond({
           topic: request.topic,
           response: {
@@ -129,10 +130,9 @@ const Verification = React.memo(function Verification(props: {
           },
         });
       } catch (err) {
-        console.error("catch err");
         console.error(err);
         setVerificationState(VerificationState.Error);
-        console.log("actionListener():", request);
+
         await client.reject({
           id: request.id,
           reason: {

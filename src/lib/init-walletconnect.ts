@@ -1,14 +1,16 @@
 import type { Identity } from "@/types";
+import type { VerificationRequest } from "@/types/metadata";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import Client from "@walletconnect/sign-client";
 import type { SignClientTypes } from "@walletconnect/types";
 import { getSdkError } from "@walletconnect/utils";
-import type { VerificationRequest } from "@worldcoin/id";
+
 import { ErrorCodes } from "@worldcoin/id";
 import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
 import { getFullProof } from "./get-full-proof";
 import { getMerkleProof } from "./get-merkle-proof";
 import { fetchApprovalRequestMetadata } from "./get-metadata";
+
 export interface WalletConnectRequest extends VerificationRequest {
   code?: string;
 }
@@ -37,7 +39,7 @@ export async function connectWallet({
     projectId: process.env.WALLETCONNECT_PID,
     metadata: {
       name: "World ID Simulator",
-      description: "The simulator for testing the Orb credential in World ID.",
+      description: "The simulator for testing verification with World ID.",
       url: "https://id.worldcoin.org/test",
       icons: ["https://worldcoin.org/icons/logo-small.svg"],
     },
@@ -49,8 +51,8 @@ export async function connectWallet({
       namespaces: {
         eip155: {
           accounts: ["eip155:1:0"],
-          methods: ["wld_worldIDVerification"],
-          events: ["chainChanged", "accountsChanged"],
+          methods: ["world_id_v1"],
+          events: ["accountsChanged"],
         },
       },
     });
@@ -58,30 +60,15 @@ export async function connectWallet({
     await acknowledged();
   });
 
-  // client.on("session_event", (event) => {
-  //   console.log("session_event:", event);
-  // });
-
-  // client.on("session_request", (event) => {
-  //   console.log("session_request:", event);
-  // });
-
-  // client.on("session_ping", (event) => {
-  //   console.log("session_ping:", event);
-  // });
-
-  // client.on("session_delete", (event) => {
-  //   console.log("session_delete:", event);
-  // });
-
   await client.core.pairing.pair({ uri });
 
   const _disconnectSessionOnUnloadPromise = async () => {
-    if (sessionProposal.params.pairingTopic)
+    if (sessionProposal.params.pairingTopic) {
       await client.disconnect({
         topic: sessionProposal.params.pairingTopic,
         reason: getSdkError("USER_DISCONNECTED"),
       });
+    }
   };
 
   const disconnectSessionOnUnload = () =>
@@ -109,10 +96,8 @@ export async function connectWallet({
 
   window.removeEventListener("beforeunload", disconnectSessionOnUnload);
 
-  console.log("WalletConnect connected");
-
   // validate method
-  if (sessionRequest.params.request.method !== "wld_worldIDVerification") {
+  if (sessionRequest.params.request.method !== "world_id_v1") {
     console.error(
       "Unknown request method:",
       sessionRequest.params.request.method,
@@ -168,14 +153,14 @@ export async function connectWallet({
     }
   };
 
-  const validateActionId = async () => {
+  const validateExternalNullifier = async () => {
     try {
       const params = sessionRequest.params.request.params as Record<
         string,
         string
       >[];
-      BigInt(params[0].action_id);
-      return params[0].action_id;
+      BigInt(params[0].external_nullifier);
+      return params[0].external_nullifier;
     } catch (error) {
       console.error(error);
       await client.respond({
@@ -185,7 +170,7 @@ export async function connectWallet({
           jsonrpc: "2.0",
           error: {
             code: -32602,
-            message: ErrorCodes.InvalidActionID,
+            message: "invalid_app_id", // ErrorCodes.InvalidActionID // TODO: Need to update ErrorCodes in @worldcoin/id
           },
         },
       });
@@ -221,8 +206,8 @@ export async function connectWallet({
   const fullProof = await getFullProof(
     identity,
     merkleProof,
-    await validateActionId(), // callRequestPayload.params.request.params[0].action_id as string,
-    await validateSignal(), // callRequestPayload.params.request.params[0].signal as string,
+    await validateExternalNullifier(),
+    await validateSignal(),
   );
   const nullifierHash = abi.encode(
     ["uint256"],
