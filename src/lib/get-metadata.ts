@@ -3,52 +3,72 @@ import type { WalletConnectRequest } from "./init-walletconnect";
 
 interface ActionPayload {
   id: string;
-  public_description: string;
   name: string;
+  logo_url: string;
   is_staging: boolean;
-  team: {
-    app_name: string;
-    is_verified: boolean;
-    verified_app_logo?: string;
+  is_verified: boolean;
+  action: {
+    external_nullifier: string;
+    action_description: string;
+    nullifiers: [{ nullifier_hash: string }];
   };
-  nullifiers: [{ nullifier_hash: string }];
+}
+
+interface ActionBody {
+  action: string;
+  external_nullifier: string;
+  nullifier_hash?: string;
 }
 
 export async function fetchApprovalRequestMetadata(
   request: WalletConnectRequest,
-  // nullifierHash?: string,
+  nullifierHash?: string,
 ): Promise<Partial<ApprovalRequestMetadata>> {
-  const [{ action_id: app_id, app_name, signal_description }] = request.params;
+  const [{ app_id, action, action_description, external_nullifier }] =
+    request.params;
   const meta: Partial<ApprovalRequestMetadata> = {
     app_id,
-    project_name: app_name,
-    description: signal_description,
+    description: action_description,
   };
 
   try {
     const url = new URL(`https://dev2.worldcoin.org/api/v1/precheck/${app_id}`);
-    // if (nullifierHash) {
-    //   url.searchParams.append("nullifier_hash", nullifierHash);
-    // }
+    const body: ActionBody = {
+      action,
+      external_nullifier,
+    };
 
-    const req = await fetch(url.toString());
-    if (req.status === 404) {
+    if (nullifierHash) {
+      body.nullifier_hash = nullifierHash;
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (response.status === 404) {
       console.info("App is not registered in the dev portal.");
       return meta;
     }
 
-    if (!req.ok) {
-      throw new Error(`Failed to fetch metadata service: ${req.statusText}`);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch metadata service: ${response.statusText}`,
+      );
     }
 
-    const content = (await req.json()) as ActionPayload;
-    console.log("content:", content);
+    const content = (await response.json()) as ActionPayload;
 
-    meta.description = content.public_description;
-    meta.project_name = content.team.app_name;
-    meta.logo_image = content.team.verified_app_logo;
-    meta.validated = content.team.is_verified || undefined;
-    meta.nullifiers = content.nullifiers;
+    meta.description =
+      content.action.action_description !== ""
+        ? content.action.action_description
+        : meta.description;
+    meta.project_name = content.name;
+    meta.logo_image = content.logo_url;
+    meta.validated = content.is_verified || undefined;
+    meta.nullifiers = content.action.nullifiers;
   } catch (err) {
     console.error(err);
   }

@@ -1,14 +1,16 @@
 import type { Identity } from "@/types";
+import type { VerificationRequest } from "@/types/metadata";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import Client from "@walletconnect/sign-client";
 import type { SignClientTypes } from "@walletconnect/types";
 import { getSdkError } from "@walletconnect/utils";
-import type { VerificationRequest } from "@worldcoin/id";
+
 import { ErrorCodes } from "@worldcoin/id";
 import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
 import { getFullProof } from "./get-full-proof";
 import { getMerkleProof } from "./get-merkle-proof";
 import { fetchApprovalRequestMetadata } from "./get-metadata";
+
 export interface WalletConnectRequest extends VerificationRequest {
   code?: string;
 }
@@ -266,7 +268,7 @@ export async function connectWallet({
 
   const meta = await fetchApprovalRequestMetadata(
     sessionRequest.params.request as WalletConnectRequest,
-    // nullifierHash,
+    nullifierHash,
   );
 
   return {
