@@ -31,11 +31,8 @@ const Verification = React.memo(function Verification(props: {
 
   const dismiss = React.useCallback(async () => {
     const { client, request } = props.approval;
-    console.log("client:", client);
-    console.log("request:", request);
     if (client && request) {
       try {
-        console.log("client.reject()");
         await client.reject({
           id: request.id,
           reason: {
@@ -111,9 +108,6 @@ const Verification = React.memo(function Verification(props: {
         await verifyProof(fullProof.proof, fullProof.publicSignals);
 
         // Emits 'No matching key' error, https://github.com/WalletConnect/walletconnect-monorepo/issues/1514
-        console.log("client:", client);
-        console.log("request:", request);
-        console.log("client.respond()");
         await new Promise((r) => setTimeout(r, 1000));
         await client.respond({
           topic: request.topic,
@@ -136,12 +130,9 @@ const Verification = React.memo(function Verification(props: {
           },
         });
       } catch (err) {
-        console.error("catch err");
         console.error(err);
         setVerificationState(VerificationState.Error);
 
-        console.log("actionListener():", request);
-        console.log("client.reject()");
         await client.reject({
           id: request.id,
           reason: {
