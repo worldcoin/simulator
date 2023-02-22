@@ -126,6 +126,7 @@ const Verification = React.memo(function Verification(props: {
                 ["uint256[8]"],
                 [Semaphore.packToSolidityProof(fullProof.proof)],
               ),
+              credential_type: "orb",
             },
           },
         });
