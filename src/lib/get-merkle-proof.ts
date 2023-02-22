@@ -4,7 +4,7 @@ import type { MerkleProof } from "@zk-kit/protocols";
 import { generateMerkleProof } from "@zk-kit/protocols";
 
 export const getMerkleProof = (identity: Identity): MerkleProof => {
-  if (identity.inclusionProof) {
+  if (identity.inclusionProof?.proof) {
     const siblings = identity.inclusionProof.proof
       .flatMap((v) => Object.values(v))
       .map((v) => BigNumber.from(v).toBigInt());

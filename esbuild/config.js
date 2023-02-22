@@ -15,12 +15,22 @@ import { fileURLToPath } from "node:url";
 import postcss from "postcss";
 import tailwindcss from "tailwindcss";
 
+if (!process.env.WALLETCONNECT_PID) {
+  console.error(
+    "\x1b[1m\x1b[5m\x1b[31mWALLETCONNECT_PID\x1b[0m environment variable is required to build this project",
+  );
+  console.error(
+    "Set one either explicitly or create an .env file (see .env.sample)",
+  );
+  process.exit(1);
+}
+
 if (!process.env.INFURA_ID) {
   console.error(
     "\x1b[1m\x1b[5m\x1b[31mINFURA_ID\x1b[0m environment variable is required to build this project",
   );
   console.error(
-    "Set one either explicitely or create an .env file (see .env.sample)",
+    "Set one either explicitly or create an .env file (see .env.sample)",
   );
   process.exit(1);
 }
@@ -141,5 +151,6 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
     global: "window",
     "process.env.INFURA_ID": `"${process.env.INFURA_ID}"`,
     "process.env.SEQUENCER_PASSWORD": `"${process.env.SEQUENCER_PASSWORD}"`,
+    "process.env.WALLETCONNECT_PID": `"${process.env.WALLETCONNECT_PID}"`,
   },
 });

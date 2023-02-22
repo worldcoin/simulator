@@ -1,13 +1,16 @@
 import type { Identity } from "@/types";
+import type { VerificationRequest } from "@/types/metadata";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
-import WalletConnect from "@walletconnect/client";
-import type { ISessionParams } from "@walletconnect/types";
-import type { VerificationRequest } from "@worldcoin/id";
+import Client from "@walletconnect/sign-client";
+import type { SignClientTypes } from "@walletconnect/types";
+import { getSdkError } from "@walletconnect/utils";
+
 import { ErrorCodes } from "@worldcoin/id";
 import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
 import { getFullProof } from "./get-full-proof";
 import { getMerkleProof } from "./get-merkle-proof";
 import { fetchApprovalRequestMetadata } from "./get-metadata";
+
 export interface WalletConnectRequest extends VerificationRequest {
   code?: string;
 }
@@ -19,151 +22,183 @@ export async function connectWallet({
   uri: string;
   identity: Identity;
 }): Promise<{
-  connector: WalletConnect;
-  request: WalletConnectRequest;
+  client: Client;
+  proposal: SignClientTypes.EventArguments["session_proposal"];
+  request: SignClientTypes.EventArguments["session_request"];
   meta: Awaited<ReturnType<typeof fetchApprovalRequestMetadata>>;
   merkleProof: MerkleProof;
   fullProof: SemaphoreFullProof;
 }> {
-  console.log("Initializing WalletConnect with uri:", uri);
   // we don't want persistent sessions
   const STORAGE_KEY = "walletconnect-worldid-check";
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch {}
-  const connector = new WalletConnect({
-    uri,
-    storageId: STORAGE_KEY,
-    storage: {
-      getSession: () => null,
-      setSession: (s) => s,
-      removeSession() {}, // eslint-disable-line @typescript-eslint/no-empty-function
+
+  const client = await Client.init({
+    projectId: process.env.WALLETCONNECT_PID,
+    metadata: {
+      name: "World ID Simulator",
+      description: "The simulator for testing verification with World ID.",
+      url: "https://id.worldcoin.org/test",
+      icons: ["https://worldcoin.org/icons/logo-small.svg"],
     },
   });
-  // connector.on("session_update", (error, _payload) => {
-  //   console.log("EVENT", "session_update");
-  //   if (error) throw error;
-  // });
-  // connector.on("wc_sessionRequest", (error, _payload) => {
-  //   console.log("EVENT", "wc_sessionRequest");
-  //   if (error) throw error;
-  // });
-  // connector.on("wc_sessionUpdate", (error, _payload) => {
-  //   console.log("EVENT", "wc_sessionUpdate");
-  //   if (error) throw error;
-  // });
-  // connector.on("connect", (error, _payload) => {
-  //   console.log("EVENT", "connect");
-  //   if (error) throw error;
-  // });
-  connector.on("disconnect", (error, _payload) => {
-    console.log("EVENT", "disconnect");
-    if (error) throw error;
+
+  client.on("session_proposal", async (event) => {
+    const { acknowledged } = await client.approve({
+      id: event.id,
+      namespaces: {
+        eip155: {
+          accounts: ["eip155:1:0"],
+          methods: ["world_id_v1"],
+          events: ["accountsChanged"],
+        },
+      },
+    });
+
+    await acknowledged();
   });
 
-  // we should immediately receive session request from SDK
-  const sessionRequestPayload = await new Promise<ISessionParams>(
-    (resolve, reject) =>
-      connector.on(
-        "session_request",
-        (error: Error | null, payload: { params: ISessionParams[] }) => {
-          console.log("EVENT", "session_request");
-          if (error) return reject(error);
-          console.log("SESSION_REQUEST", payload.params);
-          resolve(payload.params[0]);
-        },
-      ),
-  );
+  await client.core.pairing.pair({ uri });
 
-  const disconnectSessionOnUnload = () => {
-    if (connector.connected)
-      connector.killSession().catch(console.error.bind(console));
+  const _disconnectSessionOnUnloadPromise = async () => {
+    if (sessionProposal.params.pairingTopic) {
+      await client.disconnect({
+        topic: sessionProposal.params.pairingTopic,
+        reason: getSdkError("USER_DISCONNECTED"),
+      });
+    }
   };
+
+  const disconnectSessionOnUnload = () =>
+    void _disconnectSessionOnUnloadPromise();
+
   window.addEventListener("beforeunload", disconnectSessionOnUnload);
 
-  // we should immediately approve session on connection and expect receive call request from SDK
-  const [callRequestPayload] = (await Promise.all([
-    new Promise((resolve, reject) =>
-      connector.on("call_request", (error: Error | null, payload) => {
-        console.log("EVENT", "call_request");
-        if (error) return reject(error);
-        console.log(payload);
-        resolve(payload);
-      }),
-    ),
-    connector.approveSession({
-      chainId: sessionRequestPayload.chainId ?? connector.chainId,
-      accounts: connector.accounts,
+  // we should immediately receive session request from SDK
+  const sessionProposal = await new Promise<
+    SignClientTypes.EventArguments["session_proposal"]
+  >((resolve) =>
+    client.on("session_proposal", (event) => {
+      resolve(event);
     }),
-  ])) as [WalletConnectRequest, unknown];
+  );
 
-  const rejectRequest = () => {
-    if (connector.connected)
-      connector.rejectRequest({
-        id: callRequestPayload.id,
-        error: {
-          code: -32100,
-          message: ErrorCodes.VerificationRejected,
-        },
-      });
-  };
+  // we should immediately approve session on connection and expect receive call request from SDK
+  const sessionRequest = await new Promise<
+    SignClientTypes.EventArguments["session_request"]
+  >((resolve) =>
+    client.on("session_request", (event) => {
+      resolve(event);
+    }),
+  );
+
   window.removeEventListener("beforeunload", disconnectSessionOnUnload);
 
-  console.log("WalletConnect connected");
-
   // validate method
-  if (callRequestPayload.method !== "wld_worldIDVerification") {
-    console.error("Unknown request method:", callRequestPayload.method);
-    connector.rejectRequest({
-      id: callRequestPayload.id,
-      error: {
+  if (sessionRequest.params.request.method !== "world_id_v1") {
+    console.error(
+      "Unknown request method:",
+      sessionRequest.params.request.method,
+    );
+    await client.reject({
+      id: sessionRequest.id,
+      reason: {
         code: -32601,
         message: "method_not_found",
       },
     });
     await new Promise((resolve) => setTimeout(resolve, 500));
-    if (connector.connected) await connector.killSession();
+    if (sessionProposal.params.pairingTopic) {
+      await client.disconnect({
+        topic: sessionProposal.params.pairingTopic,
+        reason: getSdkError("USER_DISCONNECTED"),
+      });
+    }
     throw new TypeError(
-      `Unsupported request method: ${callRequestPayload.method}`,
+      `Unsupported request method: ${sessionRequest.params.request.method}`,
     );
   }
 
-  // validate signal
-  try {
-    BigInt(callRequestPayload.params[0].signal);
-  } catch (err) {
-    console.error(err);
-    connector.rejectRequest({
-      id: callRequestPayload.id,
-      error: {
-        code: -32602,
-        message: ErrorCodes.InvalidSignal,
-      },
-    });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    if (connector.connected) await connector.killSession();
-    throw err;
-  }
+  const validateSignal = async () => {
+    try {
+      const params = sessionRequest.params.request.params as Record<
+        string,
+        string
+      >[];
+      BigInt(params[0].signal);
+      return params[0].signal;
+    } catch (error) {
+      console.error(error);
+      await client.respond({
+        topic: sessionRequest.topic,
+        response: {
+          id: sessionRequest.id,
+          jsonrpc: "2.0",
+          error: {
+            code: -32602,
+            message: ErrorCodes.InvalidSignal,
+          },
+        },
+      });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (sessionProposal.params.pairingTopic) {
+        await client.disconnect({
+          topic: sessionProposal.params.pairingTopic,
+          reason: getSdkError("USER_DISCONNECTED"),
+        });
+      }
+      throw error;
+    }
+  };
 
-  // validate action ID
-  try {
-    BigInt(callRequestPayload.params[0].action_id);
-  } catch (err) {
-    console.error(err);
-    connector.rejectRequest({
-      id: callRequestPayload.id,
-      error: {
-        code: -32602,
-        message: ErrorCodes.InvalidActionID,
+  const validateExternalNullifier = async () => {
+    try {
+      const params = sessionRequest.params.request.params as Record<
+        string,
+        string
+      >[];
+      BigInt(params[0].external_nullifier);
+      return params[0].external_nullifier;
+    } catch (error) {
+      console.error(error);
+      await client.respond({
+        topic: sessionRequest.topic,
+        response: {
+          id: sessionRequest.id,
+          jsonrpc: "2.0",
+          error: {
+            code: -32602,
+            message: "invalid_app_id", // ErrorCodes.InvalidActionID // TODO: Need to update ErrorCodes in @worldcoin/id
+          },
+        },
+      });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (sessionProposal.params.pairingTopic) {
+        await client.disconnect({
+          topic: sessionProposal.params.pairingTopic,
+          reason: getSdkError("USER_DISCONNECTED"),
+        });
+      }
+      throw error;
+    }
+  };
+
+  const _rejectRequestPromise = async () => {
+    await client.reject({
+      id: sessionRequest.id,
+      reason: {
+        code: -32100,
+        message: ErrorCodes.VerificationRejected,
       },
     });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    if (connector.connected) await connector.killSession();
-    throw err;
-  }
+  };
+
+  const rejectRequest = () => void _rejectRequestPromise();
 
   window.addEventListener("beforeunload", rejectRequest);
-  connector.on("disconnect", () => {
+  client.on("session_delete", () => {
     window.removeEventListener("beforeunload", rejectRequest);
   });
 
@@ -171,8 +206,8 @@ export async function connectWallet({
   const fullProof = await getFullProof(
     identity,
     merkleProof,
-    callRequestPayload.params[0].action_id,
-    callRequestPayload.params[0].signal,
+    await validateExternalNullifier(),
+    await validateSignal(),
   );
   const nullifierHash = abi.encode(
     ["uint256"],
@@ -180,13 +215,14 @@ export async function connectWallet({
   );
 
   const meta = await fetchApprovalRequestMetadata(
-    callRequestPayload,
+    sessionRequest.params.request as WalletConnectRequest,
     nullifierHash,
   );
 
   return {
-    connector,
-    request: callRequestPayload,
+    client,
+    proposal: sessionProposal,
+    request: sessionRequest,
     meta,
     merkleProof,
     fullProof,
