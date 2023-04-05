@@ -12,7 +12,14 @@
     "yaml",
     "json"
   ],
-  "ignorePaths": [".gitignore", "node_modules", "semaphore", "dist", ".husky"],
+  "ignorePaths": [
+    ".gitignore",
+    "node_modules",
+    "semaphore",
+    "dist",
+    ".husky",
+    "pnpm-lock.yaml"
+  ],
   "words": [
     "bbbec",
     "binded",
@@ -26,6 +33,7 @@
     "keccak",
     "merkle",
     "Nullifer",
+    "pnpm",
     "qrcode",
     "sippl",
     "toastify",
