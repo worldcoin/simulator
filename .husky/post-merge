@@ -2,7 +2,7 @@
 . "$(dirname "$0")/_/husky.sh"
 
 function warning {
-  echo $(tput setaf 1)$(tput bold)WARNING:$(tput sgr0)$(tput setaf 3) $1
+  echo $(tput setaf 1)$(tput bold)WARNING:$(tput sgr0)$(tput setaf 3) "$1"
   echo $(tput sgr0)
 }
 
@@ -10,9 +10,9 @@ function changed {
   git diff --name-only HEAD@{2} HEAD | grep "^$1" >/dev/null 2>&1
 }
 
-if changed 'yarn.lock'; then
-  warning "yarn.lock has changed, running 'yarn'..."
-  yarn --frozen-lockfile
+if changed 'pnpm-lock.yaml'; then
+  warning "pnpm-lock.yaml has changed, running 'pnpm install'..."
+  pnpm install --frozen-lockfile
 fi
 
 exit 0
