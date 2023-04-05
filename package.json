@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@walletconnect/sign-client": "^2.6.1",
+    "@walletconnect/utils": "^2.6.1",
     "@worldcoin/id": "^0.8.0",
     "@zk-kit/identity": "^1.4.1",
     "@zk-kit/protocols": "^1.11.1",
@@ -27,6 +29,7 @@
     "@types/react-dom": "^18.0.3",
     "@typescript-eslint/eslint-plugin": "5.20.0",
     "@typescript-eslint/parser": "5.20.0",
+    "@walletconnect/types": "^2.6.1",
     "autoprefixer": "^10.4.5",
     "browserslist": "^4.20.3",
     "cspell": "^6.8.0",

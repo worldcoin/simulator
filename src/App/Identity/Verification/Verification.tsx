@@ -164,7 +164,7 @@ const Verification = React.memo(function Verification(props: {
       {verificationState === VerificationState.Initial && (
         <Verify
           meta={props.approval.meta}
-          onDismiss={dismiss}
+          onDismiss={() => void dismiss()}
           onVerify={verify}
         />
       )}
@@ -174,7 +174,7 @@ const Verification = React.memo(function Verification(props: {
       {verificationState === VerificationState.AlreadyVerified && (
         <AlreadyVerified
           onContinue={verify}
-          onDismiss={dismiss}
+          onDismiss={() => void dismiss()}
           description={props.approval.meta?.description}
         />
       )}
@@ -182,13 +182,13 @@ const Verification = React.memo(function Verification(props: {
       {verificationState === VerificationState.Error && (
         <Error
           onTryAgain={handleReset}
-          onDismiss={dismiss}
+          onDismiss={() => void dismiss()}
         />
       )}
 
       {verificationState === VerificationState.Success && (
         <Success
-          onDismiss={dismiss}
+          onDismiss={() => void dismiss()}
           description={props.approval.meta?.description}
         />
       )}

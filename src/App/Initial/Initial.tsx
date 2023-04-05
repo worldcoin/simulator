@@ -99,7 +99,7 @@ const Initial = React.memo(function Initial(props: {
       return console.error("Provider was not created");
     }
     disconnect();
-  }, [isConnected]);
+  }, [disconnect, isConnected]);
 
   return (
     <div

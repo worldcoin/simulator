@@ -15,10 +15,7 @@ const SEQUENCER_ENDPOINT: Record<Environment, string> = {
 };
 
 const getUrl = (pathname: string, env: Environment) =>
-  new URL(
-    pathname,
-    SEQUENCER_ENDPOINT[env] ?? SEQUENCER_ENDPOINT[Environment.STAGING],
-  );
+  new URL(pathname, SEQUENCER_ENDPOINT[env]);
 
 async function postRequest<T = unknown>(
   endpoint: string,

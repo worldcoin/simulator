@@ -128,7 +128,7 @@ export const IdentityVerification = React.memo(
           {!submitSuccess && (
             <Button
               isDisabled={loading}
-              onClick={verifyHandle}
+              onClick={() => void verifyHandle()}
               type="button"
               className="bg-4940e0 font-sora uppercase text-ffffff disabled:opacity-30 dark:shadow-[0px_10px_20px_rgba(83,67,212,0.2),inset_0px_-1px_1px_rgba(0,0,0,0.3),inset_0px_1px_1px_rgba(255,255,255,0.2)]"
             >
