@@ -1,9 +1,9 @@
 import type { WalletConnectFlow } from "@/types";
 import type { Identity } from "@/types/identity";
-import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import { ErrorCodes } from "@worldcoin/id";
 import type { Proof, SemaphorePublicSignals } from "@zk-kit/protocols";
 import { Semaphore } from "@zk-kit/protocols";
+import { defaultAbiCoder as abi } from "ethers/lib/utils";
 import React from "react";
 import verificationKey from "semaphore/verification_key.json";
 import { AlreadyVerified } from "./AlreadyVerified";
@@ -126,7 +126,7 @@ const Verification = React.memo(function Verification(props: {
                 ["uint256[8]"],
                 [Semaphore.packToSolidityProof(fullProof.proof)],
               ),
-              credential_type: 'orb',
+              credential_type: "orb",
             },
           },
         });

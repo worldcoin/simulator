@@ -1,7 +1,7 @@
 import type { Identity } from "@/types";
-import { BigNumber } from "@ethersproject/bignumber";
 import type { MerkleProof } from "@zk-kit/protocols";
 import { generateMerkleProof } from "@zk-kit/protocols";
+import { BigNumber } from "ethers";
 
 export const getMerkleProof = (identity: Identity): MerkleProof => {
   if (identity.inclusionProof?.proof) {

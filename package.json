@@ -1,26 +1,20 @@
 {
   "dependencies": {
-    "@ethersproject/abi": "5.6.1",
-    "@ethersproject/bignumber": "^5.7.0",
-    "@ethersproject/providers": "5.6.4",
-    "@ethersproject/solidity": "^5.6.0",
-    "@walletconnect/client": "^1.8.0",
-    "@walletconnect/sign-client": "^2.2.0",
-    "@walletconnect/types": "^2.2.1",
-    "@walletconnect/utils": "^2.2.1",
-    "@walletconnect/web3-provider": "^1.7.8",
     "@worldcoin/id": "^0.8.0",
     "@zk-kit/identity": "^1.4.1",
     "@zk-kit/protocols": "^1.11.1",
     "blockies-ts": "^1.0.0",
     "classnames": "^2.3.1",
+    "connectkit": "^1.2.2",
+    "ethers": "^5",
     "qr-scanner": "^1.4.1",
     "react": "^18.1.0",
     "react-dom": "^18.0.0",
     "react-popper-tooltip": "^4.3.1",
     "react-router-dom": "^6.3.0",
     "react-toastify": "^9.0.8",
-    "usehooks-ts": "^2.9.1"
+    "usehooks-ts": "^2.9.1",
+    "wagmi": "^0.12.9"
   },
   "devDependencies": {
     "@babel/core": "^7.17.9",
