@@ -29,7 +29,7 @@ enum InputMode {
 }
 
 export const encodeIdentityCommitment = (
-  identityCommitment: BigInt,
+  identityCommitment: bigint,
 ): string => {
   return identityCommitment.toString(16).padStart(64, "0");
 };

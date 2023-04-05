@@ -10,7 +10,7 @@ export const parseWorldIDQRCode = (data: string): ParseWorldIDQRCodeOutput => {
   const uri = parsedUrl.searchParams.get("w");
   const wcRegex = /^wc:[A-Za-z0-9]+@2/;
 
-  if (!uri || !uri.match(wcRegex)) {
+  if (!uri?.match(wcRegex)) {
     return { valid: false };
   }
 
