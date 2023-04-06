@@ -1,29 +1,9 @@
-import { WalletProviderContext } from "@/common/contexts/WalletProvider/WalletProvider";
-import { validateImageUrl } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import unknownSvg from "@static/unknown-wallet.svg";
 import React from "react";
 
 export const Signature = React.memo(function Signature() {
-  const providerContext = React.useContext(WalletProviderContext);
   const [icon, setIcon] = React.useState<string>("");
-
-  const provider = React.useMemo(
-    () => providerContext.provider,
-    [providerContext.provider],
-  );
-
-  React.useEffect(() => {
-    if (provider?.walletMeta?.icons && provider.walletMeta.icons.length > 0) {
-      const result = provider.walletMeta.icons.find((iconUrl) => {
-        return validateImageUrl(iconUrl);
-      });
-
-      if (result) {
-        return setIcon(result);
-      }
-    }
-  }, [provider]);
 
   const onError = React.useCallback(() => {
     console.error("Unable to set wallet icon");
@@ -33,12 +13,8 @@ export const Signature = React.memo(function Signature() {
   return (
     <div className="grid gap-y-12">
       <p className="text-center text-858494">
-        We’ve established a connection to your{" "}
-        <span className="text-4940e0">
-          {provider?.walletMeta?.name ?? "wallet"}
-        </span>
-        , now please confirm the signature request so we can generate your World
-        ID identity.
+        We’ve established a connection to your wallet, now please confirm the
+        signature request so we can generate your World ID identity.
       </p>
 
       <div className="grid w-full rounded-12 bg-f1f5f8 p-4 dark:bg-3c4040">

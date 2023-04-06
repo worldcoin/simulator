@@ -29,7 +29,7 @@ enum InputMode {
 }
 
 export const encodeIdentityCommitment = (
-  identityCommitment: BigInt,
+  identityCommitment: bigint,
 ): string => {
   return identityCommitment.toString(16).padStart(64, "0");
 };
@@ -335,7 +335,7 @@ const Identity = React.memo(function Identity(props: {
           <Verification
             approval={approval}
             identity={props.identity}
-            dismiss={dismiss}
+            dismiss={() => void dismiss()}
           />
         )}
       </Modal>

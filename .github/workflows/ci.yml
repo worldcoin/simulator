@@ -12,25 +12,29 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: "yarn"
+          cache: "pnpm"
 
-      - run: yarn
+      - run: pnpm install
 
-      - run: yarn lint
+      - run: pnpm lint
 
       - name: Check Typescript
-        run: yarn typescript:check
+        run: pnpm typescript:check
 
       - run: npx prettier --check src/**
 
       - uses: streetsidesoftware/cspell-action@v1
 
-      - run: yarn build
+      - run: pnpm build
         env:
           INFURA_ID: "unsafe_test_id"
           WALLETCONNECT_PID: "unsafe_test_pid"
 
-      # - run: yarn test --if-present
+      # - run: pnpm test --if-present

@@ -1,16 +1,16 @@
 import Button from "@/common/Button/Button";
-import { WalletProviderContext } from "@/common/contexts/WalletProvider/WalletProvider";
 import { useIdentityStorage } from "@/common/hooks/use-identity-storage";
 import { Icon } from "@/common/Icon";
 import { inclusionProof } from "@/lib/sequencer-service";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
-import { Web3Provider } from "@ethersproject/providers";
 import spinnerSvg from "@static/spinner.svg";
 import { utils } from "@worldcoin/id";
 import { Strategy, ZkIdentity } from "@zk-kit/identity";
 import cn from "classnames";
-import React, { useContext } from "react";
+import { useModal } from "connectkit";
+import React from "react";
+import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 import { encodeIdentityCommitment } from "../Identity/Identity";
 import { Cards } from "./Cards/Cards";
 import { Signature } from "./Signature/Signature";
@@ -22,13 +22,24 @@ const Initial = React.memo(function Initial(props: {
   identity: IdentityType;
   setIdentity: React.Dispatch<React.SetStateAction<IdentityType>>;
 }) {
-  const providerContext = useContext(WalletProviderContext);
   const { storeIdentity } = useIdentityStorage();
-
-  const provider = React.useMemo(
-    () => providerContext.provider,
-    [providerContext.provider],
-  );
+  const { setOpen: setConnectModalOpen } = useModal();
+  const { isConnected } = useAccount();
+  const { disconnect } = useDisconnect({
+    onSuccess: () => {
+      props.setPhase(Phase.Initial);
+    },
+  });
+  const { signMessage } = useSignMessage({
+    message: "Signature request to generate seed for World ID identity.",
+    onSuccess: (signature) => {
+      const identitySeed = utils.keccak256(signature);
+      return updateIdentity(new ZkIdentity(Strategy.MESSAGE, identitySeed));
+    },
+    onError: (error) => {
+      console.error("Error while connecting to identity wallet:", error);
+    },
+  });
 
   const updateIdentity = React.useCallback(
     async (newIdentity: ZkIdentity) => {
@@ -67,46 +78,14 @@ const Initial = React.memo(function Initial(props: {
   );
 
   React.useEffect(() => {
-    //  Enable session (triggers QR Code modal)
-    provider
-      ?.enable()
-      .then(() => {
-        props.setPhase(Phase.Signature);
-        //  Create Web3 instance
-        const web3provider = new Web3Provider(provider);
-        const signer = web3provider.getSigner();
-        const message =
-          "Signature request to generate seed for World ID identity.";
-        return signer.signMessage(message);
-      })
-      .then((signature) => {
-        const identitySeed = utils.keccak256(signature);
+    if (!isConnected) return;
 
-        return updateIdentity(new ZkIdentity(Strategy.MESSAGE, identitySeed));
-      })
-      .catch((error) =>
-        console.error("Error while connecting to identity wallet:", error),
-      )
-      .finally(() => {
-        provider.qrcodeModal.close();
-
-        // we should wait for some event and then disconnect, to avoid error on the client
-        // but for now we will just wait 2 seconds
-        const cleanup = setTimeout(() => {
-          if (provider.connected)
-            provider.disconnect().catch(console.error.bind(console));
-        }, 2000);
-        provider.connector.on("disconnect", () => {
-          console.log("Provider disconnected by user");
-          clearTimeout(cleanup);
-        });
-      });
-  }, [props, provider, updateIdentity]);
+    signMessage();
+  }, [isConnected, signMessage]);
 
   const connectWallet = React.useCallback(() => {
-    //  Create WalletConnect Provider
-    providerContext.createProvider();
-  }, [providerContext]);
+    if (!isConnected) setConnectModalOpen(true);
+  }, [isConnected, setConnectModalOpen]);
 
   const createIdentity = () => {
     const identity = new ZkIdentity(Strategy.RANDOM);
@@ -116,16 +95,11 @@ const Initial = React.memo(function Initial(props: {
   };
 
   const goBack = React.useCallback(() => {
-    if (!provider) {
+    if (!isConnected) {
       return console.error("Provider was not created");
     }
-    provider.disconnect().catch(console.error.bind(console));
-
-    provider.connector.on("disconnect", () => {
-      console.log("Provider disconnected by user");
-      props.setPhase(Phase.Initial);
-    });
-  }, [props, provider]);
+    disconnect();
+  }, [disconnect, isConnected]);
 
   return (
     <div
