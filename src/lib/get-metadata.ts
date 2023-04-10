@@ -32,7 +32,9 @@ export async function fetchApprovalRequestMetadata(
   };
 
   try {
-    const url = new URL(`https://dev2.worldcoin.org/api/v1/precheck/${app_id}`);
+    const url = new URL(
+      `https://developer.worldcoin.org/api/v1/precheck/${app_id}`,
+    );
     const body: ActionBody = {
       action,
       external_nullifier,
