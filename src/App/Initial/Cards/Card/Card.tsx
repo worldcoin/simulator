@@ -1,74 +1,42 @@
-import { Icon } from "@/common/Icon";
-import Tooltip from "@/common/Tooltip/Toolip";
-import infoSvg from "@static/info.svg";
-import cn from "classnames";
-import type { ReactNode } from "react";
 import React from "react";
-import { usePopperTooltip } from "react-popper-tooltip";
+import Typography from "@/common/Typography/Typography";
 
 const Card = React.memo(function Card(props: {
-  heading: string;
-  text: ReactNode | string;
-  className?: string;
-  tooltipText?: string;
-  icon: string;
+  number: number;
+  title: string;
+  text: string;
+  hint?: string;
 }) {
-  const {
-    getArrowProps,
-    getTooltipProps,
-    setTooltipRef,
-    setTriggerRef,
-    visible,
-  } = usePopperTooltip({
-    placement: "bottom",
-    offset: [0, 8],
-  });
-
   return (
-    <div
-      className={cn("grid grid-cols-auto/1fr gap-y-1 gap-x-4", props.className)}
-    >
-      <Icon
-        data={props.icon}
-        className="row-span-2 h-8 w-8"
-        noMask
-      />
-      <h2 className="text-16 font-semibold text-183c4a dark:text-ffffff">
-        {props.heading}
-      </h2>
-
-      <div className="relative text-14 leading-5 tracking-[-0.01em] text-777e90 dark:text-858494">
-        {props.text}
-        {props.tooltipText && (
-          <span
-            data-tip
-            data-for="tooltip"
-            className="relative pl-5"
-            ref={setTriggerRef}
-          >
-            <Icon
-              data={infoSvg}
-              className={cn(
-                "absolute top-[2px] left-[2px] h-4 w-4 rotate-180",
-                { "text-191c20": visible },
-              )}
-            />
-          </span>
-        )}
+    <div className="grid grid-cols-auto/1fr gap-x-4 gap-y-1">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-f0f0fd font-sora text-16 font-semibold text-4940e0">
+        {props.number}
       </div>
 
-      {visible && (
-        <Tooltip
-          ref={setTooltipRef}
-          getTooltipProps={getTooltipProps({ className: "relative px-4 z-50" })}
-          getArrowProps={getArrowProps({
-            className: "absolute bg-transparent w-4 h-4 -top-1.5",
-          })}
-          backgroundColor="bg-191c20"
-          className="text-ffffff"
-          text={props.tooltipText ?? ""}
-        />
-      )}
+      <div>
+        <Typography
+          variant="s1"
+          className="pt-2 !leading-4 text-gray-900"
+        >
+          {props.title}
+        </Typography>
+
+        <Typography
+          variant="b3"
+          className="mt-2 text-gray-500"
+        >
+          {props.text}
+        </Typography>
+
+        {props.hint && (
+          <Typography
+            variant="b3"
+            className="mt-2 italic text-gray-400"
+          >
+            {props.hint}
+          </Typography>
+        )}
+      </div>
     </div>
   );
 });

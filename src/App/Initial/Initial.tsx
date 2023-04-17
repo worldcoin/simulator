@@ -14,6 +14,7 @@ import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 import { encodeIdentityCommitment } from "../Identity/Identity";
 import { Cards } from "./Cards/Cards";
 import { Signature } from "./Signature/Signature";
+import Typography from "@/common/Typography/Typography";
 
 const Initial = React.memo(function Initial(props: {
   phase: Phase;
@@ -105,32 +106,28 @@ const Initial = React.memo(function Initial(props: {
     <div
       className={cn("grid content-between px-2 pb-6 xs:pb-0", props.className)}
     >
-      <div className={cn("grid gap-y-6")}>
-        <h1
-          className={cn(
-            "z-10 text-center font-sora text-30 font-semibold text-183c4a dark:text-ffffff",
-            { "px-14 pb-6": props.phase === Phase.Initial },
-          )}
+      <div className={cn("grid")}>
+        <Typography
+          className="z-10 text-center text-gray-900 dark:text-ffffff"
+          variant="h2"
         >
           {props.phase === Phase.Initial && "World ID simulator"}
           {props.phase === Phase.Signature && "Confirm the signature request"}
-        </h1>
+        </Typography>
 
         {props.phase === Phase.Initial && <Cards />}
         {props.phase === Phase.Signature && <Signature />}
       </div>
 
-      <div className="grid justify-items-center gap-y-6">
+      <div className="grid justify-items-center gap-y-4">
         <Button
+          variant="primary"
+          fullWidth
           onClick={props.phase === Phase.Initial ? connectWallet : () => null}
           type="button"
           isDisabled={props.phase === Phase.Signature}
-          className={cn(
-            "w-full bg-4940e0 font-sora text-16 font-semibold text-ffffff",
-            { "py-4": props.phase === Phase.Signature },
-          )}
         >
-          {props.phase === Phase.Initial && "CONNECT WALLET"}
+          {props.phase === Phase.Initial && "Connect Wallet"}
           {props.phase === Phase.Signature && (
             <Icon
               data={spinnerSvg}
@@ -140,13 +137,21 @@ const Initial = React.memo(function Initial(props: {
         </Button>
 
         <Button
+          variant="secondary"
+          fullWidth
+        >
+          Verify with Phone Number
+        </Button>
+
+        <Button
+          className="h-10"
+          fullWidth
           onClick={
             {
               [`${Phase.Initial}`]: createIdentity,
               [`${Phase.Signature}`]: goBack,
             }[props.phase]
           }
-          className="!p-0 text-18 font-medium text-858494"
         >
           {props.phase === Phase.Initial && "Create temporary identity"}
           {props.phase === Phase.Signature && "Cancel"}

@@ -64,6 +64,12 @@ module.exports = {
     },
 
     colors: {
+      gray: {
+        200: "#EBECEF",
+        400: "#9BA3AE",
+        500: "#657080",
+        900: "#191C20",
+      },
       ...mirrorHexColors([
         "#000000",
         "#0c0e10",
@@ -83,6 +89,7 @@ module.exports = {
         "#dadada",
         "#dde7ea",
         "#f0edf9",
+        "#f0f0fd",
         "#f1f2f2",
         "#f1f5f8",
         "#f66751",

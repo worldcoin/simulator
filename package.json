@@ -55,6 +55,7 @@
     "prettier-plugin-organize-attributes": "^0.0.5",
     "prettier-plugin-organize-imports": "^2.3.4",
     "prettier-plugin-tailwindcss": "0.1.10",
+    "react-polymorphic-types": "^2.0.0",
     "stylelint": "^14.8.1",
     "stylelint-config-idiomatic-order": "^8.1.0",
     "stylelint-config-prettier": "^9.0.3",
