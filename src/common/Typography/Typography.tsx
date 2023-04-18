@@ -5,7 +5,7 @@ import cn from "classnames";
 type TypographyProps<T extends React.ElementType = "div"> =
   PolymorphicPropsWithoutRef<
     {
-      variant: "h1" | "h2" | "s1";
+      variant: "b3" | "h1" | "h2" | "s1";
     },
     T
   >;
