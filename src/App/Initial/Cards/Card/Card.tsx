@@ -15,14 +15,14 @@ const Card = React.memo(function Card(props: {
 
       <div>
         <Typography
-          variant="s1"
+          variant="subtitle1"
           className="pt-2 !leading-4 text-gray-900"
         >
           {props.title}
         </Typography>
 
         <Typography
-          variant="b3"
+          variant="body3"
           className="mt-2 text-gray-500"
         >
           {props.text}
@@ -30,7 +30,7 @@ const Card = React.memo(function Card(props: {
 
         {props.hint && (
           <Typography
-            variant="b3"
+            variant="body3"
             className="mt-2 italic text-gray-400"
           >
             {props.hint}
