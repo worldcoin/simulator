@@ -1,5 +1,5 @@
-import { useIdentityStorage } from "@/common/hooks";
 import { Icon } from "@/common/Icon";
+import { useIdentityStorage } from "@/common/hooks";
 import { inclusionProof } from "@/lib/sequencer-service";
 import type { Identity as IdentityType } from "@/types";
 import { Phase } from "@/types";
@@ -123,8 +123,6 @@ const App = React.memo(function App() {
           "h-full w-full p-4 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-183c4a",
           "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
           "gap-y-3 bg-ffffff transition duration-500 dark:bg-0c0e10 xs:[zoom:.9] md:[zoom:initial]",
-          { "xs:grid-rows-auto/1fr/auto": phase !== Phase.Identity },
-          { "xs:grid-rows-auto/1fr": phase === Phase.Identity },
         )}
       >
         <header className="z-10 grid grid-cols-1fr/auto px-4">
@@ -182,13 +180,6 @@ const App = React.memo(function App() {
             setVerificationSkipped={setVerificationSkipped}
           />
         )}
-
-        <hr
-          className={cn(
-            "mb-2 hidden h-1 w-full max-w-[134px] justify-self-center rounded-full border-none bg-000000/20",
-            { "xs:block": phase !== Phase.Identity },
-          )}
-        />
       </section>
 
       <ToastContainer

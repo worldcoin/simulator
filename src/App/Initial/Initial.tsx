@@ -1,6 +1,7 @@
 import Button from "@/common/Button/Button";
-import { useIdentityStorage } from "@/common/hooks/use-identity-storage";
 import { Icon } from "@/common/Icon";
+import Typography from "@/common/Typography/Typography";
+import { useIdentityStorage } from "@/common/hooks/use-identity-storage";
 import { inclusionProof } from "@/lib/sequencer-service";
 import { Phase } from "@/types/common";
 import type { Identity as IdentityType } from "@/types/identity";
@@ -14,7 +15,6 @@ import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 import { encodeIdentityCommitment } from "../Identity/Identity";
 import { Cards } from "./Cards/Cards";
 import { Signature } from "./Signature/Signature";
-import Typography from "@/common/Typography/Typography";
 
 const Initial = React.memo(function Initial(props: {
   phase: Phase;
@@ -104,7 +104,10 @@ const Initial = React.memo(function Initial(props: {
 
   return (
     <div
-      className={cn("grid content-between px-2 pb-6 xs:pb-0", props.className)}
+      className={cn(
+        "grid content-between gap-y-14 px-2 pb-6 xs:pb-0",
+        props.className,
+      )}
     >
       <div className={cn("grid")}>
         <Typography
