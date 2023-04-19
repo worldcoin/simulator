@@ -143,6 +143,7 @@ export default /** @type {import('esbuild').BuildOptions} */ ({
       copyWithFolder: false,
     }),
   ],
+  external: ["@zxing/library"],
   sourcemap: true,
   format: "esm",
   splitting: true,
