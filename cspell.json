@@ -41,6 +41,7 @@
     "wagmi",
     "walletconnect",
     "worldid",
-    "zkey"
+    "zkey",
+    "zxing"
   ]
 }

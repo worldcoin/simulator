@@ -1,6 +1,6 @@
 import Modal from "@/App/Identity/Modal/Modal";
 import QrInput from "@/App/Identity/QrInput/QrInput";
-import QrScanner from "@/App/Identity/QrScanner/QrScanner";
+import QrScanner from "@/App/Identity/QrScanner";
 import { GradientButton } from "@/common/GradientButton/GradientButton";
 import { Icon } from "@/common/Icon";
 import { connectWallet } from "@/lib/init-walletconnect";
@@ -306,25 +306,29 @@ const Identity = React.memo(function Identity(props: {
         />
       </Modal>
 
+      {isScanModalVisible && inputMode === InputMode.Scan && (
+        <QrScanner
+          className="z-10"
+          onScanSuccess={applyURL}
+          scanConstraints={{
+            top: "12%",
+            bottom: "36%",
+          }}
+          onClose={() => setIsScanModalVisible(false)}
+        />
+      )}
+
       <Modal
-        isVisible={isScanModalVisible}
+        isVisible={isScanModalVisible && inputMode === InputMode.Manual}
         setIsVisible={setIsScanModalVisible}
         className={cn("!gap-y-4 px-4 !pb-3.5", {
           "!h-auto": isScanModalVisible && inputMode === InputMode.Manual,
         })}
       >
-        {isScanModalVisible && inputMode === InputMode.Scan && (
-          <QrScanner
-            setIsModalVisible={setIsScanModalVisible}
-            applyURL={applyURL}
-          />
-        )}
-        {isScanModalVisible && inputMode === InputMode.Manual && (
-          <QrInput
-            setIsModalVisible={setIsScanModalVisible}
-            applyURL={applyURL}
-          />
-        )}
+        <QrInput
+          setIsModalVisible={setIsScanModalVisible}
+          applyURL={applyURL}
+        />
       </Modal>
 
       <Modal
