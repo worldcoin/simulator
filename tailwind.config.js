@@ -53,6 +53,24 @@ module.exports = {
     },
 
     colors: {
+      gray: {
+        100: "#F3F4F5",
+        400: "#9BA3AE",
+      },
+      icons: {
+        green: {
+          DEFAULT: "#00C313",
+          secondary: "#EBFAEC",
+        },
+        orange: {
+          DEFAULT: "#FF6848",
+          secondary: "#FFF3F0",
+        },
+        yellow: {
+          DEFAULT: "#FFC700",
+          secondary: "#FFF9E5",
+        }
+      },
       ...mirrorHexColors([
         "#000000",
         "#0c0e10",
