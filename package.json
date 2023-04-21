@@ -2,6 +2,9 @@
   "name": "simulator",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "18"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build && workbox generateSW workbox-config.cjs",
@@ -34,6 +37,7 @@
     "wagmi": "^0.12.12"
   },
   "devDependencies": {
+    "@semaphore-protocol/identity": "^3.7.0",
     "@types/node": "18.15.13",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
