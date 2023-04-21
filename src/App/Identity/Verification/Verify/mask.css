@@ -1,7 +1,0 @@
-.mask {
-  mask: url("@/static/hexagon.svg") center no-repeat;
-}
-
-.mask-border {
-  mask: url("@/static/hex-border.svg") center no-repeat;
-}
