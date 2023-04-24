@@ -1,8 +1,8 @@
 import type { Identity } from "@/types";
-import { Strategy, ZkIdentity } from "@zk-kit/identity";
+import * as ZKP from "@zk-kit/identity";
 
 type RawIdentity = {
-  ZkIdentity: ZkIdentity;
+  ZkIdentity: ZKP.ZkIdentity;
   id: string;
 };
 
@@ -23,8 +23,8 @@ export function useIdentityStorage() {
 
       const parsedIdentity = JSON.parse(storedIdentity) as StoredIdentity;
 
-      const parsedZkIdentity = new ZkIdentity(
-        Strategy.SERIALIZED,
+      const parsedZkIdentity = new ZKP.ZkIdentity(
+        ZKP.Strategy.SERIALIZED,
         parsedIdentity.ZkIdentity,
       );
 

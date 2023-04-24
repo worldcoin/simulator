@@ -1,6 +1,7 @@
+"use client";
 import { ConnectKitProvider, getDefaultClient } from "connectkit";
 import React from "react";
-import { createClient, WagmiConfig } from "wagmi";
+import { WagmiConfig, createClient } from "wagmi";
 
 const client = createClient(
   getDefaultClient({

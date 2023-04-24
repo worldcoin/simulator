@@ -1,7 +1,10 @@
 import type { Identity } from "@/types";
 import type { MerkleProof } from "@zk-kit/protocols";
-import { generateMerkleProof } from "@zk-kit/protocols";
 import { BigNumber } from "ethers";
+
+// FIXME
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+const { generateMerkleProof } = require("@zk-kit/protocols");
 
 export const getMerkleProof = (identity: Identity): MerkleProof => {
   if (identity.inclusionProof?.proof) {
@@ -25,6 +28,7 @@ export const getMerkleProof = (identity: Identity): MerkleProof => {
   console.warn(
     "Identity inclusion Merkle proof was not present, using dummy proof. Smart contract will reject identity. Use only to test failure use case.",
   );
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
   return generateMerkleProof(
     20,
     BigInt(0),

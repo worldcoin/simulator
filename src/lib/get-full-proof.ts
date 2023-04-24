@@ -5,7 +5,18 @@ import type {
   SemaphoreWitness,
   StrBigInt,
 } from "@zk-kit/protocols";
-import { Semaphore } from "@zk-kit/protocols";
+
+// FIXME
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+const { Semaphore } = require("@zk-kit/protocols");
+
+/**
+{
+  MerkleProof,
+  SemaphoreFullProof,
+  SemaphoreWitness,
+  StrBigInt,
+}*/
 
 /**
  * Creates a Semaphore witness for the Semaphore ZK proof.
@@ -53,5 +64,6 @@ export const getFullProof = async (
     signal, // Encoding & hashing happens on the widget
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   return await Semaphore.genProof(witness, wasmFilePath, finalZkeyPath);
 };
