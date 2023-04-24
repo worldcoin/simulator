@@ -19,11 +19,18 @@
   "[xml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "prettier.documentSelectors": ["**/*.svg"],
+  "prettier.documentSelectors": [
+    "**/*.svg"
+  ],
   "eslint.options": {
     "cache": true,
     "reportUnusedDisableDirectives": "error"
   },
   "css.validate": false,
-  "testExplorer.useNativeTesting": true
+  "testExplorer.useNativeTesting": true,
+  "cSpell.words": [
+    "Merkle"
+  ],
+  "typescript.tsdk": "node_modules/.pnpm/typescript@5.0.4/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }

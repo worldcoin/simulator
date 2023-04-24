@@ -1,4 +1,4 @@
-import cn from "classnames";
+import clsx from "clsx";
 import type { CSSProperties } from "react";
 import React from "react";
 
@@ -17,7 +17,7 @@ export const GradientButton = React.memo(function GradientButton(props: {
   return (
     <button
       onClick={props.onClick}
-      className={cn(
+      className={clsx(
         "rounded-12 p-0.5 leading-5",
         "bg-[linear-gradient(var(--bgColor,_#ffffff),var(--bgColor,_#ffffff)),_linear-gradient(to_right,#FF6848,#4940E0)]",
         "bg-origin-border transition-opacity [background-clip:content-box,_border-box]",
@@ -30,7 +30,7 @@ export const GradientButton = React.memo(function GradientButton(props: {
     >
       <div className="flex h-full w-full items-center justify-center rounded-10 bg-ffffff dark:bg-191c20">
         <span
-          className={cn(
+          className={clsx(
             "font-sora font-semibold uppercase",
             {
               "bg-[linear-gradient(to_right,#FF6848,#4940E0)] bg-clip-text text-transparent":
