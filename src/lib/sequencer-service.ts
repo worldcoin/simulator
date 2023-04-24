@@ -5,12 +5,13 @@ type EncodedCommitment = string; // this should be a 64-padded hex-string
 const SEQUENCER_PASSWORD = process.env.SEQUENCER_PASSWORD;
 
 interface InclusionProofResponse {
+  status: string;
   root: EncodedCommitment;
   proof: Record<"Left" | "Right", string>[];
 }
 
 const SEQUENCER_ENDPOINT: Record<Environment, string> = {
-  [Environment.STAGING]: "https://signup.stage-crypto.worldcoin.dev/",
+  [Environment.STAGING]: "https://signup-v2.stage-crypto.worldcoin.dev/",
   [Environment.PRODUCTION]: "https://signup.crypto.worldcoin.dev/",
 };
 
@@ -28,7 +29,7 @@ async function postRequest<T = unknown>(
   }
   const res = await fetch(getUrl(endpoint, env).toString(), {
     method: "POST",
-    body: JSON.stringify([1, identityCommitment]),
+    body: JSON.stringify({ identityCommitment }),
     headers: {
       "Content-Type": "application/json",
       ...(authenticateRequest
@@ -36,10 +37,11 @@ async function postRequest<T = unknown>(
         : {}),
     },
   });
-  if (!res.ok)
+  if (!res.ok) {
     throw new TypeError(
       `Failed to call ${endpoint} [${res.status}]: ${res.statusText}`,
     );
+  }
   return (await res.json()) as Promise<T>;
 }
 
