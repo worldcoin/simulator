@@ -63,6 +63,8 @@ module.exports = {
         "#3c424b",
         "#4940e0",
         "#5743d6",
+        "#657080",
+        "#7357f5",
         "#777e90",
         "#858494",
         "#9ba3ae",
@@ -71,6 +73,7 @@ module.exports = {
         "#cfdce1",
         "#d1d3d4",
         "#d1dbe1",
+        "#d9d9d9",
         "#dadada",
         "#dde7ea",
         "#f0edf9",
@@ -171,6 +174,8 @@ module.exports = {
     },
 
     fontSize: {
+      5: ["calc(5 * 1rem / 16)", { lineHeight: "6px" }],
+      7: ["calc(7 * 1rem / 16)", { lineHeight: "8px" }],
       10: "calc(10 * 1rem / 16)",
       11: "calc(11 * 1rem / 16)",
       12: "calc(12 * 1rem / 16)",

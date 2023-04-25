@@ -6,6 +6,8 @@ const icons = [
   "airdrop",
   "avatar",
   "battery",
+  "bead-verified",
+  "bead-not-verified",
   "camera-disallow",
   "card-question",
   "check-badge",

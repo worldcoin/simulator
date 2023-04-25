@@ -1,15 +1,15 @@
-.icon {
+.icon:global {
   contain: strict;
 }
 
-.icon:not(.no-mask) {
+.icon:global:not(.no-mask) {
   mask-image: var(--image);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
 }
 
-.icon.no-mask {
+.icon:global:is(.no-mask) {
   background-image: var(--image);
   background-position: center;
   background-repeat: no-repeat;
