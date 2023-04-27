@@ -31,6 +31,9 @@ dependencies:
   connectkit:
     specifier: ^1.2.3
     version: 1.2.3(ethers@5.7.2)(react-dom@18.2.0)(react-is@16.13.1)(react@18.2.0)(wagmi@0.12.12)
+  dayjs:
+    specifier: ^1.11.7
+    version: 1.11.7
   ethers:
     specifier: ^5
     version: 5.7.2
@@ -4752,6 +4755,10 @@ packages:
     engines: {node: '>=0.10'}
     dependencies:
       assert-plus: 1.0.0
+    dev: false
+
+  /dayjs@1.11.7:
+    resolution: {integrity: sha512-+Yw9U6YO5TQohxLcIkrXBeY73WP3ejHWVvx8XCk3gxvQDCTEmS48ZrSZCKciI7Bhl/uCMyxYtE9UqRILmFphkQ==}
     dev: false
 
   /debounce@1.2.1:
