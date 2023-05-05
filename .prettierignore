@@ -1,2 +1,28 @@
-dist/
-*.svg
+# Ignore commonly generated files and directories
+node_modules
+.next
+out
+public
+
+# Ignore minified files
+*.min.js
+*.min.css
+
+# Ignore package manager lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore git-related files
+.git
+.gitignore
+
+# Ignore configuration files
+.prettierrc
+.prettierignore
+.eslintrc
+.eslintcache
+.editorconfig
+tailwind.config.js
+postcss.config.js
+tsconfig.json
