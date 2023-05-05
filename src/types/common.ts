@@ -1,12 +1,9 @@
-export enum Phase {
-  Initial,
-  Identity,
-  VerifyIdentity,
-  Signature,
-  Loading,
+export enum Environment {
+  Production = "production",
+  Staging = "staging",
 }
 
-export enum Environment {
-  PRODUCTION = "production",
-  STAGING = "staging",
+export enum CredentialType {
+  Orb = "orb",
+  Phone = "phone",
 }
