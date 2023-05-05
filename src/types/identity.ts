@@ -1,5 +1,4 @@
 import type { inclusionProof } from "@/services/sequencer";
-import type { ZkIdentity } from "@zk-kit/identity";
 
 export interface Identity {
   readonly id: string;
@@ -9,14 +8,4 @@ export interface Identity {
   verified: boolean;
   persisted: boolean;
   inclusionProof: Awaited<ReturnType<typeof inclusionProof>> | null;
-}
-
-export interface RawIdentity {
-  id: string;
-  zkIdentity: ZkIdentity;
-}
-
-export interface StoredIdentity {
-  id: string;
-  zkIdentity: string;
 }

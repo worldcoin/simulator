@@ -1,8 +1,9 @@
 import { inclusionProof } from "@/services/sequencer";
 import type { IIdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type { Identity, RawIdentity, StoredIdentity } from "@/types";
-import { Strategy, ZkIdentity } from "@zk-kit/identity";
+import type { Identity } from "@/types";
+import { CredentialType } from "@/types";
+import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 
 const IDENTITY_STORAGE_KEY = "Identity";
 
@@ -15,18 +16,16 @@ const useIdentity = () => {
   const { identity, setIdentity } = useIdentityStore(getStore);
 
   const createIdentity = async () => {
-    const identity = new ZkIdentity(Strategy.RANDOM);
+    const identity = new ZkIdentity();
     return await updateIdentity(identity);
   };
 
-  const storeIdentity = ({ id, zkIdentity }: RawIdentity) => {
-    const identity = {
-      id,
-      zkIdentity: zkIdentity.serializeIdentity(),
-    };
-
+  const storeIdentity = (id: string, identity: ZkIdentity) => {
     try {
-      sessionStorage.setItem(IDENTITY_STORAGE_KEY, JSON.stringify(identity));
+      sessionStorage.setItem(
+        IDENTITY_STORAGE_KEY,
+        JSON.stringify({ id, identity }),
+      );
     } catch {
       console.error("Unable to persist semaphore identity");
     }
@@ -39,12 +38,7 @@ const useIdentity = () => {
         return null;
       }
 
-      const parsedIdentity = JSON.parse(storedIdentity) as StoredIdentity;
-      const zkIdentity = new ZkIdentity(
-        Strategy.SERIALIZED,
-        parsedIdentity.zkIdentity,
-      );
-
+      const zkIdentity = new ZkIdentity(storedIdentity);
       const identity = await updateIdentity(zkIdentity);
       console.log("Restored serialized identity");
 
@@ -56,14 +50,11 @@ const useIdentity = () => {
   };
 
   const updateIdentity = async (identity: ZkIdentity, persisted = false) => {
-    const commitment = identity.genIdentityCommitment();
-    const trapdoor = identity.getTrapdoor();
-    const nullifier = identity.getNullifier();
-
+    const { commitment, trapdoor, nullifier } = identity;
     const encodedCommitment = encodeIdentityCommitment(commitment);
     const id = encodedCommitment.slice(0, 10);
 
-    const proof = await getIdentityProof(encodedCommitment);
+    const proof = await getIdentityProof(encodedCommitment, CredentialType.Orb);
 
     const extendedIdentity: Identity = {
       ...identity,
@@ -77,7 +68,7 @@ const useIdentity = () => {
     };
 
     setIdentity(extendedIdentity);
-    storeIdentity({ id, zkIdentity: identity });
+    storeIdentity(id, identity);
     return extendedIdentity;
   };
 
@@ -93,12 +84,17 @@ const useIdentity = () => {
     return identityCommitment.toString(16).padStart(64, "0");
   };
 
-  const getIdentityProof = async (encodedCommitment: string) => {
+  const getIdentityProof = async (
+    encodedCommitment: string,
+    credentialType: CredentialType,
+  ) => {
     try {
-      const proof = await inclusionProof(encodedCommitment);
+      const proof = await inclusionProof(encodedCommitment, credentialType);
       return proof;
     } catch (error) {
-      console.error("Unable to get identity proof");
+      console.error(
+        `Unable to get identity proof for credential type '${credentialType}'`,
+      );
       return null;
     }
   };
