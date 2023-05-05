@@ -11,12 +11,12 @@ export type Bounds = [
   number,
 ];
 
-type ScanConstraints = {
+interface ScanConstraints {
   top?: string;
   right?: string;
   bottom?: string;
   left?: string;
-};
+}
 
 export interface QrScannerFrameProps {
   containerRef: MutableRefObject<HTMLElement | null>;
