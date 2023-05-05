@@ -6,9 +6,9 @@ import { getSdkError } from "@walletconnect/utils";
 import { ErrorCodes } from "@worldcoin/id";
 import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
 import { defaultAbiCoder as abi } from "ethers/lib/utils";
-import { getFullProof } from "./get-full-proof";
-import { getMerkleProof } from "./get-merkle-proof";
-import { fetchApprovalRequestMetadata } from "./get-metadata";
+import { getFullProof } from "../lib/get-full-proof";
+import { getMerkleProof } from "../lib/get-merkle-proof";
+import { fetchApprovalRequestMetadata } from "../lib/get-metadata";
 
 export interface WalletConnectRequest extends VerificationRequest {
   code?: string;

@@ -2,9 +2,9 @@ import clsx from "clsx";
 import dayjs from "dayjs";
 import { Fragment, useMemo } from "react";
 import { Icon } from "../Icon";
-import styles from "./Card.module.css";
+import styles from "./WorldID.module.css";
 
-export function Card(props: {
+export function WorldID(props: {
   address?: string;
   animate?: boolean;
   bioVerified?: boolean;
@@ -21,7 +21,7 @@ export function Card(props: {
       <div
         className={clsx(
           "absolute inset-0",
-          'bg-[url("/images/card-bg-verified-front.svg")] bg-no-repeat bg-cover bg-[position:center]',
+          'bg-[url("/images/card-bg-verified-front.svg")] bg-cover bg-[position:center] bg-no-repeat',
         )}
       />
     );
@@ -30,7 +30,7 @@ export function Card(props: {
       <div
         className={clsx(
           "absolute inset-0",
-          'bg-[url("/images/card-bg-verified-back.svg")] bg-no-repeat bg-cover bg-[position:center]',
+          'bg-[url("/images/card-bg-verified-back.svg")] bg-cover bg-[position:center] bg-no-repeat',
         )}
       />
     );
@@ -39,7 +39,7 @@ export function Card(props: {
       <div
         className={clsx(
           "absolute inset-0",
-          'bg-[url("/images/card-bg-not-verified.svg")] bg-no-repeat bg-cover bg-[position:center]',
+          'bg-[url("/images/card-bg-not-verified.svg")] bg-cover bg-[position:center] bg-no-repeat',
         )}
       />
     );
@@ -56,7 +56,7 @@ export function Card(props: {
       className={clsx(
         styles.card,
         // FIXME: temp
-        "w-[164px] h-[216px]",
+        "h-[216px] w-[164px]",
         "relative ",
         "font-rubik",
       )}
@@ -76,11 +76,11 @@ export function Card(props: {
           {bg.front}
 
           {/* NOTE: left top simulator label */}
-          <div className="absolute z-10 top-0 inset-x-0">
+          <div className="absolute inset-x-0 top-0 z-10">
             <span
               className={clsx(
-                "absolute top-0 left-0 py-1.5 px-2",
-                "text-7 text-ffffff font-medium uppercase",
+                "absolute left-0 top-0 px-2 py-1.5",
+                "text-7 font-medium uppercase text-ffffff",
                 "rounded-br-[4px]",
                 {
                   "bg-191c20": !props.verified,
@@ -93,21 +93,21 @@ export function Card(props: {
 
             <Icon
               name="logo"
-              className="w-3 h-3 absolute top-1.5 right-2"
+              className="absolute right-2 top-1.5 h-3 w-3"
             />
           </div>
 
           {/* NOTE: card body */}
           <div
             className={clsx(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-[calc(-50%-3px)]",
+              "absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-[calc(-50%-3px)]",
               "grid justify-items-center gap-3",
             )}
           >
             {props.verified && (
               <Icon
                 name="bead-verified"
-                className="w-[50px] h-[50px]"
+                className="h-[50px] w-[50px]"
                 noMask
               />
             )}
@@ -115,7 +115,7 @@ export function Card(props: {
             {!props.verified && (
               <Icon
                 name="bead-not-verified"
-                className="w-[50px] h-[50px]"
+                className="h-[50px] w-[50px]"
                 noMask
               />
             )}
@@ -143,10 +143,10 @@ export function Card(props: {
           {/* NOTE: left stats */}
           <div
             className={clsx(
-              "absolute top-[26px] right-0 bottom-0",
+              "absolute bottom-0 right-0 top-[26px]",
               "flex justify-between",
-              "text-5 uppercase [writing-mode:vertical-rl] -scale-100",
-              "py-1.5 px-2.5 text-657080",
+              "-scale-100 text-5 uppercase [writing-mode:vertical-rl]",
+              "px-2.5 py-1.5 text-657080",
             )}
           >
             <div>
@@ -202,10 +202,10 @@ export function Card(props: {
             <Fragment>
               <div
                 className={clsx(
-                  "absolute left-0 inset-y-0 [writing-mode:vertical-rl] -scale-100 break-all",
+                  "absolute inset-y-0 left-0 -scale-100 break-all [writing-mode:vertical-rl]",
                   "grid grid-cols-[repeat(34,_1fr)]",
                   "px-1 py-2",
-                  "text-ffffff/20 uppercase text-7 font-thin text-center",
+                  "text-center text-7 font-thin uppercase text-ffffff/20",
                   "bg-191c20",
                 )}
               >
@@ -218,7 +218,7 @@ export function Card(props: {
                     <span key={key}>{i}</span>
                   ))}
               </div>
-              <div className="absolute bottom-2 left-8 text-5 uppercase grid">
+              <div className="absolute bottom-2 left-8 grid text-5 uppercase">
                 <span className="text-ffffff">
                   Verified in {props.verifiedIn}
                 </span>

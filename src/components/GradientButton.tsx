@@ -28,7 +28,7 @@ export const GradientButton = React.memo(function GradientButton(props: {
         ? { style: { "--bgColor": props.bgColor } as CSSProperties }
         : {})}
     >
-      <div className="flex h-full w-full items-center justify-center rounded-10 bg-ffffff dark:bg-191c20">
+      <div className="flex h-full w-full items-center justify-center rounded-10 bg-ffffff">
         <span
           className={clsx(
             "font-sora font-semibold uppercase",

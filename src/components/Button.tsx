@@ -14,7 +14,7 @@ const Button = React.memo(function Button(props: {
   return (
     <button
       className={clsx(
-        "rounded-12 py-4.5 transition-all",
+        "rounded-12 transition-all",
         { "pointer-events-none invisible opacity-0": props.isInvisible },
         props.className,
       )}
