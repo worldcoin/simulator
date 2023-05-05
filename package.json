@@ -16,6 +16,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@semaphore-protocol/proof": "^3.9.0",
     "@walletconnect/core": "^2.7.2",
     "@walletconnect/sign-client": "^2.7.0",
     "@walletconnect/types": "^2.7.0",
@@ -41,7 +42,7 @@
     "zustand": "^4.3.7"
   },
   "devDependencies": {
-    "@semaphore-protocol/identity": "^3.7.0",
+    "@semaphore-protocol/identity": "^3.9.0",
     "@types/node": "18.15.13",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
