@@ -1,5 +1,5 @@
 import type { ApprovalRequestMetadata } from "@/types/metadata";
-import type { WalletConnectRequest } from "../services/walletconnect.ts.new";
+import type { WalletConnectRequest } from "../services/walletconnect";
 
 interface ActionPayload {
   id: string;
