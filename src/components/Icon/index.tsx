@@ -8,6 +8,7 @@ const icons = [
   "bead-not-verified",
   "checkmark",
   "clock",
+  "cross",
   "favicon",
   "info",
   "logo",
