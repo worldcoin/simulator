@@ -50,3 +50,9 @@ export interface useQrScannerProps {
   videoRef: MutableRefObject<HTMLVideoElement | null>;
   scanConstraints?: ScanConstraints;
 }
+
+export interface ParseWorldIDQRCodeOutput {
+  valid: boolean;
+  errorMessage?: string;
+  uri?: string;
+}

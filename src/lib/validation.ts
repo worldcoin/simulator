@@ -1,13 +1,8 @@
-interface ParseWorldIDQRCodeOutput {
-  valid: boolean;
-  errorMessage?: string;
-  uri?: string;
-}
+import type { ParseWorldIDQRCodeOutput } from "@/types";
 
-export const parseWorldIDQRCode = (data: string): ParseWorldIDQRCodeOutput => {
-  // New version of World ID QR code
-  const parsedUrl = new URL(data);
-  const uri = parsedUrl.searchParams.get("w");
+export function parseWorldIDQRCode(data: string): ParseWorldIDQRCodeOutput {
+  const url = new URL(data);
+  const uri = url.searchParams.get("w");
   const wcRegex = /^wc:[A-Za-z0-9]+@2/;
 
   if (!uri?.match(wcRegex)) {
@@ -18,17 +13,17 @@ export const parseWorldIDQRCode = (data: string): ParseWorldIDQRCodeOutput => {
     uri,
     valid: true,
   };
-};
+}
 
-export const validateImageUrl = (url: string) => {
+export function validateImageUrl(data: string): boolean {
   try {
-    const ic = new URL(url);
+    const url = new URL(data);
     return (
-      ic.protocol === "data:" ||
-      ic.protocol === "https:" ||
-      ic.protocol === document.location.protocol
+      url.protocol === "data:" ||
+      url.protocol === "https:" ||
+      url.protocol === document.location.protocol
     );
   } catch {
     return false;
   }
-};
+}
