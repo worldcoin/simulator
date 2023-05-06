@@ -107,7 +107,7 @@ const App = React.memo(function App() {
         </p>
         <div>
           <a
-            href="https://id.worldcoin.org/test"
+            href="https://docs.worldcoin.org/"
             target="_blank"
             className="text-4940e0"
             rel="noreferrer"
