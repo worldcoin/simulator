@@ -56,9 +56,10 @@ export default function Home() {
     }
   };
 
-  const handleCreateTemporaryIdentity = async () => {
-    const newIdentity = await createIdentity();
-    void router.push(`/id/${newIdentity.id}`);
+  const handleCreateTemporaryIdentity = () => {
+    void createIdentity().then((newIdentity) => {
+      void router.push(`/id/${newIdentity.id}`);
+    });
   };
 
   // On initial load, restore previous identity from storage
@@ -78,9 +79,13 @@ export default function Home() {
     <div className="px-2 pb-6 xs:pb-0">
       {!isSigning && (
         <div className="grid content-between gap-y-6">
-          <h1 className="mt-16 text-center font-sora text-26 font-semibold text-191c20">
-            What can you do with the Simulator?
+          <h1 className="mt-12 text-center font-sora text-30 font-semibold text-191c20">
+            Create your test World ID
           </h1>
+          <p className=" text-center text-16 text-657080">
+            With the World ID Simulator, you can test different scenarios with
+            your identity.
+          </p>
           <Card
             icon="user"
             heading="Generate persistent identity"
@@ -107,7 +112,9 @@ export default function Home() {
               Create Temporary ID
             </Button>
           </Card>
-          <p className=" mt-10 text-center text-14 text-9ba3ae">Version 2.0</p>
+          <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
+            Version 2.0
+          </p>
         </div>
       )}
       {isSigning && <Confirm isConfirmed={isConfirmed} />}
