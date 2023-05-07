@@ -19,6 +19,54 @@ export let core: ICore;
 export let client: IWeb3Wallet;
 let identity: Identity;
 
+function getTopic(uri: string): string | null {
+  const topicRegex = /wc:([a-f0-9]+)@2/;
+  const match = uri.match(topicRegex);
+  return match ? match[1] : null;
+}
+
+function buildResponse(id: number, fullProof: FullProof): SignResponse {
+  return {
+    id,
+    jsonrpc: "2.0",
+    result: {
+      merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
+      nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
+      proof: abi.encode(["uint256[8]"], [fullProof.proof]),
+      credential_type: "orb",
+    },
+  };
+}
+
+async function approveRequest(
+  topic: string,
+  response: SignResponse,
+): Promise<void> {
+  await client.respondSessionRequest({
+    topic,
+    response,
+  });
+}
+
+async function rejectRequest(
+  topic: string,
+  id: number,
+  code: number,
+  message: string,
+): Promise<void> {
+  await client.respondSessionRequest({
+    topic,
+    response: {
+      id,
+      jsonrpc: "2.0",
+      error: {
+        code,
+        message,
+      },
+    },
+  });
+}
+
 export async function createClient(id: Identity): Promise<void> {
   core = new Core({
     logger: "debug",
@@ -36,8 +84,20 @@ export async function createClient(id: Identity): Promise<void> {
   identity = id;
 }
 
-export async function pair(uri: string): Promise<PairingTypes.Struct> {
-  return await core.pairing.pair({ uri });
+export async function pairClient(
+  uri: string,
+): Promise<PairingTypes.Struct | void> {
+  const pairings = core.pairing.getPairings();
+  const topics = pairings.map((pairing) => pairing.topic);
+  const topic = getTopic(uri);
+
+  if (topic && !topics.includes(topic)) {
+    return await core.pairing.pair({ uri });
+  } else if (topic && topics.includes(topic)) {
+    return await core.pairing.activate({ topic });
+  } else {
+    console.error("Invalid or expired WalletConnect URI, please try again.");
+  }
 }
 
 export async function onSessionProposal(
@@ -101,55 +161,21 @@ export async function onSessionDisconnect(
   const topics = Object.keys(client.getActiveSessions());
 
   if (topics.includes(event.topic)) {
-    await disconnectSession(event.topic);
+    await disconnectSessions([event.topic]);
   }
 }
 
-export async function disconnectSession(topic: string): Promise<void> {
-  await client.disconnectSession({
-    topic,
-    reason: getSdkError("USER_DISCONNECTED"),
-  });
+export async function disconnectPairings(topics: string[]): Promise<void> {
+  await Promise.all(topics.map((topic) => core.pairing.disconnect({ topic })));
 }
 
-async function approveRequest(
-  topic: string,
-  response: SignResponse,
-): Promise<void> {
-  await client.respondSessionRequest({
-    topic,
-    response,
-  });
-}
-
-async function rejectRequest(
-  topic: string,
-  id: number,
-  code: number,
-  message: string,
-): Promise<void> {
-  await client.respondSessionRequest({
-    topic,
-    response: {
-      id,
-      jsonrpc: "2.0",
-      error: {
-        code,
-        message,
-      },
-    },
-  });
-}
-
-function buildResponse(id: number, fullProof: FullProof): SignResponse {
-  return {
-    id,
-    jsonrpc: "2.0",
-    result: {
-      merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
-      nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
-      proof: abi.encode(["uint256[8]"], [fullProof.proof]),
-      credential_type: "orb",
-    },
-  };
+export async function disconnectSessions(topics: string[]): Promise<void> {
+  await Promise.all(
+    topics.map((topic) =>
+      client.disconnectSession({
+        topic,
+        reason: getSdkError("USER_DISCONNECTED"),
+      }),
+    ),
+  );
 }
