@@ -33,7 +33,7 @@ function buildResponse(id: number, fullProof: FullProof): SignResponse {
       merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
       nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
       proof: abi.encode(["uint256[8]"], [fullProof.proof]),
-      credential_type: "orb",
+      credential_type: "orb", // TODO: Add support for phone credential
     },
   };
 }
