@@ -1,8 +1,18 @@
-import type { connectWallet } from "@/services/walletconnect";
+export interface SignRequest {
+  method: string;
+  params: Record<string, string>[];
+}
 
-export type WalletConnectFlow = Partial<
-  Awaited<ReturnType<typeof connectWallet>>
->;
+export interface SignResponse {
+  id: number;
+  jsonrpc: string;
+  result: {
+    merkle_root: string;
+    nullifier_hash: string;
+    proof: string;
+    credential_type: string;
+  };
+}
 
 // export interface ApprovalRequestMetadata {
 //   app_id: string;
