@@ -1,228 +1,155 @@
-import type { Identity } from "@/types";
-import type { VerificationRequest } from "@/types/metadata";
-import Client from "@walletconnect/sign-client";
-import type { SignClientTypes } from "@walletconnect/types";
-import { getSdkError } from "@walletconnect/utils";
-import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
+import { verifySemaphoreProof } from "@/lib/proof";
+import type { Identity, SignResponse } from "@/types";
+import { ProofError } from "@/types";
+import type { FullProof } from "@semaphore-protocol/proof";
+import { Core } from "@walletconnect/core";
+import type {
+  ICore,
+  PairingTypes,
+  SignClientTypes,
+} from "@walletconnect/types";
+import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
+import type { IWeb3Wallet } from "@walletconnect/web3wallet";
+import { Web3Wallet } from "@walletconnect/web3wallet";
 import { defaultAbiCoder as abi } from "ethers/lib/utils";
-import { getFullProof } from "../lib/get-full-proof";
-import { getMerkleProof } from "../lib/get-merkle-proof";
-import { fetchApprovalRequestMetadata } from "../lib/get-metadata";
 
-export interface WalletConnectRequest extends VerificationRequest {
-  code?: string;
-}
+const WALLETCONNECT_PID = process.env.NEXT_PUBLIC_WALLETCONNECT_PID;
 
-export async function connectWallet({
-  uri,
-  identity,
-}: {
-  uri: string;
-  identity: Identity;
-}): Promise<{
-  client: Client;
-  proposal: SignClientTypes.EventArguments["session_proposal"];
-  request: SignClientTypes.EventArguments["session_request"];
-  meta: Awaited<ReturnType<typeof fetchApprovalRequestMetadata>>;
-  merkleProof: MerkleProof;
-  fullProof: SemaphoreFullProof;
-}> {
-  // we don't want persistent sessions
-  const STORAGE_KEY = "walletconnect-worldid-check";
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {}
+export let core: ICore;
+export let client: IWeb3Wallet;
+let identity: Identity;
 
-  const client = await Client.init({
-    projectId: process.env.WALLETCONNECT_PID,
+export async function createClient(id: Identity): Promise<void> {
+  core = new Core({
+    logger: "debug",
+    projectId: WALLETCONNECT_PID,
+  });
+  client = await Web3Wallet.init({
+    core,
     metadata: {
       name: "World ID Simulator",
-      description: "The simulator for testing verification with World ID.",
-      url: "https://id.worldcoin.org/test",
+      description: "The simulator for testing World ID verifications.",
+      url: "https://id.worldcoin.org/",
       icons: ["https://worldcoin.org/icons/logo-small.svg"],
     },
   });
+  identity = id;
+}
 
-  client.on("session_proposal", async (event) => {
-    const { acknowledged } = await client.approve({
-      id: event.id,
-      namespaces: {
-        eip155: {
-          accounts: ["eip155:1:0"],
-          methods: ["world_id_v1"],
-          events: ["accountsChanged"],
-        },
+export async function pair(uri: string): Promise<PairingTypes.Struct> {
+  return await core.pairing.pair({ uri });
+}
+
+export async function onSessionProposal(
+  event: SignClientTypes.EventArguments["session_proposal"],
+) {
+  const { id, params } = event;
+  const namespaces = buildApprovedNamespaces({
+    proposal: params,
+    supportedNamespaces: {
+      eip155: {
+        chains: ["eip155:1"],
+        methods: ["world_id_v1"],
+        events: ["accountsChanged"],
+        accounts: ["eip155:1:0"],
       },
-    });
-
-    await acknowledged();
+    },
   });
 
-  await client.core.pairing.pair({ uri });
-
-  const _disconnectSessionOnUnloadPromise = async () => {
-    if (sessionProposal.params.pairingTopic) {
-      await client.disconnect({
-        topic: sessionProposal.params.pairingTopic,
-        reason: getSdkError("USER_DISCONNECTED"),
-      });
-    }
-  };
-
-  const disconnectSessionOnUnload = () =>
-    void _disconnectSessionOnUnloadPromise();
-
-  window.addEventListener("beforeunload", disconnectSessionOnUnload);
-
-  // we should immediately receive session request from SDK
-  const sessionProposal = await new Promise<
-    SignClientTypes.EventArguments["session_proposal"]
-  >((resolve) =>
-    client.on("session_proposal", (event) => {
-      resolve(event);
-    }),
-  );
-
-  // we should immediately approve session on connection and expect receive call request from SDK
-  const sessionRequest = await new Promise<
-    SignClientTypes.EventArguments["session_request"]
-  >((resolve) =>
-    client.on("session_request", (event) => {
-      resolve(event);
-    }),
-  );
-
-  window.removeEventListener("beforeunload", disconnectSessionOnUnload);
-
-  // validate method
-  if (sessionRequest.params.request.method !== "world_id_v1") {
-    console.error(
-      "Unknown request method:",
-      sessionRequest.params.request.method,
-    );
-    await client.reject({
-      id: sessionRequest.id,
-      reason: {
-        code: -32601,
-        message: "method_not_found",
-      },
+  try {
+    await client.approveSession({
+      id,
+      namespaces,
     });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    if (sessionProposal.params.pairingTopic) {
-      await client.disconnect({
-        topic: sessionProposal.params.pairingTopic,
-        reason: getSdkError("USER_DISCONNECTED"),
-      });
+  } catch (error) {
+    console.error(error);
+    await client.rejectSession({
+      id,
+      reason: getSdkError("USER_REJECTED_METHODS"),
+    });
+  }
+}
+
+export async function onSessionRequest(
+  event: SignClientTypes.EventArguments["session_request"],
+): Promise<void> {
+  const { id, params, topic } = event;
+  const { request } = params;
+
+  let verification: { verified: boolean; fullProof: FullProof };
+
+  try {
+    verification = await verifySemaphoreProof(request, identity);
+  } catch (error) {
+    console.error(`Error verifying semaphore proof, ${error}`);
+    if (error instanceof ProofError) {
+      await rejectRequest(topic, id, error.code, error.message);
+      return;
+    } else {
+      await rejectRequest(topic, id, -32602, "generic_error");
+      return;
     }
-    throw new TypeError(
-      `Unsupported request method: ${sessionRequest.params.request.method}`,
-    );
   }
 
-  const validateSignal = async () => {
-    try {
-      const params = sessionRequest.params.request.params as Record<
-        string,
-        string
-      >[];
-      BigInt(params[0].signal);
-      return params[0].signal;
-    } catch (error) {
-      console.error(error);
-      await client.respond({
-        topic: sessionRequest.topic,
-        response: {
-          id: sessionRequest.id,
-          jsonrpc: "2.0",
-          error: {
-            code: -32602,
-            message: "invalid_signal",
-          },
-        },
-      });
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (sessionProposal.params.pairingTopic) {
-        await client.disconnect({
-          topic: sessionProposal.params.pairingTopic,
-          reason: getSdkError("USER_DISCONNECTED"),
-        });
-      }
-      throw error;
-    }
-  };
+  const response = buildResponse(id, verification.fullProof);
+  await approveRequest(topic, response);
+}
 
-  const validateExternalNullifier = async () => {
-    try {
-      const params = sessionRequest.params.request.params as Record<
-        string,
-        string
-      >[];
-      BigInt(params[0].external_nullifier);
-      return params[0].external_nullifier;
-    } catch (error) {
-      console.error(error);
-      await client.respond({
-        topic: sessionRequest.topic,
-        response: {
-          id: sessionRequest.id,
-          jsonrpc: "2.0",
-          error: {
-            code: -32602,
-            message: "invalid_app_id", // ErrorCodes.InvalidActionID // TODO: Need to update ErrorCodes in @worldcoin/id
-          },
-        },
-      });
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (sessionProposal.params.pairingTopic) {
-        await client.disconnect({
-          topic: sessionProposal.params.pairingTopic,
-          reason: getSdkError("USER_DISCONNECTED"),
-        });
-      }
-      throw error;
-    }
-  };
+export async function onSessionDisconnect(
+  event: SignClientTypes.EventArguments["session_delete"],
+): Promise<void> {
+  const topics = Object.keys(client.getActiveSessions());
 
-  const _rejectRequestPromise = async () => {
-    await client.reject({
-      id: sessionRequest.id,
-      reason: {
-        code: -32100,
-        message: "user_rejected",
-      },
-    });
-  };
+  if (topics.includes(event.topic)) {
+    await disconnectSession(event.topic);
+  }
+}
 
-  const rejectRequest = () => void _rejectRequestPromise();
-
-  window.addEventListener("beforeunload", rejectRequest);
-  client.on("session_delete", () => {
-    window.removeEventListener("beforeunload", rejectRequest);
+export async function disconnectSession(topic: string): Promise<void> {
+  await client.disconnectSession({
+    topic,
+    reason: getSdkError("USER_DISCONNECTED"),
   });
+}
 
-  const merkleProof = getMerkleProof(identity);
-  const fullProof = await getFullProof(
-    identity,
-    merkleProof,
-    await validateExternalNullifier(),
-    await validateSignal(),
-  );
-  const nullifierHash = abi.encode(
-    ["uint256"],
-    [fullProof.publicSignals.nullifierHash],
-  );
+async function approveRequest(
+  topic: string,
+  response: SignResponse,
+): Promise<void> {
+  await client.respondSessionRequest({
+    topic,
+    response,
+  });
+}
 
-  const meta = await fetchApprovalRequestMetadata(
-    sessionRequest.params.request as WalletConnectRequest,
-    nullifierHash,
-  );
+async function rejectRequest(
+  topic: string,
+  id: number,
+  code: number,
+  message: string,
+): Promise<void> {
+  await client.respondSessionRequest({
+    topic,
+    response: {
+      id,
+      jsonrpc: "2.0",
+      error: {
+        code,
+        message,
+      },
+    },
+  });
+}
 
+function buildResponse(id: number, fullProof: FullProof): SignResponse {
   return {
-    client,
-    proposal: sessionProposal,
-    request: sessionRequest,
-    meta,
-    merkleProof,
-    fullProof,
+    id,
+    jsonrpc: "2.0",
+    result: {
+      merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
+      nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
+      proof: abi.encode(["uint256[8]"], [fullProof.proof]),
+      credential_type: "orb",
+    },
   };
 }
