@@ -1,9 +1,11 @@
-import type { Identity } from "@/types";
+import type { Identity, SignRequest } from "@/types";
+import { ProofError } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { FullProof } from "@semaphore-protocol/proof";
-import { generateProof } from "@semaphore-protocol/proof";
+import { generateProof, verifyProof } from "@semaphore-protocol/proof";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
+import { validateExternalNullifier, validateSignal } from "./validation";
 
 export function getMerkleProof(identity: Identity): MerkleProof {
   // Identity has inclusion proof from sequencer
@@ -50,6 +52,41 @@ export async function getFullProof(
     merkleProof,
     externalNullifier,
     signal,
-    { zkeyFilePath: "./semaphore.zkey", wasmFilePath: "./semaphore.wasm" },
+    {
+      zkeyFilePath: "/semaphore/semaphore.zkey",
+      wasmFilePath: "/semaphore/semaphore.wasm",
+    },
   );
+}
+
+export async function verifySemaphoreProof(
+  request: SignRequest,
+  identity: Identity,
+) {
+  const { signal, external_nullifier: externalNullifier } = request.params[0];
+
+  try {
+    // Validate inputs
+    await validateSignal(signal);
+    await validateExternalNullifier(externalNullifier);
+
+    // Generate proofs
+    const merkleProof = getMerkleProof(identity);
+    const fullProof = await getFullProof(
+      identity,
+      merkleProof,
+      signal,
+      externalNullifier,
+    );
+
+    // Verify the full proof
+    const verified = await verifyProof(fullProof, 20);
+    return { verified, fullProof };
+  } catch (error) {
+    if (error instanceof ProofError) {
+      throw error;
+    } else {
+      throw new ProofError(-32602, "generic_error");
+    }
+  }
 }

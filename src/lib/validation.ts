@@ -1,4 +1,5 @@
 import type { ParseWorldIDQRCodeOutput } from "@/types";
+import { ProofError } from "@/types";
 
 export function parseWorldIDQRCode(data: string): ParseWorldIDQRCodeOutput {
   const url = new URL(data);
@@ -25,5 +26,23 @@ export function validateImageUrl(data: string): boolean {
     );
   } catch {
     return false;
+  }
+}
+
+export async function validateSignal(signal: string) {
+  try {
+    BigInt(signal);
+    return signal;
+  } catch (error) {
+    throw new ProofError(-32602, "invalid_signal");
+  }
+}
+
+export async function validateExternalNullifier(externalNullifier: string) {
+  try {
+    BigInt(externalNullifier);
+    return externalNullifier;
+  } catch (error) {
+    throw new ProofError(-32602, "invalid_external_nullifier");
   }
 }
