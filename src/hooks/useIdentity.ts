@@ -24,10 +24,10 @@ const useIdentity = () => {
     try {
       sessionStorage.setItem(
         IDENTITY_STORAGE_KEY,
-        JSON.stringify({ id, identity }),
+        JSON.stringify({ id, identity: identity.toString() }),
       );
-    } catch {
-      console.error("Unable to persist semaphore identity");
+    } catch (error) {
+      console.error(`Unable to persist semaphore identity, ${error}`);
     }
   };
 
@@ -40,7 +40,7 @@ const useIdentity = () => {
 
       const zkIdentity = new ZkIdentity(storedIdentity);
       const identity = await updateIdentity(zkIdentity);
-      console.log("Restored serialized identity");
+      console.info("Restored serialized identity");
 
       return identity;
     } catch (error) {
@@ -76,7 +76,7 @@ const useIdentity = () => {
     try {
       sessionStorage.removeItem(IDENTITY_STORAGE_KEY);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -107,6 +107,7 @@ const useIdentity = () => {
     retrieveIdentity,
     updateIdentity,
     clearIdentity,
+    encodeIdentityCommitment,
   };
 };
 
