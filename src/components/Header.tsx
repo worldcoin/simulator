@@ -1,34 +1,47 @@
-import clsx from "clsx";
+import Button from "./Button";
+import type { IconType } from "./Icon";
 import { Icon } from "./Icon";
 
-const Header = () => {
+export default function Header(props: {
+  heading: string;
+  iconLeft?: IconType;
+  iconRight?: IconType;
+  onClickLeft?: (
+    event?: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
+  ) => void;
+  onClickRight?: (
+    event?: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
+  ) => void;
+}) {
   return (
-    <header className="z-10 grid grid-cols-1fr/auto px-4">
-      <div className="col-span-2 hidden grid-flow-col content-center justify-between xs:grid">
-        <span
-          className={clsx(
-            "font-sora font-semibold leading-none text-191c20 transition-colors ",
-          )}
+    <div className="mt-3 grid w-full grid-cols-3 items-center justify-between">
+      {props.iconLeft && props.onClickLeft && (
+        <Button
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-ebecef"
+          onClick={props.onClickLeft}
         >
-          9:41
-        </span>
-        <div className="grid grid-flow-col items-center justify-center gap-x-1">
           <Icon
-            name="network"
-            className="z-50 h-[14px] w-5 text-191c20 transition-colors "
+            name={props.iconLeft}
+            className="h-6 w-6"
           />
+        </Button>
+      )}
+      {!props.iconLeft && <span />}
+      <h2 className="text-center font-rubik text-20 font-semibold text-191c20">
+        {props.heading}
+      </h2>
+      {props.iconRight && props.onClickRight && (
+        <Button
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-ebecef"
+          onClick={props.onClickRight}
+        >
           <Icon
-            name="wifi"
-            className="z-50 h-[14px] w-4 text-191c20 transition-colors "
+            name={props.iconRight}
+            className="h-6 w-6"
           />
-          <Icon
-            name="battery"
-            className="z-50 h-[14px] w-[25px] text-191c20 transition-colors "
-          />
-        </div>
-      </div>
-    </header>
+        </Button>
+      )}
+      {!props.iconRight && <span />}
+    </div>
   );
-};
-
-export default Header;
+}

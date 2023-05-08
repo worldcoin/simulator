@@ -1,5 +1,6 @@
-import Header from "@/components/Header";
 import { Icon } from "@/components/Icon";
+import Layout from "@/components/Layout";
+import StatusBar from "@/components/StatusBar";
 import "@/styles/globals.css";
 import { ConnectKitProvider, getDefaultClient } from "connectkit";
 import type { AppProps } from "next/app";
@@ -9,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useMediaQuery } from "usehooks-ts";
 import { WagmiConfig, createClient } from "wagmi";
 
-import Layout from "@/components/Layout";
+// Must be loaded after global styles
 import "@/styles/react-toastify.css";
 
 const sora = Sora({
@@ -42,7 +43,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <WagmiConfig client={client}>
         <ConnectKitProvider>
           <Layout>
-            <Header />
+            <StatusBar />
             <Component {...pageProps} />
           </Layout>
         </ConnectKitProvider>
