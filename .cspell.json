@@ -3,6 +3,7 @@
     "blockies",
     "clsx",
     "connectkit",
+    "fafb",
     "fbfc",
     "IDQR",
     "keccak",
@@ -17,6 +18,7 @@
     "worldcoin",
     "worldid",
     "zkey",
+    "zustand",
     "zxing"
   ]
 }
