@@ -3,7 +3,6 @@ import type { VerificationRequest } from "@/types/metadata";
 import Client from "@walletconnect/sign-client";
 import type { SignClientTypes } from "@walletconnect/types";
 import { getSdkError } from "@walletconnect/utils";
-import { ErrorCodes } from "@worldcoin/id";
 import type { MerkleProof, SemaphoreFullProof } from "@zk-kit/protocols";
 import { defaultAbiCoder as abi } from "ethers/lib/utils";
 import { getFullProof } from "../lib/get-full-proof";
@@ -137,7 +136,7 @@ export async function connectWallet({
           jsonrpc: "2.0",
           error: {
             code: -32602,
-            message: ErrorCodes.InvalidSignal,
+            message: "invalid_signal",
           },
         },
       });
@@ -189,7 +188,7 @@ export async function connectWallet({
       id: sessionRequest.id,
       reason: {
         code: -32100,
-        message: ErrorCodes.VerificationRejected,
+        message: "user_rejected",
       },
     });
   };
