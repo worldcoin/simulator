@@ -1,4 +1,5 @@
 import type { inclusionProof } from "@/services/sequencer";
+import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 
 export interface Identity {
   readonly id: string;
