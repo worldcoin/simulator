@@ -31,8 +31,7 @@ export function validateImageUrl(data: string): boolean {
 
 export async function validateSignal(signal: string) {
   try {
-    BigInt(signal);
-    return signal;
+    return BigInt(signal);
   } catch (error) {
     throw new ProofError(-32602, "invalid_signal");
   }
@@ -40,8 +39,7 @@ export async function validateSignal(signal: string) {
 
 export async function validateExternalNullifier(externalNullifier: string) {
   try {
-    BigInt(externalNullifier);
-    return externalNullifier;
+    return BigInt(externalNullifier);
   } catch (error) {
     throw new ProofError(-32602, "invalid_external_nullifier");
   }

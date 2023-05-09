@@ -6,13 +6,13 @@ import type {
 import { CredentialType } from "@/types";
 
 const SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> = {
-  [CredentialType.Orb]: process.env.ORB_SEQUENCER_PASSWORD,
-  [CredentialType.Phone]: process.env.PHONE_SEQUENCER_PASSWORD,
+  [CredentialType.Orb]: process.env.NEXT_PUBLIC_ORB_SEQUENCER_PASSWORD,
+  [CredentialType.Phone]: process.env.NEXT_PUBLIC_PHONE_SEQUENCER_PASSWORD,
 };
 
 const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
-  [CredentialType.Orb]: "https://signup-v2.stage-crypto.worldcoin.dev/",
-  [CredentialType.Phone]: "https://phone-signup-v2.stage-crypto.worldcoin.dev/",
+  [CredentialType.Orb]: "https://signup-batching.stage-crypto.worldcoin.dev/",
+  [CredentialType.Phone]: "https://phone-signup.stage-crypto.worldcoin.dev/",
 };
 
 function buildUrl(pathname: string, credentialType: CredentialType) {

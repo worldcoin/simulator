@@ -38,8 +38,8 @@ export function getMerkleProof(identity: Identity): MerkleProof {
 export async function getFullProof(
   identity: Identity,
   merkleProof: MerkleProof,
-  externalNullifier: string,
-  signal: string,
+  externalNullifier: bigint,
+  signal: bigint,
 ): Promise<FullProof> {
   const zkIdentity = {
     trapdoor: identity.trapdoor,
@@ -63,26 +63,29 @@ export async function verifySemaphoreProof(
   request: SignRequest,
   identity: Identity,
 ) {
-  const { signal, external_nullifier: externalNullifier } = request.params[0];
-
+  const { signal: rawSignal, external_nullifier: rawExternalNullifier } =
+    request.params[0];
   try {
     // Validate inputs
-    await validateSignal(signal);
-    await validateExternalNullifier(externalNullifier);
+    const signal = await validateSignal(rawSignal);
+    const externalNullifier = await validateExternalNullifier(
+      rawExternalNullifier,
+    );
 
     // Generate proofs
     const merkleProof = getMerkleProof(identity);
     const fullProof = await getFullProof(
       identity,
       merkleProof,
-      signal,
       externalNullifier,
+      signal,
     );
 
     // Verify the full proof
     const verified = await verifyProof(fullProof, 20);
     return { verified, fullProof };
   } catch (error) {
+    console.error(error);
     if (error instanceof ProofError) {
       throw error;
     } else {
