@@ -116,7 +116,18 @@ export default function Id() {
         </button>
       </div>
 
-      <WorldID />
+      <svg
+        className="aspect-[164_/_216] w-full"
+        viewBox="0 0 164 216"
+      >
+        <foreignObject
+          width="100%"
+          height="100%"
+          xmlns="http://www.w3.org/1999/xhtml"
+        >
+          <WorldID />
+        </foreignObject>
+      </svg>
 
       <div className="grid grid-cols-2 gap-2">
         <button className="rounded-12 bg-icons-purple-secondary p-4 text-left">

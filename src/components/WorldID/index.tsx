@@ -57,7 +57,7 @@ export function WorldID(props: {
       className={clsx(
         props.className,
         styles.card,
-        "aspect-[164_/_216] w-full",
+        "h-[216px] w-[164px]",
         "relative ",
         "font-rubik",
       )}
