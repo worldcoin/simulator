@@ -116,7 +116,7 @@ export function Id() {
         </button>
       </div>
 
-      <WorldID verified={true} />
+      <WorldID verified={identity?.verified} />
 
       <div className="grid grid-cols-2 gap-2">
         <button className="rounded-12 bg-icons-purple-secondary p-4 text-left">
