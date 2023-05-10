@@ -12,10 +12,11 @@ import {
 } from "@/services/walletconnect";
 import { CredentialType } from "@/types";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { WorldID } from "@/components/WorldID";
 import { Icon } from "@/components/Icon";
 import { CardIcon } from "@/components/CardIcon";
+import { Drawer } from "@/components/Drawer";
 
 export default function Id() {
   const router = useRouter();
@@ -76,6 +77,8 @@ export default function Id() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [isOpenSettings, setOpenSettings] = useState(false);
+
   return (
     <div className="grid content-between px-2 pb-6 xs:pb-0">
       <div className="grid grid-cols-auto/1fr/auto gap-4">
@@ -97,7 +100,10 @@ export default function Id() {
           </div>
         </div>
 
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
+        <button
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200"
+          onClick={() => setOpenSettings(true)}
+        >
           <Icon
             name="setting"
             className="h-6 w-6"
@@ -108,8 +114,9 @@ export default function Id() {
       <WorldID />
 
       <div className="grid grid-cols-2 gap-2">
-        <button className="rounded-xl bg-icons-purple-secondary p-4 text-left">
+        <button className="rounded-12 bg-icons-purple-secondary p-4 text-left">
           <CardIcon
+            className="h-[44px] w-[44px]"
             name="user"
             color="#9D50FF"
           />
@@ -123,8 +130,9 @@ export default function Id() {
           </div>
         </button>
 
-        <button className="rounded-xl bg-gray-100 p-4 text-left">
+        <button className="rounded-12 bg-gray-100 p-4 text-left">
           <CardIcon
+            className="h-[44px] w-[44px]"
             name="text"
             color="#191C20"
           />
@@ -138,6 +146,55 @@ export default function Id() {
           </div>
         </button>
       </div>
+
+      <Drawer
+        open={isOpenSettings}
+        onClose={() => setOpenSettings(false)}
+      >
+        <div className="py-1.5 text-center text-h3 font-bold">Settings</div>
+
+        <div className="mt-6 grid gap-y-3">
+          <button className="grid grid-cols-auto/1fr/auto items-center gap-x-3 rounded-12 bg-gray-50 p-4">
+            <CardIcon
+              className="h-8 w-8"
+              name="user"
+              color="#9D50FF"
+            />
+
+            <div className="grid gap-y-0.5 text-left">
+              <div className="text-s3">Credentials</div>
+              <div className="text-b4 text-gray-500">
+                Manage your credentials
+              </div>
+            </div>
+
+            <Icon
+              name="direction-right"
+              className="h-6 w-6 text-gray-400"
+            />
+          </button>
+
+          <button className="grid grid-cols-auto/1fr/auto items-center gap-x-3 rounded-12 bg-gray-50 p-4">
+            <CardIcon
+              className="h-8 w-8"
+              name="file"
+              color="#00C3B6"
+            />
+
+            <div className="grid gap-y-0.5 text-left">
+              <div className="text-s3">Identity commitment</div>
+              <div className="text-b4 text-gray-500">
+                Copy your ID commitment number
+              </div>
+            </div>
+
+            <Icon
+              name="copy"
+              className="h-6 w-6 text-gray-400"
+            />
+          </button>
+        </div>
+      </Drawer>
     </div>
   );
 }

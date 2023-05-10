@@ -1,6 +1,7 @@
 import React from "react";
 import type { IconType } from "@/components/Icon";
 import { Icon } from "@/components/Icon";
+import clsx from "clsx";
 
 export const CardIcon = React.memo(function CardIcon(props: {
   className?: string;
@@ -9,7 +10,10 @@ export const CardIcon = React.memo(function CardIcon(props: {
 }) {
   return (
     <div
-      className="rounded-xl relative flex h-[44px] w-[44px] items-center justify-center"
+      className={clsx(
+        props.className,
+        "relative flex items-center justify-center",
+      )}
       style={{
         "--color": props.color,
       }}

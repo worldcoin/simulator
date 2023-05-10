@@ -54,8 +54,11 @@ module.exports = {
 
     colors: {
       gray: {
+        50: "#F9FAFB",
         100: "#F3F4F5",
         200: "#EBECEF",
+        400: "#9BA3AE",
+        500: "#657080",
         900: "#191C20",
       },
       info: {
@@ -193,8 +196,11 @@ module.exports = {
     },
 
     fontSize: {
+      h3: ["calc(20 * 1rem / 16)", { lineHeight: "120%" }],
       s1: ["calc(18 * 1rem / 16)", { lineHeight: "120%" }],
+      s3: ["calc(14 * 1rem / 16)", { lineHeight: "120%", fontWeight: 500 }],
       s4: ["calc(12 * 1rem / 16)", { lineHeight: "120%" }],
+      b4: ["calc(12 * 1rem / 16)", { lineHeight: "130%" }],
       5: ["calc(5 * 1rem / 16)", { lineHeight: "6px" }],
       7: ["calc(7 * 1rem / 16)", { lineHeight: "8px" }],
       10: "calc(10 * 1rem / 16)",
