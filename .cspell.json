@@ -3,11 +3,13 @@
     "blockies",
     "clsx",
     "connectkit",
+    "fafb",
     "fbfc",
     "IDQR",
     "keccak",
     "merkle",
     "personhood",
+    "precheck",
     "Sempahore",
     "srcset",
     "toastify",
@@ -17,6 +19,7 @@
     "worldcoin",
     "worldid",
     "zkey",
+    "zustand",
     "zxing"
   ]
 }
