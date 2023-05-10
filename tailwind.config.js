@@ -36,6 +36,7 @@ module.exports = {
       12: "calc(12 * 1rem / 16)",
       16: "calc(16 * 1rem / 16)",
       18: "calc(18 * 1rem / 16)",
+      20: "calc(20 * 1rem / 16)",
       24: "calc(24 * 1rem / 16)",
       30: "calc(30 * 1rem / 16)",
       34: "calc(34 * 1rem / 16)",
