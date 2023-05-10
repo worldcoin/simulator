@@ -101,7 +101,9 @@ export function Id() {
               className="h-4 w-4"
             />
 
-            <span className="leading-[1px]">Temporary ID Simulator</span>
+            <span className="leading-[1px]">{`${
+              identity?.persisted ? "Persistent ID" : "Temporary ID"
+            } Simulator`}</span>
           </div>
         </div>
 
