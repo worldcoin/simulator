@@ -53,6 +53,21 @@ module.exports = {
     },
 
     colors: {
+      gray: {
+        100: "#F3F4F5",
+        200: "#EBECEF",
+        900: "#191C20",
+      },
+      info: {
+        100: "#F5F6FD",
+        700: "#506DFF",
+      },
+      icons: {
+        purple: {
+          primary: "#9D50FF",
+          secondary: "#F7F1FF",
+        }
+      },
       ...mirrorHexColors([
         "#000000",
         "#00c313",
@@ -178,6 +193,8 @@ module.exports = {
     },
 
     fontSize: {
+      s1: ["calc(18 * 1rem / 16)", { lineHeight: "120%" }],
+      s4: ["calc(12 * 1rem / 16)", { lineHeight: "120%" }],
       5: ["calc(5 * 1rem / 16)", { lineHeight: "6px" }],
       7: ["calc(7 * 1rem / 16)", { lineHeight: "8px" }],
       10: "calc(10 * 1rem / 16)",

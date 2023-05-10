@@ -5,6 +5,7 @@ import { Icon } from "../Icon";
 import styles from "./WorldID.module.css";
 
 export function WorldID(props: {
+  className?: string;
   address?: string;
   animate?: boolean;
   bioVerified?: boolean;
@@ -54,9 +55,9 @@ export function WorldID(props: {
   return (
     <div
       className={clsx(
+        props.className,
         styles.card,
-        // FIXME: temp
-        "h-[216px] w-[164px]",
+        "aspect-[164_/_216] w-full",
         "relative ",
         "font-rubik",
       )}
