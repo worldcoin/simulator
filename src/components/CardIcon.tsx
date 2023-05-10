@@ -14,9 +14,11 @@ export const CardIcon = React.memo(function CardIcon(props: {
         props.className,
         "relative flex items-center justify-center",
       )}
-      style={{
-        "--color": props.color,
-      }}
+      style={
+        {
+          "--color": props.color,
+        } as React.CSSProperties
+      }
     >
       <svg
         className="absolute inset-0 h-full w-full"
