@@ -1,5 +1,10 @@
+import { CardIcon } from "@/components/CardIcon";
+import { Icon } from "@/components/Icon";
+import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
 import { parseWorldIDQRCode } from "@/lib/validation";
+import { Scanner } from "@/scenes/Id/Scanner";
+import { Settings } from "@/scenes/Id/Settings";
 import { insertIdentity } from "@/services/sequencer";
 import {
   client,
@@ -13,11 +18,6 @@ import {
 import { CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { WorldID } from "@/components/WorldID";
-import { Icon } from "@/components/Icon";
-import { CardIcon } from "@/components/CardIcon";
-import { Settings } from "@/scenes/Id/Settings";
-import { Scanner } from "@/scenes/Id/Scanner";
 
 export function Id() {
   const router = useRouter();
@@ -82,7 +82,7 @@ export function Id() {
   const [isOpenSettings, setOpenSettings] = useState(false);
 
   return (
-    <div className="grid content-between px-2 pb-6 xs:pb-0">
+    <div className="grid content-between gap-y-6 px-2 pb-6 xs:pb-0">
       <div className="grid grid-cols-auto/1fr/auto gap-4">
         <button
           className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200"
@@ -116,18 +116,7 @@ export function Id() {
         </button>
       </div>
 
-      <svg
-        className="aspect-[164_/_216] w-full"
-        viewBox="0 0 164 216"
-      >
-        <foreignObject
-          width="100%"
-          height="100%"
-          xmlns="http://www.w3.org/1999/xhtml"
-        >
-          <WorldID />
-        </foreignObject>
-      </svg>
+      <WorldID verified={true} />
 
       <div className="grid grid-cols-2 gap-2">
         <button className="rounded-12 bg-icons-purple-secondary p-4 text-left">

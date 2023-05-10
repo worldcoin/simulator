@@ -57,7 +57,7 @@ export function WorldID(props: {
       className={clsx(
         props.className,
         styles.card,
-        "h-[216px] w-[164px]",
+        "aspect-[327/435] w-full",
         "relative ",
         "font-rubik",
       )}
@@ -71,44 +71,21 @@ export function WorldID(props: {
         <div
           className={clsx(styles["card--face-front"], {
             "bg-d9d9d9": !props.verified,
-            "bg-191c20": props.verified,
           })}
         >
           {bg.front}
 
-          {/* NOTE: left top simulator label */}
-          <div className="absolute inset-x-0 top-0 z-10">
-            <span
-              className={clsx(
-                "absolute left-0 top-0 px-2 py-1.5",
-                "text-7 font-medium uppercase text-ffffff",
-                "rounded-br-[4px]",
-                {
-                  "bg-191c20": !props.verified,
-                  "bg-7357f5": props.verified,
-                },
-              )}
-            >
-              simulator
-            </span>
-
-            <Icon
-              name="logo"
-              className="absolute right-2 top-1.5 h-3 w-3"
-            />
-          </div>
-
           {/* NOTE: card body */}
           <div
             className={clsx(
-              "absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-[calc(-50%-3px)]",
+              "absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-[calc(-50%-5vw)] xs:translate-y-[calc(-50%-15px)]",
               "grid justify-items-center gap-3",
             )}
           >
             {props.verified && (
               <Icon
                 name="bead-verified"
-                className="h-[50px] w-[50px]"
+                className="h-[26.6vw] w-[26.6vw] xs:h-[100px] xs:w-[100px]"
                 noMask
               />
             )}
@@ -116,22 +93,25 @@ export function WorldID(props: {
             {!props.verified && (
               <Icon
                 name="bead-not-verified"
-                className="h-[50px] w-[50px]"
+                className="h-[26.6vw] w-[26.6vw] xs:h-[100px] xs:w-[100px]"
                 noMask
               />
             )}
             <div className="space-y-0.5 text-center">
               <p
-                className={clsx("text-12 font-medium", {
-                  "text-ffffff": props.verified,
-                  "text-191c20": !props.verified,
-                })}
+                className={clsx(
+                  "text-[6.4vw] font-medium uppercase xs:text-24",
+                  {
+                    "text-ffffff": props.verified,
+                    "text-191c20": !props.verified,
+                  },
+                )}
               >
                 Anonymous
               </p>
 
               <p
-                className={clsx("text-5", {
+                className={clsx("text-[2.6vw] uppercase xs:text-10", {
                   "text-ffffff": props.verified,
                   "text-657080": !props.verified,
                 })}
@@ -144,49 +124,76 @@ export function WorldID(props: {
           {/* NOTE: left stats */}
           <div
             className={clsx(
-              "absolute bottom-0 right-0 top-[26px]",
+              "absolute bottom-0 right-0 top-0",
               "flex justify-between",
-              "-scale-100 text-5 uppercase [writing-mode:vertical-rl]",
-              "px-2.5 py-1.5 text-657080",
+              "rotate-180 uppercase [writing-mode:vertical-rl]",
+              "px-[3.7vw] py-[5.3vw] text-gray-500 xs:px-3.5 xs:py-5",
             )}
           >
-            <div>
-              <div>Phone</div>
+            <div className="grid content-end gap-y-0.5">
+              <div
+                className={clsx("text-[2.6vw] xs:text-10", {
+                  "text-gray-400": props.verified,
+                })}
+              >
+                Phone
+              </div>
 
               <div
-                className={clsx({
-                  "text-ffffff": props.verified && props.phoneVerified,
-                  "text-191c20": !props.verified && props.phoneVerified,
+                className={clsx("text-[3.2vw] xs:text-12", {
+                  "text-gray-0": props.verified && props.phoneVerified,
+                  "text-gray-900": !props.verified && props.phoneVerified,
                 })}
               >
                 {props.phoneVerified ? "Verified" : "Not Verified"}
               </div>
             </div>
 
-            <div>
-              <div>Biometrics</div>
+            <div className="grid content-end gap-y-0.5">
+              <div
+                className={clsx("text-[2.6vw] xs:text-10", {
+                  "text-gray-400": props.verified,
+                })}
+              >
+                Biometrics
+              </div>
 
               <div
-                className={clsx({
-                  "text-ffffff": props.verified && props.bioVerified,
-                  "text-191c20": !props.verified && props.bioVerified,
+                className={clsx("text-[3.2vw] xs:text-12", {
+                  "text-gray-0": props.verified && props.bioVerified,
+                  "text-gray-900": !props.verified && props.bioVerified,
                 })}
               >
                 {props.bioVerified ? "Verified" : "Not Verified"}
               </div>
             </div>
 
-            <div>
-              <div>Signed up</div>
+            <div className="grid content-end gap-y-0.5">
               <div
-                className={clsx({
-                  "text-ffffff": props.verified,
-                  "text-191c20": !props.verified,
+                className={clsx("text-[2.6vw] xs:text-10", {
+                  "text-gray-400": props.verified,
+                })}
+              >
+                Signed up
+              </div>
+
+              <div
+                className={clsx("text-[3.2vw] xs:text-12", {
+                  "text-gray-0": props.verified,
+                  "text-gray-900": !props.verified,
                 })}
               >
                 {dayjs(props.signAt).format("MMM DD, YYYY")}
               </div>
             </div>
+
+            <Icon
+              name="logo"
+              className={clsx("h-[6.4vw] w-[6.4vw] xs:h-6 xs:w-6", {
+                "text-gray-900": !props.verified,
+                "text-gray-0": props.verified,
+              })}
+            />
           </div>
         </div>
 
