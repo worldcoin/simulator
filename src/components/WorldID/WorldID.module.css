@@ -14,11 +14,8 @@
   inset: 0;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
-}
-
-.card .card--face-front {
 }
 
 .card .card--face-back {

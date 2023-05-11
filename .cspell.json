@@ -10,6 +10,7 @@
     "keccak",
     "merkle",
     "personhood",
+    "precheck",
     "Sempahore",
     "srcset",
     "toastify",

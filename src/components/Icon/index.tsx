@@ -3,6 +3,7 @@ import React from "react";
 import styles from "./Icon.module.css";
 
 const icons = [
+  "barcode",
   "battery",
   "bead-verified",
   "bead-not-verified",
@@ -12,7 +13,10 @@ const icons = [
   "clock",
   "copy",
   "cross",
+  "direction-down",
+  "direction-right",
   "favicon",
+  "file",
   "info",
   "logo",
   "network",
@@ -20,8 +24,10 @@ const icons = [
   "orb",
   "phone",
   "question",
+  "setting",
   "shield",
   "spinner",
+  "text",
   "user",
   "wifi",
 ] as const;

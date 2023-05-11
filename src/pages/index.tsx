@@ -2,7 +2,7 @@ import Button from "@/components/Button";
 import { Card } from "@/components/Card";
 import Confirm from "@/components/Confirm";
 import useIdentity from "@/hooks/useIdentity";
-import { Strategy, ZkIdentity } from "@zk-kit/identity";
+import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useModal } from "connectkit";
 import { keccak256 } from "ethers/lib/utils.js";
 import { useRouter } from "next/router";
@@ -25,7 +25,7 @@ export default function Home() {
     onSuccess: async (signature) => {
       const identitySeed = keccak256(signature);
       const newIdentity = await updateIdentity(
-        new ZkIdentity(Strategy.MESSAGE, identitySeed),
+        new ZkIdentity(identitySeed),
         true,
       );
 

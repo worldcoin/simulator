@@ -11,12 +11,12 @@ export type Bounds = [
   number,
 ];
 
-type ScanConstraints = {
+interface ScanConstraints {
   top?: string;
   right?: string;
   bottom?: string;
   left?: string;
-};
+}
 
 export interface QrScannerFrameProps {
   containerRef: MutableRefObject<HTMLElement | null>;
@@ -49,4 +49,10 @@ export interface useQrScannerProps {
   streamRef: MutableRefObject<MediaStream | undefined>;
   videoRef: MutableRefObject<HTMLVideoElement | null>;
   scanConstraints?: ScanConstraints;
+}
+
+export interface ParseWorldIDQRCodeOutput {
+  valid: boolean;
+  errorMessage?: string;
+  uri?: string;
 }
