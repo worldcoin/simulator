@@ -18,6 +18,7 @@ import {
 import { CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { QrInput } from "@/scenes/Id/QrInput";
 
 export function Id() {
   const router = useRouter();
@@ -78,6 +79,7 @@ export function Id() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [isOpenQrInput, setOpenQrInput] = useState(false);
   const [isOpenScanner, setOpenScanner] = useState(false);
   const [isOpenSettings, setOpenSettings] = useState(false);
 
@@ -137,7 +139,10 @@ export function Id() {
           </div>
         </button>
 
-        <button className="rounded-12 bg-gray-100 p-4 text-left">
+        <button
+          className="rounded-12 bg-gray-100 p-4 text-left"
+          onClick={() => setOpenQrInput(true)}
+        >
           <CardIcon
             className="h-[44px] w-[44px]"
             name="text"
@@ -153,6 +158,11 @@ export function Id() {
           </div>
         </button>
       </div>
+
+      <QrInput
+        open={isOpenQrInput}
+        onClose={() => setOpenQrInput(false)}
+      />
 
       <Scanner
         open={isOpenScanner}

@@ -124,7 +124,7 @@ export function WorldID(props: {
           {/* NOTE: left stats */}
           <div
             className={clsx(
-              "absolute bottom-0 right-0 top-0",
+              "absolute inset-y-0 right-0",
               "flex justify-between",
               "rotate-180 uppercase [writing-mode:vertical-rl]",
               "px-[3.7vw] py-[5.3vw] text-gray-500 xs:px-3.5 xs:py-5",

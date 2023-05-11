@@ -53,12 +53,17 @@ module.exports = {
       6: "6px",
     },
 
+    boxShadow: {
+      input: "0px 10px 30px rgba(25, 28, 32, 0.1)",
+    },
+
     colors: {
       gray: {
         0: '#FFFFFF',
         50: "#F9FAFB",
         100: "#F3F4F5",
         200: "#EBECEF",
+        300: "#D6D9DD",
         400: "#9BA3AE",
         500: "#657080",
         900: "#191C20",
@@ -198,10 +203,13 @@ module.exports = {
     },
 
     fontSize: {
+      h2: ["calc(26 * 1rem / 16)", { lineHeight: "120%", fontWeight: 600 }],
       h3: ["calc(20 * 1rem / 16)", { lineHeight: "120%" }],
       s1: ["calc(18 * 1rem / 16)", { lineHeight: "120%" }],
       s3: ["calc(14 * 1rem / 16)", { lineHeight: "120%", fontWeight: 500 }],
       s4: ["calc(12 * 1rem / 16)", { lineHeight: "120%" }],
+      b1: ["calc(18 * 1rem / 16)", { lineHeight: "130%" }],
+      b3: ["calc(14 * 1rem / 16)", { lineHeight: "130%" }],
       b4: ["calc(12 * 1rem / 16)", { lineHeight: "130%" }],
       5: ["calc(5 * 1rem / 16)", { lineHeight: "6px" }],
       7: ["calc(7 * 1rem / 16)", { lineHeight: "8px" }],
