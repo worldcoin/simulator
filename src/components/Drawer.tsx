@@ -15,7 +15,7 @@ export const Drawer = React.memo(function Drawer(props: {
     >
       <Overlay className="absolute inset-0 bg-gray-900/70" />
 
-      <Content className="absolute inset-x-0 bottom-0 top-[44px] rounded-t-20 bg-ffffff p-6">
+      <Content className="absolute inset-x-0 bottom-0 top-[44px] rounded-t-20 bg-ffffff p-6 outline-none">
         <Close className="absolute left-[24px] top-[24px] flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
           <Icon
             name="direction-down"
