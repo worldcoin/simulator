@@ -26,11 +26,12 @@ export function getMerkleProof(identity: Identity): MerkleProof {
     } as MerkleProof;
   }
 
+  // TODO: Reevaluate if the dummy proof case is needed
   // Generate a dummy proof for testing against error cases
   console.warn(
     "Identity inclusion proof was not found, using dummy proof. Only use this to test failure cases!",
   );
-  const group = new Group(1);
+  const group = new Group(1, 30);
   group.addMember(identity.commitment);
   return group.generateMerkleProof(0);
 }
@@ -82,7 +83,7 @@ export async function verifySemaphoreProof(
     );
 
     // Verify the full proof
-    const verified = await verifyProof(fullProof, 20);
+    const verified = await verifyProof(fullProof, 30);
     return { verified, fullProof };
   } catch (error) {
     console.error(error);

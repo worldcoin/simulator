@@ -3,6 +3,7 @@ import { Icon } from "@/components/Icon";
 import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
 import { parseWorldIDQRCode } from "@/lib/validation";
+import { QrInput } from "@/scenes/Id/QrInput";
 import { Scanner } from "@/scenes/Id/Scanner";
 import { Settings } from "@/scenes/Id/Settings";
 import { insertIdentity } from "@/services/sequencer";
@@ -18,7 +19,6 @@ import {
 import { CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { QrInput } from "@/scenes/Id/QrInput";
 
 export function Id() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export function Id() {
 
   const handleOnPaste = async (event: React.ClipboardEvent) => {
     const data = event.clipboardData.getData("Text");
-    const { uri, valid } = parseWorldIDQRCode(data);
+    const { uri } = parseWorldIDQRCode(data);
 
     if (identity) {
       await createClient(identity);
@@ -60,15 +60,7 @@ export function Id() {
   const handleInsert = async () => {
     if (identity) {
       const commitment = encodeIdentityCommitment(identity.commitment);
-      console.log(
-        "🚀 ~ file: index.tsx:57 ~ handleInsert ~ commitment:",
-        commitment,
-      );
       const response = await insertIdentity(commitment, CredentialType.Orb);
-      console.log(
-        "🚀 ~ file: index.tsx:59 ~ handleInsert ~ response:",
-        response,
-      );
     }
   };
 

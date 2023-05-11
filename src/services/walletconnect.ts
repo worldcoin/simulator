@@ -1,5 +1,5 @@
 import { verifySemaphoreProof } from "@/lib/proof";
-import type { Identity, SignResponse } from "@/types";
+import type { Identity, SignRequest, SignResponse } from "@/types";
 import { ProofError } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import { Core } from "@walletconnect/core";
@@ -25,7 +25,20 @@ function getTopic(uri: string): string | null {
   return match ? match[1] : null;
 }
 
-function buildResponse(id: number, fullProof: FullProof): SignResponse {
+function buildResponse(
+  id: number,
+  request: SignRequest,
+  fullProof: FullProof,
+): SignResponse {
+  const {
+    params: [{ credential_types }],
+  } = request;
+
+  // Orb credential always takes precedence over all other credential types
+  const credential_type = credential_types.includes("orb")
+    ? "orb"
+    : credential_types[0];
+
   return {
     id,
     jsonrpc: "2.0",
@@ -33,7 +46,7 @@ function buildResponse(id: number, fullProof: FullProof): SignResponse {
       merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
       nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
       proof: abi.encode(["uint256[8]"], [fullProof.proof]),
-      credential_type: "orb", // TODO: Add support for phone credential
+      credential_type,
     },
   };
 }
@@ -151,7 +164,7 @@ export async function onSessionRequest(
     }
   }
 
-  const response = buildResponse(id, verification.fullProof);
+  const response = buildResponse(id, request, verification.fullProof);
   await approveRequest(topic, response);
 }
 
