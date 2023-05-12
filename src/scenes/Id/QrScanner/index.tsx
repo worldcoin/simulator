@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { Dialog } from "@/components/Dialog";
 import { QrScannerFrame } from "./Frame";
 import { useQrScanner } from "./useQrScanner";
+import { Icon } from "@/components/Icon";
 
 export const QrScanner = React.memo(function QrScanner(props: {
   open: boolean;
@@ -15,6 +16,7 @@ export const QrScanner = React.memo(function QrScanner(props: {
   // NOTE: constraints in percents
   scanConstraints?: ScanConstraints;
   onScanSuccess?: (data: string) => Promise<void>;
+  onClickManualInput?: () => void;
 }) {
   const [cameraReady, setCameraReady] = useState(false);
   const [valid, setValid] = useState<boolean | null>(null);
@@ -109,7 +111,12 @@ export const QrScanner = React.memo(function QrScanner(props: {
     <Dialog
       open={props.open}
       onClose={props.onClose}
+      closeIcon="close"
     >
+      <div className="relative z-10 py-1.5 text-center text-h3 font-bold text-ffffff">
+        Scanner
+      </div>
+
       <div
         className={clsx("absolute inset-0 bg-000000", props.className)}
         ref={containerRef}
@@ -133,6 +140,7 @@ export const QrScanner = React.memo(function QrScanner(props: {
             <div className="absolute bottom-40 left-1/2 flex -translate-x-1/2 flex-col items-center gap-25 pb-8">
               <div className="space-y-4 text-center font-rubik text-ffffff">
                 <p className="text-20 font-semibold">Scan QR code</p>
+
                 <p>Use this QR code for payments and identity verification</p>
               </div>
             </div>
@@ -142,10 +150,10 @@ export const QrScanner = React.memo(function QrScanner(props: {
         {allowed === false && (
           <div className="absolute inset-x-0 top-1/2 grid -translate-y-1/2 items-center justify-items-center space-y-8">
             <span className="rounded-full bg-f3f4f5 p-7">
-              {/*<Icon*/}
-              {/*  data={cameraDisallow}*/}
-              {/*  className="h-8 w-8 text-9ba3ae"*/}
-              {/*/>*/}
+              <Icon
+                name="camera-off"
+                className="h-8 w-8 text-9ba3ae"
+              />
             </span>
 
             <div className="space-y-4 px-14 text-center font-rubik text-ffffff">
@@ -158,12 +166,20 @@ export const QrScanner = React.memo(function QrScanner(props: {
           </div>
         )}
 
-        <div className="absolute inset-x-20 bottom-8 flex justify-items-stretch rounded-12 bg-3c424b p-0.5">
-          <span className="flex-1 p-3 text-center text-ffffff">My QR</span>
+        <div className="absolute inset-x-0 bottom-12 flex justify-center">
+          <button
+            className="flex flex-col items-center"
+            onClick={props.onClickManualInput}
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
+              <Icon
+                name="text"
+                className="h-6 w-6"
+              />
+            </div>
 
-          <span className="flex-1 rounded-12 bg-ffffff p-3 text-center text-191c20">
-            Scan
-          </span>
+            <div className="mt-3 text-b3 text-ffffff">Manual Input</div>
+          </button>
         </div>
       </div>
     </Dialog>

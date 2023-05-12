@@ -151,17 +151,18 @@ export function Id() {
         </button>
       </div>
 
-      <QrInput
-        open={isOpenQrInput}
-        onClose={() => setOpenQrInput(false)}
-      />
-
       {isOpenScanner && (
         <QrScanner
           open
           onClose={() => setOpenScanner(false)}
+          onClickManualInput={() => setOpenQrInput(true)}
         />
       )}
+
+      <QrInput
+        open={isOpenQrInput}
+        onClose={() => setOpenQrInput(false)}
+      />
 
       <Settings
         open={isOpenSettings}
