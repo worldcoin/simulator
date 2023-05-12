@@ -12,13 +12,15 @@ import {
   pairClient,
 } from "@/services/walletconnect";
 import clsx from "clsx";
+import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
 export const QrInput = React.memo(function QrInput(props: {
   open: boolean;
   onClose: () => void;
 }) {
-  const [uri, setUri] = React.useState("");
+  const router = useRouter();
+  const [value, setValue] = React.useState("");
 
   const { identity, retrieveIdentity, encodeIdentityCommitment } =
     useIdentity();
@@ -27,12 +29,12 @@ export const QrInput = React.memo(function QrInput(props: {
   //   return !!value; // FIXME: implement validation
   // }, [value]);
 
-  const handleChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setUri(event.target.value);
-    },
-    [],
-  );
+  // const handleChange = React.useCallback(
+  //   (event: React.ChangeEvent<HTMLInputElement>) => {
+  //     setUri(event.target.value);
+  //   },
+  //   [],
+  // );
 
   const performVerification = async (uri: string) => {
     if (identity) {
@@ -41,11 +43,19 @@ export const QrInput = React.memo(function QrInput(props: {
       client.on("session_proposal", onSessionProposal);
       client.on("session_request", onSessionRequest);
       client.on("session_delete", onSessionDisconnect);
+      client.on("session_delete", () => {
+        void router.push(`/id/${identity.id}`);
+      });
 
       if (uri) {
         await pairClient(uri);
       }
     }
+  };
+
+  const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const data = event.target.value;
+    if (data) setValue(data);
   };
 
   const handleOnPaste = async (event: React.ClipboardEvent) => {
@@ -56,14 +66,12 @@ export const QrInput = React.memo(function QrInput(props: {
   };
 
   const handleSubmit = async (
-    event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement> | undefined,
+    event:
+      | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>
+      | undefined,
   ) => {
-    if (!event) return;
-    event.preventDefault();
-
-    const data = new FormData(event.target as HTMLFormElement);
-    const { uri } = parseWorldIDQRCode(data.get("uri") as string);
-
+    if (event) event.preventDefault();
+    const { uri } = parseWorldIDQRCode(value);
     if (uri) await performVerification(uri);
   };
 
@@ -93,9 +101,9 @@ export const QrInput = React.memo(function QrInput(props: {
         className="mt-8"
         placeholder="QR code"
         // invalid={isInvalid}
-        value={uri}
-        onChange={handleChange}
-        onPaste={handleOnPaste}
+        value={value}
+        onChange={handleOnChange}
+        // onPaste={handleOnPaste}
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
           <>
             <button
@@ -109,14 +117,14 @@ export const QrInput = React.memo(function QrInput(props: {
                 if (isEmpty) {
                   navigator.clipboard.readText().then(
                     (text) => {
-                      setUri(text);
+                      setValue(text);
                     },
                     (error) => {
                       console.error(error);
                     },
                   );
                 } else {
-                  setUri("");
+                  setValue("");
                 }
               }}
             >

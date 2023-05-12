@@ -1,10 +1,18 @@
 import type { CredentialType, Identity, SignRequest } from "@/types";
 import { ProofError } from "@/types";
-import { Group } from "@semaphore-protocol/group";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { FullProof } from "@semaphore-protocol/proof";
 import { generateProof, verifyProof } from "@semaphore-protocol/proof";
-import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
+// import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
+import { Group } from "@semaphore-protocol/group";
+import type {
+  MerkleProof,
+  SemaphoreFullProof,
+  SemaphoreWitness,
+  StrBigInt,
+} from "@zk-kit/protocols";
+import { Semaphore } from "@zk-kit/protocols";
+import { defaultAbiCoder as abi } from "ethers/lib/utils";
 import { validateExternalNullifier, validateSignal } from "./validation";
 
 export function getMerkleProof(
@@ -86,6 +94,21 @@ export async function verifySemaphoreProof(
       signal,
     );
 
+    // DEBUG
+    const proof = await getOldProof(
+      identity,
+      merkleProof,
+      rawExternalNullifier,
+      rawSignal,
+    );
+    const oldProof = abi.encode(
+      ["unit256[8]"],
+      [Semaphore.packToSolidityProof(proof.proof)],
+    );
+    console.log("🚀 ~ file: proof.ts:103 ~ oldProof:", oldProof);
+    const newProof = abi.encode(["uint256[8]"], [fullProof.proof]);
+    console.log("🚀 ~ file: proof.ts:105 ~ newProof:", newProof);
+
     // Verify the full proof
     const verified = await verifyProof(fullProof, 30);
     console.log("🚀 ~ file: proof.ts:91 ~ verified:", verified);
@@ -99,3 +122,52 @@ export async function verifySemaphoreProof(
     }
   }
 }
+
+/**
+ * Creates a Semaphore witness for the Semaphore ZK proof.
+ * '@zk-kit/protocols' witness implementation expects a bytes32 strings,
+ * while both our contract and the SDK work with bytes.
+ *
+ * @param identityTrapdoor The identity trapdoor.
+ * @param identityNullifier The identity nullifier.
+ * @param merkleProof The Merkle proof that identity exists in Merkle tree of verified identities.
+ * @param externalNullifier The hash of the app_id and action parameter.  This determines the scope of the proof.
+ * @param signal The signal that should be broadcasted.
+ * @returns The Semaphore witness.
+ */
+function generateSemaphoreWitness(
+  identityTrapdoor: StrBigInt,
+  identityNullifier: StrBigInt,
+  merkleProof: MerkleProof,
+  externalNullifier: StrBigInt,
+  signal: string,
+): SemaphoreWitness {
+  return {
+    identityNullifier: identityNullifier,
+    identityTrapdoor: identityTrapdoor,
+    treePathIndices: merkleProof.pathIndices,
+    treeSiblings: merkleProof.siblings as StrBigInt[],
+    externalNullifier,
+    signalHash: signal,
+  };
+}
+
+export const getOldProof = async (
+  identity: Identity,
+  merkleProof: MerkleProof,
+  external_nullifier: string,
+  signal: string,
+): Promise<SemaphoreFullProof> => {
+  const wasmFilePath = "./semaphore/semaphore.wasm";
+  const finalZkeyPath = "./semaphore/semaphore.zkey";
+
+  const witness = generateSemaphoreWitness(
+    identity.trapdoor,
+    identity.nullifier,
+    merkleProof,
+    external_nullifier, // Encoding & hashing happens on the widget
+    signal, // Encoding & hashing happens on the widget
+  );
+
+  return await Semaphore.genProof(witness, wasmFilePath, finalZkeyPath);
+};

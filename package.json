@@ -27,6 +27,7 @@
     "@walletconnect/utils": "^2.7.0",
     "@walletconnect/web3wallet": "^1.7.0",
     "@zk-kit/incremental-merkle-tree": "^1.0.0",
+    "@zk-kit/protocols": "^1.11.1",
     "@zxing/browser": "^0.1.3",
     "clsx": "^1.2.1",
     "connectkit": "^1.2.3",

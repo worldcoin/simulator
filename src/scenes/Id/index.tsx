@@ -120,11 +120,13 @@ export function Id() {
         onClose={() => setOpenScanner(false)}
       />
 
-      <Settings
-        open={isOpenSettings}
-        onClose={() => setOpenSettings(false)}
-        commitment={encodeIdentityCommitment(identity?.commitment)}
-      />
+      {identity && (
+        <Settings
+          open={isOpenSettings}
+          onClose={() => setOpenSettings(false)}
+          commitment={encodeIdentityCommitment(identity.commitment)}
+        />
+      )}
     </div>
   );
 }

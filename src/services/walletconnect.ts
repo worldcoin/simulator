@@ -12,6 +12,7 @@ import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
 import type { IWeb3Wallet } from "@walletconnect/web3wallet";
 import { Web3Wallet } from "@walletconnect/web3wallet";
 import { defaultAbiCoder as abi } from "ethers/lib/utils";
+import { toast } from "react-toastify";
 
 const WALLETCONNECT_PID = process.env.NEXT_PUBLIC_WALLETCONNECT_PID;
 
@@ -84,7 +85,7 @@ async function rejectRequest(
 
 export async function createClient(id: Identity): Promise<void> {
   core = new Core({
-    logger: "debug",
+    // logger: "debug",
     projectId: WALLETCONNECT_PID,
   });
   client = await Web3Wallet.init({
@@ -169,6 +170,13 @@ export async function onSessionRequest(
       await rejectRequest(topic, id, -32602, "generic_error");
       return;
     }
+  }
+
+  // TODO: Move to UI layer
+  if (verification.verified) {
+    toast.success("Proof verified successfully");
+  } else {
+    toast.error("Proof verification failed");
   }
 
   const response = buildResponse(id, request, verification.fullProof);
