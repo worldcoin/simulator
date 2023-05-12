@@ -26,8 +26,7 @@ export function Id() {
   const { identity, retrieveIdentity, encodeIdentityCommitment } =
     useIdentity();
 
-  const handleOnPaste = async (event: React.ClipboardEvent) => {
-    const data = event.clipboardData.getData("Text");
+  const handleSuccess = async (data: string) => {
     const { uri } = parseWorldIDQRCode(data);
 
     if (identity) {
@@ -41,8 +40,6 @@ export function Id() {
         await pairClient(uri);
       }
     }
-
-    return {};
   };
 
   const handleDisconnect = async () => {
@@ -156,6 +153,7 @@ export function Id() {
           open
           onClose={() => setOpenScanner(false)}
           onClickManualInput={() => setOpenQrInput(true)}
+          onScanSuccess={handleSuccess}
         />
       )}
 
