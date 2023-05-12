@@ -1,6 +1,6 @@
-import React from "react";
-import { Root, Overlay, Content, Close } from "@radix-ui/react-dialog";
 import { Icon } from "@/components/Icon";
+import { Close, Content, Overlay, Root } from "@radix-ui/react-dialog";
+import React from "react";
 
 export const Drawer = React.memo(function Drawer(props: {
   className?: string;

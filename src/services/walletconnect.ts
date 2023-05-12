@@ -1,6 +1,6 @@
 import { verifySemaphoreProof } from "@/lib/proof";
 import type { Identity, SignRequest, SignResponse } from "@/types";
-import { ProofError } from "@/types";
+import { CredentialType, ProofError } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import { Core } from "@walletconnect/core";
 import type {
@@ -25,19 +25,21 @@ function getTopic(uri: string): string | null {
   return match ? match[1] : null;
 }
 
-function buildResponse(
-  id: number,
-  request: SignRequest,
-  fullProof: FullProof,
-): SignResponse {
+function getHighestCredentialType(request: SignRequest): string {
   const {
     params: [{ credential_types }],
   } = request;
 
   // Orb credential always takes precedence over all other credential types
-  const credential_type = credential_types.includes("orb")
-    ? "orb"
-    : credential_types[0];
+  return credential_types.includes("orb") ? "orb" : credential_types[0];
+}
+
+function buildResponse(
+  id: number,
+  request: SignRequest,
+  fullProof: FullProof,
+): SignResponse {
+  const credential_type = getHighestCredentialType(request);
 
   return {
     id,
@@ -148,11 +150,16 @@ export async function onSessionRequest(
 ): Promise<void> {
   const { id, params, topic } = event;
   const { request } = params;
+  const credentialType = getHighestCredentialType(request);
 
   let verification: { verified: boolean; fullProof: FullProof };
 
   try {
-    verification = await verifySemaphoreProof(request, identity);
+    verification = await verifySemaphoreProof(
+      request,
+      identity,
+      credentialType === "orb" ? CredentialType.Orb : CredentialType.Phone, // TODO
+    );
   } catch (error) {
     console.error(`Error verifying semaphore proof, ${error}`);
     if (error instanceof ProofError) {

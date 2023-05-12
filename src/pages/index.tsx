@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import { Card } from "@/components/Card";
 import Confirm from "@/components/Confirm";
 import useIdentity from "@/hooks/useIdentity";
+import { Chain } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useModal } from "connectkit";
 import { keccak256 } from "ethers/lib/utils.js";
@@ -19,6 +20,7 @@ export default function Home() {
   const [version, setVersion] = useState("2.0");
   const [isSigning, setIsSigning] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [chain, setChain] = useState<Chain>(Chain.Polygon);
 
   const { signMessage } = useSignMessage({
     message: "Signature request to generate seed for World ID identity.",
@@ -26,6 +28,7 @@ export default function Home() {
       const identitySeed = keccak256(signature);
       const newIdentity = await updateIdentity(
         new ZkIdentity(identitySeed),
+        chain,
         true,
       );
 
@@ -58,7 +61,7 @@ export default function Home() {
   };
 
   const handleCreateTemporaryIdentity = () => {
-    void createIdentity().then((newIdentity) => {
+    void createIdentity(chain).then((newIdentity) => {
       void router.push(`/id/${newIdentity.id}`);
     });
   };
@@ -86,14 +89,21 @@ export default function Home() {
   return (
     <div className="px-2 pb-6 xs:pb-0">
       {!isSigning && (
-        <div className="grid content-between gap-y-6">
-          <h1 className="mt-12 text-center font-sora text-30 font-semibold text-191c20">
+        <div className="grid content-between gap-y-4">
+          <h1 className="mt-4 text-center font-sora text-30 font-semibold text-191c20">
             Create your test World ID
           </h1>
-          <p className=" text-center text-16 text-657080">
+          <p className="text-center text-16 text-657080">
             With the World ID Simulator, you can test different scenarios with
             your identity.
           </p>
+          <select
+            className="block w-full rounded-12 border p-4 text-16"
+            onChange={(event) => setChain(event.target.value as Chain)}
+          >
+            <option value={Chain.Polygon}>Polygon</option>
+            <option value={Chain.Optimism}>Optimism</option>
+          </select>
           <Card
             icon="user"
             heading="Generate persistent identity"
@@ -120,9 +130,9 @@ export default function Home() {
               Create Temporary ID
             </Button>
           </Card>
-          <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
+          {/* <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
             Version {version}
-          </p>
+          </p> */}
         </div>
       )}
       {isSigning && <Confirm isConfirmed={isConfirmed} />}

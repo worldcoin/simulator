@@ -1,10 +1,11 @@
-import type { CredentialType } from "./common";
+import type { Chain, CredentialType } from "./common";
 
 export interface SequencerRequest {
+  chain: Chain;
   endpoint: string;
+  credentialType: CredentialType;
   commitment: string;
   authenticate?: boolean;
-  credentialType: CredentialType;
 }
 
 export interface InclusionProofResponse {

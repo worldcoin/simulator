@@ -7,3 +7,8 @@ export enum CredentialType {
   Orb = "orb",
   Phone = "phone",
 }
+
+export enum Chain {
+  Polygon = "polygon",
+  Optimism = "optimism",
+}

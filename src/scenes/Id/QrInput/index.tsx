@@ -18,7 +18,7 @@ export const QrInput = React.memo(function QrInput(props: {
   open: boolean;
   onClose: () => void;
 }) {
-  const [value, setValue] = React.useState("");
+  const [uri, setUri] = React.useState("");
 
   const { identity, retrieveIdentity, encodeIdentityCommitment } =
     useIdentity();
@@ -29,20 +29,12 @@ export const QrInput = React.memo(function QrInput(props: {
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(event.target.value);
+      setUri(event.target.value);
     },
     [],
   );
 
-  const handleSubmit = React.useCallback(() => {
-    console.log("submit", value); // FIXME: implement submitting
-  }, [value]);
-
-  const handleOnPaste = async (event: React.ClipboardEvent) => {
-    const data = event.clipboardData.getData("Text");
-    const { uri } = parseWorldIDQRCode(data);
-    console.log("🚀 ~ file: index.tsx:44 ~ handleOnPaste ~ uri:", uri);
-
+  const performVerification = async (uri: string) => {
     if (identity) {
       await createClient(identity);
 
@@ -54,8 +46,25 @@ export const QrInput = React.memo(function QrInput(props: {
         await pairClient(uri);
       }
     }
+  };
 
-    return {};
+  const handleOnPaste = async (event: React.ClipboardEvent) => {
+    const data = event.clipboardData.getData("Text");
+    const { uri } = parseWorldIDQRCode(data);
+
+    if (uri) await performVerification(uri);
+  };
+
+  const handleSubmit = async (
+    event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement> | undefined,
+  ) => {
+    if (!event) return;
+    event.preventDefault();
+
+    const data = new FormData(event.target as HTMLFormElement);
+    const { uri } = parseWorldIDQRCode(data.get("uri") as string);
+
+    if (uri) await performVerification(uri);
   };
 
   // On initial load, get identity from session storage
@@ -84,7 +93,7 @@ export const QrInput = React.memo(function QrInput(props: {
         className="mt-8"
         placeholder="QR code"
         // invalid={isInvalid}
-        value={value}
+        value={uri}
         onChange={handleChange}
         onPaste={handleOnPaste}
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
@@ -100,14 +109,14 @@ export const QrInput = React.memo(function QrInput(props: {
                 if (isEmpty) {
                   navigator.clipboard.readText().then(
                     (text) => {
-                      setValue(text);
+                      setUri(text);
                     },
                     (error) => {
                       console.error(error);
                     },
                   );
                 } else {
-                  setValue("");
+                  setUri("");
                 }
               }}
             >
@@ -123,6 +132,7 @@ export const QrInput = React.memo(function QrInput(props: {
       )} */}
 
       <Button
+        type="submit"
         className="mt-8 h-14 w-full bg-gray-900 text-ffffff disabled:bg-gray-100 disabled:text-gray-300"
         // isDisabled={isInvalid}
         onClick={handleSubmit}

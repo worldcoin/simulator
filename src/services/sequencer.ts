@@ -3,20 +3,40 @@ import type {
   InsertIdentityResponse,
   SequencerRequest,
 } from "@/types";
-import { CredentialType } from "@/types";
+import { Chain, CredentialType } from "@/types";
 
 const SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> = {
   [CredentialType.Orb]: process.env.NEXT_PUBLIC_ORB_SEQUENCER_PASSWORD,
   [CredentialType.Phone]: process.env.NEXT_PUBLIC_PHONE_SEQUENCER_PASSWORD,
 };
 
-const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
+const POLYGON_SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
   [CredentialType.Orb]: "https://signup-batching.stage-crypto.worldcoin.dev/",
   [CredentialType.Phone]: "https://phone-signup.stage-crypto.worldcoin.dev/",
 };
 
-function buildUrl(pathname: string, credentialType: CredentialType) {
-  return new URL(pathname, SEQUENCER_ENDPOINT[credentialType]);
+const OPTIMISM_SEQUENCER_ENDPOINT: Record<CredentialType, string | undefined> =
+  {
+    [CredentialType.Orb]:
+      "https://signup-orb-ethereum.stage-crypto.worldcoin.dev/",
+    // TODO: Add phone sequencer endpoint for Optimism once deployed
+    [CredentialType.Phone]: undefined,
+  };
+
+const SEQUENCER_ENDPOINT: Record<
+  Chain,
+  Record<CredentialType, string | undefined>
+> = {
+  [Chain.Polygon]: POLYGON_SEQUENCER_ENDPOINT,
+  [Chain.Optimism]: OPTIMISM_SEQUENCER_ENDPOINT,
+};
+
+function buildUrl(
+  endpoint: string,
+  chain: Chain,
+  credentialType: CredentialType,
+) {
+  return new URL(endpoint, SEQUENCER_ENDPOINT[chain][credentialType]);
 }
 
 function buildHeaders(
@@ -43,7 +63,11 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
   }
 
   const response = await fetch(
-    buildUrl(request.endpoint, request.credentialType).toString(),
+    buildUrl(
+      request.endpoint,
+      request.chain,
+      request.credentialType,
+    ).toString(),
     {
       method: "POST",
       body: JSON.stringify({ identityCommitment: request.commitment }),
@@ -64,24 +88,28 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
 }
 
 export async function inclusionProof(
-  commitment: string,
+  chain: Chain,
   credentialType: CredentialType,
+  commitment: string,
 ) {
   return await postRequest<InclusionProofResponse>({
+    chain,
     endpoint: "inclusionProof",
-    commitment,
     credentialType,
+    commitment,
   });
 }
 
 export async function insertIdentity(
-  commitment: string,
+  chain: Chain,
   credentialType: CredentialType,
+  commitment: string,
 ) {
   return await postRequest<InsertIdentityResponse>({
+    chain,
     endpoint: "insertIdentity",
-    commitment,
     credentialType,
+    commitment,
     authenticate: true,
   });
 }

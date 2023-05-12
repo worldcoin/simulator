@@ -1,14 +1,19 @@
 import type { inclusionProof } from "@/services/sequencer";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import type { Chain, CredentialType } from "./common";
 
 export interface Identity {
   readonly id: string;
   readonly commitment: bigint;
   readonly trapdoor: bigint;
   readonly nullifier: bigint;
-  verified: boolean;
+  chain: Chain; // TODO: refactor
   persisted: boolean;
-  inclusionProof: Awaited<ReturnType<typeof inclusionProof>> | null;
+  verified: Record<CredentialType, boolean>;
+  inclusionProof: Record<
+    CredentialType,
+    Awaited<ReturnType<typeof inclusionProof>> | null
+  >;
 }
 
 export type RawIdentity = {

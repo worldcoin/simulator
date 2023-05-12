@@ -2,20 +2,10 @@ import { CardIcon } from "@/components/CardIcon";
 import { Icon } from "@/components/Icon";
 import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
-import { parseWorldIDQRCode } from "@/lib/validation";
 import { QrInput } from "@/scenes/Id/QrInput";
 import { Scanner } from "@/scenes/Id/Scanner";
 import { Settings } from "@/scenes/Id/Settings";
-import { insertIdentity } from "@/services/sequencer";
-import {
-  client,
-  createClient,
-  disconnectSessions,
-  onSessionDisconnect,
-  onSessionProposal,
-  onSessionRequest,
-  pairClient,
-} from "@/services/walletconnect";
+// import { Settings } from "@/components/Settings";
 import { CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -26,42 +16,12 @@ export function Id() {
   const { identity, retrieveIdentity, encodeIdentityCommitment } =
     useIdentity();
 
-  const handleOnPaste = async (event: React.ClipboardEvent) => {
-    const data = event.clipboardData.getData("Text");
-    const { uri } = parseWorldIDQRCode(data);
+  const [isOpenQrInput, setOpenQrInput] = useState(false);
+  const [isOpenScanner, setOpenScanner] = useState(false);
+  const [isOpenSettings, setOpenSettings] = useState(false);
 
-    if (identity) {
-      await createClient(identity);
-
-      client.on("session_proposal", onSessionProposal);
-      client.on("session_request", onSessionRequest);
-      client.on("session_delete", onSessionDisconnect);
-
-      if (uri) {
-        await pairClient(uri);
-      }
-    }
-
-    return {};
-  };
-
-  const handleDisconnect = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (client) {
-      const sessions = client.getActiveSessions();
-      const topics = Object.keys(sessions);
-
-      topics.forEach(async (topic: string) => {
-        await disconnectSessions([topic]);
-      });
-    }
-  };
-
-  const handleInsert = async () => {
-    if (identity) {
-      const commitment = encodeIdentityCommitment(identity.commitment);
-      const response = await insertIdentity(commitment, CredentialType.Orb);
-    }
+  const handleCredentialsCard = () => {
+    void router.push(`/id/${id}/credentials`);
   };
 
   // On initial load, get identity from session storage
@@ -70,10 +30,6 @@ export function Id() {
     void retrieveIdentity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const [isOpenQrInput, setOpenQrInput] = useState(false);
-  const [isOpenScanner, setOpenScanner] = useState(false);
-  const [isOpenSettings, setOpenSettings] = useState(false);
 
   return (
     <div className="grid content-between gap-y-6 px-2 pb-6 xs:pb-0">
@@ -95,9 +51,9 @@ export function Id() {
               className="h-4 w-4"
             />
 
-            <span className="leading-[1px]">{`${
-              identity?.persisted ? "Persistent ID" : "Temporary ID"
-            } Simulator`}</span>
+            <span className="leading-[1px]">
+              {identity?.persisted ? "Persistent ID" : "Temporary ID"}
+            </span>
           </div>
         </div>
 
@@ -112,10 +68,13 @@ export function Id() {
         </button>
       </div>
 
-      <WorldID verified={identity?.verified} />
+      <WorldID verified={identity?.verified[CredentialType.Orb]} />
 
       <div className="grid grid-cols-2 gap-2">
-        <button className="rounded-12 bg-icons-purple-secondary p-4 text-left">
+        <button
+          className="rounded-12 bg-icons-purple-secondary p-4 text-left"
+          onClick={handleCredentialsCard}
+        >
           <CardIcon
             className="h-[44px] w-[44px]"
             name="user"
@@ -164,6 +123,7 @@ export function Id() {
       <Settings
         open={isOpenSettings}
         onClose={() => setOpenSettings(false)}
+        commitment={encodeIdentityCommitment(identity?.commitment)}
       />
     </div>
   );
