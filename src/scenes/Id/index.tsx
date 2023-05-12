@@ -4,7 +4,7 @@ import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { QrInput } from "@/scenes/Id/QrInput";
-import { Scanner } from "@/scenes/Id/Scanner";
+import { QrScanner } from "@/scenes/Id/QrScanner";
 import { Settings } from "@/scenes/Id/Settings";
 import { insertIdentity } from "@/services/sequencer";
 import {
@@ -156,10 +156,12 @@ export function Id() {
         onClose={() => setOpenQrInput(false)}
       />
 
-      <Scanner
-        open={isOpenScanner}
-        onClose={() => setOpenScanner(false)}
-      />
+      {isOpenScanner && (
+        <QrScanner
+          open
+          onClose={() => setOpenScanner(false)}
+        />
+      )}
 
       <Settings
         open={isOpenSettings}
