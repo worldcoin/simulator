@@ -11,7 +11,7 @@ export type Bounds = [
   number,
 ];
 
-interface ScanConstraints {
+export interface ScanConstraints {
   top?: string;
   right?: string;
   bottom?: string;

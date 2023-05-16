@@ -4,7 +4,7 @@ import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { QrInput } from "@/scenes/Id/QrInput";
-import { Scanner } from "@/scenes/Id/Scanner";
+import { QrScanner } from "@/scenes/Id/QrScanner";
 import { Settings } from "@/scenes/Id/Settings";
 import { insertIdentity } from "@/services/sequencer";
 import {
@@ -26,8 +26,7 @@ export function Id() {
   const { identity, retrieveIdentity, encodeIdentityCommitment } =
     useIdentity();
 
-  const handleOnPaste = async (event: React.ClipboardEvent) => {
-    const data = event.clipboardData.getData("Text");
+  const handleSuccess = async (data: string) => {
     const { uri } = parseWorldIDQRCode(data);
 
     if (identity) {
@@ -41,8 +40,6 @@ export function Id() {
         await pairClient(uri);
       }
     }
-
-    return {};
   };
 
   const handleDisconnect = async () => {
@@ -151,14 +148,18 @@ export function Id() {
         </button>
       </div>
 
+      {isOpenScanner && (
+        <QrScanner
+          open
+          onClose={() => setOpenScanner(false)}
+          onClickManualInput={() => setOpenQrInput(true)}
+          onScanSuccess={handleSuccess}
+        />
+      )}
+
       <QrInput
         open={isOpenQrInput}
         onClose={() => setOpenQrInput(false)}
-      />
-
-      <Scanner
-        open={isOpenScanner}
-        onClose={() => setOpenScanner(false)}
       />
 
       <Settings
