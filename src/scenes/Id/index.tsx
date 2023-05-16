@@ -2,10 +2,18 @@ import { CardIcon } from "@/components/CardIcon";
 import { Icon } from "@/components/Icon";
 import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
+import { parseWorldIDQRCode } from "@/lib/validation";
 import { QrInput } from "@/scenes/Id/QrInput";
-import { Scanner } from "@/scenes/Id/Scanner";
+import { QrScanner } from "@/scenes/Id/QrScanner";
 import { Settings } from "@/scenes/Id/Settings";
-// import { Settings } from "@/components/Settings";
+import {
+  client,
+  createClient,
+  onSessionDisconnect,
+  onSessionProposal,
+  onSessionRequest,
+  pairClient,
+} from "@/services/walletconnect";
 import { CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -22,6 +30,22 @@ export function Id() {
 
   const handleCredentialsCard = () => {
     void router.push(`/id/${id}/credentials`);
+  };
+
+  const handleSuccess = async (data: string) => {
+    const { uri } = parseWorldIDQRCode(data);
+
+    if (identity) {
+      await createClient(identity);
+
+      client.on("session_proposal", onSessionProposal);
+      client.on("session_request", onSessionRequest);
+      client.on("session_delete", onSessionDisconnect);
+
+      if (uri) {
+        await pairClient(uri);
+      }
+    }
   };
 
   // On initial load, get identity from session storage
@@ -110,14 +134,18 @@ export function Id() {
         </button>
       </div>
 
+      {isOpenScanner && (
+        <QrScanner
+          open
+          onClose={() => setOpenScanner(false)}
+          onClickManualInput={() => setOpenQrInput(true)}
+          onScanSuccess={handleSuccess}
+        />
+      )}
+
       <QrInput
         open={isOpenQrInput}
         onClose={() => setOpenQrInput(false)}
-      />
-
-      <Scanner
-        open={isOpenScanner}
-        onClose={() => setOpenScanner(false)}
       />
 
       {identity && (
