@@ -26,15 +26,10 @@ export const QrInput = React.memo(function QrInput(props: {
     useIdentity();
 
   // const isInvalid = React.useMemo(() => {
-  //   return !!value; // FIXME: implement validation
+  //   const regex =
+  //     /^https:\/\/worldcoin\.org\/verify\?w=wc:[a-zA-Z0-9]{64}@2\?relay-protocol=irn&symKey=[a-f0-9]{64}$/;
+  //   return value.match(regex);
   // }, [value]);
-
-  // const handleChange = React.useCallback(
-  //   (event: React.ChangeEvent<HTMLInputElement>) => {
-  //     setUri(event.target.value);
-  //   },
-  //   [],
-  // );
 
   const performVerification = async (uri: string) => {
     if (identity) {
@@ -53,12 +48,12 @@ export const QrInput = React.memo(function QrInput(props: {
     }
   };
 
-  const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = event.target.value;
     if (data) setValue(data);
   };
 
-  const handleOnPaste = async (event: React.ClipboardEvent) => {
+  const handlePaste = async (event: React.ClipboardEvent) => {
     const data = event.clipboardData.getData("Text");
     const { uri } = parseWorldIDQRCode(data);
 
@@ -102,8 +97,8 @@ export const QrInput = React.memo(function QrInput(props: {
         placeholder="QR code"
         // invalid={isInvalid}
         value={value}
-        onChange={handleOnChange}
-        // onPaste={handleOnPaste}
+        onChange={handleChange}
+        onPaste={handlePaste}
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
           <>
             <button

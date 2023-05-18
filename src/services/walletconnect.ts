@@ -58,6 +58,7 @@ async function approveRequest(
   topic: string,
   response: SignResponse,
 ): Promise<void> {
+  console.log("🚀 ~ file: walletconnect.ts:61 ~ response:", response);
   await client.respondSessionRequest({
     topic,
     response,
@@ -151,6 +152,7 @@ export async function onSessionRequest(
 ): Promise<void> {
   const { id, params, topic } = event;
   const { request } = params;
+  console.log("🚀 ~ file: walletconnect.ts:154 ~ request:", request);
   const credentialType = getHighestCredentialType(request);
 
   let verification: { verified: boolean; fullProof: FullProof };

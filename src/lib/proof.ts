@@ -73,6 +73,8 @@ export async function verifySemaphoreProof(
   try {
     // Validate inputs
     const signal = await validateSignal(rawSignal);
+    console.log("🚀 ~ file: proof.ts:76 ~ signal:", signal);
+    console.log("🚀 ~ file: proof.ts:76 ~ rawSignal:", rawSignal);
     const externalNullifier = await validateExternalNullifier(
       rawExternalNullifier,
     );
