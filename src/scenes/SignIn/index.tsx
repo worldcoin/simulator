@@ -1,7 +1,7 @@
 import React from "react";
-import { Modal } from "@/scenes/Signin/Modal";
+import { Modal } from "./Modal";
 
-export function Signin() {
+export function SignIn() {
   const [open, setOpen] = React.useState(true);
 
   return (
