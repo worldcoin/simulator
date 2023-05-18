@@ -1,13 +1,12 @@
-import React from "react";
-import { parseWorldIDQRCode } from "@/lib/validate-wallet-uri";
+import { Dialog } from "@/components/Dialog";
+import { Icon } from "@/components/Icon";
+import { parseWorldIDQRCode } from "@/lib/validation";
 import type { ScanConstraints } from "@/types/qr-scanner";
 import clsx from "clsx";
-import { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { Dialog } from "@/components/Dialog";
 import { QrScannerFrame } from "./Frame";
 import { useQrScanner } from "./useQrScanner";
-import { Icon } from "@/components/Icon";
 
 export const QrScanner = React.memo(function QrScanner(props: {
   open: boolean;

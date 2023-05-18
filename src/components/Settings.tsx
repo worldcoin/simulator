@@ -1,10 +1,68 @@
 import Button from "@/components/Button";
 import Header from "@/components/Header";
 import Item from "@/components/Item";
-import { useEffect, useState } from "react";
+import useIdentity from "@/hooks/useIdentity";
+import {
+  client,
+  core,
+  disconnectPairings,
+  disconnectSessions,
+} from "@/services/walletconnect";
+import { useRouter } from "next/router";
+import { memo, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { Drawer } from "./Drawer";
+import { GradientIcon } from "./GradientIcon";
 
-export default function Settings() {
+export const Settings = memo(function Settings(props: {
+  open: boolean;
+  onClose: () => void;
+  commitment: string;
+}) {
+  const router = useRouter();
+  const { id } = router.query;
   const [version, setVersion] = useState("2.0");
+
+  const { clearIdentity } = useIdentity();
+
+  const handleCredentialsMenu = () => {
+    void router.push(`/id/${id}/credentials`);
+  };
+
+  const handleCopyCommitment = async () => {
+    try {
+      await navigator.clipboard.writeText(props.commitment);
+      toast.success("Copied commitment");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to copy commitment");
+    }
+  };
+
+  const handleLogout = async () => {
+    // Disconnect all WalletConnect sessions
+    if (client) {
+      const sessions = client.getActiveSessions();
+      const sessionTopics = Object.keys(sessions);
+      const pairings = core.pairing.getPairings();
+      const pairingTopics = pairings.map((pairing) => pairing.topic);
+
+      try {
+        await disconnectSessions(sessionTopics);
+        await disconnectPairings(pairingTopics);
+        console.info("WalletConnect disconnected");
+      } catch (error) {
+        console.error(`WalletConnect failed to disconnect, ${error}`);
+      }
+    }
+
+    // Clear session storage
+    clearIdentity();
+    console.info("Session storage cleared");
+
+    // Redirect to landing page
+    await router.push("/");
+  };
 
   // On initial load, check for package version
   useEffect(() => {
@@ -14,42 +72,51 @@ export default function Settings() {
   }, []);
 
   return (
-    <div className="flex flex-col justify-between">
-      <div>
-        <Header
-          heading="Settings"
-          iconLeft="chevron-thick"
-          onClickLeft={() => console.log("clicked")}
-        />
-        <Item
-          icon="user"
-          heading="Credentials"
-          text="Manage your credentials"
-          className="mt-5 p-4"
-          iconClassName="text-ffffff"
-          iconBgClassName="bg-9d50ff"
-          onClick={() => console.log("clicked")}
-        />
-        <Item
-          icon="note"
-          heading="Identity commitment"
-          text="Copy your identity commitment"
-          className="mt-3 p-4"
-          iconClassName="text-ffffff"
-          iconBgClassName="bg-00c3b6"
-          indicator="copy"
-          onClick={() => console.log("clicked")}
-        />
+    <Drawer
+      open={props.open}
+      onClose={props.onClose}
+    >
+      <div className="flex h-full flex-col justify-between">
+        <div>
+          <Header
+            heading="Settings"
+            iconLeft="chevron-thick"
+            onClickLeft={props.onClose}
+          />
+          <Item
+            heading="Credentials"
+            text="Manage your credentials"
+            className="mt-5 p-4"
+            onClick={handleCredentialsMenu}
+          >
+            <GradientIcon
+              name="user"
+              color="#9D50FF"
+            />
+          </Item>
+          <Item
+            heading="Identity commitment"
+            text="Copy your identity commitment"
+            className="mt-3 p-4"
+            indicator="copy"
+            onClick={handleCopyCommitment}
+          >
+            <GradientIcon
+              name="note"
+              color="#00C3B6"
+            />
+          </Item>
+        </div>
+        <Button
+          className="mb-8 h-14 w-full bg-fff5f7 font-sora text-16 font-semibold text-ff5a76"
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
+          Version {version}
+        </p>
       </div>
-      <Button
-        className="mb-6 h-14 w-full bg-fff5f7 font-sora text-16 font-semibold text-ff5a76"
-        onClick={() => console.log("clicked")}
-      >
-        Logout
-      </Button>
-      <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
-        Version {version}
-      </p>
-    </div>
+    </Drawer>
   );
-}
+});

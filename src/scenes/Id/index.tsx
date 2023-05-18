@@ -1,11 +1,12 @@
-import { CardIcon } from "@/components/CardIcon";
+import { GradientIcon } from "@/components/GradientIcon";
+import Header from "@/components/Header";
 import { Icon } from "@/components/Icon";
+import { Settings } from "@/components/Settings";
 import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { QrInput } from "@/scenes/Id/QrInput";
 import { QrScanner } from "@/scenes/Id/QrScanner";
-import { Settings } from "@/scenes/Id/Settings";
 import {
   client,
   createClient,
@@ -57,40 +58,23 @@ export function Id() {
 
   return (
     <div className="grid content-between gap-y-6 px-2 pb-6 xs:pb-0">
-      <div className="grid grid-cols-auto/1fr/auto gap-4">
-        <button
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200"
-          onClick={() => setOpenScanner(true)}
-        >
+      <Header
+        iconLeft="barcode"
+        iconRight="setting"
+        onClickLeft={() => setOpenScanner(true)}
+        onClickRight={() => setOpenSettings(true)}
+      >
+        <div className="flex h-8 items-center gap-1 rounded-full bg-info-100 px-3 text-s4 font-medium text-info-700">
           <Icon
-            name="barcode"
-            className="h-6 w-6"
+            name="user"
+            className="h-4 w-4"
           />
-        </button>
 
-        <div className="flex items-center justify-center">
-          <div className="inline-flex h-8 items-center gap-1 rounded-full bg-info-100 px-3 text-s4 font-medium text-info-700">
-            <Icon
-              name="user"
-              className="h-4 w-4"
-            />
-
-            <span className="leading-[1px]">
-              {identity?.persisted ? "Persistent ID" : "Temporary ID"}
-            </span>
-          </div>
+          <span className="leading-[1px]">
+            {identity?.persisted ? "Persistent" : "Temporary"}
+          </span>
         </div>
-
-        <button
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200"
-          onClick={() => setOpenSettings(true)}
-        >
-          <Icon
-            name="setting"
-            className="h-6 w-6"
-          />
-        </button>
-      </div>
+      </Header>
 
       <WorldID verified={identity?.verified[CredentialType.Orb]} />
 
@@ -99,10 +83,11 @@ export function Id() {
           className="rounded-12 bg-icons-purple-secondary p-4 text-left"
           onClick={handleCredentialsCard}
         >
-          <CardIcon
-            className="h-[44px] w-[44px]"
+          <GradientIcon
             name="user"
             color="#9D50FF"
+            className="h-6 w-6 text-gray-0"
+            bgClassName="h-[44px] w-[44px]"
           />
 
           <div className="mt-4.5 text-s4 font-medium text-icons-purple-primary/60">
@@ -118,10 +103,11 @@ export function Id() {
           className="rounded-12 bg-gray-100 p-4 text-left"
           onClick={() => setOpenQrInput(true)}
         >
-          <CardIcon
-            className="h-[44px] w-[44px]"
+          <GradientIcon
             name="text"
             color="#191C20"
+            className="h-6 w-6 text-gray-0"
+            bgClassName="h-[44px] w-[44px]"
           />
 
           <div className="mt-4.5 text-s4 font-medium text-gray-900/60">
