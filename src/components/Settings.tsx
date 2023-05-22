@@ -73,6 +73,7 @@ export const Settings = memo(function Settings(props: {
 
   return (
     <Drawer
+      fullHeight
       open={props.open}
       onClose={props.onClose}
     >

@@ -3,16 +3,20 @@ import React from "react";
 import styles from "./Icon.module.css";
 
 const icons = [
+  "badge-not-verified",
   "barcode",
   "battery",
   "bead-verified",
   "bead-not-verified",
   "camera-off",
+  "check",
+  "check-circle",
   "checkmark",
   "chevron-thick",
   "chevron-thin",
   "clock",
   "close",
+  "close-circle",
   "copy",
   "cross",
   "direction-down",
@@ -32,6 +36,7 @@ const icons = [
   "text",
   "user",
   "wifi",
+  "world-id",
 ] as const;
 
 export type IconType = typeof icons[number];
