@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { inclusionProof, insertIdentity } from "@/services/sequencer";
@@ -59,19 +60,29 @@ export default function Credentials() {
         Simulate and manage different verified credentials for your World ID.
       </p>
       <Item
-        icon="orb"
         heading="Biometrics"
         text="Verify with a simulation of the Worldcoin Orb"
         className="mt-14 p-5"
         onClick={() => handleVerifyCredential(CredentialType.Orb)}
-      />
+      >
+        <Icon
+          name="orb"
+          className="h-5 w-5 text-gray-400"
+          bgClassName="h-10 w-10 bg-gray-200 rounded-12"
+        />
+      </Item>
       <Item
-        icon="phone"
         heading="Phone number"
         text="Verify with a randomly generated phone number"
         className="mt-3 p-5"
         onClick={() => handleVerifyCredential(CredentialType.Phone)}
-      />
+      >
+        <Icon
+          name="phone"
+          className="h-5 w-5 text-gray-400"
+          bgClassName="h-10 w-10 bg-gray-200 rounded-12"
+        />
+      </Item>
       {/* <Switch /> */}
     </div>
   );

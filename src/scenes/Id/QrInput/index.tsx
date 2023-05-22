@@ -13,23 +13,29 @@ import {
 } from "@/services/walletconnect";
 import clsx from "clsx";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
-export const QrInput = React.memo(function QrInput(props: {
+export const QrInput = memo(function QrInput(props: {
   open: boolean;
   onClose: () => void;
 }) {
   const router = useRouter();
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = useState("");
 
   const { identity, retrieveIdentity, encodeIdentityCommitment } =
     useIdentity();
 
-  // const isInvalid = React.useMemo(() => {
-  //   const regex =
-  //     /^https:\/\/worldcoin\.org\/verify\?w=wc:[a-zA-Z0-9]{64}@2\?relay-protocol=irn&symKey=[a-f0-9]{64}$/;
-  //   return value.match(regex);
-  // }, [value]);
+  const isInvalid = useMemo(() => {
+    if (!value) return false;
+    try {
+      const url = decodeURIComponent(value);
+      const regex =
+        /^https:\/\/worldcoin\.org\/verify\?w=wc:[a-zA-Z0-9]{64}@2\?relay-protocol=irn&symKey=[a-zA-Z0-9]{64}$/;
+      return url.match(regex) === null;
+    } catch (e) {
+      return true;
+    }
+  }, [value]);
 
   const performVerification = async (uri: string) => {
     if (identity) {
@@ -50,7 +56,7 @@ export const QrInput = React.memo(function QrInput(props: {
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = event.target.value;
-    if (data) setValue(data);
+    if (data || data === "") setValue(data);
   };
 
   const handlePaste = async (event: React.ClipboardEvent) => {
@@ -95,7 +101,7 @@ export const QrInput = React.memo(function QrInput(props: {
       <Input
         className="mt-8"
         placeholder="QR code"
-        // invalid={isInvalid}
+        invalid={isInvalid}
         value={value}
         onChange={handleChange}
         onPaste={handlePaste}
@@ -130,14 +136,14 @@ export const QrInput = React.memo(function QrInput(props: {
         )}
       />
 
-      {/* {isInvalid && (
+      {isInvalid && (
         <div className="mt-2 text-b3 text-ff5a76">The QR code is not valid</div>
-      )} */}
+      )}
 
       <Button
         type="submit"
         className="mt-8 h-14 w-full bg-gray-900 text-ffffff disabled:bg-gray-100 disabled:text-gray-300"
-        // isDisabled={isInvalid}
+        isDisabled={isInvalid || !value}
         onClick={handleSubmit}
       >
         Submit

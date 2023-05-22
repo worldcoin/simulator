@@ -76,7 +76,10 @@ export function Id() {
         </div>
       </Header>
 
-      <WorldID verified={identity?.verified[CredentialType.Orb]} />
+      <WorldID
+        verified={identity?.verified[CredentialType.Orb]}
+        bioVerified={identity?.verified[CredentialType.Orb]}
+      />
 
       <div className="grid grid-cols-2 gap-2">
         <button

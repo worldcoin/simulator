@@ -1,12 +1,12 @@
 import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
+import { useQrScanner } from "@/hooks/useQrScanner";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import type { ScanConstraints } from "@/types/qr-scanner";
 import clsx from "clsx";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { QrScannerFrame } from "./Frame";
-import { useQrScanner } from "./useQrScanner";
 
 export const QrScanner = React.memo(function QrScanner(props: {
   open: boolean;
@@ -38,8 +38,6 @@ export const QrScanner = React.memo(function QrScanner(props: {
     if (!qrData) {
       return;
     }
-
-    console.log(qrData);
 
     const t = setTimeout(() => setValid(null), 2000);
 
