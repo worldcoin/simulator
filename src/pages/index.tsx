@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
 import { Card } from "@/components/Card";
 import Confirm from "@/components/Confirm";
+import { Dropdown } from "@/components/Dropdown";
 import useIdentity from "@/hooks/useIdentity";
 import { Chain } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
@@ -97,13 +98,23 @@ export default function Home() {
             With the World ID Simulator, you can test different scenarios with
             your identity.
           </p>
-          <select
-            className="block w-full rounded-12 border p-4 text-16"
-            onChange={(event) => setChain(event.target.value as Chain)}
-          >
-            <option value={Chain.Polygon}>Polygon</option>
-            <option value={Chain.Optimism}>Optimism</option>
-          </select>
+          <Dropdown
+            options={[
+              {
+                label: "Polygon",
+                src: "/icons/polygon.svg",
+                alt: "The Polygon logo",
+                chain: Chain.Polygon,
+              },
+              {
+                label: "Optimism",
+                src: "/icons/optimism.svg",
+                alt: "The Optimism logo",
+                chain: Chain.Optimism,
+              },
+            ]}
+            setChain={setChain}
+          />
           <Card
             icon="user"
             heading="Generate persistent identity"

@@ -1,18 +1,18 @@
+import Button from "@/components/Button";
 import type { DrawerProps } from "@/components/Drawer";
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
-import Button from "@/components/Button";
-import { Credential } from "./Credential";
-import { Status } from "./Status";
 import { RadioGroup } from "@radix-ui/react-radio-group";
 import Image from "next/image";
+import { Credential } from "./Credential";
+import { Status } from "./Status";
 
 export interface ModalProps {
+  title: string;
+  status?: "error" | "verified" | "verifying";
+  imageUrl?: string;
   open: DrawerProps["open"];
   onClose: DrawerProps["onClose"];
-  title: string;
-  imageUrl?: string;
-  status?: "error" | "verified" | "verifying";
 }
 
 export function Modal(props: ModalProps) {

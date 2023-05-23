@@ -1,6 +1,5 @@
 import type { IconType } from "@/components/Icon";
-import { Icon } from "@/components/Icon";
-import { Close, Content, Overlay, Root } from "@radix-ui/react-dialog";
+import { Content, Overlay, Root } from "@radix-ui/react-dialog";
 import clsx from "clsx";
 import React from "react";
 
@@ -30,18 +29,6 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
           },
         )}
       >
-        <Close
-          className={clsx(
-            props.closeClassName,
-            "absolute left-[24px] top-[24px] flex h-9 w-9 items-center justify-center rounded-full bg-gray-200",
-          )}
-        >
-          <Icon
-            name={props.closeIcon ?? "direction-down"}
-            className="h-6 w-6"
-          />
-        </Close>
-
         {props.children}
       </Content>
     </Root>

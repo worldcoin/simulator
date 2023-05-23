@@ -1,15 +1,15 @@
+import { GradientIcon } from "@/components/GradientIcon";
 import type { IconType } from "@/components/Icon";
 import { Icon } from "@/components/Icon";
-import { CardIcon } from "@/components/CardIcon";
-import { Item, Indicator } from "@radix-ui/react-radio-group";
+import { Indicator, Item } from "@radix-ui/react-radio-group";
 
 export interface CredentialProps {
-  className?: string;
-  color: string;
   icon: IconType;
   text: string;
-  single?: boolean;
   value: string;
+  color: string;
+  single?: boolean;
+  className?: string;
 }
 
 export function Credential(props: CredentialProps) {
@@ -20,7 +20,7 @@ export function Credential(props: CredentialProps) {
     >
       <div className="grid grid-cols-auto/1fr/auto items-center gap-x-4 rounded-16 bg-gray-100 p-3.5">
         <div>
-          <CardIcon
+          <GradientIcon
             className="h-8 w-8"
             color={props.color}
             name={props.icon}

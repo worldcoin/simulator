@@ -12,3 +12,10 @@ export enum Chain {
   Polygon = "polygon",
   Optimism = "optimism",
 }
+
+export enum Status {
+  Waiting,
+  Pending,
+  Verified,
+  Error,
+}

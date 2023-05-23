@@ -25,8 +25,8 @@ export function Id() {
   const { identity, retrieveIdentity, encodeIdentityCommitment } =
     useIdentity();
 
-  const [isOpenQrInput, setOpenQrInput] = useState(false);
   const [isOpenScanner, setOpenScanner] = useState(false);
+  const [isOpenQrInput, setOpenQrInput] = useState(false);
   const [isOpenSettings, setOpenSettings] = useState(false);
 
   const handleCredentialsCard = () => {
@@ -53,6 +53,7 @@ export function Id() {
   useEffect(() => {
     if (identity) return;
     void retrieveIdentity();
+    console.log("🚀 ~ file: index.tsx:58 ~ useEffect ~ identity:", identity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -79,6 +80,7 @@ export function Id() {
       <WorldID
         verified={identity?.verified[CredentialType.Orb]}
         bioVerified={identity?.verified[CredentialType.Orb]}
+        phoneVerified={identity?.verified[CredentialType.Phone]}
       />
 
       <div className="grid grid-cols-2 gap-2">

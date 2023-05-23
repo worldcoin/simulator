@@ -5,9 +5,26 @@ import type {
 } from "@/types";
 import { Chain, CredentialType } from "@/types";
 
-const SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> = {
-  [CredentialType.Orb]: process.env.NEXT_PUBLIC_ORB_SEQUENCER_PASSWORD,
-  [CredentialType.Phone]: process.env.NEXT_PUBLIC_PHONE_SEQUENCER_PASSWORD,
+const POLYGON_SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> = {
+  [CredentialType.Orb]: process.env.NEXT_PUBLIC_POLYGON_ORB_SEQUENCER_PASSWORD,
+  [CredentialType.Phone]:
+    process.env.NEXT_PUBLIC_POLYGON_PHONE_SEQUENCER_PASSWORD,
+};
+
+const OPTIMISM_SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> =
+  {
+    [CredentialType.Orb]:
+      process.env.NEXT_PUBLIC_OPTIMISM_ORB_SEQUENCER_PASSWORD,
+    // TODO: Add phone sequencer password for Optimism once deployed
+    [CredentialType.Phone]: undefined,
+  };
+
+const SEQUENCER_PASSWORD: Record<
+  Chain,
+  Record<CredentialType, string | undefined>
+> = {
+  [Chain.Polygon]: POLYGON_SEQUENCER_PASSWORD,
+  [Chain.Optimism]: OPTIMISM_SEQUENCER_PASSWORD,
 };
 
 const POLYGON_SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
@@ -41,6 +58,7 @@ function buildUrl(
 
 function buildHeaders(
   authenticate: boolean,
+  chain: Chain,
   credentialType: CredentialType,
 ): HeadersInit {
   const headers: HeadersInit = {
@@ -49,14 +67,17 @@ function buildHeaders(
 
   if (authenticate) {
     headers.Authorization = `Basic ${btoa(
-      `worldcoin:${SEQUENCER_PASSWORD[credentialType]}`,
+      `worldcoin:${SEQUENCER_PASSWORD[chain][credentialType]}`,
     )}`;
   }
   return headers;
 }
 
 async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
-  if (request.authenticate && !SEQUENCER_PASSWORD[request.credentialType]) {
+  if (
+    request.authenticate &&
+    !SEQUENCER_PASSWORD[request.chain][request.credentialType]
+  ) {
     throw new Error(
       `Sequencer password for '${request.credentialType}' is not provided and this request requires authentication. Please set SEQUENCER_PASSWORD environment variables.`,
     );
@@ -73,6 +94,7 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
       body: JSON.stringify({ identityCommitment: request.commitment }),
       headers: buildHeaders(
         request.authenticate ?? false,
+        request.chain,
         request.credentialType,
       ),
     },

@@ -2,8 +2,8 @@ import { Icon } from "@/components/Icon";
 import clsx from "clsx";
 
 export interface StatusProps {
-  className?: string;
   status: "error" | "verified" | "verifying";
+  className?: string;
 }
 
 export function Status(props: StatusProps) {
