@@ -1,5 +1,4 @@
 import Button from "@/common/Button/Button";
-import { parseWorldIDQRCode } from "@/common/helpers";
 import { Icon } from "@/common/Icon";
 import gradientSpinnerSvg from "@static/gradient-spinner.svg";
 import React, { Fragment } from "react";
@@ -12,19 +11,19 @@ const QrInput = React.memo(function QrInput(props: {
 
   const handleApplyUrl = React.useCallback(
     async (data: string, debugQrError = false) => {
-      const { valid, errorMessage, uri } = parseWorldIDQRCode(data);
+      // const { valid, errorMessage, uri } = parseWorldIDQRCode(data);
       setLoading(true);
 
-      if (!valid || !uri) {
-        if (debugQrError) {
-          console.log(errorMessage);
-        }
-        setLoading(false);
-        return;
-      }
+      // if (!valid || !uri) {
+      //   if (debugQrError) {
+      //     console.log(errorMessage);
+      //   }
+      //   setLoading(false);
+      //   return;
+      // }
 
       try {
-        await props.applyURL(uri);
+        await props.applyURL(data);
       } catch (error) {
         console.log(error);
         props.setIsModalVisible(false);

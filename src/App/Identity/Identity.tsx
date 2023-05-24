@@ -3,7 +3,7 @@ import QrInput from "@/App/Identity/QrInput/QrInput";
 import QrScanner from "@/App/Identity/QrScanner/QrScanner";
 import { GradientButton } from "@/common/GradientButton/GradientButton";
 import { Icon } from "@/common/Icon";
-import { connectWallet } from "@/lib/init-walletconnect";
+import { connectBridge } from "@/lib/init-bridge";
 import type { WalletConnectFlow } from "@/types";
 import { IdentityState, TabsType } from "@/types";
 import { Phase } from "@/types/common";
@@ -110,10 +110,8 @@ const Identity = React.memo(function Identity(props: {
 
   const applyURL = React.useCallback(
     async (uri: string) => {
-      if (!uri) {
-        return;
-      }
-      const request = await connectWallet({ uri, identity: props.identity });
+      if (!uri) return;
+      const request = await connectBridge({ uri, identity: props.identity });
 
       setToApprove({ ...approval, ...request });
       setIsVerificationModalVisible(true);

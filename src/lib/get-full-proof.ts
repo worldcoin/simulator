@@ -53,5 +53,5 @@ export const getFullProof = async (
     signal, // Encoding & hashing happens on the widget
   );
 
-  return await Semaphore.genProof(witness, wasmFilePath, finalZkeyPath);
+  return Semaphore.genProof(witness, wasmFilePath, finalZkeyPath);
 };

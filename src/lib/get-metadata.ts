@@ -1,5 +1,7 @@
-import type { ApprovalRequestMetadata } from "@/types/metadata";
-import type { WalletConnectRequest } from "./init-walletconnect";
+import type {
+  ApprovalRequestMetadata,
+  VerificationRequestParams,
+} from "@/types/metadata";
 
 interface ActionPayload {
   id: string;
@@ -21,11 +23,10 @@ interface ActionBody {
 }
 
 export async function fetchApprovalRequestMetadata(
-  request: WalletConnectRequest,
+  params: VerificationRequestParams,
   nullifierHash?: string,
 ): Promise<Partial<ApprovalRequestMetadata>> {
-  const [{ app_id, action, action_description, external_nullifier }] =
-    request.params;
+  const { app_id, action, action_description, external_nullifier } = params;
   const meta: Partial<ApprovalRequestMetadata> = {
     app_id,
     description: action_description,
