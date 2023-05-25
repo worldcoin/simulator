@@ -1,18 +1,20 @@
-import React from "react";
 import type { IconType } from "@/components/Icon";
 import { Icon } from "@/components/Icon";
 import clsx from "clsx";
+import React from "react";
 
-export const CardIcon = React.memo(function CardIcon(props: {
-  className?: string;
-  color: string;
+export const GradientIcon = React.memo(function CardIcon(props: {
   name: IconType;
+  color: string;
+  className?: string;
+  bgClassName?: string;
 }) {
   return (
     <div
       className={clsx(
-        props.className,
         "relative flex items-center justify-center",
+        { "h-8 w-8 text-gray-0": !props.bgClassName },
+        props.bgClassName,
       )}
       style={
         {
@@ -62,7 +64,10 @@ export const CardIcon = React.memo(function CardIcon(props: {
 
       <Icon
         name={props.name}
-        className="h-6 w-6 text-ffffff"
+        className={clsx(
+          { "h-5 w-5 text-gray-0": !props.className },
+          props.className,
+        )}
       />
     </div>
   );

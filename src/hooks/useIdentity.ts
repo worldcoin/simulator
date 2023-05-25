@@ -1,7 +1,8 @@
+import { encode } from "@/lib/utils";
 import { inclusionProof } from "@/services/sequencer";
 import type { IIdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type { Identity } from "@/types";
+import type { Identity, RawIdentity } from "@/types";
 import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 
@@ -15,6 +16,8 @@ const getStore = (store: IIdentityStore) => ({
 const useIdentity = () => {
   const { identity, setIdentity } = useIdentityStore(getStore);
 
+  const getIdentity = () => identity;
+
   const createIdentity = async (chain: Chain) => {
     const identity = new ZkIdentity();
     return await updateIdentity(identity, chain);
@@ -24,8 +27,9 @@ const useIdentity = () => {
     try {
       sessionStorage.setItem(
         IDENTITY_STORAGE_KEY,
-        JSON.stringify({ id, identity: identity.toString() }),
+        JSON.stringify({ id, zkIdentity: identity.toString() }),
       );
+      console.info("Stored identity");
     } catch (error) {
       console.error(`Unable to persist semaphore identity, ${error}`);
     }
@@ -33,12 +37,13 @@ const useIdentity = () => {
 
   const retrieveIdentity = async () => {
     try {
-      const storedIdentity = sessionStorage.getItem(IDENTITY_STORAGE_KEY);
-      if (!storedIdentity) {
+      const storage = sessionStorage.getItem(IDENTITY_STORAGE_KEY);
+      if (!storage) {
         return null;
       }
 
-      const zkIdentity = new ZkIdentity(storedIdentity);
+      const rawIdentity = JSON.parse(storage) as RawIdentity;
+      const zkIdentity = new ZkIdentity(rawIdentity.zkIdentity.toString());
       const identity = await updateIdentity(zkIdentity);
       console.info("Restored serialized identity");
 
@@ -55,7 +60,7 @@ const useIdentity = () => {
     persisted = false,
   ) => {
     const { commitment, trapdoor, nullifier } = identity;
-    const encodedCommitment = encodeIdentityCommitment(commitment);
+    const encodedCommitment = encode(commitment);
     const id = encodedCommitment.slice(0, 10);
 
     const orbProof = await getIdentityProof(
@@ -100,10 +105,6 @@ const useIdentity = () => {
     }
   };
 
-  const encodeIdentityCommitment = (identityCommitment: bigint): string => {
-    return identityCommitment.toString(16).padStart(64, "0");
-  };
-
   const getIdentityProof = async (
     chain: Chain,
     credentialType: CredentialType,
@@ -126,13 +127,13 @@ const useIdentity = () => {
 
   return {
     identity,
+    getIdentity,
     setIdentity,
     createIdentity,
     storeIdentity,
     retrieveIdentity,
     updateIdentity,
     clearIdentity,
-    encodeIdentityCommitment,
   };
 };
 

@@ -7,6 +7,7 @@ export interface Identity {
   readonly commitment: bigint;
   readonly trapdoor: bigint;
   readonly nullifier: bigint;
+  // readonly zkIdentity: ZkIdentity;
   chain: Chain; // TODO: refactor
   persisted: boolean;
   verified: Record<CredentialType, boolean>;

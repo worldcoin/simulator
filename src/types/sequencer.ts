@@ -17,6 +17,5 @@ export interface InclusionProofResponse {
 export interface InsertIdentityResponse {
   root: string;
   status: string;
-  pendingValidAsOf: Date;
-  minedValidAsOf: Date;
+  proof: Record<"Left" | "Right", string>[];
 }

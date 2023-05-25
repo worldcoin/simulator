@@ -1,20 +1,28 @@
+import { Icon } from "@/components/Icon";
 import Item from "@/components/Item";
+import { VerifyOrb } from "@/components/Verify/VerifyOrb";
+import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
+import { encode } from "@/lib/utils";
 import { inclusionProof, insertIdentity } from "@/services/sequencer";
-import type { InclusionProofResponse } from "@/types";
-import { CredentialType } from "@/types";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import {
+  Chain,
+  type CredentialType,
+  type InclusionProofResponse,
+} from "@/types";
+import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function Credentials() {
-  const router = useRouter();
-  const { identity, retrieveIdentity, encodeIdentityCommitment } =
-    useIdentity();
+  const { identity, retrieveIdentity, updateIdentity } = useIdentity();
+
+  const [isOpenVerifyOrb, setIsOpenVerifyOrb] = useState(false);
+  const [isOpenVerifyPhone, setIsOpenVerifyPhone] = useState(false);
 
   const handleVerifyCredential = async (credentialType: CredentialType) => {
     if (identity) {
-      const commitment = encodeIdentityCommitment(identity.commitment);
+      const commitment = encode(identity.commitment);
       let proof: InclusionProofResponse | undefined;
       try {
         proof = await inclusionProof(
@@ -22,21 +30,25 @@ export default function Credentials() {
           credentialType,
           commitment,
         );
-        toast.info(`${credentialType.toString()} credential already exists!`);
-        await router.push(`/id/${identity.id}`);
+        toast.info(
+          `Credential type '${credentialType.toString()}' already exists onchain!`,
+        );
       } catch (e) {}
 
       if (!proof) {
         try {
           await insertIdentity(identity.chain, credentialType, commitment);
-          toast.success(
-            `${credentialType.toString()} credential is being verified!`,
-          );
-          await router.push(`/id/${identity.id}`);
+          const zkIdentity = {
+            trapdoor: identity.trapdoor,
+            nullifier: identity.nullifier,
+            commitment: identity.commitment,
+          } as ZkIdentity;
+          await updateIdentity(zkIdentity, identity.chain, identity.persisted);
         } catch (error) {
-          console.error(error);
-          toast.error(
-            `Error verifying ${credentialType.toString()} credential`,
+          throw new Error(
+            `Error verifying '${credentialType.toString()}' credential on chain '${
+              identity.chain
+            }'`,
           );
         }
       }
@@ -53,26 +65,53 @@ export default function Credentials() {
   return (
     <div className="mt-12 flex flex-col px-2 pb-6 text-center xs:pb-0">
       <h1 className="font-sora text-26 font-semibold text-191c20">
-        World ID credentials
+        Obtain your credentials
       </h1>
       <p className="mt-4 font-rubik text-18 text-657080">
-        Simulate and manage different verified credentials for your World ID.
+        Simulate obtaining different credentials for your World ID.
       </p>
       <Item
-        icon="orb"
         heading="Biometrics"
-        text="Verify with a simulation of the Worldcoin Orb"
+        text="Obtain the Orb verification on the staging network"
         className="mt-14 p-5"
-        onClick={() => handleVerifyCredential(CredentialType.Orb)}
+        onClick={() => setIsOpenVerifyOrb(true)}
+      >
+        <Icon
+          name="orb"
+          className="h-5 w-5 text-gray-400"
+          bgClassName="h-10 w-10 bg-gray-200 rounded-12"
+        />
+      </Item>
+      {identity?.chain !== Chain.Optimism ? (
+        <Item
+          heading="Phone number"
+          text="Obtain the phone verification on the staging network"
+          className="mt-3 p-5"
+          onClick={() => setIsOpenVerifyPhone(true)}
+        >
+          <Icon
+            name="phone"
+            className="h-5 w-5 text-gray-400"
+            bgClassName="h-10 w-10 bg-gray-200 rounded-12"
+          />
+        </Item>
+      ) : (
+        <p className="mx-2 mt-6 text-left text-b3 text-gray-400">
+          Note: Phone credentials are not currently supported on the Optimism
+          network.
+        </p>
+      )}
+
+      <VerifyOrb
+        open={isOpenVerifyOrb}
+        onClose={() => setIsOpenVerifyOrb(false)}
+        handleVerify={handleVerifyCredential}
       />
-      <Item
-        icon="phone"
-        heading="Phone number"
-        text="Verify with a randomly generated phone number"
-        className="mt-3 p-5"
-        onClick={() => handleVerifyCredential(CredentialType.Phone)}
+      <VerifyPhone
+        open={isOpenVerifyPhone}
+        onClose={() => setIsOpenVerifyPhone(false)}
+        handleVerify={handleVerifyCredential}
       />
-      {/* <Switch /> */}
     </div>
   );
 }

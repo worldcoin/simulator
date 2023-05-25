@@ -208,6 +208,7 @@ module.exports = {
     },
 
     fontSize: {
+      h1: ["calc(32 * 1rem / 16)", { lineHeight: "120%", fontWeight: 600 }],
       h2: ["calc(26 * 1rem / 16)", { lineHeight: "120%", fontWeight: 600 }],
       h3: ["calc(20 * 1rem / 16)", { lineHeight: "120%" }],
       s1: ["calc(18 * 1rem / 16)", { lineHeight: "120%" }],
