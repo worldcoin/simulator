@@ -1,10 +1,13 @@
 import { Icon } from "@/components/Icon";
 import Layout from "@/components/Layout";
 import StatusBar from "@/components/StatusBar";
+import { useWalletConnect } from "@/hooks/useWalletConnect";
+import { setupClient } from "@/services/walletconnect";
 import "@/styles/globals.css";
 import { ConnectKitProvider, getDefaultClient } from "connectkit";
 import type { AppProps } from "next/app";
 import { Rubik, Sora } from "next/font/google";
+import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useMediaQuery } from "usehooks-ts";
@@ -37,6 +40,20 @@ const client = createClient(
 
 export default function App({ Component, pageProps }: AppProps) {
   const isMobile = useMediaQuery("(max-width: 499px)");
+  const [ready, setReady] = useState(false);
+
+  // Initialize WalletConnect
+  useEffect(() => {
+    const initialize = async () => {
+      await setupClient();
+      setReady(true);
+    };
+
+    if (!ready) {
+      void initialize();
+    }
+  }, [ready]);
+  useWalletConnect(ready);
 
   return (
     <>

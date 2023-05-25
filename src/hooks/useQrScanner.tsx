@@ -2,7 +2,7 @@ import type {
   Bounds,
   QrScannerResultPoint,
   useQrScannerProps,
-} from "@/types/qr-scanner";
+} from "@/types/qrcode";
 import type { IScannerControls } from "@zxing/browser";
 import { BrowserQRCodeReader } from "@zxing/browser";
 import { useEffect, useState } from "react";

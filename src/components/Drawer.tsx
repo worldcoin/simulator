@@ -1,15 +1,12 @@
-import type { IconType } from "@/components/Icon";
 import { Content, Overlay, Root } from "@radix-ui/react-dialog";
 import clsx from "clsx";
 import React from "react";
 
 export interface DrawerProps {
-  closeClassName?: string;
-  closeIcon?: IconType;
-  fullHeight?: boolean;
   open: boolean;
-  className?: string;
   onClose: () => void;
+  className?: string;
+  fullHeight?: boolean;
   children: React.ReactNode;
 }
 

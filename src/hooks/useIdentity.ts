@@ -1,3 +1,4 @@
+import { encode } from "@/lib/utils";
 import { inclusionProof } from "@/services/sequencer";
 import type { IIdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
@@ -14,6 +15,8 @@ const getStore = (store: IIdentityStore) => ({
 
 const useIdentity = () => {
   const { identity, setIdentity } = useIdentityStore(getStore);
+
+  const getIdentity = () => identity;
 
   const createIdentity = async (chain: Chain) => {
     const identity = new ZkIdentity();
@@ -57,7 +60,7 @@ const useIdentity = () => {
     persisted = false,
   ) => {
     const { commitment, trapdoor, nullifier } = identity;
-    const encodedCommitment = encodeIdentityCommitment(commitment);
+    const encodedCommitment = encode(commitment);
     const id = encodedCommitment.slice(0, 10);
 
     const orbProof = await getIdentityProof(
@@ -102,10 +105,6 @@ const useIdentity = () => {
     }
   };
 
-  const encodeIdentityCommitment = (identityCommitment: bigint): string => {
-    return identityCommitment.toString(16).padStart(64, "0");
-  };
-
   const getIdentityProof = async (
     chain: Chain,
     credentialType: CredentialType,
@@ -128,13 +127,13 @@ const useIdentity = () => {
 
   return {
     identity,
+    getIdentity,
     setIdentity,
     createIdentity,
     storeIdentity,
     retrieveIdentity,
     updateIdentity,
     clearIdentity,
-    encodeIdentityCommitment,
   };
 };
 

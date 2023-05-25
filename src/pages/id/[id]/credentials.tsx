@@ -1,22 +1,28 @@
 import { Icon } from "@/components/Icon";
 import Item from "@/components/Item";
-import { VerifyOrb } from "@/components/VerifyOrb";
-import { VerifyPhone } from "@/components/VerifyPhone";
+import { VerifyOrb } from "@/components/Verify/VerifyOrb";
+import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
+import { encode } from "@/lib/utils";
 import { inclusionProof, insertIdentity } from "@/services/sequencer";
-import type { CredentialType, InclusionProofResponse } from "@/types";
+import {
+  Chain,
+  type CredentialType,
+  type InclusionProofResponse,
+} from "@/types";
+import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function Credentials() {
-  const { identity, retrieveIdentity, encodeIdentityCommitment } =
-    useIdentity();
+  const { identity, retrieveIdentity, updateIdentity } = useIdentity();
 
   const [isOpenVerifyOrb, setIsOpenVerifyOrb] = useState(false);
   const [isOpenVerifyPhone, setIsOpenVerifyPhone] = useState(false);
 
   const handleVerifyCredential = async (credentialType: CredentialType) => {
     if (identity) {
-      const commitment = encodeIdentityCommitment(identity.commitment);
+      const commitment = encode(identity.commitment);
       let proof: InclusionProofResponse | undefined;
       try {
         proof = await inclusionProof(
@@ -24,16 +30,25 @@ export default function Credentials() {
           credentialType,
           commitment,
         );
+        toast.info(
+          `Credential type '${credentialType.toString()}' already exists onchain!`,
+        );
       } catch (e) {}
 
       if (!proof) {
         try {
           await insertIdentity(identity.chain, credentialType, commitment);
+          const zkIdentity = {
+            trapdoor: identity.trapdoor,
+            nullifier: identity.nullifier,
+            commitment: identity.commitment,
+          } as ZkIdentity;
+          await updateIdentity(zkIdentity, identity.chain, identity.persisted);
         } catch (error) {
           throw new Error(
-            `Error verifying ${credentialType.toString()} credential on chain ${
+            `Error verifying '${credentialType.toString()}' credential on chain '${
               identity.chain
-            }`,
+            }'`,
           );
         }
       }
@@ -57,7 +72,7 @@ export default function Credentials() {
       </p>
       <Item
         heading="Biometrics"
-        text="Obtain the Orb verifcation on the staging network"
+        text="Obtain the Orb verification on the staging network"
         className="mt-14 p-5"
         onClick={() => setIsOpenVerifyOrb(true)}
       >
@@ -67,18 +82,25 @@ export default function Credentials() {
           bgClassName="h-10 w-10 bg-gray-200 rounded-12"
         />
       </Item>
-      <Item
-        heading="Phone number"
-        text="Obtain the phone verification on the staging network"
-        className="mt-3 p-5"
-        onClick={() => setIsOpenVerifyPhone(true)}
-      >
-        <Icon
-          name="phone"
-          className="h-5 w-5 text-gray-400"
-          bgClassName="h-10 w-10 bg-gray-200 rounded-12"
-        />
-      </Item>
+      {identity?.chain !== Chain.Optimism ? (
+        <Item
+          heading="Phone number"
+          text="Obtain the phone verification on the staging network"
+          className="mt-3 p-5"
+          onClick={() => setIsOpenVerifyPhone(true)}
+        >
+          <Icon
+            name="phone"
+            className="h-5 w-5 text-gray-400"
+            bgClassName="h-10 w-10 bg-gray-200 rounded-12"
+          />
+        </Item>
+      ) : (
+        <p className="mx-2 mt-6 text-left text-b3 text-gray-400">
+          Note: Phone credentials are not currently supported on the Optimism
+          network.
+        </p>
+      )}
 
       <VerifyOrb
         open={isOpenVerifyOrb}

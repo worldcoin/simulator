@@ -2,17 +2,14 @@ import Button from "@/components/Button";
 import Header from "@/components/Header";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
-import {
-  client,
-  core,
-  disconnectPairings,
-  disconnectSessions,
-} from "@/services/walletconnect";
+import { useWalletConnect } from "@/hooks/useWalletConnect";
+import { client, core } from "@/services/walletconnect";
 import { useRouter } from "next/router";
 import { memo, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Drawer } from "./Drawer";
 import { GradientIcon } from "./GradientIcon";
+import { Icon } from "./Icon";
 
 export const Settings = memo(function Settings(props: {
   open: boolean;
@@ -24,6 +21,7 @@ export const Settings = memo(function Settings(props: {
   const [version, setVersion] = useState("2.0");
 
   const { clearIdentity } = useIdentity();
+  const { disconnectSessions, disconnectPairings } = useWalletConnect();
 
   const handleCredentialsMenu = () => {
     void router.push(`/id/${id}/credentials`);
@@ -41,26 +39,27 @@ export const Settings = memo(function Settings(props: {
 
   const handleLogout = async () => {
     // Disconnect all WalletConnect sessions
-    if (client) {
-      const sessions = client.getActiveSessions();
-      const sessionTopics = Object.keys(sessions);
-      const pairings = core.pairing.getPairings();
-      const pairingTopics = pairings.map((pairing) => pairing.topic);
+    // if (client) {
+    const sessions = client.getActiveSessions();
+    const sessionTopics = Object.keys(sessions);
+    const pairings = core.pairing.getPairings();
+    const pairingTopics = pairings.map((pairing) => pairing.topic);
 
-      try {
-        await disconnectSessions(sessionTopics);
-        await disconnectPairings(pairingTopics);
-        console.info("WalletConnect disconnected");
-      } catch (error) {
-        console.error(`WalletConnect failed to disconnect, ${error}`);
-      }
+    try {
+      await disconnectSessions(sessionTopics);
+      await disconnectPairings(pairingTopics);
+      console.info("WalletConnect disconnected");
+    } catch (error) {
+      console.error(`WalletConnect failed to disconnect, ${error}`);
     }
+    // }
 
     // Clear session storage
     clearIdentity();
     console.info("Session storage cleared");
 
     // Redirect to landing page
+    toast.info(`Logged out of identity ${id}`);
     await router.push("/");
   };
 
@@ -99,7 +98,12 @@ export const Settings = memo(function Settings(props: {
             heading="Identity commitment"
             text="Copy your identity commitment"
             className="mt-3 p-4"
-            indicator="copy"
+            indicator={() => (
+              <Icon
+                name="copy"
+                className="h-6 w-6 text-gray-400"
+              />
+            )}
             onClick={handleCopyCommitment}
           >
             <GradientIcon

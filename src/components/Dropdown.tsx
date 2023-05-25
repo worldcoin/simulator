@@ -56,7 +56,7 @@ export const Dropdown = memo(function Dropdown(props: DropdownProps) {
           <Item
             key={option.label}
             onSelect={() => handleSelect(option)}
-            className="flex w-[285px] cursor-pointer items-center outline-none"
+            className="flex w-[305px] cursor-pointer items-center outline-none xs:w-[285px]"
           >
             <img
               src={option.src}

@@ -1,29 +1,17 @@
 import Button from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
-import { Input } from "@/components/Input";
 import useIdentity from "@/hooks/useIdentity";
-import { parseWorldIDQRCode } from "@/lib/validation";
-import {
-  client,
-  createClient,
-  onSessionDisconnect,
-  onSessionProposal,
-  onSessionRequest,
-  pairClient,
-} from "@/services/walletconnect";
 import clsx from "clsx";
-import { useRouter } from "next/router";
 import { memo, useEffect, useMemo, useState } from "react";
+import { Input } from "../Input";
 
 export const QrInput = memo(function QrInput(props: {
   open: boolean;
   onClose: () => void;
+  performVerification: (uri: string) => Promise<void>;
 }) {
-  const router = useRouter();
   const [value, setValue] = useState("");
-
-  const { identity, retrieveIdentity, encodeIdentityCommitment } =
-    useIdentity();
+  const { identity, retrieveIdentity } = useIdentity();
 
   const isInvalid = useMemo(() => {
     if (!value) return false;
@@ -37,23 +25,6 @@ export const QrInput = memo(function QrInput(props: {
     }
   }, [value]);
 
-  const performVerification = async (uri: string) => {
-    if (identity) {
-      await createClient(identity);
-
-      client.on("session_proposal", onSessionProposal);
-      client.on("session_request", onSessionRequest);
-      client.on("session_delete", onSessionDisconnect);
-      client.on("session_delete", () => {
-        void router.push(`/id/${identity.id}`);
-      });
-
-      if (uri) {
-        await pairClient(uri);
-      }
-    }
-  };
-
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = event.target.value;
     if (data || data === "") setValue(data);
@@ -61,9 +32,7 @@ export const QrInput = memo(function QrInput(props: {
 
   const handlePaste = async (event: React.ClipboardEvent) => {
     const data = event.clipboardData.getData("Text");
-    const { uri } = parseWorldIDQRCode(data);
-
-    if (uri) await performVerification(uri);
+    await props.performVerification(data);
   };
 
   const handleSubmit = async (
@@ -72,8 +41,7 @@ export const QrInput = memo(function QrInput(props: {
       | undefined,
   ) => {
     if (event) event.preventDefault();
-    const { uri } = parseWorldIDQRCode(value);
-    if (uri) await performVerification(uri);
+    await props.performVerification(value);
   };
 
   // On initial load, get identity from session storage

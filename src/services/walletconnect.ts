@@ -1,24 +1,12 @@
-import { verifySemaphoreProof } from "@/lib/proof";
-import type { Identity, SignRequest, SignResponse } from "@/types";
-import { CredentialType, ProofError } from "@/types";
-import type { FullProof } from "@semaphore-protocol/proof";
 import { Core } from "@walletconnect/core";
-import type {
-  ICore,
-  PairingTypes,
-  SignClientTypes,
-} from "@walletconnect/types";
-import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
+import type { ICore, PairingTypes } from "@walletconnect/types";
 import type { IWeb3Wallet } from "@walletconnect/web3wallet";
 import { Web3Wallet } from "@walletconnect/web3wallet";
-import { defaultAbiCoder as abi } from "ethers/lib/utils";
-import { toast } from "react-toastify";
 
 const WALLETCONNECT_PID = process.env.NEXT_PUBLIC_WALLETCONNECT_PID;
 
 export let core: ICore;
 export let client: IWeb3Wallet;
-let identity: Identity;
 
 function getTopic(uri: string): string | null {
   const topicRegex = /wc:([a-f0-9]+)@2/;
@@ -26,65 +14,7 @@ function getTopic(uri: string): string | null {
   return match ? match[1] : null;
 }
 
-function getHighestCredentialType(request: SignRequest): string {
-  const {
-    params: [{ credential_types }],
-  } = request;
-
-  // Orb credential always takes precedence over all other credential types
-  return credential_types.includes("orb") ? "orb" : credential_types[0];
-}
-
-function buildResponse(
-  id: number,
-  request: SignRequest,
-  fullProof: FullProof,
-): SignResponse {
-  const credential_type = getHighestCredentialType(request);
-
-  return {
-    id,
-    jsonrpc: "2.0",
-    result: {
-      merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
-      nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
-      proof: abi.encode(["uint256[8]"], [fullProof.proof]),
-      credential_type,
-    },
-  };
-}
-
-async function approveRequest(
-  topic: string,
-  response: SignResponse,
-): Promise<void> {
-  console.log("🚀 ~ file: walletconnect.ts:61 ~ response:", response);
-  await client.respondSessionRequest({
-    topic,
-    response,
-  });
-}
-
-async function rejectRequest(
-  topic: string,
-  id: number,
-  code: number,
-  message: string,
-): Promise<void> {
-  await client.respondSessionRequest({
-    topic,
-    response: {
-      id,
-      jsonrpc: "2.0",
-      error: {
-        code,
-        message,
-      },
-    },
-  });
-}
-
-export async function createClient(id: Identity): Promise<void> {
+export async function setupClient(): Promise<boolean> {
   core = new Core({
     // logger: "debug",
     projectId: WALLETCONNECT_PID,
@@ -98,7 +28,7 @@ export async function createClient(id: Identity): Promise<void> {
       icons: ["https://worldcoin.org/icons/logo-small.svg"],
     },
   });
-  identity = id;
+  return true;
 }
 
 export async function pairClient(
@@ -115,97 +45,4 @@ export async function pairClient(
   } else {
     console.error("Invalid or expired WalletConnect URI, please try again.");
   }
-}
-
-export async function onSessionProposal(
-  event: SignClientTypes.EventArguments["session_proposal"],
-) {
-  const { id, params } = event;
-  const namespaces = buildApprovedNamespaces({
-    proposal: params,
-    supportedNamespaces: {
-      eip155: {
-        chains: ["eip155:1"],
-        methods: ["world_id_v1"],
-        events: ["accountsChanged"],
-        accounts: ["eip155:1:0"],
-      },
-    },
-  });
-
-  try {
-    await client.approveSession({
-      id,
-      namespaces,
-    });
-  } catch (error) {
-    console.error(error);
-    await client.rejectSession({
-      id,
-      reason: getSdkError("USER_REJECTED_METHODS"),
-    });
-  }
-}
-
-export async function onSessionRequest(
-  event: SignClientTypes.EventArguments["session_request"],
-): Promise<void> {
-  const { id, params, topic } = event;
-  const { request } = params;
-  console.log("🚀 ~ file: walletconnect.ts:154 ~ request:", request);
-  const credentialType = getHighestCredentialType(request);
-
-  let verification: { verified: boolean; fullProof: FullProof };
-
-  try {
-    verification = await verifySemaphoreProof(
-      request,
-      identity,
-      credentialType === "orb" ? CredentialType.Orb : CredentialType.Phone, // TODO
-    );
-  } catch (error) {
-    console.error(`Error verifying semaphore proof, ${error}`);
-    if (error instanceof ProofError) {
-      await rejectRequest(topic, id, error.code, error.message);
-      return;
-    } else {
-      await rejectRequest(topic, id, -32602, "generic_error");
-      return;
-    }
-  }
-
-  // TODO: Move to UI layer
-  if (verification.verified) {
-    toast.success("Proof verified successfully");
-  } else {
-    toast.error("Proof verification failed");
-  }
-
-  const response = buildResponse(id, request, verification.fullProof);
-  await approveRequest(topic, response);
-}
-
-export async function onSessionDisconnect(
-  event: SignClientTypes.EventArguments["session_delete"],
-): Promise<void> {
-  const topics = Object.keys(client.getActiveSessions());
-
-  if (topics.includes(event.topic)) {
-    await disconnectSessions([event.topic]);
-  }
-}
-
-export async function disconnectPairings(topics: string[]): Promise<void> {
-  await Promise.all(topics.map((topic) => core.pairing.disconnect({ topic })));
-}
-
-export async function disconnectSessions(topics: string[]): Promise<void> {
-  await Promise.all(
-    topics.map((topic) =>
-      client.disconnectSession({
-        topic,
-        reason: getSdkError("USER_DISCONNECTED"),
-      }),
-    ),
-  );
 }

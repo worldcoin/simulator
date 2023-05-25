@@ -1,7 +1,7 @@
 import { Status } from "@/types";
 import { memo } from "react";
-import Button from "./Button";
-import { Icon } from "./Icon";
+import Button from "../Button";
+import { Icon } from "../Icon";
 
 interface VerifyStatusProps {
   status: Status;
@@ -16,10 +16,14 @@ export const VerifyStatus = memo(function VerifyStatus(
     <div className="mb-8 flex items-center justify-center">
       {props.status === Status.Waiting && (
         <Button
-          className="h-14 w-full bg-gray-900 font-sora text-16 font-semibold text-gray-0"
           onClick={props.handleClick}
+          className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-gray-0"
         >
-          Verify now
+          <Icon
+            name="world-id"
+            className="h-6 w-6"
+          />
+          <span className="ml-3">Verify with World ID</span>
         </Button>
       )}
       {props.status === Status.Pending && (

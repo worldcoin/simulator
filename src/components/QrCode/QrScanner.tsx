@@ -2,11 +2,11 @@ import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
 import { useQrScanner } from "@/hooks/useQrScanner";
 import { parseWorldIDQRCode } from "@/lib/validation";
-import type { ScanConstraints } from "@/types/qr-scanner";
+import type { ScanConstraints } from "@/types/qrcode";
 import clsx from "clsx";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { QrScannerFrame } from "./Frame";
+import { QrFrame } from "./QrFrame";
 
 export const QrScanner = React.memo(function QrScanner(props: {
   open: boolean;
@@ -14,7 +14,7 @@ export const QrScanner = React.memo(function QrScanner(props: {
   className?: string;
   // NOTE: constraints in percents
   scanConstraints?: ScanConstraints;
-  onScanSuccess?: (data: string) => Promise<void>;
+  performVerification: (data: string) => Promise<void>;
   onClickManualInput?: () => void;
 }) {
   const [cameraReady, setCameraReady] = useState(false);
@@ -46,7 +46,7 @@ export const QrScanner = React.memo(function QrScanner(props: {
       if (res.valid) {
         clearTimeout(t);
         setValid(true);
-        void props.onScanSuccess?.(qrData);
+        void props.performVerification(qrData);
       } else {
         throw res.errorMessage;
       }
@@ -102,7 +102,7 @@ export const QrScanner = React.memo(function QrScanner(props: {
         video.removeEventListener("canplay", onplay);
       }
     };
-  }, []);
+  }, [canvasRef]);
 
   return (
     <Dialog
@@ -127,7 +127,7 @@ export const QrScanner = React.memo(function QrScanner(props: {
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
 
-            <QrScannerFrame
+            <QrFrame
               qrPosition={qrPosition}
               containerRef={containerRef}
               videoRef={videoRef}
