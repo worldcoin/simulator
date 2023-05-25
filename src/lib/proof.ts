@@ -1,4 +1,4 @@
-import type { Identity, SignRequest } from "@/types";
+import type { CredentialType, Identity, SignRequest } from "@/types";
 import { ProofError } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
@@ -7,14 +7,17 @@ import { generateProof, verifyProof } from "@semaphore-protocol/proof";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import { validateExternalNullifier, validateSignal } from "./validation";
 
-export function getMerkleProof(identity: Identity): MerkleProof {
+export function getMerkleProof(
+  identity: Identity,
+  credentialType: CredentialType,
+): MerkleProof {
   // Identity has inclusion proof from sequencer
-  if (identity.inclusionProof?.proof) {
-    const siblings = identity.inclusionProof.proof
+  if (identity.inclusionProof[credentialType]?.proof) {
+    const siblings = identity.inclusionProof[credentialType]?.proof
       .flatMap((v) => Object.values(v))
       .map((v) => BigInt(v));
 
-    const pathIndices = identity.inclusionProof.proof
+    const pathIndices = identity.inclusionProof[credentialType]?.proof
       .flatMap((v) => Object.keys(v))
       .map((v) => (v == "Left" ? 0 : 1));
 
@@ -63,6 +66,7 @@ export async function getFullProof(
 export async function verifySemaphoreProof(
   request: SignRequest,
   identity: Identity,
+  credentialType: CredentialType,
 ) {
   const { signal: rawSignal, external_nullifier: rawExternalNullifier } =
     request.params[0];
@@ -74,7 +78,7 @@ export async function verifySemaphoreProof(
     );
 
     // Generate proofs
-    const merkleProof = getMerkleProof(identity);
+    const merkleProof = getMerkleProof(identity, credentialType);
     const fullProof = await getFullProof(
       identity,
       merkleProof,

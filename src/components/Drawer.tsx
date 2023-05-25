@@ -1,13 +1,16 @@
+import { Content, Overlay, Root } from "@radix-ui/react-dialog";
+import clsx from "clsx";
 import React from "react";
-import { Root, Overlay, Content, Close } from "@radix-ui/react-dialog";
-import { Icon } from "@/components/Icon";
 
-export const Drawer = React.memo(function Drawer(props: {
-  className?: string;
+export interface DrawerProps {
   open: boolean;
   onClose: () => void;
+  className?: string;
+  fullHeight?: boolean;
   children: React.ReactNode;
-}) {
+}
+
+export const Drawer = React.memo(function Drawer(props: DrawerProps) {
   return (
     <Root
       open={props.open}
@@ -15,14 +18,14 @@ export const Drawer = React.memo(function Drawer(props: {
     >
       <Overlay className="absolute inset-0 bg-gray-900/70" />
 
-      <Content className="absolute inset-x-0 bottom-0 top-[44px] rounded-t-20 bg-ffffff p-6 outline-none">
-        <Close className="absolute left-[24px] top-[24px] flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
-          <Icon
-            name="direction-down"
-            className="h-6 w-6"
-          />
-        </Close>
-
+      <Content
+        className={clsx(
+          "absolute inset-x-0 bottom-0 rounded-t-20 bg-ffffff p-6 outline-none",
+          {
+            "top-[44px]": props.fullHeight,
+          },
+        )}
+      >
         {props.children}
       </Content>
     </Root>

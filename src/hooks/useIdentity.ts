@@ -1,8 +1,9 @@
+import { encode } from "@/lib/utils";
 import { inclusionProof } from "@/services/sequencer";
 import type { IIdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type { Identity } from "@/types";
-import { CredentialType } from "@/types";
+import type { Identity, RawIdentity } from "@/types";
+import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 
 const IDENTITY_STORAGE_KEY = "Identity";
@@ -15,17 +16,20 @@ const getStore = (store: IIdentityStore) => ({
 const useIdentity = () => {
   const { identity, setIdentity } = useIdentityStore(getStore);
 
-  const createIdentity = async () => {
+  const getIdentity = () => identity;
+
+  const createIdentity = async (chain: Chain) => {
     const identity = new ZkIdentity();
-    return await updateIdentity(identity);
+    return await updateIdentity(identity, chain);
   };
 
   const storeIdentity = (id: string, identity: ZkIdentity) => {
     try {
       sessionStorage.setItem(
         IDENTITY_STORAGE_KEY,
-        JSON.stringify({ id, identity: identity.toString() }),
+        JSON.stringify({ id, zkIdentity: identity.toString() }),
       );
+      console.info("Stored identity");
     } catch (error) {
       console.error(`Unable to persist semaphore identity, ${error}`);
     }
@@ -33,12 +37,13 @@ const useIdentity = () => {
 
   const retrieveIdentity = async () => {
     try {
-      const storedIdentity = sessionStorage.getItem(IDENTITY_STORAGE_KEY);
-      if (!storedIdentity) {
+      const storage = sessionStorage.getItem(IDENTITY_STORAGE_KEY);
+      if (!storage) {
         return null;
       }
 
-      const zkIdentity = new ZkIdentity(storedIdentity);
+      const rawIdentity = JSON.parse(storage) as RawIdentity;
+      const zkIdentity = new ZkIdentity(rawIdentity.zkIdentity.toString());
       const identity = await updateIdentity(zkIdentity);
       console.info("Restored serialized identity");
 
@@ -49,22 +54,42 @@ const useIdentity = () => {
     }
   };
 
-  const updateIdentity = async (identity: ZkIdentity, persisted = false) => {
+  const updateIdentity = async (
+    identity: ZkIdentity,
+    chain = Chain.Polygon,
+    persisted = false,
+  ) => {
     const { commitment, trapdoor, nullifier } = identity;
-    const encodedCommitment = encodeIdentityCommitment(commitment);
+    const encodedCommitment = encode(commitment);
     const id = encodedCommitment.slice(0, 10);
 
-    const proof = await getIdentityProof(encodedCommitment, CredentialType.Orb);
+    const orbProof = await getIdentityProof(
+      chain,
+      CredentialType.Orb,
+      encodedCommitment,
+    );
+    const phoneProof = await getIdentityProof(
+      chain,
+      CredentialType.Phone,
+      encodedCommitment,
+    );
 
     const extendedIdentity: Identity = {
       ...identity,
+      id,
       commitment,
       trapdoor,
       nullifier,
-      id,
-      verified: proof ? true : false,
+      chain,
       persisted,
-      inclusionProof: proof,
+      verified: {
+        [CredentialType.Orb]: orbProof !== null,
+        [CredentialType.Phone]: phoneProof !== null,
+      },
+      inclusionProof: {
+        [CredentialType.Orb]: orbProof,
+        [CredentialType.Phone]: phoneProof,
+      },
     };
 
     setIdentity(extendedIdentity);
@@ -80,20 +105,21 @@ const useIdentity = () => {
     }
   };
 
-  const encodeIdentityCommitment = (identityCommitment: bigint): string => {
-    return identityCommitment.toString(16).padStart(64, "0");
-  };
-
   const getIdentityProof = async (
-    encodedCommitment: string,
+    chain: Chain,
     credentialType: CredentialType,
+    encodedCommitment: string,
   ) => {
     try {
-      const proof = await inclusionProof(encodedCommitment, credentialType);
+      const proof = await inclusionProof(
+        chain,
+        credentialType,
+        encodedCommitment,
+      );
       return proof;
     } catch (error) {
       console.error(
-        `Unable to get identity proof for credential type '${credentialType}'`,
+        `Unable to get identity proof for credential type '${credentialType}' on chain '${chain}'`,
       );
       return null;
     }
@@ -101,13 +127,13 @@ const useIdentity = () => {
 
   return {
     identity,
+    getIdentity,
     setIdentity,
     createIdentity,
     storeIdentity,
     retrieveIdentity,
     updateIdentity,
     clearIdentity,
-    encodeIdentityCommitment,
   };
 };
 

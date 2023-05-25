@@ -1,61 +1,47 @@
 import Button from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
-import { Input } from "@/components/Input";
 import useIdentity from "@/hooks/useIdentity";
-import { parseWorldIDQRCode } from "@/lib/validation";
-import {
-  client,
-  createClient,
-  onSessionDisconnect,
-  onSessionProposal,
-  onSessionRequest,
-  pairClient,
-} from "@/services/walletconnect";
 import clsx from "clsx";
-import React, { useEffect } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
+import { Input } from "../Input";
 
-export const QrInput = React.memo(function QrInput(props: {
+export const QrInput = memo(function QrInput(props: {
   open: boolean;
   onClose: () => void;
+  performVerification: (uri: string) => Promise<void>;
 }) {
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = useState("");
+  const { identity, retrieveIdentity } = useIdentity();
 
-  const { identity, retrieveIdentity, encodeIdentityCommitment } =
-    useIdentity();
-
-  // const isInvalid = React.useMemo(() => {
-  //   return !!value; // FIXME: implement validation
-  // }, [value]);
-
-  const handleChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(event.target.value);
-    },
-    [],
-  );
-
-  const handleSubmit = React.useCallback(() => {
-    console.log("submit", value); // FIXME: implement submitting
+  const isInvalid = useMemo(() => {
+    if (!value) return false;
+    try {
+      const url = decodeURIComponent(value);
+      const regex =
+        /^https:\/\/worldcoin\.org\/verify\?w=wc:[a-zA-Z0-9]{64}@2\?relay-protocol=irn&symKey=[a-zA-Z0-9]{64}$/;
+      return url.match(regex) === null;
+    } catch (e) {
+      return true;
+    }
   }, [value]);
 
-  const handleOnPaste = async (event: React.ClipboardEvent) => {
+  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const data = event.target.value;
+    if (data || data === "") setValue(data);
+  };
+
+  const handlePaste = async (event: React.ClipboardEvent) => {
     const data = event.clipboardData.getData("Text");
-    const { uri } = parseWorldIDQRCode(data);
-    console.log("🚀 ~ file: index.tsx:44 ~ handleOnPaste ~ uri:", uri);
+    await props.performVerification(data);
+  };
 
-    if (identity) {
-      await createClient(identity);
-
-      client.on("session_proposal", onSessionProposal);
-      client.on("session_request", onSessionRequest);
-      client.on("session_delete", onSessionDisconnect);
-
-      if (uri) {
-        await pairClient(uri);
-      }
-    }
-
-    return {};
+  const handleSubmit = async (
+    event:
+      | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>
+      | undefined,
+  ) => {
+    if (event) event.preventDefault();
+    await props.performVerification(value);
   };
 
   // On initial load, get identity from session storage
@@ -83,10 +69,10 @@ export const QrInput = React.memo(function QrInput(props: {
       <Input
         className="mt-8"
         placeholder="QR code"
-        // invalid={isInvalid}
+        invalid={isInvalid}
         value={value}
         onChange={handleChange}
-        onPaste={handleOnPaste}
+        onPaste={handlePaste}
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
           <>
             <button
@@ -118,13 +104,14 @@ export const QrInput = React.memo(function QrInput(props: {
         )}
       />
 
-      {/* {isInvalid && (
+      {isInvalid && (
         <div className="mt-2 text-b3 text-ff5a76">The QR code is not valid</div>
-      )} */}
+      )}
 
       <Button
+        type="submit"
         className="mt-8 h-14 w-full bg-gray-900 text-ffffff disabled:bg-gray-100 disabled:text-gray-300"
-        // isDisabled={isInvalid}
+        isDisabled={isInvalid || !value}
         onClick={handleSubmit}
       >
         Submit

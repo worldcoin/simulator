@@ -1,10 +1,11 @@
-import type { CredentialType } from "./common";
+import type { Chain, CredentialType } from "./common";
 
 export interface SequencerRequest {
+  chain: Chain;
   endpoint: string;
+  credentialType: CredentialType;
   commitment: string;
   authenticate?: boolean;
-  credentialType: CredentialType;
 }
 
 export interface InclusionProofResponse {
@@ -16,6 +17,5 @@ export interface InclusionProofResponse {
 export interface InsertIdentityResponse {
   root: string;
   status: string;
-  pendingValidAsOf: Date;
-  minedValidAsOf: Date;
+  proof: Record<"Left" | "Right", string>[];
 }

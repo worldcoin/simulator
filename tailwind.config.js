@@ -29,6 +29,7 @@ module.exports = {
   theme: {
     borderRadius: {
       2.5: "calc(2.5 * 1rem / 16)",
+      5: "calc(5 * 1rem / 16)",
       8: "calc(8 * 1rem / 16)",
       9: "calc(9 * 1rem / 16)",
       4: "calc(4 * 1rem / 16)",
@@ -207,12 +208,15 @@ module.exports = {
     },
 
     fontSize: {
+      h1: ["calc(32 * 1rem / 16)", { lineHeight: "120%", fontWeight: 600 }],
       h2: ["calc(26 * 1rem / 16)", { lineHeight: "120%", fontWeight: 600 }],
       h3: ["calc(20 * 1rem / 16)", { lineHeight: "120%" }],
       s1: ["calc(18 * 1rem / 16)", { lineHeight: "120%" }],
+      s2: ["calc(16 * 1rem / 16)", { lineHeight: "120%", fontWeight: 500 }],
       s3: ["calc(14 * 1rem / 16)", { lineHeight: "120%", fontWeight: 500 }],
       s4: ["calc(12 * 1rem / 16)", { lineHeight: "120%" }],
       b1: ["calc(18 * 1rem / 16)", { lineHeight: "130%" }],
+      b2: ["calc(16 * 1rem / 16)", { lineHeight: "130%" }],
       b3: ["calc(14 * 1rem / 16)", { lineHeight: "130%" }],
       b4: ["calc(12 * 1rem / 16)", { lineHeight: "130%" }],
       5: ["calc(5 * 1rem / 16)", { lineHeight: "6px" }],
