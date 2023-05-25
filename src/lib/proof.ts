@@ -126,8 +126,8 @@ async function generateSemaphoreProof(
       externalNullifier: externalNullifier,
       signalHash: signal,
     },
-    "../semaphore/semaphore.wasm",
-    "../semaphore/semaphore.zkey",
+    "/semaphore/semaphore.wasm",
+    "/semaphore/semaphore.zkey",
   )) as { proof: SnarkJSProof; publicSignals: string[] };
 
   return {
