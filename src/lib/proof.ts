@@ -1,13 +1,60 @@
-import type { CredentialType, Identity, SignRequest } from "@/types";
-import { ProofError } from "@/types";
+import verificationKeys from "@/public/semaphore/verification_key.json";
+import type { SignRequest } from "@/types";
+import { ProofError, type CredentialType, type Identity } from "@/types";
+import { BigNumber } from "@ethersproject/bignumber";
+import type { BytesLike, Hexable } from "@ethersproject/bytes";
 import { Group } from "@semaphore-protocol/group";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import type { FullProof } from "@semaphore-protocol/proof";
-import { generateProof, verifyProof } from "@semaphore-protocol/proof";
+import type { FullProof, Proof, SnarkJSProof } from "@semaphore-protocol/proof";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import { validateExternalNullifier, validateSignal } from "./validation";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { groth16 } from "snarkjs";
 
-export function getMerkleProof(
+/**
+ * Packs a proof into a format compatible with Semaphore.
+ * @param originalProof The proof generated with SnarkJS.
+ * @returns The proof compatible with Semaphore.
+ */
+function packProof(originalProof: SnarkJSProof): Proof {
+  return [
+    originalProof.pi_a[0],
+    originalProof.pi_a[1],
+    originalProof.pi_b[0][1],
+    originalProof.pi_b[0][0],
+    originalProof.pi_b[1][1],
+    originalProof.pi_b[1][0],
+    originalProof.pi_c[0],
+    originalProof.pi_c[1],
+  ];
+}
+
+/**
+ * Unpacks a proof into its original form.
+ * @param proof The proof compatible with Semaphore.
+ * @returns The proof compatible with SnarkJS.
+ */
+function unpackProof(proof: Proof): SnarkJSProof {
+  return {
+    pi_a: [proof[0], proof[1]],
+    pi_b: [
+      [proof[3], proof[2]],
+      [proof[5], proof[4]],
+    ],
+    pi_c: [proof[6], proof[7]],
+    protocol: "groth16",
+    curve: "bn128",
+  };
+}
+
+/**
+ * Transforms an inclusion proof into the Merkle proof format.
+ * @param identity The current simulator identity.
+ * @param credentialType The credential type to generate the proof for.
+ * @returns The Merkle proof of inclusion.
+ */
+function getMerkleProof(
   identity: Identity,
   credentialType: CredentialType,
 ): MerkleProof {
@@ -39,31 +86,101 @@ export function getMerkleProof(
   return group.generateMerkleProof(0);
 }
 
-export async function getFullProof(
-  identity: Identity,
-  merkleProof: MerkleProof,
-  externalNullifier: bigint,
-  signal: bigint,
+/**
+ * Generates a Semaphore proof.
+ * World ID overridden to avoid double hashing the external nullifier and signal hash.
+ * @param identity The Semaphore identity.
+ * @param groupOrMerkleProof The Semaphore group or its Merkle proof.
+ * @param externalNullifier The external nullifier.
+ * @param signal The Semaphore signal.
+ * @param snarkArtifacts The SNARK artifacts.
+ * @returns The Semaphore proof ready to be verified.
+ */
+async function generateSemaphoreProof(
+  { trapdoor, nullifier, commitment }: ZkIdentity,
+  groupOrMerkleProof: Group | MerkleProof,
+  externalNullifier: BytesLike | Hexable | bigint | number,
+  signal: BytesLike | Hexable | bigint | number,
 ): Promise<FullProof> {
-  const zkIdentity = {
-    trapdoor: identity.trapdoor,
-    nullifier: identity.nullifier,
-    commitment: identity.commitment,
-  } as ZkIdentity;
+  let merkleProof: MerkleProof;
 
-  return await generateProof(
-    zkIdentity,
-    merkleProof,
+  if ("depth" in groupOrMerkleProof) {
+    const index = groupOrMerkleProof.indexOf(commitment);
+
+    if (index === -1) {
+      throw new Error("The identity is not part of the group");
+    }
+
+    merkleProof = groupOrMerkleProof.generateMerkleProof(index);
+  } else {
+    merkleProof = groupOrMerkleProof;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  const { proof, publicSignals } = (await groth16.fullProve(
+    {
+      identityTrapdoor: trapdoor,
+      identityNullifier: nullifier,
+      treePathIndices: merkleProof.pathIndices,
+      treeSiblings: merkleProof.siblings,
+      externalNullifier: externalNullifier,
+      signalHash: signal,
+    },
+    "../semaphore/semaphore.wasm",
+    "../semaphore/semaphore.zkey",
+  )) as { proof: SnarkJSProof; publicSignals: string[] };
+
+  return {
+    merkleTreeRoot: publicSignals[0],
+    nullifierHash: publicSignals[1],
+    signal: BigNumber.from(signal).toString(),
+    externalNullifier: BigNumber.from(externalNullifier).toString(),
+    proof: packProof(proof),
+  };
+}
+
+/**
+ * Verifies a Semaphore proof.
+ * @param fullProof The SnarkJS Semaphore proof.
+ * @param treeDepth The Merkle tree depth.
+ * @returns True if the proof is valid, false otherwise.
+ */
+async function verifySemaphoreProof(
+  {
+    merkleTreeRoot,
+    nullifierHash,
     externalNullifier,
     signal,
-    {
-      zkeyFilePath: "/semaphore/semaphore.zkey",
-      wasmFilePath: "/semaphore/semaphore.wasm",
-    },
+    proof,
+  }: FullProof,
+  treeDepth: number,
+): Promise<boolean> {
+  if (treeDepth < 16 || treeDepth > 32) {
+    throw new TypeError("The tree depth must be a number between 16 and 32");
+  }
+
+  const verificationKey = {
+    ...verificationKeys,
+    vk_delta_2: verificationKeys.vk_delta_2[treeDepth - 16],
+    IC: verificationKeys.IC[treeDepth - 16],
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  return groth16.verify(
+    verificationKey,
+    [merkleTreeRoot, nullifierHash, signal, externalNullifier],
+    unpackProof(proof),
   );
 }
 
-export async function verifySemaphoreProof(
+/**
+ * Performs the Semaphore proof generation and verification process.
+ * @param request The session request from WalletConnect.
+ * @param identity The current simulator identity.
+ * @param credentialType The credential type to generate the proof for.
+ * @returns The full semaphore proof and its verification status.
+ */
+export default async function getFullProof(
   request: SignRequest,
   identity: Identity,
   credentialType: CredentialType,
@@ -79,15 +196,19 @@ export async function verifySemaphoreProof(
 
     // Generate proofs
     const merkleProof = getMerkleProof(identity, credentialType);
-    const fullProof = await getFullProof(
-      identity,
+    const fullProof = await generateSemaphoreProof(
+      {
+        trapdoor: identity.trapdoor,
+        nullifier: identity.nullifier,
+        commitment: identity.commitment,
+      } as ZkIdentity,
       merkleProof,
       externalNullifier,
       signal,
     );
 
     // Verify the full proof
-    const verified = await verifyProof(fullProof, 30);
+    const verified = await verifySemaphoreProof(fullProof, 30);
     return { verified, fullProof };
   } catch (error) {
     console.error(error);

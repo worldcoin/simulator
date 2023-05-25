@@ -1,16 +1,15 @@
-import { verifySemaphoreProof } from "@/lib/proof";
+import getFullProof from "@/lib/proof";
+import { client, core } from "@/services/walletconnect";
+import type { IModalStore } from "@/stores/modalStore";
+import { useModalStore } from "@/stores/modalStore";
 import type { SignRequest, SignResponse } from "@/types";
 import { CredentialType, ProofError } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
 import { defaultAbiCoder as abi } from "ethers/lib/utils";
-import { toast } from "react-toastify";
-
-import { client, core } from "@/services/walletconnect";
-import type { IModalStore } from "@/stores/modalStore";
-import { useModalStore } from "@/stores/modalStore";
 import { useCallback, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
 import useIdentity from "./useIdentity";
 
 function getHighestCredentialType(request: SignRequest): string {
@@ -119,12 +118,11 @@ export const useWalletConnect = (ready?: boolean) => {
       const { request } = params;
 
       const credentialType = getHighestCredentialType(request);
-
       let verification: { verified: boolean; fullProof: FullProof };
 
       if (identityRef.current) {
         try {
-          verification = await verifySemaphoreProof(
+          verification = await getFullProof(
             request,
             identityRef.current,
             credentialType === "orb"

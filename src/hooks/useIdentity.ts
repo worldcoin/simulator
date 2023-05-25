@@ -16,8 +16,6 @@ const getStore = (store: IIdentityStore) => ({
 const useIdentity = () => {
   const { identity, setIdentity } = useIdentityStore(getStore);
 
-  const getIdentity = () => identity;
-
   const createIdentity = async (chain: Chain) => {
     const identity = new ZkIdentity();
     return await updateIdentity(identity, chain);
@@ -127,7 +125,6 @@ const useIdentity = () => {
 
   return {
     identity,
-    getIdentity,
     setIdentity,
     createIdentity,
     storeIdentity,
