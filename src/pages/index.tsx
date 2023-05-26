@@ -6,9 +6,9 @@ import useIdentity from "@/hooks/useIdentity";
 import { Chain } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useModal } from "connectkit";
-import { keccak256 } from "ethers/lib/utils.js";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { keccak256 } from "viem";
 import { useAccount, useSignMessage } from "wagmi";
 
 export default function Home() {

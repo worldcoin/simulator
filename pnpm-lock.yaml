@@ -64,9 +64,6 @@ dependencies:
   dayjs:
     specifier: ^1.11.7
     version: 1.11.7
-  ethers:
-    specifier: ^5
-    version: 5.7.2
   next:
     specifier: 13.3.0
     version: 13.3.0(@babel/core@7.21.4)(react-dom@18.2.0)(react@18.2.0)
@@ -85,6 +82,9 @@ dependencies:
   usehooks-ts:
     specifier: ^2.9.1
     version: 2.9.1(react-dom@18.2.0)(react@18.2.0)
+  viem:
+    specifier: ^0.3.37
+    version: 0.3.37(typescript@5.0.4)
   wagmi:
     specifier: ^1.0.7
     version: 1.0.7(react-dom@18.2.0)(react@18.2.0)(typescript@5.0.4)(viem@0.3.37)
