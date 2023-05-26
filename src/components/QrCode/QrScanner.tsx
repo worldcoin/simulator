@@ -2,6 +2,7 @@ import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
 import { useQrScanner } from "@/hooks/useQrScanner";
 import { parseWorldIDQRCode } from "@/lib/validation";
+import { useModalStore } from "@/stores/modalStore";
 import type { ScanConstraints } from "@/types/qrcode";
 import clsx from "clsx";
 import React, { Fragment, useEffect, useRef, useState } from "react";
@@ -32,6 +33,8 @@ export const QrScanner = React.memo(function QrScanner(props: {
     videoRef,
     scanConstraints: props.scanConstraints,
   });
+
+  const { open } = useModalStore();
 
   // NOTE: validate code
   useEffect(() => {
@@ -103,6 +106,13 @@ export const QrScanner = React.memo(function QrScanner(props: {
       }
     };
   }, [canvasRef]);
+
+  // Close scanner once modal opens
+  useEffect(() => {
+    if (open) {
+      props.onClose();
+    }
+  }, [open, props]);
 
   return (
     <Dialog

@@ -32,7 +32,7 @@ export default function Header(props: HeaderProps) {
       {!props.iconLeft && <span />}
 
       {props.heading && (
-        <h2 className="text-center font-rubik text-20 font-semibold text-191c20">
+        <h2 className="text-center font-rubik text-20 font-semibold">
           {props.heading}
         </h2>
       )}
