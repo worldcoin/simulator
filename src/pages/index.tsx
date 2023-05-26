@@ -88,13 +88,14 @@ export default function Home() {
   }, [identity, isConnected, signMessage]);
 
   return (
-    <div className="px-2 pb-6 xs:pb-0">
+    // <div className="px-2 pb-6 xs:pb-0">
+    <>
       {!isSigning && (
-        <div className="grid content-between gap-y-4">
-          <h1 className="mt-4 text-center font-sora text-30 font-semibold text-191c20">
+        <div className="flex flex-col gap-y-4">
+          <h1 className="mt-1 text-center font-sora text-h2 text-191c20 xs:mt-4 xs:text-h1">
             Create your test World ID
           </h1>
-          <p className="text-center text-16 text-657080">
+          <p className="text-center text-b2 text-657080">
             With the World ID Simulator, you can test different scenarios with
             your identity.
           </p>
@@ -147,6 +148,6 @@ export default function Home() {
         </div>
       )}
       {isSigning && <Confirm isConfirmed={isConfirmed} />}
-    </div>
+    </>
   );
 }

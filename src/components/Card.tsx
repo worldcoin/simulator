@@ -23,10 +23,10 @@ export const Card = React.memo(function Card(props: {
           props.iconBgClassName,
         )}
       />
-      <h2 className="mt-5 font-rubik text-18 font-semibold text-191c20">
+      <h2 className="mt-3 font-rubik text-18 font-semibold text-191c20 xs:mt-5">
         {props.heading}
       </h2>
-      <div className="mt-2 font-rubik text-14 text-657080">{props.text}</div>
+      <div className="mt-1 font-rubik text-14 text-657080">{props.text}</div>
       {props.children}
     </div>
   );

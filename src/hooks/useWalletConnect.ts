@@ -79,14 +79,6 @@ export const useWalletConnect = (ready?: boolean) => {
     useModalStore(getStore);
 
   async function approveRequest(event: SessionEvent): Promise<void> {
-    // Show pending modal
-    if (!identity) {
-      toast.error("No identity found");
-      setStatus(Status.Error);
-      return;
-    }
-    setStatus(Status.Pending);
-
     // Destructure session request
     const {
       id,
@@ -95,6 +87,14 @@ export const useWalletConnect = (ready?: boolean) => {
     }: SessionEvent = event;
     const credentialType = getHighestCredentialType(request);
     let verification: { verified: boolean; fullProof: FullProof };
+
+    // Show pending modal
+    if (!identity?.verified[credentialType]) {
+      setStatus(Status.Error);
+      await rejectRequest(topic, id, -32602, "generic_error");
+      return;
+    }
+    setStatus(Status.Pending);
 
     // Generate zero knowledge proof locally
     try {
@@ -113,7 +113,7 @@ export const useWalletConnect = (ready?: boolean) => {
     // Show success or error modal
     if (verification.verified) {
       toast.success("Proof verified successfully");
-      setStatus(Status.Verified);
+      setStatus(Status.Success);
     } else {
       toast.error("Proof verification failed");
       setStatus(Status.Error);
@@ -148,6 +148,11 @@ export const useWalletConnect = (ready?: boolean) => {
 
   const onSessionProposal = useCallback(
     async (event: SignClientTypes.EventArguments["session_proposal"]) => {
+      // Show loading modal
+      reset();
+      setStatus(Status.Loading);
+      setOpen(true);
+
       const { id, params } = event;
       const namespaces = buildApprovedNamespaces({
         proposal: params,
@@ -181,13 +186,10 @@ export const useWalletConnect = (ready?: boolean) => {
     async (
       event: SignClientTypes.EventArguments["session_request"],
     ): Promise<void> => {
-      // Show loading modal
-      reset();
-      setStatus(Status.Loading);
-      setOpen(true);
-
       // Destructure session request
       const {
+        id,
+        topic,
         params: { request },
       }: SessionEvent = event;
       setEvent(event);
@@ -197,6 +199,12 @@ export const useWalletConnect = (ready?: boolean) => {
       const metadata = await fetchMetadata(params);
       setMetadata(metadata);
       setStatus(Status.Waiting);
+
+      // Reject session if application is not staging
+      if (!metadata.is_staging) {
+        await rejectRequest(topic, id, -32602, "generic_error");
+        return;
+      }
     },
     [],
   );

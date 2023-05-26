@@ -17,7 +17,7 @@ interface HeaderProps {
 
 export default function Header(props: HeaderProps) {
   return (
-    <div className="mt-3 grid w-full grid-cols-3 items-center justify-between">
+    <div className="grid w-full grid-cols-3 items-center justify-between xs:mt-3">
       {props.iconLeft && props.onClickLeft && (
         <Button
           className="flex h-9 w-9 items-center justify-center rounded-full bg-ebecef"

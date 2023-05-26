@@ -6,6 +6,7 @@ import { Icon } from "../Icon";
 interface VerifyStatusProps {
   status: Status;
   handleClick: () => void;
+  fancy?: boolean;
 }
 
 export const VerifyStatus = memo(function VerifyStatus(
@@ -18,11 +19,17 @@ export const VerifyStatus = memo(function VerifyStatus(
           onClick={props.handleClick}
           className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-gray-0"
         >
-          <Icon
-            name="world-id"
-            className="h-6 w-6"
-          />
-          <span className="ml-3">Verify with World ID</span>
+          {props.fancy ? (
+            <>
+              <Icon
+                name="world-id"
+                className="h-6 w-6"
+              />
+              <span className="ml-3">Verify with World ID</span>
+            </>
+          ) : (
+            <span>Verify now</span>
+          )}
         </Button>
       )}
       {props.status === Status.Pending && (
@@ -36,7 +43,7 @@ export const VerifyStatus = memo(function VerifyStatus(
           </span>
         </>
       )}
-      {props.status === Status.Verified && (
+      {props.status === Status.Success && (
         <>
           <Icon
             name="checkmark"

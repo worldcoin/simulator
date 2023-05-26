@@ -17,6 +17,6 @@ export enum Status {
   Loading,
   Waiting,
   Pending,
-  Verified,
+  Success,
   Error,
 }

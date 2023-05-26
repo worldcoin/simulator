@@ -23,7 +23,7 @@ export const VerifyOrb = memo(function VerifyOrb(props: {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await props.handleVerify(CredentialType.Orb);
-      setStatus(Status.Verified);
+      setStatus(Status.Success);
       if (identity) {
         // Display verified state for 2 seconds
         await new Promise((resolve) => setTimeout(resolve, 2000));
