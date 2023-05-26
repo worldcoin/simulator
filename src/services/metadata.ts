@@ -1,10 +1,10 @@
-import type { MetadataRequest, MetadataResponse } from "@/types";
+import type { MetadataParams, MetadataResponse } from "@/types";
 
 const DEV_PORTAL_PRECHECK_URL =
   "https://developer.worldcoin.org/api/v1/precheck/";
 
 async function precheckAction(
-  request: MetadataRequest,
+  request: MetadataParams,
 ): Promise<MetadataResponse | null> {
   const url = new URL(request.app_id, DEV_PORTAL_PRECHECK_URL);
   const body = {
@@ -37,7 +37,7 @@ async function precheckAction(
 }
 
 export async function fetchMetadata(
-  request: MetadataRequest,
+  request: MetadataParams,
 ): Promise<Partial<MetadataResponse>> {
   let metadata: Partial<MetadataResponse> = {
     id: request.app_id,

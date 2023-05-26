@@ -5,7 +5,6 @@ import { Icon } from "../Icon";
 
 interface VerifyStatusProps {
   status: Status;
-  setStatus: (status: Status) => void;
   handleClick: () => void;
 }
 

@@ -71,7 +71,6 @@ export const VerifyOrb = memo(function VerifyOrb(props: {
         <div className="grow" />
         <VerifyStatus
           status={status}
-          setStatus={setStatus}
           handleClick={handleClick}
         />
       </div>

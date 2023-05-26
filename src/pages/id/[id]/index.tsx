@@ -1,6 +1,7 @@
 import { GradientIcon } from "@/components/GradientIcon";
 import Header from "@/components/Header";
 import { Icon } from "@/components/Icon";
+import { Modal } from "@/components/Modal";
 import { QrInput } from "@/components/QrCode/QrInput";
 import { QrScanner } from "@/components/QrCode/QrScanner";
 import { Settings } from "@/components/Settings";
@@ -28,19 +29,8 @@ export default function Id() {
 
   const performVerification = async (data: string) => {
     const { uri } = parseWorldIDQRCode(data);
-    if (identity) {
-      // await createClient(identity);
-
-      // client.on("session_proposal", onSessionProposal);
-      // client.on("session_request", onSessionRequest);
-      // client.on("session_delete", onSessionDisconnect);
-      // client.on("session_delete", () => {
-      //   void router.push(`/id/${identity.id}`);
-      // });
-
-      if (uri) {
-        await pairClient(uri);
-      }
+    if (identity && uri) {
+      await pairClient(uri);
     }
   };
 
@@ -141,6 +131,8 @@ export default function Id() {
           commitment={encode(identity.commitment)}
         />
       )}
+
+      <Modal />
     </div>
   );
 }

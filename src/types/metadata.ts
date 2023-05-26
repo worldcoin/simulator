@@ -1,9 +1,11 @@
-export interface MetadataRequest {
+export interface MetadataParams {
   app_id: string;
   action: string;
-  nullifier_hash?: string;
+  signal: string;
   external_nullifier: string;
+  nullifier_hash?: string;
   action_description?: string;
+  credential_types: string[];
 }
 
 export interface MetadataResponse {
@@ -19,6 +21,7 @@ export interface MetadataResponse {
   action: Partial<ActionResponse>;
   __typename: string;
 }
+
 interface ActionResponse {
   external_nullifier: string;
   name: string;

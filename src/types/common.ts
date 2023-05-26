@@ -14,6 +14,7 @@ export enum Chain {
 }
 
 export enum Status {
+  Loading,
   Waiting,
   Pending,
   Verified,
