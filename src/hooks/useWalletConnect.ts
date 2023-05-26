@@ -1,9 +1,15 @@
 import getFullProof from "@/lib/proof";
+import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
 import type { IModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
-import type { SignRequest, SignResponse } from "@/types";
-import { CredentialType, ProofError } from "@/types";
+import type {
+  MetadataParams,
+  SessionEvent,
+  SignRequest,
+  SignResponse,
+} from "@/types";
+import { CredentialType, ProofError, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
@@ -12,13 +18,15 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import useIdentity from "./useIdentity";
 
-function getHighestCredentialType(request: SignRequest): string {
+function getHighestCredentialType(request: SignRequest): CredentialType {
   const {
     params: [{ credential_types }],
   } = request;
 
   // Orb credential always takes precedence over all other credential types
-  return credential_types.includes("orb") ? "orb" : credential_types[0];
+  return credential_types.includes("orb")
+    ? CredentialType.Orb
+    : CredentialType.Phone; // TODO: Add support for arbitrary number of credential types
 }
 
 function buildResponse(
@@ -27,33 +35,92 @@ function buildResponse(
   fullProof: FullProof,
 ): SignResponse {
   const credential_type = getHighestCredentialType(request);
+  const proof = fullProof.proof as [
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+  ];
 
   return {
     id,
     jsonrpc: "2.0",
     result: {
-      merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
-      nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
-      proof: abi.encode(["uint256[8]"], [fullProof.proof]),
+      merkle_root: abi.encode(
+        ["uint256"],
+        [fullProof.merkleTreeRoot as bigint],
+      ),
+      nullifier_hash: abi.encode(
+        ["uint256"],
+        [fullProof.nullifierHash as bigint],
+      ),
+      proof: abi.encode(["uint256[8]"], [proof]),
       credential_type,
     },
   };
 }
 
 const getStore = (store: IModalStore) => ({
-  open: store.open,
   setOpen: store.setOpen,
+  setStatus: store.setStatus,
+  setMetadata: store.setMetadata,
+  setEvent: store.setEvent,
+  reset: store.reset,
 });
 
 export const useWalletConnect = (ready?: boolean) => {
   const { identity } = useIdentity();
   const identityRef = useRef(identity);
-  const { open, setOpen } = useModalStore(getStore);
+  const { setOpen, setStatus, setMetadata, setEvent, reset } =
+    useModalStore(getStore);
 
-  async function approveRequest(
-    topic: string,
-    response: SignResponse,
-  ): Promise<void> {
+  async function approveRequest(event: SessionEvent): Promise<void> {
+    // Show pending modal
+    if (!identity) {
+      toast.error("No identity found");
+      setStatus(Status.Error);
+      return;
+    }
+    setStatus(Status.Pending);
+
+    // Destructure session request
+    const {
+      id,
+      topic,
+      params: { request },
+    }: SessionEvent = event;
+    const credentialType = getHighestCredentialType(request);
+    let verification: { verified: boolean; fullProof: FullProof };
+
+    // Generate zero knowledge proof locally
+    try {
+      verification = await getFullProof(request, identity, credentialType);
+    } catch (error) {
+      console.error(`Error verifying semaphore proof, ${error}`);
+      if (error instanceof ProofError) {
+        await rejectRequest(topic, id, error.code, error.message);
+        return;
+      } else {
+        await rejectRequest(topic, id, -32602, "generic_error");
+        return;
+      }
+    }
+
+    // Show success or error modal
+    if (verification.verified) {
+      toast.success("Proof verified successfully");
+      setStatus(Status.Verified);
+    } else {
+      toast.error("Proof verification failed");
+      setStatus(Status.Error);
+    }
+
+    // Send response to dapp
+    const response = buildResponse(id, request, verification.fullProof);
     await client.respondSessionRequest({
       topic,
       response,
@@ -114,42 +181,22 @@ export const useWalletConnect = (ready?: boolean) => {
     async (
       event: SignClientTypes.EventArguments["session_request"],
     ): Promise<void> => {
-      const { id, params, topic } = event;
-      const { request } = params;
+      // Show loading modal
+      reset();
+      setStatus(Status.Loading);
+      setOpen(true);
 
-      const credentialType = getHighestCredentialType(request);
-      let verification: { verified: boolean; fullProof: FullProof };
+      // Destructure session request
+      const {
+        params: { request },
+      }: SessionEvent = event;
+      setEvent(event);
 
-      if (identityRef.current) {
-        try {
-          verification = await getFullProof(
-            request,
-            identityRef.current,
-            credentialType === "orb"
-              ? CredentialType.Orb
-              : CredentialType.Phone, // TODO
-          );
-        } catch (error) {
-          console.error(`Error verifying semaphore proof, ${error}`);
-          if (error instanceof ProofError) {
-            await rejectRequest(topic, id, error.code, error.message);
-            return;
-          } else {
-            await rejectRequest(topic, id, -32602, "generic_error");
-            return;
-          }
-        }
-
-        // TODO: Move to UI layer
-        if (verification.verified) {
-          toast.success("Proof verified successfully");
-        } else {
-          toast.error("Proof verification failed");
-        }
-
-        const response = buildResponse(id, request, verification.fullProof);
-        await approveRequest(topic, response);
-      }
+      // Fetch metadata for the request
+      const params: MetadataParams = { ...request.params[0] };
+      const metadata = await fetchMetadata(params);
+      setMetadata(metadata);
+      setStatus(Status.Waiting);
     },
     [],
   );
@@ -200,6 +247,7 @@ export const useWalletConnect = (ready?: boolean) => {
   }, [identity]);
 
   return {
+    approveRequest,
     disconnectPairings,
     disconnectSessions,
   };

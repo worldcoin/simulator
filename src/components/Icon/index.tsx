@@ -4,6 +4,7 @@ import styles from "./Icon.module.css";
 
 const icons = [
   "badge-not-verified",
+  "badge-verified",
   "barcode",
   "battery",
   "bead-verified",

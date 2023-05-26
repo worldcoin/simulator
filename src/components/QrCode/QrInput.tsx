@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
 import useIdentity from "@/hooks/useIdentity";
+import { useModalStore } from "@/stores/modalStore";
 import clsx from "clsx";
 import { memo, useEffect, useMemo, useState } from "react";
 import { Input } from "../Input";
@@ -12,6 +13,7 @@ export const QrInput = memo(function QrInput(props: {
 }) {
   const [value, setValue] = useState("");
   const { identity, retrieveIdentity } = useIdentity();
+  const { open } = useModalStore();
 
   const isInvalid = useMemo(() => {
     if (!value) return false;
@@ -50,6 +52,13 @@ export const QrInput = memo(function QrInput(props: {
     void retrieveIdentity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Close input once modal opens
+  useEffect(() => {
+    if (open) {
+      props.onClose();
+    }
+  }, [open, props]);
 
   return (
     <Dialog
