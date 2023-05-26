@@ -35,14 +35,30 @@ function buildResponse(
   fullProof: FullProof,
 ): SignResponse {
   const credential_type = getHighestCredentialType(request);
+  const proof = fullProof.proof as [
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+  ];
 
   return {
     id,
     jsonrpc: "2.0",
     result: {
-      merkle_root: abi.encode(["uint256"], [fullProof.merkleTreeRoot]),
-      nullifier_hash: abi.encode(["uint256"], [fullProof.nullifierHash]),
-      proof: abi.encode(["uint256[8]"], [fullProof.proof]),
+      merkle_root: abi.encode(
+        ["uint256"],
+        [fullProof.merkleTreeRoot as bigint],
+      ),
+      nullifier_hash: abi.encode(
+        ["uint256"],
+        [fullProof.nullifierHash as bigint],
+      ),
+      proof: abi.encode(["uint256[8]"], [proof]),
       credential_type,
     },
   };
