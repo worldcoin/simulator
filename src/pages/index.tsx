@@ -3,7 +3,8 @@ import { Card } from "@/components/Card";
 import Confirm from "@/components/Confirm";
 import { Dropdown } from "@/components/Dropdown";
 import useIdentity from "@/hooks/useIdentity";
-import { Chain } from "@/types";
+import type { Identity } from "@/types";
+import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useModal } from "connectkit";
 import { keccak256 } from "ethers/lib/utils.js";
@@ -26,12 +27,23 @@ export default function Home() {
   const { signMessage } = useSignMessage({
     message: "Signature request to generate seed for World ID identity.",
     onSuccess: async (signature) => {
-      const identitySeed = keccak256(signature);
-      const newIdentity = await updateIdentity(
-        new ZkIdentity(identitySeed),
+      const seed = keccak256(signature);
+      const zkIdentity = new ZkIdentity(seed);
+      const identity: Identity = {
+        id: "",
+        zkIdentity,
         chain,
-        true,
-      );
+        persisted: true,
+        verified: {
+          [CredentialType.Orb]: false,
+          [CredentialType.Phone]: false,
+        },
+        inclusionProof: {
+          [CredentialType.Orb]: null,
+          [CredentialType.Phone]: null,
+        },
+      };
+      const newIdentity = await updateIdentity(identity);
 
       // Display confirmed state for 2 seconds
       setIsConfirmed(true);

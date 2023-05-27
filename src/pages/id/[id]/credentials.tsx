@@ -6,7 +6,6 @@ import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
 import { Chain, type CredentialType } from "@/types";
-import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -21,7 +20,7 @@ export default function Credentials() {
   const handleVerifyCredential = async (credentialType: CredentialType) => {
     if (!identity) return;
 
-    const commitment = encode(identity.commitment);
+    const commitment = encode(identity.zkIdentity.commitment);
     const init = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -35,7 +34,7 @@ export default function Credentials() {
     // Check if credentials already exist
     try {
       const response = await fetch("/api/sequencer/inclusionProof", init);
-      if (response.ok) {
+      if (response.status === 200) {
         toast.info(
           `Credential type '${credentialType.toString()}' already exists onchain!`,
         );
@@ -46,12 +45,7 @@ export default function Credentials() {
     // Insert new credentials via sequencer
     try {
       await fetch("/api/sequencer/insertIdentity", init);
-      const zkIdentity = {
-        trapdoor: identity.trapdoor,
-        nullifier: identity.nullifier,
-        commitment: identity.commitment,
-      } as ZkIdentity;
-      await updateIdentity(zkIdentity, identity.chain, identity.persisted);
+      await updateIdentity(identity);
     } catch (error) {
       throw new Error(
         `Error verifying '${credentialType.toString()}' credential on chain '${
