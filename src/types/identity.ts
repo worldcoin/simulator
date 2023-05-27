@@ -4,10 +4,7 @@ import type { Chain, CredentialType } from "./common";
 
 export interface Identity {
   readonly id: string;
-  readonly commitment: bigint;
-  readonly trapdoor: bigint;
-  readonly nullifier: bigint;
-  // readonly zkIdentity: ZkIdentity;
+  readonly zkIdentity: ZkIdentity;
   chain: Chain; // TODO: refactor
   persisted: boolean;
   verified: Record<CredentialType, boolean>;
@@ -17,12 +14,14 @@ export interface Identity {
   >;
 }
 
-export type RawIdentity = {
-  id: string;
-  zkIdentity: ZkIdentity;
-};
-
-export type StoredIdentity = {
-  id: string;
-  zkIdentity: string;
-};
+export interface StoredIdentity {
+  readonly id: string;
+  readonly zkIdentity: string;
+  chain: Chain; // TODO: refactor
+  persisted: boolean;
+  verified: Record<CredentialType, boolean>;
+  inclusionProof: Record<
+    CredentialType,
+    Awaited<ReturnType<typeof inclusionProof>> | null
+  >;
+}

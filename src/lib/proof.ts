@@ -82,7 +82,7 @@ function getMerkleProof(
     "Identity inclusion proof was not found, using dummy proof. Only use this to test failure cases!",
   );
   const group = new Group(1, 30);
-  group.addMember(identity.commitment);
+  group.addMember(identity.zkIdentity.commitment);
   return group.generateMerkleProof(0);
 }
 
@@ -197,11 +197,7 @@ export default async function getFullProof(
     // Generate proofs
     const merkleProof = getMerkleProof(identity, credentialType);
     const fullProof = await generateSemaphoreProof(
-      {
-        trapdoor: identity.trapdoor,
-        nullifier: identity.nullifier,
-        commitment: identity.commitment,
-      } as ZkIdentity,
+      identity.zkIdentity,
       merkleProof,
       externalNullifier,
       signal,
