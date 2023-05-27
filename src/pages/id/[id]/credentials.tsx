@@ -4,7 +4,7 @@ import { VerifyOrb } from "@/components/Verify/VerifyOrb";
 import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
-import { Chain, type CredentialType } from "@/types";
+import { Chain, CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
