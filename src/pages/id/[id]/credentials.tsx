@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import { Icon } from "@/components/Icon";
 import Item from "@/components/Item";
 import { VerifyOrb } from "@/components/Verify/VerifyOrb";
@@ -6,10 +7,12 @@ import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
 import { Chain, type CredentialType } from "@/types";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function Credentials() {
+  const router = useRouter();
   const { identity, retrieveIdentity, updateIdentity } = useIdentity();
 
   const [isOpenVerifyOrb, setIsOpenVerifyOrb] = useState(false);
@@ -66,8 +69,12 @@ export default function Credentials() {
   }, []);
 
   return (
-    <div className="mt-12 flex flex-col px-2 pb-6 text-center xs:pb-0">
-      <h1 className="font-sora text-26 font-semibold text-191c20">
+    <div className="flex flex-col px-2 pb-6 text-center xs:pb-0">
+      <Header
+        iconLeft="direction-left"
+        onClickLeft={() => router.back()}
+      />
+      <h1 className="mt-10 font-sora text-26 font-semibold text-191c20">
         Obtain your credentials
       </h1>
       <p className="mt-4 font-rubik text-18 text-657080">

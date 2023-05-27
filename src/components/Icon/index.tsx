@@ -21,6 +21,7 @@ const icons = [
   "copy",
   "cross",
   "direction-down",
+  "direction-left",
   "direction-right",
   "favicon",
   "file",

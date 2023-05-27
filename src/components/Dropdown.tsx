@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { Chain } from "@/types";
 import { Content, Item, Root, Trigger } from "@radix-ui/react-dropdown-menu";
 import type { Dispatch, SetStateAction } from "react";
@@ -30,7 +31,7 @@ export const Dropdown = memo(function Dropdown(props: DropdownProps) {
 
   return (
     <Root>
-      <Trigger className="flex items-center rounded-12 border p-3 text-16">
+      <Trigger className="flex items-center rounded-12 border p-2 text-16">
         <div className="flex w-full items-center justify-between">
           {selected ? (
             <div className="flex items-center">

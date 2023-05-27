@@ -60,6 +60,13 @@ export const QrInput = memo(function QrInput(props: {
     }
   }, [open, props]);
 
+  // Clear input once dialog is closed
+  useEffect(() => {
+    if (!props.open) {
+      setValue("");
+    }
+  }, [props.open]);
+
   return (
     <Dialog
       open={props.open}

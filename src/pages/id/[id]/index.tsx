@@ -10,7 +10,7 @@ import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { pairClient } from "@/services/walletconnect";
-import { CredentialType } from "@/types";
+import { CredentialType } from "@worldcoin/idkit";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -42,7 +42,7 @@ export default function Id() {
   }, []);
 
   return (
-    <div className="grid content-between gap-y-6 px-2 pb-6 xs:pb-0">
+    <div className="flex flex-col gap-y-4 px-2 pb-4 xs:gap-y-6 xs:pb-6">
       <Header
         iconLeft="barcode"
         iconRight="setting"

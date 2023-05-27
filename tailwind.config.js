@@ -59,6 +59,10 @@ module.exports = {
     },
 
     colors: {
+      error: {
+        100: "#FFF5F7",
+        700: "#FF5A76"
+      },
       gray: {
         0: '#FFFFFF',
         50: "#F9FAFB",

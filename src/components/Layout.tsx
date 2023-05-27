@@ -5,7 +5,7 @@ import bgBlur from "/public/images/bg-blur.svg";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed grid h-full w-full overflow-y-scroll bg-f9fbfc xs:min-h-screen">
+    <div className="fixed grid h-[calc(100dvh)] w-full overflow-y-scroll bg-f9fbfc xs:min-h-screen">
       <div className="group pointer-events-none fixed h-screen w-full overflow-hidden bg-f0edf9">
         <Image
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -45,7 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
       <section
         className={clsx(
-          "h-full w-full p-4 pb-8 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-183c4a",
+          "h-full w-full px-4 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-183c4a xs:p-4",
           "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
           "gap-y-3 bg-ffffff transition duration-500 xs:grid-rows-auto/1fr/auto xs:[zoom:.9] md:[zoom:initial]",
         )}
