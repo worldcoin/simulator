@@ -3,12 +3,7 @@ import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
 import type { IModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
-import type {
-  MetadataParams,
-  SessionEvent,
-  SignRequest,
-  SignResponse,
-} from "@/types";
+import type { MetadataParams, SessionEvent, SignResponse } from "@/types";
 import { CredentialType, ProofError, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
@@ -18,23 +13,20 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import useIdentity from "./useIdentity";
 
-function getHighestCredentialType(request: SignRequest): CredentialType {
-  const {
-    params: [{ credential_types }],
-  } = request;
-
+function getHighestCredentialType(
+  credentialTypes: CredentialType[],
+): CredentialType {
   // Orb credential always takes precedence over all other credential types
-  return credential_types.includes("orb")
+  return credentialTypes.includes(CredentialType.Orb)
     ? CredentialType.Orb
     : CredentialType.Phone; // TODO: Add support for arbitrary number of credential types
 }
 
 function buildResponse(
   id: number,
-  request: SignRequest,
   fullProof: FullProof,
+  credential_type: CredentialType,
 ): SignResponse {
-  const credential_type = getHighestCredentialType(request);
   const proof = fullProof.proof as [
     bigint,
     bigint,
@@ -78,18 +70,21 @@ export const useWalletConnect = (ready?: boolean) => {
   const { setOpen, setStatus, setMetadata, setEvent, reset } =
     useModalStore(getStore);
 
-  async function approveRequest(event: SessionEvent): Promise<void> {
+  async function approveRequest(
+    event: SessionEvent,
+    credentialTypes: CredentialType[],
+  ): Promise<void> {
     // Destructure session request
     const {
       id,
       topic,
       params: { request },
     }: SessionEvent = event;
-    const credentialType = getHighestCredentialType(request);
+    const credentialType = getHighestCredentialType(credentialTypes);
     let verification: { verified: boolean; fullProof: FullProof };
 
     // Show pending modal
-    if (!identity?.verified[credentialType]) {
+    if (!credentialTypes.length) {
       setStatus(Status.Error);
       await rejectRequest(topic, id, -32602, "generic_error");
       return;
@@ -97,12 +92,16 @@ export const useWalletConnect = (ready?: boolean) => {
     setStatus(Status.Pending);
 
     // Generate zero knowledge proof locally
+    if (!identity) {
+      await rejectRequest(topic, id, -32602, "generic_error");
+      return;
+    }
+
     try {
       verification = await getFullProof(request, identity, credentialType);
     } catch (error) {
       console.error(`Error verifying semaphore proof, ${error}`);
       if (error instanceof ProofError) {
-        await rejectRequest(topic, id, error.code, error.message);
         return;
       } else {
         await rejectRequest(topic, id, -32602, "generic_error");
@@ -120,7 +119,7 @@ export const useWalletConnect = (ready?: boolean) => {
     }
 
     // Send response to dapp
-    const response = buildResponse(id, request, verification.fullProof);
+    const response = buildResponse(id, verification.fullProof, credentialType);
     await client.respondSessionRequest({
       topic,
       response,
@@ -217,6 +216,7 @@ export const useWalletConnect = (ready?: boolean) => {
 
       if (topics.includes(event.topic)) {
         await disconnectSessions([event.topic]);
+        setEvent(null); // TODO: Needed?
       }
     },
     [],

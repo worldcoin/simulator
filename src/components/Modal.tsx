@@ -9,6 +9,7 @@ import { useWalletConnect } from "@/hooks/useWalletConnect";
 import type { IModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
+import { CredentialType } from "@worldcoin/idkit";
 import clsx from "clsx";
 import Image from "next/image";
 import { useState } from "react";
@@ -18,12 +19,14 @@ const getStore = (store: IModalStore) => ({
   open: store.open,
   setOpen: store.setOpen,
   status: store.status,
+  setStatus: store.setStatus,
   metadata: store.metadata,
   event: store.event,
 });
 
 export function Modal() {
-  const { open, setOpen, status, metadata, event } = useModalStore(getStore);
+  const { open, setOpen, status, setStatus, metadata, event } =
+    useModalStore(getStore);
   const { approveRequest } = useWalletConnect();
   const { identity } = useIdentity();
 
@@ -35,8 +38,20 @@ export function Modal() {
   );
 
   const handleClick = async () => {
+    const credentialTypeMap = {
+      [CredentialType.Orb]: biometricsChecked,
+      [CredentialType.Phone]: phoneChecked,
+    };
+
+    const credentialTypes = Object.entries(credentialTypeMap)
+      .filter(([_type, isChecked]) => isChecked)
+      .map(([type]) => type) as CredentialType[];
+
     if (event) {
-      await approveRequest(event);
+      await approveRequest(event, credentialTypes);
+    } else {
+      console.error("No event found, WalletConnect session may have expired");
+      setStatus(Status.Error);
     }
   };
 
