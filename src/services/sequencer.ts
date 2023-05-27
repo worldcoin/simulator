@@ -6,15 +6,13 @@ import type {
 import { Chain, CredentialType } from "@/types";
 
 const POLYGON_SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> = {
-  [CredentialType.Orb]: process.env.NEXT_PUBLIC_POLYGON_ORB_SEQUENCER_PASSWORD,
-  [CredentialType.Phone]:
-    process.env.NEXT_PUBLIC_POLYGON_PHONE_SEQUENCER_PASSWORD,
+  [CredentialType.Orb]: process.env.POLYGON_ORB_SEQUENCER_PASSWORD,
+  [CredentialType.Phone]: process.env.POLYGON_PHONE_SEQUENCER_PASSWORD,
 };
 
 const OPTIMISM_SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> =
   {
-    [CredentialType.Orb]:
-      process.env.NEXT_PUBLIC_OPTIMISM_ORB_SEQUENCER_PASSWORD,
+    [CredentialType.Orb]: process.env.OPTIMISM_ORB_SEQUENCER_PASSWORD,
     // TODO: Add phone sequencer password for Optimism once deployed
     [CredentialType.Phone]: undefined,
   };

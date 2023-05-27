@@ -4,12 +4,7 @@ import { VerifyOrb } from "@/components/Verify/VerifyOrb";
 import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
-import { inclusionProof, insertIdentity } from "@/services/sequencer";
-import {
-  Chain,
-  type CredentialType,
-  type InclusionProofResponse,
-} from "@/types";
+import { Chain, type CredentialType } from "@/types";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -21,37 +16,45 @@ export default function Credentials() {
   const [isOpenVerifyPhone, setIsOpenVerifyPhone] = useState(false);
 
   const handleVerifyCredential = async (credentialType: CredentialType) => {
-    if (identity) {
-      const commitment = encode(identity.commitment);
-      let proof: InclusionProofResponse | undefined;
-      try {
-        proof = await inclusionProof(
-          identity.chain,
-          credentialType,
-          commitment,
-        );
+    if (!identity) return;
+
+    const commitment = encode(identity.commitment);
+    const init = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chain: identity.chain,
+        credentialType,
+        commitment,
+      }),
+    };
+
+    // Check if credentials already exist
+    try {
+      const response = await fetch("/api/sequencer/inclusionProof", init);
+      if (response.ok) {
         toast.info(
           `Credential type '${credentialType.toString()}' already exists onchain!`,
         );
-      } catch (e) {}
-
-      if (!proof) {
-        try {
-          await insertIdentity(identity.chain, credentialType, commitment);
-          const zkIdentity = {
-            trapdoor: identity.trapdoor,
-            nullifier: identity.nullifier,
-            commitment: identity.commitment,
-          } as ZkIdentity;
-          await updateIdentity(zkIdentity, identity.chain, identity.persisted);
-        } catch (error) {
-          throw new Error(
-            `Error verifying '${credentialType.toString()}' credential on chain '${
-              identity.chain
-            }'`,
-          );
-        }
+        return;
       }
+    } catch (e) {} // Intentionally ignored
+
+    // Insert new credentials via sequencer
+    try {
+      await fetch("/api/sequencer/insertIdentity", init);
+      const zkIdentity = {
+        trapdoor: identity.trapdoor,
+        nullifier: identity.nullifier,
+        commitment: identity.commitment,
+      } as ZkIdentity;
+      await updateIdentity(zkIdentity, identity.chain, identity.persisted);
+    } catch (error) {
+      throw new Error(
+        `Error verifying '${credentialType.toString()}' credential on chain '${
+          identity.chain
+        }'`,
+      );
     }
   };
 

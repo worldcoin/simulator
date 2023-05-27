@@ -1,8 +1,7 @@
 import { encode } from "@/lib/utils";
-import { inclusionProof } from "@/services/sequencer";
 import type { IIdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type { Identity, RawIdentity } from "@/types";
+import type { Identity, InclusionProofResponse, RawIdentity } from "@/types";
 import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 
@@ -109,12 +108,16 @@ const useIdentity = () => {
     encodedCommitment: string,
   ) => {
     try {
-      const proof = await inclusionProof(
-        chain,
-        credentialType,
-        encodedCommitment,
-      );
-      return proof;
+      const response = await fetch("/api/sequencer/inclusionProof", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chain,
+          credentialType,
+          commitment: encodedCommitment,
+        }),
+      });
+      return response.json() as unknown as InclusionProofResponse; // TODO: fix this
     } catch (error) {
       console.error(
         `Unable to get identity proof for credential type '${credentialType}' on chain '${chain}'`,
