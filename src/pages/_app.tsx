@@ -1,4 +1,3 @@
-import { Icon } from "@/components/Icon";
 import Layout from "@/components/Layout";
 import StatusBar from "@/components/StatusBar";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
@@ -67,21 +66,11 @@ export default function App({ Component, pageProps }: AppProps) {
         </ConnectKitProvider>
       </WagmiConfig>
       <ToastContainer
-        position={isMobile ? "bottom-center" : "top-right"}
-        autoClose={3500}
+        position={isMobile ? "top-center" : "top-right"}
+        autoClose={3000}
         hideProgressBar
         pauseOnHover
-        closeButton={({ closeToast }) => (
-          <button
-            className="border-l border-f0edf9 p-4"
-            onClick={closeToast}
-          >
-            <Icon
-              name="cross"
-              className="h-5 w-5 text-191c20"
-            />
-          </button>
-        )}
+        closeButton={false}
       />
       <style
         jsx

@@ -8,6 +8,7 @@ export default function Item(props: {
   text?: ReactNode | string;
   indicator?: () => JSX.Element;
   className?: string;
+  disabled?: boolean;
   onClick: (
     event?: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
   ) => void;
@@ -23,6 +24,7 @@ export default function Item(props: {
     >
       <button
         onClick={props.onClick}
+        disabled={props.disabled}
         className="flex w-full items-center outline-none"
       >
         {props.children}

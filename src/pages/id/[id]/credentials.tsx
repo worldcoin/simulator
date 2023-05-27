@@ -1,11 +1,10 @@
 import Header from "@/components/Header";
-import { Icon } from "@/components/Icon";
-import Item from "@/components/Item";
+import VerifyItem from "@/components/Verify/VerifyItem";
 import { VerifyOrb } from "@/components/Verify/VerifyOrb";
 import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
-import { Chain, type CredentialType } from "@/types";
+import { Chain, CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -74,31 +73,25 @@ export default function Credentials() {
       <p className="mt-4 font-rubik text-18 text-657080">
         Simulate obtaining different credentials for your World ID.
       </p>
-      <Item
+      <VerifyItem
         heading="Biometrics"
         text="Obtain the Orb verification on the staging network"
+        icon="orb"
+        color="#9D50FF"
         className="mt-14 p-5"
+        verified={identity?.verified[CredentialType.Orb]}
         onClick={() => setIsOpenVerifyOrb(true)}
-      >
-        <Icon
-          name="orb"
-          className="h-5 w-5 text-gray-400"
-          bgClassName="h-10 w-10 bg-gray-200 rounded-12"
-        />
-      </Item>
+      />
       {identity?.chain !== Chain.Optimism ? (
-        <Item
-          heading="Phone number"
+        <VerifyItem
+          heading="Phone"
           text="Obtain the phone verification on the staging network"
+          icon="phone"
+          color="#00C313"
           className="mt-3 p-5"
+          verified={identity?.verified[CredentialType.Phone]}
           onClick={() => setIsOpenVerifyPhone(true)}
-        >
-          <Icon
-            name="phone"
-            className="h-5 w-5 text-gray-400"
-            bgClassName="h-10 w-10 bg-gray-200 rounded-12"
-          />
-        </Item>
+        />
       ) : (
         <p className="mx-2 mt-6 text-left text-b3 text-gray-400">
           Note: Phone credentials are not currently supported on the Optimism
