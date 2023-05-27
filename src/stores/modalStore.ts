@@ -10,7 +10,7 @@ export type IModalStore = {
   metadata: Partial<MetadataResponse> | null;
   setMetadata: (metadata: Partial<MetadataResponse> | null) => void;
   event: SessionEvent | null;
-  setEvent: (event: SessionEvent) => void;
+  setEvent: (event: SessionEvent | null) => void;
   reset: () => void;
 };
 
@@ -31,6 +31,7 @@ export const useModalStore = create<IModalStore>((set) => ({
       open: false,
       status: Status.Loading,
       metadata: null,
+      event: null,
       request: null,
     })),
 }));
