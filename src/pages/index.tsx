@@ -19,7 +19,6 @@ export default function Home() {
   const { identity, retrieveIdentity, createIdentity, updateIdentity } =
     useIdentity();
 
-  const [version, setVersion] = useState("2.0");
   const [isSigning, setIsSigning] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [chain, setChain] = useState<Chain>(Chain.Polygon);
@@ -85,13 +84,6 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // On initial load, check for package version
-  useEffect(() => {
-    void fetch("/version.json")
-      .then((response) => response.json())
-      .then((data: { version: string }) => setVersion(data.version));
-  }, []);
-
   // Generate persistent identity seed from connected wallet
   useEffect(() => {
     if (!isConnected || identity) return;
@@ -154,9 +146,6 @@ export default function Home() {
               Create Temporary ID
             </Button>
           </Card>
-          {/* <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
-            Version {version}
-          </p> */}
         </div>
       )}
       {isSigning && <Confirm isConfirmed={isConfirmed} />}
