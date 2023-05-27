@@ -1,8 +1,13 @@
 import { encode } from "@/lib/utils";
 import type { IIdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type { Identity, InclusionProofResponse, RawIdentity } from "@/types";
-import { Chain, CredentialType } from "@/types";
+import type {
+  Chain,
+  Identity,
+  InclusionProofResponse,
+  StoredIdentity,
+} from "@/types";
+import { CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 
 const IDENTITY_STORAGE_KEY = "Identity";
@@ -16,15 +21,33 @@ const useIdentity = () => {
   const { identity, setIdentity } = useIdentityStore(getStore);
 
   const createIdentity = async (chain: Chain) => {
-    const identity = new ZkIdentity();
-    return await updateIdentity(identity, chain);
+    const zkIdentity = new ZkIdentity();
+    const identity: Identity = {
+      id: "",
+      zkIdentity,
+      chain,
+      persisted: false,
+      verified: {
+        [CredentialType.Orb]: false,
+        [CredentialType.Phone]: false,
+      },
+      inclusionProof: {
+        [CredentialType.Orb]: null,
+        [CredentialType.Phone]: null,
+      },
+    };
+    return await updateIdentity(identity);
   };
 
-  const storeIdentity = (id: string, identity: ZkIdentity) => {
+  const storeIdentity = (identity: Identity) => {
     try {
+      const storedIdentity: StoredIdentity = {
+        ...identity,
+        zkIdentity: identity.zkIdentity.toString(),
+      };
       sessionStorage.setItem(
         IDENTITY_STORAGE_KEY,
-        JSON.stringify({ id, zkIdentity: identity.toString() }),
+        JSON.stringify(storedIdentity),
       );
       console.info("Stored identity");
     } catch (error) {
@@ -39,9 +62,13 @@ const useIdentity = () => {
         return null;
       }
 
-      const rawIdentity = JSON.parse(storage) as RawIdentity;
-      const zkIdentity = new ZkIdentity(rawIdentity.zkIdentity.toString());
-      const identity = await updateIdentity(zkIdentity);
+      const storedIdentity = JSON.parse(storage) as StoredIdentity;
+      const zkIdentity = new ZkIdentity(storedIdentity.zkIdentity);
+      const identity: Identity = {
+        ...storedIdentity,
+        zkIdentity,
+      };
+      await updateIdentity(identity);
       console.info("Restored serialized identity");
 
       return identity;
@@ -51,34 +78,28 @@ const useIdentity = () => {
     }
   };
 
-  const updateIdentity = async (
-    identity: ZkIdentity,
-    chain = Chain.Polygon,
-    persisted = false,
-  ) => {
-    const { commitment, trapdoor, nullifier } = identity;
+  const updateIdentity = async (identity: Identity) => {
+    // Generate id value
+    const { commitment } = identity.zkIdentity;
     const encodedCommitment = encode(commitment);
     const id = encodedCommitment.slice(0, 10);
 
+    // Retrieve inclusion proofs
     const orbProof = await getIdentityProof(
-      chain,
+      identity.chain,
       CredentialType.Orb,
       encodedCommitment,
     );
     const phoneProof = await getIdentityProof(
-      chain,
+      identity.chain,
       CredentialType.Phone,
       encodedCommitment,
     );
 
-    const extendedIdentity: Identity = {
+    // Build updated identity object
+    const newIdentity: Identity = {
       ...identity,
       id,
-      commitment,
-      trapdoor,
-      nullifier,
-      chain,
-      persisted,
       verified: {
         [CredentialType.Orb]: orbProof !== null,
         [CredentialType.Phone]: phoneProof !== null,
@@ -89,9 +110,9 @@ const useIdentity = () => {
       },
     };
 
-    setIdentity(extendedIdentity);
-    storeIdentity(id, identity);
-    return extendedIdentity;
+    setIdentity(newIdentity);
+    storeIdentity(newIdentity);
+    return newIdentity;
   };
 
   const clearIdentity = () => {
@@ -106,7 +127,7 @@ const useIdentity = () => {
     chain: Chain,
     credentialType: CredentialType,
     encodedCommitment: string,
-  ) => {
+  ): Promise<InclusionProofResponse | null> => {
     try {
       const response = await fetch("/api/sequencer/inclusionProof", {
         method: "POST",
@@ -117,20 +138,21 @@ const useIdentity = () => {
           commitment: encodedCommitment,
         }),
       });
-      return response.json() as unknown as InclusionProofResponse; // TODO: fix this
+
+      if (response.status === 200) {
+        return response.json() as unknown as InclusionProofResponse; // TODO: fix this
+      }
     } catch (error) {
       console.error(
-        `Unable to get identity proof for credential type '${credentialType}' on chain '${chain}'`,
+        `Unable to get identity proof for credential type '${credentialType}' on chain '${chain}'. Error: ${error}`,
       );
-      return null;
     }
+    return null;
   };
 
   return {
     identity,
-    setIdentity,
     createIdentity,
-    storeIdentity,
     retrieveIdentity,
     updateIdentity,
     clearIdentity,

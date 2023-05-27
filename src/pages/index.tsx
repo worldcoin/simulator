@@ -3,7 +3,8 @@ import { Card } from "@/components/Card";
 import Confirm from "@/components/Confirm";
 import { Dropdown } from "@/components/Dropdown";
 import useIdentity from "@/hooks/useIdentity";
-import { Chain } from "@/types";
+import type { Identity } from "@/types";
+import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useModal } from "connectkit";
 import { keccak256 } from "ethers/lib/utils.js";
@@ -18,7 +19,6 @@ export default function Home() {
   const { identity, retrieveIdentity, createIdentity, updateIdentity } =
     useIdentity();
 
-  const [version, setVersion] = useState("2.0");
   const [isSigning, setIsSigning] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [chain, setChain] = useState<Chain>(Chain.Polygon);
@@ -26,12 +26,23 @@ export default function Home() {
   const { signMessage } = useSignMessage({
     message: "Signature request to generate seed for World ID identity.",
     onSuccess: async (signature) => {
-      const identitySeed = keccak256(signature);
-      const newIdentity = await updateIdentity(
-        new ZkIdentity(identitySeed),
+      const seed = keccak256(signature);
+      const zkIdentity = new ZkIdentity(seed);
+      const identity: Identity = {
+        id: "",
+        zkIdentity,
         chain,
-        true,
-      );
+        persisted: true,
+        verified: {
+          [CredentialType.Orb]: false,
+          [CredentialType.Phone]: false,
+        },
+        inclusionProof: {
+          [CredentialType.Orb]: null,
+          [CredentialType.Phone]: null,
+        },
+      };
+      const newIdentity = await updateIdentity(identity);
 
       // Display confirmed state for 2 seconds
       setIsConfirmed(true);
@@ -71,13 +82,6 @@ export default function Home() {
   useEffect(() => {
     void retrieveIdentity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // On initial load, check for package version
-  useEffect(() => {
-    void fetch("/version.json")
-      .then((response) => response.json())
-      .then((data: { version: string }) => setVersion(data.version));
   }, []);
 
   // Generate persistent identity seed from connected wallet
@@ -142,9 +146,6 @@ export default function Home() {
               Create Temporary ID
             </Button>
           </Card>
-          {/* <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
-            Version {version}
-          </p> */}
         </div>
       )}
       {isSigning && <Confirm isConfirmed={isConfirmed} />}

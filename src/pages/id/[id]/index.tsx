@@ -128,7 +128,7 @@ export default function Id() {
         <Settings
           open={isOpenSettings}
           onClose={() => setOpenSettings(false)}
-          commitment={encode(identity.commitment)}
+          commitment={encode(identity.zkIdentity.commitment)}
         />
       )}
 
