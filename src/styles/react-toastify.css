@@ -25,13 +25,13 @@
 }
 
 .Toastify__toast-container {
-  @apply px-6 pb-12 md:px-0 md:pb-0;
+  @apply flex justify-center;
 }
 
 .Toastify__toast {
-  @apply grid grid-cols-1fr/auto items-center rounded-12 border border-f0edf9 dark:border-858494;
+  @apply mt-4 min-h-fit items-center rounded-full border border-gray-200 p-2 font-rubik text-b3 font-medium xs:p-3 xs:text-b2;
 }
 
-.Toastify__close-button {
-  @apply relative p-5 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-f0edf9;
+.Toastify__toast-body {
+  @apply m-0 p-0;
 }
