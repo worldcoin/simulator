@@ -1,6 +1,6 @@
 import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
-import { useQRScanner } from "@/hooks/test";
+import { useQRScanner } from "@/hooks/useQRScanner";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { useModalStore } from "@/stores/modalStore";
 import type { ScanConstraints } from "@/types/qrcode";
