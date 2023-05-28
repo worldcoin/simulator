@@ -1,14 +1,14 @@
 import type {
   Bounds,
-  QrScannerResultPoint,
-  useQrScannerProps,
+  QRScannerResultPoint,
+  useQRScannerProps,
 } from "@/types/qrcode";
 import type { IScannerControls } from "@zxing/browser";
 import { BrowserQRCodeReader } from "@zxing/browser";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-export function useQrScanner(props: useQrScannerProps): {
+export function useQRScanner(props: useQRScannerProps): {
   data: string | null;
   position: Bounds | null;
 } {
@@ -23,7 +23,7 @@ export function useQrScanner(props: useQrScannerProps): {
       delayBetweenScanSuccess: 1000,
     });
 
-    const handleData = (data: QrScannerResultPoint | undefined) => {
+    const handleData = (data: QRScannerResultPoint | undefined) => {
       if (!data) {
         return;
       }

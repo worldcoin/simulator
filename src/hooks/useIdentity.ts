@@ -49,7 +49,7 @@ const useIdentity = () => {
         IDENTITY_STORAGE_KEY,
         JSON.stringify(storedIdentity),
       );
-      console.info("Stored identity");
+      console.info(`Saved identity ${identity.id}`);
     } catch (error) {
       console.error(`Unable to persist semaphore identity, ${error}`);
     }
@@ -69,7 +69,7 @@ const useIdentity = () => {
         zkIdentity,
       };
       await updateIdentity(identity);
-      console.info("Restored serialized identity");
+      console.info(`Restored identity ${identity.id}`);
 
       return identity;
     } catch (error) {

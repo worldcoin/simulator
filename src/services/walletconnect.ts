@@ -1,3 +1,4 @@
+import { WALLETCONNECT_METADATA } from "@/lib/constants";
 import { Core } from "@walletconnect/core";
 import type { ICore, PairingTypes } from "@walletconnect/types";
 import type { IWeb3Wallet } from "@walletconnect/web3wallet";
@@ -21,12 +22,7 @@ export async function setupClient(): Promise<boolean> {
   });
   client = await Web3Wallet.init({
     core,
-    metadata: {
-      name: "World ID Simulator",
-      description: "The simulator for testing World ID verifications.",
-      url: "https://id.worldcoin.org/",
-      icons: ["https://worldcoin.org/icons/logo-small.svg"],
-    },
+    metadata: WALLETCONNECT_METADATA,
   });
   return true;
 }

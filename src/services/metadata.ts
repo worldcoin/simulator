@@ -1,7 +1,5 @@
+import { DEV_PORTAL_PRECHECK_URL } from "@/lib/constants";
 import type { MetadataParams, MetadataResponse } from "@/types";
-
-const DEV_PORTAL_PRECHECK_URL =
-  "https://developer.worldcoin.org/api/v1/precheck/";
 
 async function precheckAction(
   request: MetadataParams,

@@ -1,9 +1,9 @@
-import { GradientIcon } from "@/components/GradientIcon";
 import Header from "@/components/Header";
 import { Icon } from "@/components/Icon";
+import { IconGradient } from "@/components/Icon/IconGradient";
 import { Modal } from "@/components/Modal";
-import { QrInput } from "@/components/QrCode/QrInput";
-import { QrScanner } from "@/components/QrCode/QrScanner";
+import { QRInput } from "@/components/QR/QRInput";
+import { QRScanner } from "@/components/QR/QRScanner";
 import { Settings } from "@/components/Settings";
 import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
@@ -20,7 +20,7 @@ export default function Id() {
   const { identity, retrieveIdentity } = useIdentity();
 
   const [isOpenScanner, setOpenScanner] = useState(false);
-  const [isOpenQrInput, setOpenQrInput] = useState(false);
+  const [isOpenQRInput, setOpenQRInput] = useState(false);
   const [isOpenSettings, setOpenSettings] = useState(false);
 
   const handleCredentialsCard = () => {
@@ -72,7 +72,7 @@ export default function Id() {
           className="rounded-12 bg-icons-purple-secondary p-4 text-left"
           onClick={handleCredentialsCard}
         >
-          <GradientIcon
+          <IconGradient
             name="user"
             color="#9D50FF"
             className="h-6 w-6 text-gray-0"
@@ -90,9 +90,9 @@ export default function Id() {
 
         <button
           className="rounded-12 bg-gray-100 p-4 text-left"
-          onClick={() => setOpenQrInput(true)}
+          onClick={() => setOpenQRInput(true)}
         >
-          <GradientIcon
+          <IconGradient
             name="text"
             color="#191C20"
             className="h-6 w-6 text-gray-0"
@@ -110,17 +110,17 @@ export default function Id() {
       </div>
 
       {isOpenScanner && (
-        <QrScanner
+        <QRScanner
           open={isOpenScanner}
           onClose={() => setOpenScanner(false)}
-          onClickManualInput={() => setOpenQrInput(true)}
+          onClickManualInput={() => setOpenQRInput(true)}
           performVerification={performVerification}
         />
       )}
 
-      <QrInput
-        open={isOpenQrInput}
-        onClose={() => setOpenQrInput(false)}
+      <QRInput
+        open={isOpenQRInput}
+        onClose={() => setOpenQRInput(false)}
         performVerification={performVerification}
       />
 

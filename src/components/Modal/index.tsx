@@ -1,7 +1,7 @@
 import { Checkbox } from "@/components/Checkbox";
 import { Drawer } from "@/components/Drawer";
-import { GradientIcon } from "@/components/GradientIcon";
 import { Icon } from "@/components/Icon";
+import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import { VerifyStatus } from "@/components/Verify/VerifyStatus";
 import useIdentity from "@/hooks/useIdentity";
@@ -13,7 +13,7 @@ import { CredentialType } from "@worldcoin/idkit";
 import clsx from "clsx";
 import Image from "next/image";
 import { useState } from "react";
-import Warning from "./Warning";
+import Warning from "./ModalWarning";
 
 const getStore = (store: IModalStore) => ({
   open: store.open,
@@ -66,8 +66,10 @@ export function Modal() {
             <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200">
               <Image
                 src={
-                  metadata.verified_app_logo ??
-                  metadata.logo_url ??
+                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                  metadata.verified_app_logo ||
+                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                  metadata.logo_url ||
                   "/icons/question.svg"
                 }
                 alt={metadata.name ?? "App logo"}
@@ -123,7 +125,7 @@ export function Modal() {
               />
             )}
           >
-            <GradientIcon
+            <IconGradient
               name="user"
               color="#9D50FF"
             />
@@ -139,7 +141,7 @@ export function Modal() {
               />
             )}
           >
-            <GradientIcon
+            <IconGradient
               name="phone"
               color="#00C313"
             />

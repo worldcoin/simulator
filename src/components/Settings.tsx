@@ -8,8 +8,8 @@ import { useRouter } from "next/router";
 import { memo, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Drawer } from "./Drawer";
-import { GradientIcon } from "./GradientIcon";
 import { Icon } from "./Icon";
+import { IconGradient } from "./Icon/IconGradient";
 
 export const Settings = memo(function Settings(props: {
   open: boolean;
@@ -89,7 +89,7 @@ export const Settings = memo(function Settings(props: {
             className="mt-5 p-4"
             onClick={handleCredentialsMenu}
           >
-            <GradientIcon
+            <IconGradient
               name="user"
               color="#9D50FF"
             />
@@ -106,7 +106,7 @@ export const Settings = memo(function Settings(props: {
             )}
             onClick={handleCopyCommitment}
           >
-            <GradientIcon
+            <IconGradient
               name="note"
               color="#00C3B6"
             />

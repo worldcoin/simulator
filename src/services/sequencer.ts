@@ -1,3 +1,4 @@
+import { SEQUENCER_ENDPOINT } from "@/lib/utils";
 import type {
   InclusionProofResponse,
   InsertIdentityResponse,
@@ -5,45 +6,30 @@ import type {
 } from "@/types";
 import { Chain, CredentialType } from "@/types";
 
-const POLYGON_SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> = {
-  [CredentialType.Orb]: process.env.POLYGON_ORB_SEQUENCER_PASSWORD,
-  [CredentialType.Phone]: process.env.POLYGON_PHONE_SEQUENCER_PASSWORD,
+const POLYGON_SEQUENCER_STAGING_PASSWORD: Record<
+  CredentialType,
+  string | undefined
+> = {
+  [CredentialType.Orb]: process.env.POLYGON_ORB_SEQUENCER_STAGING_PASSWORD,
+  [CredentialType.Phone]: process.env.POLYGON_PHONE_SEQUENCER_STAGING_PASSWORD,
 };
 
-const OPTIMISM_SEQUENCER_PASSWORD: Record<CredentialType, string | undefined> =
-  {
-    [CredentialType.Orb]: process.env.OPTIMISM_ORB_SEQUENCER_PASSWORD,
-    // TODO: Add phone sequencer password for Optimism once deployed
-    [CredentialType.Phone]: undefined,
-  };
+const OPTIMISM_SEQUENCER_STAGING_PASSWORD: Record<
+  CredentialType,
+  string | undefined
+> = {
+  [CredentialType.Orb]: process.env.OPTIMISM_ORB_SEQUENCER_STAGING_PASSWORD,
+  // TODO: Add phone sequencer password for Optimism once deployed
+  [CredentialType.Phone]: undefined,
+};
 
+// Password mapping stays here since it's only exposed on the backend
 const SEQUENCER_PASSWORD: Record<
   Chain,
   Record<CredentialType, string | undefined>
 > = {
-  [Chain.Polygon]: POLYGON_SEQUENCER_PASSWORD,
-  [Chain.Optimism]: OPTIMISM_SEQUENCER_PASSWORD,
-};
-
-const POLYGON_SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
-  [CredentialType.Orb]: "https://signup-batching.stage-crypto.worldcoin.dev/",
-  [CredentialType.Phone]: "https://phone-signup.stage-crypto.worldcoin.dev/",
-};
-
-const OPTIMISM_SEQUENCER_ENDPOINT: Record<CredentialType, string | undefined> =
-  {
-    [CredentialType.Orb]:
-      "https://signup-orb-ethereum.stage-crypto.worldcoin.dev/",
-    // TODO: Add phone sequencer endpoint for Optimism once deployed
-    [CredentialType.Phone]: undefined,
-  };
-
-const SEQUENCER_ENDPOINT: Record<
-  Chain,
-  Record<CredentialType, string | undefined>
-> = {
-  [Chain.Polygon]: POLYGON_SEQUENCER_ENDPOINT,
-  [Chain.Optimism]: OPTIMISM_SEQUENCER_ENDPOINT,
+  [Chain.Polygon]: POLYGON_SEQUENCER_STAGING_PASSWORD,
+  [Chain.Optimism]: OPTIMISM_SEQUENCER_STAGING_PASSWORD,
 };
 
 function buildUrl(

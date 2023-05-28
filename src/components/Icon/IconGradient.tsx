@@ -3,7 +3,7 @@ import { Icon } from "@/components/Icon";
 import clsx from "clsx";
 import React from "react";
 
-export const GradientIcon = React.memo(function CardIcon(props: {
+export const IconGradient = React.memo(function IconGradient(props: {
   name: IconType;
   color: string;
   className?: string;
