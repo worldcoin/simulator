@@ -1,8 +1,6 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
 import type { SignRequest } from "@/types";
 import { ProofError, type CredentialType, type Identity } from "@/types";
-import { BigNumber } from "@ethersproject/bignumber";
-import type { BytesLike, Hexable } from "@ethersproject/bytes";
 import { Group } from "@semaphore-protocol/group";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { FullProof, Proof, SnarkJSProof } from "@semaphore-protocol/proof";
@@ -99,8 +97,8 @@ function getMerkleProof(
 async function generateSemaphoreProof(
   { trapdoor, nullifier, commitment }: ZkIdentity,
   groupOrMerkleProof: Group | MerkleProof,
-  externalNullifier: BytesLike | Hexable | bigint | number,
-  signal: BytesLike | Hexable | bigint | number,
+  externalNullifier: bigint,
+  signal: bigint,
 ): Promise<FullProof> {
   let merkleProof: MerkleProof;
 
@@ -133,8 +131,8 @@ async function generateSemaphoreProof(
   return {
     merkleTreeRoot: publicSignals[0],
     nullifierHash: publicSignals[1],
-    signal: BigNumber.from(signal).toString(),
-    externalNullifier: BigNumber.from(externalNullifier).toString(),
+    signal,
+    externalNullifier,
     proof: packProof(proof),
   };
 }

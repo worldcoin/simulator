@@ -8,9 +8,9 @@ import { CredentialType, ProofError, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
-import { defaultAbiCoder as abi } from "ethers/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
+import { encodePacked } from "viem";
 import useIdentity from "./useIdentity";
 
 function getHighestCredentialType(
@@ -42,15 +42,15 @@ function buildResponse(
     id,
     jsonrpc: "2.0",
     result: {
-      merkle_root: abi.encode(
+      merkle_root: encodePacked(
         ["uint256"],
         [fullProof.merkleTreeRoot as bigint],
       ),
-      nullifier_hash: abi.encode(
+      nullifier_hash: encodePacked(
         ["uint256"],
         [fullProof.nullifierHash as bigint],
       ),
-      proof: abi.encode(["uint256[8]"], [proof]),
+      proof: encodePacked(["uint256[8]"], [proof]),
       credential_type,
     },
   };
