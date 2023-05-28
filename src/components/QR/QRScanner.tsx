@@ -9,6 +9,7 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { QRFrame } from "./QRFrame";
 
+// Test comment
 export const QRScanner = React.memo(function QRScanner(props: {
   open: boolean;
   onClose: () => void;
