@@ -3,7 +3,12 @@ import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
 import type { IModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
-import type { MetadataParams, SessionEvent, SignResponse } from "@/types";
+import type {
+  Chain,
+  MetadataParams,
+  SessionEvent,
+  SignResponse,
+} from "@/types";
 import { CredentialType, ProofError, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
@@ -24,8 +29,9 @@ function getHighestCredentialType(
 
 function buildResponse(
   id: number,
-  fullProof: FullProof,
+  chain: Chain,
   credential_type: CredentialType,
+  fullProof: FullProof,
 ): SignResponse {
   const proof = fullProof.proof as [
     bigint,
@@ -52,6 +58,7 @@ function buildResponse(
       ),
       proof: encodePacked(["uint256[8]"], [proof]),
       credential_type,
+      chain,
     },
   };
 }
@@ -119,7 +126,12 @@ export const useWalletConnect = (ready?: boolean) => {
     }
 
     // Send response to dapp
-    const response = buildResponse(id, verification.fullProof, credentialType);
+    const response = buildResponse(
+      id,
+      identity.chain,
+      credentialType,
+      verification.fullProof,
+    );
     await client.respondSessionRequest({
       topic,
       response,

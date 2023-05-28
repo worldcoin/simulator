@@ -1,6 +1,6 @@
-import { GradientIcon } from "../GradientIcon";
 import type { IconType } from "../Icon";
 import { Icon } from "../Icon";
+import { IconGradient } from "../Icon/IconGradient";
 import Item from "../Item";
 
 interface VerifyItemProps {
@@ -25,7 +25,7 @@ export default function VerifyItem(props: VerifyItemProps) {
       onClick={props.onClick}
     >
       {props.verified ? (
-        <GradientIcon
+        <IconGradient
           name={props.icon}
           color={props.color}
           className="h-5 w-5"

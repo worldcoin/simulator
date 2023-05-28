@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { memo, useState } from "react";
 import { toast } from "react-toastify";
 import { Drawer } from "../Drawer";
-import { GradientIcon } from "../GradientIcon";
+import { IconGradient } from "../Icon/IconGradient";
 import { Input } from "../Input";
 import { VerifyStatus } from "./VerifyStatus";
 
@@ -51,7 +51,7 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
           iconLeft="direction-down"
           onClickLeft={props.onClose}
         />
-        <GradientIcon
+        <IconGradient
           name="phone"
           color="#00C313"
           className="h-10 w-10 text-gray-0"

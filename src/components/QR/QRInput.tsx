@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { memo, useEffect, useMemo, useState } from "react";
 import { Input } from "../Input";
 
-export const QrInput = memo(function QrInput(props: {
+export const QRInput = memo(function QRInput(props: {
   open: boolean;
   onClose: () => void;
   performVerification: (uri: string) => Promise<void>;

@@ -1,4 +1,4 @@
-import type { Bounds, QrScannerFrameProps } from "@/types/qrcode";
+import type { Bounds, QRScannerFrameProps } from "@/types/qrcode";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -10,7 +10,7 @@ const minD = (d: string) =>
     .replace(/(\s|)([a-z])(\s|)/gi, "$2")
     .replace(/(\s|)(-)(\s|)/gi, "$2");
 
-export function QrFrame(props: QrScannerFrameProps) {
+export function QRFrame(props: QRScannerFrameProps) {
   const [frame, setFrame] = useState("");
   const [border, setBorder] = useState("");
 

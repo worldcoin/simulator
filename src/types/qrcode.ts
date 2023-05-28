@@ -18,7 +18,7 @@ export interface ScanConstraints {
   left?: string;
 }
 
-export interface QrScannerFrameProps {
+export interface QRScannerFrameProps {
   containerRef: MutableRefObject<HTMLElement | null>;
   videoRef: MutableRefObject<HTMLVideoElement | null>;
   qrPosition: Bounds | null;
@@ -26,7 +26,7 @@ export interface QrScannerFrameProps {
   valid?: boolean | null;
 }
 
-export interface QrScannerProps {
+export interface QRScannerProps {
   className?: string;
   // NOTE: constraints in percents
   scanConstraints?: ScanConstraints;
@@ -34,7 +34,7 @@ export interface QrScannerProps {
   onClose?: () => void;
 }
 
-export interface QrScannerResultPoint {
+export interface QRScannerResultPoint {
   text: string;
   resultPoints: Array<{
     x: number;
@@ -44,7 +44,7 @@ export interface QrScannerResultPoint {
   }>;
 }
 
-export interface useQrScannerProps {
+export interface useQRScannerProps {
   cameraReady: boolean;
   streamRef: MutableRefObject<MediaStream | undefined>;
   videoRef: MutableRefObject<HTMLVideoElement | null>;

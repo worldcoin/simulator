@@ -19,5 +19,6 @@ export interface SignResponse {
     nullifier_hash: string;
     proof: string;
     credential_type: string;
+    chain: string;
   };
 }
