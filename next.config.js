@@ -14,6 +14,8 @@ const nextConfig = {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
+      net: false, // NOTE: Fallback for legacy WalletConnect v1 (loaded through wagmi)
+      tls: false, // NOTE: Fallback for legacy WalletConnect v1 (loaded through wagmi)
     };
     return config;
   },

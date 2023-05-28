@@ -17,8 +17,6 @@
     "prebuild": "node -e \"const fs = require('fs'); const pkg = require('./package.json'); fs.writeFileSync('./public/version.json', JSON.stringify({ version: pkg.version }));\""
   },
   "dependencies": {
-    "@ethersproject/bignumber": "^5.7.0",
-    "@ethersproject/bytes": "^5.7.0",
     "@radix-ui/react-checkbox": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.3",
     "@radix-ui/react-dropdown-menu": "^2.0.4",
@@ -26,11 +24,9 @@
     "@semaphore-protocol/group": "^3.9.0",
     "@semaphore-protocol/identity": "^3.9.0",
     "@semaphore-protocol/proof": "^3.9.0",
-    "@wagmi/core": "^1.0.7",
-    "@walletconnect/core": "^2.7.2",
-    "@walletconnect/types": "^2.7.0",
+    "@walletconnect/core": "^2.7.7",
     "@walletconnect/utils": "^2.7.0",
-    "@walletconnect/web3wallet": "^1.7.0",
+    "@walletconnect/web3wallet": "^1.7.5",
     "@worldcoin/idkit": "^0.4.9",
     "@zk-kit/incremental-merkle-tree": "^1.0.0",
     "@zk-kit/protocols": "^1.11.1",
@@ -45,7 +41,7 @@
     "snarkjs": "0.4.20",
     "usehooks-ts": "^2.9.1",
     "viem": "^0.3.37",
-    "wagmi": "^1.0.7",
+    "wagmi": "^1.0.8",
     "zustand": "^4.3.7"
   },
   "devDependencies": {
@@ -53,6 +49,7 @@
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@walletconnect/types": "^2.7.7",
     "autoprefixer": "10.4.14",
     "cspell": "^6.8.0",
     "eslint": "8.38.0",
