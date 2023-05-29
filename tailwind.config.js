@@ -83,6 +83,9 @@ module.exports = {
           secondary: "#F7F1FF",
         }
       },
+      warning: {
+        700: "#FFB11B"
+      },
       ...mirrorHexColors([
         "#000000",
         "#00c313",

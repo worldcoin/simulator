@@ -19,3 +19,5 @@ export const WALLETCONNECT_METADATA = {
   url: "https://id.worldcoin.org/",
   icons: ["https://worldcoin.org/icons/logo-small.svg"],
 };
+
+export const SERVICE_STATUS_URL = "https://status.worldcoin.org/api/services";
