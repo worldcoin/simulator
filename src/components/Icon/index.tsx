@@ -37,6 +37,7 @@ const icons = [
   "spinner",
   "text",
   "user",
+  "warning",
   "wifi",
   "world-id",
 ] as const;
