@@ -73,7 +73,7 @@ export const QRScanner = React.memo(function QRScanner(props: {
       navigator.mediaDevices
         .getUserMedia({
           video: {
-            facingMode: ["environment"],
+            facingMode: "environment",
             // NOTE: this prevents stuck camera on some IOS devices
             width: { ideal: isIOS ? 2048 : 4096 },
           },
