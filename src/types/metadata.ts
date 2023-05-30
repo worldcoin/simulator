@@ -1,3 +1,5 @@
+import type { CredentialType } from "./common";
+
 export interface MetadataParams {
   app_id: string;
   action: string;
@@ -5,7 +7,7 @@ export interface MetadataParams {
   external_nullifier: string;
   nullifier_hash?: string;
   action_description?: string;
-  credential_types: string[];
+  credential_types: CredentialType[];
 }
 
 export interface MetadataResponse {

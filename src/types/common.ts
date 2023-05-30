@@ -1,3 +1,5 @@
+import type { FullProof } from "@semaphore-protocol/proof";
+
 export enum Environment {
   Production = "production",
   Staging = "staging",
@@ -18,5 +20,11 @@ export enum Status {
   Waiting,
   Pending,
   Success,
+  Warning,
   Error,
+}
+
+export interface Verification {
+  verified: boolean;
+  fullProof: FullProof;
 }

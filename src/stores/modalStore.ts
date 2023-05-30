@@ -1,4 +1,4 @@
-import type { MetadataResponse, SessionEvent } from "@/types";
+import type { MetadataResponse, SessionEvent, Verification } from "@/types";
 import { Status } from "@/types";
 import { create } from "zustand";
 
@@ -11,6 +11,8 @@ export type IModalStore = {
   setMetadata: (metadata: Partial<MetadataResponse> | null) => void;
   event: SessionEvent | null;
   setEvent: (event: SessionEvent | null) => void;
+  verification: Verification | null;
+  setVerification: (verification: Verification | null) => void;
   reset: () => void;
 };
 
@@ -26,6 +28,8 @@ export const useModalStore = create<IModalStore>((set) => ({
     })),
   event: null,
   setEvent: (event) => set(() => ({ event })),
+  verification: null,
+  setVerification: (verification) => set(() => ({ verification })),
   reset: () =>
     set(() => ({
       open: false,

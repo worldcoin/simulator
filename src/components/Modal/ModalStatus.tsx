@@ -3,22 +3,26 @@ import { memo } from "react";
 import Button from "../Button";
 import { Icon } from "../Icon";
 
-interface VerifyStatusProps {
+interface ModalStatusProps {
   status: Status;
   handleClick: () => void;
 }
 
-export const VerifyStatus = memo(function VerifyStatus(
-  props: VerifyStatusProps,
-) {
+export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
   return (
-    <div className="mb-8 flex items-center justify-center">
+    <div className="my-8 flex items-center justify-center">
       {props.status === Status.Waiting && (
         <Button
           onClick={props.handleClick}
           className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-gray-0"
         >
-          <span>Verify now</span>
+          <>
+            <Icon
+              name="world-id"
+              className="h-6 w-6"
+            />
+            <span className="ml-3">Verify with World ID</span>
+          </>
         </Button>
       )}
       {props.status === Status.Pending && (
@@ -41,6 +45,18 @@ export const VerifyStatus = memo(function VerifyStatus(
           />
           <span className="ml-2 text-16 font-semibold text-00c313">
             Verified
+          </span>
+        </>
+      )}
+      {props.status === Status.Warning && (
+        <>
+          <Icon
+            name="close"
+            className="h-4 w-4 text-ffffff "
+            bgClassName="rounded-full w-6 h-6 bg-warning-700"
+          />
+          <span className="ml-2 text-16 font-semibold text-warning-700">
+            You&apos;ve done this before
           </span>
         </>
       )}
