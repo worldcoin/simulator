@@ -13,7 +13,7 @@ export const IconGradient = React.memo(function IconGradient(props: {
     <div
       className={clsx(
         "relative flex items-center justify-center",
-        { "h-8 w-8 text-gray-0": !props.bgClassName },
+        { "h-8 w-8 text-white": !props.bgClassName },
         props.bgClassName,
       )}
       style={
@@ -65,7 +65,7 @@ export const IconGradient = React.memo(function IconGradient(props: {
       <Icon
         name={props.name}
         className={clsx(
-          { "h-5 w-5 text-gray-0": !props.className },
+          { "h-5 w-5 text-white": !props.className },
           props.className,
         )}
       />

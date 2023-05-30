@@ -1,27 +1,6 @@
 const plugin = require("tailwindcss/plugin");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
-const mirrorHexColors = (colors) =>
-  Object.fromEntries(
-    colors.map((color, index) => {
-      if (!/#[a-f0-9]{6}/.test(color)) {
-        throw new Error(
-          'All colors should be lowercase hexadecimal strings 7 characters long with "#" sign at the beginning',
-        );
-      }
-
-      if (colors.indexOf(color) !== index) {
-        throw new Error("Colors should be unique");
-      }
-
-      if (colors[index - 1] > color) {
-        throw new Error("Colors should be sorted alphabetically");
-      }
-
-      return [color.substring(1), color];
-    }),
-  );
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
@@ -59,6 +38,7 @@ module.exports = {
     },
 
     colors: {
+      black: "#000000",
       error: {
         100: "#FFF5F7",
         700: "#FF5A76"
@@ -73,64 +53,27 @@ module.exports = {
         500: "#657080",
         900: "#191C20",
       },
-      info: {
-        100: "#F5F6FD",
-        700: "#506DFF",
-      },
       icons: {
+        blue: {
+          primary: "#4940E0",
+          secondary: "#F0F0FD",
+        },
         purple: {
           primary: "#9D50FF",
           secondary: "#F7F1FF",
         }
       },
+      info: {
+        100: "#F5F6FD",
+        700: "#506DFF",
+      },
+      success: {
+        700: "#00C313"
+      },
       warning: {
         700: "#FFB11B"
       },
-      ...mirrorHexColors([
-        "#000000",
-        "#00c313",
-        "#00c3b6",
-        "#0c0e10",
-        "#0d049a",
-        "#183c4a",
-        "#191c20",
-        "#3c4040",
-        "#3c424b",
-        "#4940e0",
-        "#506dff",
-        "#5743d6",
-        "#657080",
-        "#7357f5",
-        "#777e90",
-        "#858494",
-        "#9ba3ae",
-        "#9d50ff",
-        "#bbbec7",
-        "#cee2f5",
-        "#cfdce1",
-        "#d1d3d4",
-        "#d1dbe1",
-        "#d9d9d9",
-        "#dadada",
-        "#dde7ea",
-        "#ebecef",
-        "#f0edf9",
-        "#f0f0fd",
-        "#f1f2f2",
-        "#f1f5f8",
-        "#f3f4f5",
-        "#f66751",
-        "#f9f9f9",
-        "#f9fafb",
-        "#f9fbfc",
-        "#fbfbfb",
-        "#ff5a76",
-        "#ff5b26",
-        "#ff6471",
-        "#fff5f7",
-        "#ffffff",
-      ]),
-
+      white: "#FFFFFF",
       current: "currentColor",
       transparent: "transparent",
     },

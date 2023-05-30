@@ -57,8 +57,8 @@ export const Input = React.memo(function Input(props: InputProps) {
         {
           "bg-gray-100": !isFocused,
           "border-gray-100": !isFocused && !isInvalid,
-          "border-ff5a76": isInvalid,
-          "bg-ffffff shadow-input": isFocused,
+          "border-error-700": isInvalid,
+          "bg-white shadow-input": isFocused,
           "border-gray-200": isFocused && !isInvalid,
         },
       )}

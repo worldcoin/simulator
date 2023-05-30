@@ -30,7 +30,7 @@ export default function ModalConfirm(props: ModalConfirmProps) {
       </p>
       <Button
         onClick={props.handleClick}
-        className="mb-8 mt-14 flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-gray-0"
+        className="mb-8 mt-14 flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
       >
         Continue anyway
       </Button>

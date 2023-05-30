@@ -14,7 +14,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
       {props.status === Status.Waiting && (
         <Button
           onClick={props.handleClick}
-          className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-gray-0"
+          className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
         >
           <>
             <Icon
@@ -29,9 +29,9 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="spinner"
-            className="h-6 w-6 animate-spin text-000000"
+            className="h-6 w-6 animate-spin text-black"
           />
-          <span className="ml-2 text-16 font-semibold text-657080">
+          <span className="ml-2 text-16 font-semibold text-gray-500">
             Verifying
           </span>
         </>
@@ -40,10 +40,10 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="checkmark"
-            className="h-4 w-4 text-ffffff "
-            bgClassName="rounded-full w-6 h-6 bg-00c313"
+            className="h-4 w-4 text-white "
+            bgClassName="rounded-full w-6 h-6 bg-success-700"
           />
-          <span className="ml-2 text-16 font-semibold text-00c313">
+          <span className="ml-2 text-16 font-semibold text-success-700">
             Verified
           </span>
         </>
@@ -52,7 +52,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="close"
-            className="h-4 w-4 text-ffffff "
+            className="h-4 w-4 text-white "
             bgClassName="rounded-full w-6 h-6 bg-warning-700"
           />
           <span className="ml-2 text-16 font-semibold text-warning-700">
@@ -64,10 +64,10 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="cross"
-            className="h-4 w-4 text-ffffff "
-            bgClassName="rounded-full w-6 h-6 bg-ff5a76"
+            className="h-4 w-4 text-white "
+            bgClassName="rounded-full w-6 h-6 bg-error-700"
           />
-          <span className="ml-2 text-16 font-semibold text-ff5a76">
+          <span className="ml-2 text-16 font-semibold text-error-700">
             Verification failed
           </span>
         </>

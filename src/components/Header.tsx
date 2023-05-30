@@ -20,7 +20,7 @@ export default function Header(props: HeaderProps) {
     <div className="grid w-full grid-cols-3 items-center justify-between xs:mt-3">
       {props.iconLeft && props.onClickLeft && (
         <Button
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-ebecef"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200"
           onClick={props.onClickLeft}
         >
           <Icon
@@ -40,7 +40,7 @@ export default function Header(props: HeaderProps) {
 
       {props.iconRight && props.onClickRight && (
         <Button
-          className="flex h-9 w-9 items-center justify-center justify-self-end rounded-full bg-ebecef"
+          className="flex h-9 w-9 items-center justify-center justify-self-end rounded-full bg-gray-200"
           onClick={props.onClickRight}
         >
           <Icon

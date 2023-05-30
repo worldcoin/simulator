@@ -52,7 +52,7 @@ export const Dropdown = memo(function Dropdown(props: DropdownProps) {
           />
         </div>
       </Trigger>
-      <Content className="z-10 flex w-full flex-col gap-y-2 rounded-12 border bg-gray-0 p-4 text-16">
+      <Content className="z-10 flex w-full flex-col gap-y-2 rounded-12 border bg-white p-4 text-16">
         {filteredOptions.map((option) => (
           <Item
             key={option.label}

@@ -17,7 +17,7 @@ export default function Item(props: {
   return (
     <div
       className={clsx(
-        "flex w-full items-center rounded-16 bg-f9fafb",
+        "flex w-full items-center rounded-16 bg-gray-50",
         { "p-4": !props.className },
         props.className,
       )}

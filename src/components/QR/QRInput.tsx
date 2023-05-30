@@ -93,10 +93,10 @@ export const QRInput = memo(function QRInput(props: {
           <>
             <button
               className={clsx("h-10 rounded-10 px-3 text-12 font-medium", {
-                "bg-ffffff": !isInvalid && !isFocused,
+                "bg-white": !isInvalid && !isFocused,
                 "bg-gray-100": !isInvalid && isFocused,
                 "text-gray-500": !isInvalid,
-                "bg-ff5a76 text-ffffff": isInvalid,
+                "bg-error-700 text-white": isInvalid,
               })}
               onClick={() => {
                 if (isEmpty) {
@@ -121,12 +121,14 @@ export const QRInput = memo(function QRInput(props: {
       />
 
       {isInvalid && (
-        <div className="mt-2 text-b3 text-ff5a76">The QR code is not valid</div>
+        <div className="mt-2 text-b3 text-error-700">
+          The QR code is not valid
+        </div>
       )}
 
       <Button
         type="submit"
-        className="mt-8 h-14 w-full bg-gray-900 text-ffffff disabled:bg-gray-100 disabled:text-gray-300"
+        className="mt-8 h-14 w-full bg-gray-900 text-white disabled:bg-gray-100 disabled:text-gray-300"
         isDisabled={isInvalid || !value}
         onClick={handleSubmit}
       >

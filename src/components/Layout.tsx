@@ -5,8 +5,8 @@ import bgBlur from "/public/images/bg-blur.svg";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed grid h-[calc(100dvh)] w-full overflow-y-scroll bg-f9fbfc xs:min-h-screen">
-      <div className="group pointer-events-none fixed h-screen w-full overflow-hidden bg-f0edf9">
+    <div className="fixed grid h-[calc(100dvh)] w-full overflow-y-scroll bg-gray-100 xs:min-h-screen">
+      <div className="group pointer-events-none fixed h-screen w-full overflow-hidden bg-gray-100">
         <Image
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           src={bgBlur}
@@ -19,12 +19,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           name="logo"
           className="h-10 w-10"
         />
-        <p className="w-full text-777e90">
+        <p className="w-full text-gray-500">
           This is a simulator of the{" "}
           <a
             href="https://worldcoin.org/download"
             target="_blank"
-            className="text-4940e0"
+            className="text-icons-blue-primary"
             rel="noreferrer"
           >
             Worldcoin app
@@ -35,7 +35,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <a
             href="https://docs.worldcoin.org/"
             target="_blank"
-            className="text-4940e0"
+            className="text-icons-blue-primary"
             rel="noreferrer"
           >
             Read the docs
@@ -45,13 +45,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
       <section
         className={clsx(
-          "h-full w-full px-4 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-183c4a xs:p-4",
+          "h-full w-full px-4 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-gray-900 xs:p-4",
           "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
-          "gap-y-3 bg-ffffff transition duration-500 xs:grid-rows-auto/1fr/auto xs:[zoom:.9] md:[zoom:initial]",
+          "gap-y-3 bg-white transition duration-500 xs:grid-rows-auto/1fr/auto xs:[zoom:.9] md:[zoom:initial]",
         )}
       >
         {children}
-        <hr className="absolute bottom-2 left-1/2 hidden h-[5px] w-32 -translate-x-1/2 rounded-full bg-000000 xs:block" />
+        <hr className="absolute bottom-2 left-1/2 hidden h-[5px] w-32 -translate-x-1/2 rounded-full bg-black xs:block" />
       </section>
     </div>
   );
