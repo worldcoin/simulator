@@ -1,6 +1,15 @@
-import type { Bounds, QRScannerFrameProps } from "@/types/qrcode";
+import type { Bounds } from "@/types/qrcode";
 import clsx from "clsx";
+import type { MutableRefObject } from "react";
 import { useEffect, useState } from "react";
+
+interface QRFrameProps {
+  valid?: boolean | null;
+  // position: Bounds | null; // TODO: Add back QR code position calculation
+  videoRef: MutableRefObject<HTMLVideoElement | null>;
+  containerRef: MutableRefObject<HTMLElement | null>;
+  classNames?: string;
+}
 
 // NOTE: minify path d attribute value
 const minD = (d: string) =>
@@ -10,7 +19,7 @@ const minD = (d: string) =>
     .replace(/(\s|)([a-z])(\s|)/gi, "$2")
     .replace(/(\s|)(-)(\s|)/gi, "$2");
 
-export function QRFrame(props: QRScannerFrameProps) {
+export function QRFrame(props: QRFrameProps) {
   const [frame, setFrame] = useState("");
   const [border, setBorder] = useState("");
 
@@ -33,28 +42,28 @@ export function QRFrame(props: QRScannerFrameProps) {
       const ch = container.offsetHeight;
 
       // NOTE: video sizes
-      const vw = video.videoWidth;
-      const vh = video.videoHeight;
+      // const vw = video.videoWidth;
+      // const vh = video.videoHeight;
 
       // NOTE: real video sizes
-      const rw = vw === vh ? Math.max(cw, ch) : vw > vh ? vw + ch - vh : cw;
-      const rh = vw === vh ? Math.max(cw, ch) : vw > vh ? ch : vh + cw - vw;
+      // const rw = vw === vh ? Math.max(cw, ch) : vw > vh ? vw + ch - vh : cw;
+      // const rh = vw === vh ? Math.max(cw, ch) : vw > vh ? ch : vh + cw - vw;
 
       // NOTE: scale multiplier
-      const wm = rw / vw;
-      const hm = rh / vh;
+      // const wm = rw / vw;
+      // const hm = rh / vh;
 
       // NOTE: frame bounds
-      let f: Bounds = [cw / 2 - d / 2, cw / 2 + d / 2, ch / 6, ch / 6 + d];
+      const f: Bounds = [cw / 2 - d / 2, cw / 2 + d / 2, ch / 6, ch / 6 + d];
 
-      if (props.qrPosition) {
-        f = [
-          props.qrPosition[0] * wm - (rw - cw) / 2,
-          props.qrPosition[1] * wm - (rw - cw) / 2,
-          props.qrPosition[2] * hm - (rh - ch) / 2,
-          props.qrPosition[3] * hm - (rh - ch) / 2,
-        ];
-      }
+      // if (props.position) {
+      //   f = [
+      //     props.position[0] * wm - (rw - cw) / 2,
+      //     props.position[1] * wm - (rw - cw) / 2,
+      //     props.position[2] * hm - (rh - ch) / 2,
+      //     props.position[3] * hm - (rh - ch) / 2,
+      //   ];
+      // }
 
       // NOTE: padding
       const p = ((f[1] - f[0]) / 100) * 2;
@@ -105,7 +114,7 @@ export function QRFrame(props: QRScannerFrameProps) {
     return () => {
       window.removeEventListener("resize", calcShapes);
     };
-  }, [props.containerRef, props.qrPosition, props.videoRef]);
+  }, [props.containerRef, props.videoRef]);
 
   return (
     <svg
