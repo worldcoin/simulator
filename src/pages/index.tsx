@@ -96,10 +96,10 @@ export default function Home() {
     <>
       {!isSigning && (
         <div className="flex flex-col gap-y-4">
-          <h1 className="mt-1 text-center font-sora text-h2 text-191c20 xs:mt-4 xs:text-h1">
+          <h1 className="mt-1 text-center font-sora text-h2 text-gray-900 xs:mt-4 xs:text-h1">
             Create your test World ID
           </h1>
-          <p className="text-center text-b2 text-657080">
+          <p className="text-center text-b2 text-gray-500">
             With the World ID Simulator, you can test different scenarios with
             your identity.
           </p>
@@ -127,7 +127,7 @@ export default function Home() {
           >
             <Button
               onClick={handleConnectWallet}
-              className="mt-5 w-full bg-191c20 py-3 font-sora text-14 font-semibold text-ffffff"
+              className="mt-5 w-full bg-gray-900 py-3 font-sora text-14 font-semibold text-white"
             >
               Generate Persistent ID
             </Button>
@@ -137,11 +137,11 @@ export default function Home() {
             icon="clock"
             heading="Create a temporary identity"
             text="Stored only on cache. Ideal for rapid testing and one-time verification flows. Create a temporary identity."
-            iconBgClassName="bg-506dff"
+            iconBgClassName="bg-info-700"
           >
             <Button
               onClick={handleCreateTemporaryIdentity}
-              className="mt-5 w-full bg-191c20 py-3 font-sora text-14 font-semibold text-ffffff"
+              className="mt-5 w-full bg-gray-900 py-3 font-sora text-14 font-semibold text-white"
             >
               Create Temporary ID
             </Button>

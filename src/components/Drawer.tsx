@@ -20,7 +20,7 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
 
       <Content
         className={clsx(
-          "absolute inset-x-0 bottom-0 z-30 rounded-t-20 bg-ffffff p-6 outline-none",
+          "absolute inset-x-0 bottom-0 z-30 rounded-t-20 bg-white p-6 outline-none",
           {
             "top-[44px]": props.fullHeight,
           },

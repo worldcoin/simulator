@@ -54,7 +54,7 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
         <IconGradient
           name="phone"
           color="#00C313"
-          className="h-10 w-10 text-gray-0"
+          className="h-10 w-10 text-white"
           bgClassName="h-20 w-20 mx-auto mt-5"
         />
 

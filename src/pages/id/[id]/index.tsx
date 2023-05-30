@@ -76,7 +76,7 @@ export default function Id() {
           <IconGradient
             name="user"
             color="#9D50FF"
-            className="h-6 w-6 text-gray-0"
+            className="h-6 w-6 text-white"
             bgClassName="h-[44px] w-[44px]"
           />
 
@@ -96,7 +96,7 @@ export default function Id() {
           <IconGradient
             name="text"
             color="#191C20"
-            className="h-6 w-6 text-gray-0"
+            className="h-6 w-6 text-white"
             bgClassName="h-[44px] w-[44px]"
           />
 

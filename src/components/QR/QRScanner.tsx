@@ -121,12 +121,12 @@ export const QRScanner = React.memo(function QRScanner(props: {
       onClose={props.onClose}
       closeIcon="close"
     >
-      <div className="relative z-10 py-1.5 text-center text-h3 font-bold text-ffffff">
+      <div className="relative z-10 py-1.5 text-center text-h3 font-bold text-white">
         Scanner
       </div>
 
       <div
-        className={clsx("absolute inset-0 bg-000000", props.className)}
+        className={clsx("absolute inset-0 bg-black", props.className)}
         ref={containerRef}
       >
         {allowed !== false && (
@@ -146,7 +146,7 @@ export const QRScanner = React.memo(function QRScanner(props: {
             />
 
             <div className="absolute bottom-40 left-1/2 flex -translate-x-1/2 flex-col items-center gap-25 pb-8">
-              <div className="space-y-4 text-center font-rubik text-ffffff">
+              <div className="space-y-4 text-center font-rubik text-white">
                 <p className="text-20 font-semibold">Scan QR code</p>
 
                 <p>Use this QR code for payments and identity verification</p>
@@ -157,14 +157,14 @@ export const QRScanner = React.memo(function QRScanner(props: {
 
         {allowed === false && (
           <div className="absolute inset-x-0 top-1/2 grid -translate-y-1/2 items-center justify-items-center space-y-8">
-            <span className="rounded-full bg-f3f4f5 p-7">
+            <span className="rounded-full bg-gray-100 p-7">
               <Icon
                 name="camera-off"
-                className="h-8 w-8 text-9ba3ae"
+                className="h-8 w-8 text-gray-400"
               />
             </span>
 
-            <div className="space-y-4 px-14 text-center font-rubik text-ffffff">
+            <div className="space-y-4 px-14 text-center font-rubik text-white">
               <p className="text-20 font-semibold">
                 Allow Worldcoin to access your camera
               </p>
@@ -186,7 +186,7 @@ export const QRScanner = React.memo(function QRScanner(props: {
               />
             </div>
 
-            <div className="mt-3 text-b3 text-ffffff">Manual Input</div>
+            <div className="mt-3 text-b3 text-white">Manual Input</div>
           </button>
         </div>
       </div>

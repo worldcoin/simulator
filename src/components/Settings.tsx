@@ -113,12 +113,12 @@ export const Settings = memo(function Settings(props: {
           </Item>
         </div>
         <Button
-          className="mb-8 h-14 w-full bg-fff5f7 font-sora text-16 font-semibold text-ff5a76"
+          className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
           onClick={handleLogout}
         >
           Logout
         </Button>
-        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-9ba3ae">
+        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-gray-400">
           Version {version}
         </p>
       </div>

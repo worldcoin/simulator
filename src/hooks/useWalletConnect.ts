@@ -1,15 +1,19 @@
 import getFullProof from "@/lib/proof";
+import { encode } from "@/lib/utils";
 import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
 import type { IModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import type {
   Chain,
+  Identity,
   MetadataParams,
   SessionEvent,
+  SignRequest,
   SignResponse,
+  Verification,
 } from "@/types";
-import { CredentialType, ProofError, Status } from "@/types";
+import { CredentialType, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
@@ -63,72 +67,95 @@ function buildResponse(
   };
 }
 
+async function generateProof(identity: Identity, request: SignRequest) {
+  const {
+    params: [{ credential_types }],
+  } = request;
+  const credentialType = getHighestCredentialType(credential_types);
+
+  let verification: Verification;
+  try {
+    verification = await getFullProof(request, identity, credentialType);
+  } catch (error) {
+    console.error(`Error verifying semaphore proof, ${error}`);
+    throw error;
+  }
+
+  return verification;
+}
+
+async function rejectRequest(
+  id: number,
+  topic: string,
+  code: number,
+  message: string,
+): Promise<void> {
+  await client.respondSessionRequest({
+    topic,
+    response: {
+      id,
+      jsonrpc: "2.0",
+      error: {
+        code,
+        message,
+      },
+    },
+  });
+}
+
 const getStore = (store: IModalStore) => ({
   setOpen: store.setOpen,
   setStatus: store.setStatus,
+  metadata: store.metadata,
   setMetadata: store.setMetadata,
   setEvent: store.setEvent,
+  verification: store.verification,
+  setVerification: store.setVerification,
   reset: store.reset,
 });
 
 export const useWalletConnect = (ready?: boolean) => {
   const { identity } = useIdentity();
+  const {
+    setOpen,
+    setStatus,
+    metadata,
+    setMetadata,
+    setEvent,
+    verification,
+    setVerification,
+    reset,
+  } = useModalStore(getStore);
   const identityRef = useRef(identity);
-  const { setOpen, setStatus, setMetadata, setEvent, reset } =
-    useModalStore(getStore);
+  const metadataRef = useRef(metadata);
 
   async function approveRequest(
     event: SessionEvent,
     credentialTypes: CredentialType[],
   ): Promise<void> {
     // Destructure session request
-    const {
-      id,
-      topic,
-      params: { request },
-    }: SessionEvent = event;
+    const { id, topic }: SessionEvent = event;
     const credentialType = getHighestCredentialType(credentialTypes);
-    let verification: { verified: boolean; fullProof: FullProof };
 
-    // Show pending modal
-    if (!credentialTypes.length) {
-      setStatus(Status.Error);
-      await rejectRequest(topic, id, -32602, "generic_error");
-      return;
-    }
+    // Show error if identity, verification, or credential types are missing
     setStatus(Status.Pending);
-
-    // Generate zero knowledge proof locally
-    if (!identity) {
-      await rejectRequest(topic, id, -32602, "generic_error");
+    if (!identityRef.current || !verification || !credentialTypes.length) {
+      setTimeout(() => setStatus(Status.Error), 1000);
+      await rejectRequest(id, topic, -32602, "generic_error");
       return;
     }
 
-    try {
-      verification = await getFullProof(request, identity, credentialType);
-    } catch (error) {
-      console.error(`Error verifying semaphore proof, ${error}`);
-      if (error instanceof ProofError) {
-        return;
-      } else {
-        await rejectRequest(topic, id, -32602, "generic_error");
-        return;
-      }
-    }
-
-    // Show success or error modal
-    if (verification.verified) {
-      toast.success("Proof verified successfully");
-      setStatus(Status.Success);
-    } else {
-      toast.error("Proof verification failed");
-      setStatus(Status.Error);
+    // Show warning if user has verified before
+    if (metadataRef.current?.can_user_verify === "no") {
+      setTimeout(() => setStatus(Status.Warning), 1000);
+      await rejectRequest(id, topic, -32602, "generic_error");
+      return;
     }
 
     // Send response to dapp
     const response = buildResponse(
       id,
-      identity.chain,
+      identityRef.current.chain,
       credentialType,
       verification.fullProof,
     );
@@ -136,25 +163,24 @@ export const useWalletConnect = (ready?: boolean) => {
       topic,
       response,
     });
+    setTimeout(() => setStatus(Status.Success), 1000);
   }
 
-  async function rejectRequest(
-    topic: string,
-    id: number,
-    code: number,
-    message: string,
-  ): Promise<void> {
-    await client.respondSessionRequest({
-      topic,
-      response: {
-        id,
-        jsonrpc: "2.0",
-        error: {
-          code,
-          message,
-        },
-      },
-    });
+  async function disconnectPairings(topics: string[]): Promise<void> {
+    await Promise.all(
+      topics.map((topic) => core.pairing.disconnect({ topic })),
+    );
+  }
+
+  async function disconnectSessions(topics: string[]): Promise<void> {
+    await Promise.all(
+      topics.map((topic) =>
+        client.disconnectSession({
+          topic,
+          reason: getSdkError("USER_DISCONNECTED"),
+        }),
+      ),
+    );
   }
 
   const onSessionProposal = useCallback(
@@ -190,6 +216,7 @@ export const useWalletConnect = (ready?: boolean) => {
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -205,18 +232,42 @@ export const useWalletConnect = (ready?: boolean) => {
       }: SessionEvent = event;
       setEvent(event);
 
-      // Fetch metadata for the request
-      const params: MetadataParams = { ...request.params[0] };
-      const metadata = await fetchMetadata(params);
-      setMetadata(metadata);
-      setStatus(Status.Waiting);
+      // Generate zero knowledge proof locally
+      try {
+        if (!identityRef.current) {
+          throw new Error("Identity not found");
+        }
 
-      // Reject session if application is not staging
-      if (!metadata.is_staging) {
-        await rejectRequest(topic, id, -32602, "generic_error");
-        return;
+        const verification = await generateProof(identityRef.current, request);
+        if (!verification.verified) {
+          throw new Error("Proof verification failed");
+        }
+
+        // Fetch metadata for the request
+        const {
+          fullProof: { nullifierHash },
+        } = verification;
+        const params: MetadataParams = {
+          ...request.params[0],
+          nullifier_hash: encode(BigInt(nullifierHash)),
+        };
+
+        const metadata = await fetchMetadata(params);
+        if (!metadata.is_staging) {
+          throw new Error("Application is not staging");
+        }
+
+        toast.success("Proof verified successfully");
+        setMetadata(metadata);
+        setVerification(verification);
+        setStatus(Status.Waiting);
+      } catch (error) {
+        toast.error((error as Error).message);
+        setStatus(Status.Error);
+        await rejectRequest(id, topic, -32602, "generic_error");
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -231,25 +282,9 @@ export const useWalletConnect = (ready?: boolean) => {
         setEvent(null); // TODO: Needed?
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
-
-  async function disconnectPairings(topics: string[]): Promise<void> {
-    await Promise.all(
-      topics.map((topic) => core.pairing.disconnect({ topic })),
-    );
-  }
-
-  async function disconnectSessions(topics: string[]): Promise<void> {
-    await Promise.all(
-      topics.map((topic) =>
-        client.disconnectSession({
-          topic,
-          reason: getSdkError("USER_DISCONNECTED"),
-        }),
-      ),
-    );
-  }
 
   // Setup event listeners
   useEffect(() => {
@@ -265,6 +300,11 @@ export const useWalletConnect = (ready?: boolean) => {
   useEffect(() => {
     identityRef.current = identity;
   }, [identity]);
+
+  // Keep metadata up to date
+  useEffect(() => {
+    metadataRef.current = metadata;
+  }, [metadata]);
 
   return {
     approveRequest,

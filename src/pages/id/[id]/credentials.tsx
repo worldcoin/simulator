@@ -67,10 +67,10 @@ export default function Credentials() {
         iconLeft="direction-left"
         onClickLeft={() => router.back()}
       />
-      <h1 className="mt-10 font-sora text-26 font-semibold text-191c20">
+      <h1 className="mt-10 font-sora text-26 font-semibold text-gray-900">
         Obtain your credentials
       </h1>
-      <p className="mt-4 font-rubik text-18 text-657080">
+      <p className="mt-4 font-rubik text-18 text-gray-500">
         Simulate obtaining different credentials for your World ID.
       </p>
       <VerifyItem

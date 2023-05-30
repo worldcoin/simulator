@@ -1,5 +1,5 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
-import type { SignRequest } from "@/types";
+import type { SignRequest, Verification } from "@/types";
 import { ProofError, type CredentialType, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
@@ -182,7 +182,7 @@ export default async function getFullProof(
   request: SignRequest,
   identity: Identity,
   credentialType: CredentialType,
-) {
+): Promise<Verification> {
   const { signal: rawSignal, external_nullifier: rawExternalNullifier } =
     request.params[0];
   try {

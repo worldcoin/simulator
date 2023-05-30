@@ -3,7 +3,6 @@ import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
-import { VerifyStatus } from "@/components/Verify/VerifyStatus";
 import useIdentity from "@/hooks/useIdentity";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
 import type { IModalStore } from "@/stores/modalStore";
@@ -12,7 +11,11 @@ import { Status } from "@/types";
 import { CredentialType } from "@worldcoin/idkit";
 import clsx from "clsx";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import ModalConfirm from "./ModalConfirm";
+import ModalEnvironment from "./ModalEnvironment";
+import ModalLoading from "./ModalLoading";
+import { ModalStatus } from "./ModalStatus";
 import Warning from "./ModalWarning";
 
 const getStore = (store: IModalStore) => ({
@@ -30,12 +33,34 @@ export function Modal() {
   const { approveRequest } = useWalletConnect();
   const { identity } = useIdentity();
 
+  const [showConfirm, setShowConfirm] = useState(false);
   const [biometricsChecked, setBiometricsChecked] = useState<
     boolean | "indeterminate"
-  >(true);
+  >(identity?.verified[CredentialType.Orb] ?? false);
   const [phoneChecked, setPhoneChecked] = useState<boolean | "indeterminate">(
-    true,
+    identity?.verified[CredentialType.Phone] ?? false,
   );
+
+  const isLoading = useMemo(() => {
+    return status === Status.Loading;
+  }, [status]);
+
+  const isVerified = useMemo(() => {
+    const orbVerified =
+      biometricsChecked && identity?.verified[CredentialType.Orb];
+    const phoneVerified =
+      phoneChecked && identity?.verified[CredentialType.Phone];
+    return orbVerified ?? phoneVerified;
+  }, [biometricsChecked, phoneChecked, identity]);
+
+  const isPendingInclusion = (credentialTypes: CredentialType[]): boolean => {
+    for (const credentialType of credentialTypes) {
+      if (identity?.inclusionProof[credentialType]?.status === "pending") {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const handleClick = async () => {
     const credentialTypeMap = {
@@ -47,7 +72,14 @@ export function Modal() {
       .filter(([_type, isChecked]) => isChecked)
       .map(([type]) => type) as CredentialType[];
 
+    // Show additional warning if the identity is unverified or still pending inclusion
+    if (!showConfirm && (!isVerified || isPendingInclusion(credentialTypes))) {
+      setShowConfirm(true);
+      return;
+    }
+
     if (event) {
+      setShowConfirm(false); // TODO: Needed?
       await approveRequest(event, credentialTypes);
     } else {
       console.error("No event found, WalletConnect session may have expired");
@@ -60,9 +92,9 @@ export function Modal() {
       open={open}
       onClose={() => setOpen(false)}
     >
-      {status !== Status.Loading && metadata?.is_staging && (
+      {!isLoading && !showConfirm && metadata?.is_staging && (
         <>
-          <div className="grid grid-cols-auto/1fr items-center gap-x-4">
+          <div className="flex items-center gap-x-4">
             <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200">
               <Image
                 src={
@@ -152,34 +184,19 @@ export function Modal() {
             phoneChecked={phoneChecked}
           />
 
-          <div className="mt-8">
-            <VerifyStatus
-              status={status}
-              handleClick={handleClick}
-              fancy
-            />
-          </div>
+          <ModalStatus
+            status={status}
+            handleClick={handleClick}
+          />
         </>
       )}
-      {status !== Status.Loading && !metadata?.is_staging && (
-        <div className="flex h-[360px] flex-col items-center justify-center">
-          <Icon
-            name="close"
-            className="h-10 w-10 text-error-700"
-            bgClassName="h-12 w-12 rounded-full bg-error-100"
-          />
-          <h3 className="mt-4 text-center font-sora text-h3 font-semibold">
-            Cannot verify production app on simulator
-          </h3>
-        </div>
-      )}
-      {status === Status.Loading && (
-        <div className="flex h-[360px] items-center justify-center">
-          <Icon
-            name="spinner"
-            className="h-8 w-8 animate-spin text-gray-500"
-          />
-        </div>
+      {isLoading && <ModalLoading />}
+      {!isLoading && !metadata?.is_staging && <ModalEnvironment />}
+      {!isLoading && showConfirm && (
+        <ModalConfirm
+          isVerified={isVerified}
+          handleClick={handleClick}
+        />
       )}
     </Drawer>
   );

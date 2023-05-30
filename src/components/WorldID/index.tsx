@@ -68,7 +68,7 @@ export function WorldID(props: {
         {/* NOTE: face */}
         <div
           className={clsx(styles["card--face-front"], {
-            "bg-d9d9d9": !props.verified,
+            "bg-gray-300": !props.verified,
           })}
         >
           {bg.front}
@@ -100,8 +100,8 @@ export function WorldID(props: {
                 className={clsx(
                   "text-[6.4vw] font-medium uppercase xs:text-24",
                   {
-                    "text-ffffff": props.verified,
-                    "text-191c20": !props.verified,
+                    "text-white": props.verified,
+                    "text-gray-900": !props.verified,
                   },
                 )}
               >
@@ -110,8 +110,8 @@ export function WorldID(props: {
 
               <p
                 className={clsx("text-[2.6vw] uppercase xs:text-10", {
-                  "text-ffffff": props.verified,
-                  "text-657080": !props.verified,
+                  "text-white": props.verified,
+                  "text-gray-500": !props.verified,
                 })}
               >
                 Proof of Personhood
@@ -139,7 +139,7 @@ export function WorldID(props: {
 
               <div
                 className={clsx("text-[3.2vw] xs:text-12", {
-                  "text-gray-0": props.verified && props.phoneVerified,
+                  "text-white": props.verified && props.phoneVerified,
                   "text-gray-900": !props.verified && props.phoneVerified,
                 })}
               >
@@ -158,7 +158,7 @@ export function WorldID(props: {
 
               <div
                 className={clsx("text-[3.2vw] xs:text-12", {
-                  "text-gray-0": props.verified && props.bioVerified,
+                  "text-white": props.verified && props.bioVerified,
                   "text-gray-900": !props.verified && props.bioVerified,
                 })}
               >
@@ -177,7 +177,7 @@ export function WorldID(props: {
 
               <div
                 className={clsx("text-[3.2vw] xs:text-12", {
-                  "text-gray-0": props.verified,
+                  "text-white": props.verified,
                   "text-gray-900": !props.verified,
                 })}
               >
@@ -189,7 +189,7 @@ export function WorldID(props: {
               name="logo"
               className={clsx("h-[6.4vw] w-[6.4vw] xs:h-6 xs:w-6", {
                 "text-gray-900": !props.verified,
-                "text-gray-0": props.verified,
+                "text-white": props.verified,
               })}
             />
           </div>
@@ -198,8 +198,8 @@ export function WorldID(props: {
         {/* NOTE: back */}
         <div
           className={clsx(styles["card--face-back"], {
-            "bg-d9d9d9": !props.verified,
-            "bg-191c20": props.verified,
+            "bg-gray-300": !props.verified,
+            "bg-gray-900": props.verified,
           })}
         >
           {bg.back}
@@ -211,8 +211,8 @@ export function WorldID(props: {
                   "absolute inset-y-0 left-0 -scale-100 break-all [writing-mode:vertical-rl]",
                   "grid grid-cols-[repeat(34,_1fr)]",
                   "px-1 py-2",
-                  "text-center text-7 font-thin uppercase text-ffffff/20",
-                  "bg-191c20",
+                  "text-center text-7 font-thin uppercase text-white/20",
+                  "bg-gray-900",
                 )}
               >
                 {`${"ORB<VERIFIED"}${dayjs(props.signAt).format(
@@ -225,13 +225,13 @@ export function WorldID(props: {
                   ))}
               </div>
               <div className="absolute bottom-2 left-8 grid text-5 uppercase">
-                <span className="text-ffffff">
+                <span className="text-white">
                   Verified in {props.verifiedIn}
                 </span>
-                <span className="text-ffffff">
+                <span className="text-white">
                   Expiration {dayjs(props.expiration).format("MMM DD, YYYY")}
                 </span>
-                <span className="text-ffffff/20">
+                <span className="text-white/20">
                   World ID {props.widVersion}
                 </span>
               </div>
