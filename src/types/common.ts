@@ -28,3 +28,21 @@ export interface Verification {
   verified: boolean;
   fullProof: FullProof;
 }
+
+export interface ServiceStatusResponse {
+  services: {
+    name: string;
+    id: string;
+    description: string;
+    status: string;
+    logs: {
+      id: number;
+      datetime: number;
+      status: string;
+      name: string;
+      description: string;
+    }[];
+    allUptimeRatio: string;
+  }[];
+  lastIncident: number;
+}

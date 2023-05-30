@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import { Icon } from "@/components/Icon";
 import { IconGradient } from "@/components/Icon/IconGradient";
+import Maintenance from "@/components/Maintenance";
 import { Modal } from "@/components/Modal";
 import { QRInput } from "@/components/QR/QRInput";
 import { QRScanner } from "@/components/QR/QRScanner";
@@ -133,6 +134,8 @@ export default function Id() {
       )}
 
       <Modal />
+
+      <Maintenance />
     </div>
   );
 }

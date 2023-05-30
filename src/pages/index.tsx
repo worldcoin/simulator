@@ -106,13 +106,13 @@ export default function Home() {
           <Dropdown
             options={[
               {
-                label: "Polygon",
+                label: "Polygon Mumbai",
                 src: "/icons/polygon.svg",
                 alt: "The Polygon logo",
                 chain: Chain.Polygon,
               },
               {
-                label: "Optimism",
+                label: "Optimism Goerli",
                 src: "/icons/optimism.svg",
                 alt: "The Optimism logo",
                 chain: Chain.Optimism,
