@@ -1,16 +1,15 @@
 import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
-import { useQRScanner } from "@/hooks/useQRScanner";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { useModalStore } from "@/stores/modalStore";
 import type { ScanConstraints } from "@/types/qrcode";
 import clsx from "clsx";
+import jsQR from "jsqr";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { QRFrame } from "./QRFrame";
 
-// Test comment
-export const QRScanner = React.memo(function QRScanner(props: {
+interface QRScannerProps {
   open: boolean;
   onClose: () => void;
   className?: string;
@@ -18,39 +17,34 @@ export const QRScanner = React.memo(function QRScanner(props: {
   scanConstraints?: ScanConstraints;
   performVerification: (data: string) => Promise<void>;
   onClickManualInput?: () => void;
-}) {
-  const [cameraReady, setCameraReady] = useState(false);
+}
+
+export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
+  const [data, setData] = useState<string | null>(null);
   const [valid, setValid] = useState<boolean | null>(null);
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  // const [position, setPosition] = useState<Bounds | null>(null);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const streamRef = useRef<MediaStream>();
-  const canvasRef = useRef(document.createElement("canvas"));
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const { data: qrData, position: qrPosition } = useQRScanner({
-    cameraReady,
-    streamRef,
-    videoRef,
-    scanConstraints: props.scanConstraints,
-  });
+  const canvasRef = useRef(document.createElement("canvas"));
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const { open } = useModalStore();
 
-  // NOTE: validate code
+  // After data is set, check it's validity and perform verification
   useEffect(() => {
-    if (!qrData) {
+    if (!data) {
       return;
     }
 
     const t = setTimeout(() => setValid(null), 2000);
 
     try {
-      const res = parseWorldIDQRCode(qrData);
+      const res = parseWorldIDQRCode(data);
       if (res.valid) {
         clearTimeout(t);
         setValid(true);
-        void props.performVerification(qrData);
+        void props.performVerification(data);
       } else {
         throw res.errorMessage;
       }
@@ -58,55 +52,53 @@ export const QRScanner = React.memo(function QRScanner(props: {
       setValid(false);
       toast.error(typeof err === "string" ? err : "Unsupported QR code");
     }
-  }, [props, qrData]);
+  }, [data, props]);
 
-  // NOTE: init camera
+  // On initial load, start scanning the video stream
   useEffect(() => {
-    const stream = streamRef.current;
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    const isIOS = /(iPhone|iPad)/.test(navigator.userAgent);
+    function scan() {
+      if (videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
 
-    const onplay = () => setCameraReady(true);
+        if (!video) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
 
-    if (!stream && video) {
-      navigator.mediaDevices
-        .getUserMedia({
-          video: {
-            facingMode: "environment",
-            // NOTE: this prevents stuck camera on some IOS devices
-            width: { ideal: isIOS ? 2048 : 4096 },
-          },
-          audio: false,
-        })
-        .then((stream) => {
-          streamRef.current = stream;
-          video.srcObject = stream;
-          void video.play();
-          video.addEventListener("canplay", onplay);
-        })
-        .catch((err) => {
-          if (err instanceof DOMException && err.name === "NotAllowedError") {
-            setAllowed(false);
-          }
-          setCameraReady(false);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
         });
+
+        if (code) {
+          setData(code.data);
+          setTimeout(() => null, 1000); // Wait 1 second before scanning again
+        }
+      }
+      setTimeout(() => requestAnimationFrame(scan), 200); // Only scan 5 times a second
     }
 
-    return () => {
-      setCameraReady(false);
-      canvas.remove();
-
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-
-      if (video) {
-        video.srcObject = null;
-        video.removeEventListener("canplay", onplay);
-      }
-    };
-  }, [canvasRef]);
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "environment" } })
+      .then((stream) => {
+        const video = videoRef.current;
+        if (video) {
+          video.srcObject = stream;
+          // video.setAttribute("playsinline", "true");
+          void video.play();
+          requestAnimationFrame(scan);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        setAllowed(false);
+      });
+  }, []);
 
   // Close scanner once modal opens
   useEffect(() => {
@@ -121,13 +113,13 @@ export const QRScanner = React.memo(function QRScanner(props: {
       onClose={props.onClose}
       closeIcon="close"
     >
-      <div className="relative z-10 py-1.5 text-center text-h3 font-bold text-white">
+      <h2 className="relative z-10 py-1.5 text-center text-h3 font-bold text-white">
         Scanner
-      </div>
+      </h2>
 
       <div
-        className={clsx("absolute inset-0 bg-black", props.className)}
         ref={containerRef}
+        className={clsx("absolute inset-0 bg-black", props.className)}
       >
         {allowed !== false && (
           <Fragment>
@@ -137,12 +129,15 @@ export const QRScanner = React.memo(function QRScanner(props: {
               ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
+            <canvas
+              ref={canvasRef}
+              className="hidden"
+            />
 
             <QRFrame
-              qrPosition={qrPosition}
-              containerRef={containerRef}
-              videoRef={videoRef}
               valid={valid}
+              videoRef={videoRef}
+              containerRef={containerRef}
             />
 
             <div className="absolute bottom-40 left-1/2 flex -translate-x-1/2 flex-col items-center gap-25 pb-8">
