@@ -1,0 +1,17 @@
+.icon:global {
+  contain: strict;
+}
+
+.icon:global:not(.no-mask) {
+  mask-image: var(--image);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.icon:global:is(.no-mask) {
+  background-image: var(--image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}

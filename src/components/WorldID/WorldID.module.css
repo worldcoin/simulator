@@ -1,0 +1,33 @@
+.card {
+  perspective: 1000px;
+}
+
+.card--inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.card .card--face-front,
+.card .card--face-back {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.card .card--face-back {
+  transform: rotateY(180deg);
+}
+
+.animate-flip {
+  animation: flip 2.5s ease-in-out infinite;
+}
+
+@keyframes flip {
+  to {
+    transform: rotateY(360deg);
+  }
+}

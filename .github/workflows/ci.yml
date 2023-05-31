@@ -21,16 +21,17 @@ jobs:
           node-version: 18
           cache: "pnpm"
 
-      - run: pnpm install
+      - name: Install dependencies
+        run: pnpm install
 
-      - run: pnpm lint
+      - name: Linting
+        run: pnpm lint
 
       - name: Check Typescript
-        run: pnpm typescript:check
+        run: pnpm typecheck
 
-      - run: npx prettier --check src/**
-
-      - uses: streetsidesoftware/cspell-action@v1
+      - name: Check spelling
+        run: pnpm run spellcheck
 
       - run: pnpm build
         env:

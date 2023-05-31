@@ -4,7 +4,9 @@
     "node": false,
     "es6": true
   },
+  "ignorePatterns": ["*.config.js"],
   "extends": [
+    "next/core-web-vitals",
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
@@ -12,7 +14,6 @@
     "plugin:react/jsx-runtime",
     "plugin:jsx-a11y/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:compat/recommended",
     "plugin:tailwindcss/recommended",
     "prettier"
   ],
@@ -72,13 +73,20 @@
       "warn",
       {
         "officialSorting": true,
-        "config": "tailwind.config.cjs"
+        "config": "tailwind.config.js"
+      }
+    ],
+
+    "react/no-unknown-property": [
+      2,
+      {
+        "ignore": ["jsx", "global"]
       }
     ]
   },
   "settings": {
     "tailwindcss": {
-      "config": "tailwind.config.cjs"
+      "config": "tailwind.config.js"
     }
   }
 }
