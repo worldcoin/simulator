@@ -6,6 +6,7 @@ import "@/styles/globals.css";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import type { AppProps } from "next/app";
 import { Rubik, Sora } from "next/font/google";
+import Script from "next/script";
 import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -39,8 +40,8 @@ const config = createConfig(
 );
 
 export default function App({ Component, pageProps }: AppProps) {
-  const isMobile = useMediaQuery("(max-width: 499px)");
   const [ready, setReady] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 499px)");
 
   // Initialize WalletConnect
   useEffect(() => {
@@ -81,14 +82,9 @@ export default function App({ Component, pageProps }: AppProps) {
           --font-rubik: ${rubik.style.fontFamily};
         }
       `}</style>
-      {/* <Script id="sw">
+      <Script id="sw">
         {`
-          // NOTE: disable for ssr 
-          if (typeof window === 'undefined') {
-            return;
-          }
-          
-          if ("serviceWorker" in navigator) {
+          if (typeof window !== 'undefined' && "serviceWorker" in navigator) {
             window.addEventListener("load", function() {
               navigator.serviceWorker.register("/sw.js").catch(function(error) {
                 console.error("Error during service worker registration:", error);
@@ -96,7 +92,7 @@ export default function App({ Component, pageProps }: AppProps) {
             });
           }
         `}
-      </Script> */}
+      </Script>
     </>
   );
 }

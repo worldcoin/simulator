@@ -4,7 +4,7 @@
     "node": false,
     "es6": true
   },
-  "ignorePatterns": ["*.config.js"],
+  "ignorePatterns": ["*.config.js", "*-config.cjs"],
   "extends": [
     "next/core-web-vitals",
     "eslint:recommended",
