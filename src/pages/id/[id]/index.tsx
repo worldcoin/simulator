@@ -1,5 +1,5 @@
+import Chip from "@/components/Chip";
 import Header from "@/components/Header";
-import { Icon } from "@/components/Icon";
 import { IconGradient } from "@/components/Icon/IconGradient";
 import Maintenance from "@/components/Maintenance";
 import { Modal } from "@/components/Modal";
@@ -50,16 +50,7 @@ export default function Id() {
         onClickLeft={() => setOpenScanner(true)}
         onClickRight={() => setOpenSettings(true)}
       >
-        <div className="flex h-8 items-center gap-1 rounded-full bg-info-100 px-3 text-s4 font-medium text-info-700">
-          <Icon
-            name="user"
-            className="h-4 w-4"
-          />
-
-          <span className="leading-[1px]">
-            {identity?.persisted ? "Persistent" : "Temporary"}
-          </span>
-        </div>
+        <Chip />
       </Header>
 
       <WorldID

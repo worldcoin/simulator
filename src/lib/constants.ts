@@ -12,9 +12,9 @@ export const OPTIMISM_ORB_SEQUENCER_STAGING =
   "https://signup-orb-ethereum.stage-crypto.worldcoin.dev";
 export const OPTIMISM_PHONE_SEQUENCER_STAGING = undefined; // TODO: Add phone sequencer once deployed
 
-// WalletConnect
-export const WALLETCONNECT_METADATA = {
-  name: "World ID Simulator",
+// Site Metadata
+export const METADATA = {
+  name: "Worldcoin Simulator",
   description: "The simulator for testing World ID verifications.",
   url: "https://id.worldcoin.org/",
   icons: ["https://worldcoin.org/icons/logo-small.svg"],

@@ -6,7 +6,7 @@ import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { isPendingInclusion } from "@/lib/utils";
-import type { IModalStore } from "@/stores/modalStore";
+import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
 import { CredentialType } from "@worldcoin/idkit";
@@ -19,7 +19,7 @@ import ModalLoading from "./ModalLoading";
 import { ModalStatus } from "./ModalStatus";
 import Warning from "./ModalWarning";
 
-const getStore = (store: IModalStore) => ({
+const getStore = (store: ModalStore) => ({
   open: store.open,
   setOpen: store.setOpen,
   status: store.status,

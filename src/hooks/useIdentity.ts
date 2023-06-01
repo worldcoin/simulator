@@ -1,5 +1,5 @@
 import { encode } from "@/lib/utils";
-import type { IIdentityStore } from "@/stores/identityStore";
+import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
 import type {
   Chain,
@@ -12,7 +12,7 @@ import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 
 const IDENTITY_STORAGE_KEY = "Identity";
 
-const getStore = (store: IIdentityStore) => ({
+const getStore = (store: IdentityStore) => ({
   identity: store.identity,
   setIdentity: store.setIdentity,
 });

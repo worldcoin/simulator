@@ -40,9 +40,10 @@ export default async function handler(
         return res.status(400).json({ error: "Invalid endpoint" });
     }
 
-    res.status(200).json(data);
+    if (endpoint === "inclusionProof") res.status(200).json(data);
+    if (endpoint === "insertIdentity") res.status(200).end();
   } catch (error) {
-    console.error(error);
+    console.error((error as Error).message);
   }
   return res.status(204).end();
 }

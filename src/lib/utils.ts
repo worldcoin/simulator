@@ -24,6 +24,26 @@ export function isPendingInclusion(
   return false;
 }
 
+export async function checkFilesInCache(files: string[]) {
+  if (!("caches" in window)) {
+    throw new Error("Browser does not support the Cache API");
+  }
+
+  const cacheKeys = await caches.keys();
+
+  return Promise.all(
+    files.map(async (file) => {
+      const fileInCache = await Promise.all(
+        cacheKeys.map((key) =>
+          caches.open(key).then((cache) => cache.match(file)),
+        ),
+      );
+
+      return fileInCache.some(Boolean);
+    }),
+  );
+}
+
 // Mappings
 const POLYGON_SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
   [CredentialType.Orb]: POLYGON_ORB_SEQUENCER_STAGING,

@@ -1,4 +1,4 @@
-import { WALLETCONNECT_METADATA } from "@/lib/constants";
+import { METADATA } from "@/lib/constants";
 import { Core } from "@walletconnect/core";
 import type { ICore, PairingTypes } from "@walletconnect/types";
 import type { IWeb3Wallet } from "@walletconnect/web3wallet";
@@ -22,7 +22,7 @@ export async function setupClient(): Promise<boolean> {
   });
   client = await Web3Wallet.init({
     core,
-    metadata: WALLETCONNECT_METADATA,
+    metadata: METADATA,
   });
   return true;
 }

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "rm -rf public/workbox-* && next build && workbox generateSW workbox-config.cjs",
+    "build": "rm -rf public/workbox-* && next build && workbox injectManifest workbox-config.cjs",
     "start": "next start",
     "lint": "next lint && prettier --check src/**",
     "format": "next lint --fix && prettier --write src/**",
@@ -68,7 +68,11 @@
     "prettier-plugin-tailwindcss": "0.1.10",
     "tailwindcss": "3.3.1",
     "typescript": "5.0.4",
-    "workbox-cli": "^6.5.4"
+    "workbox-cli": "^6.5.4",
+    "workbox-expiration": "^7.0.0",
+    "workbox-precaching": "^7.0.0",
+    "workbox-routing": "^7.0.0",
+    "workbox-strategies": "^7.0.0"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": "eslint --cache --fix",

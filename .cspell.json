@@ -18,6 +18,8 @@
     "keccak",
     "merkle",
     "personhood",
+    "precache",
+    "precaching",
     "precheck",
     "qrcode",
     "Sempahore",
