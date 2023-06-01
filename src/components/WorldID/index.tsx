@@ -187,10 +187,13 @@ export function WorldID(props: {
 
             <Icon
               name="logo"
-              className={clsx("h-[6.4vw] w-[6.4vw] xs:h-6 xs:w-6", {
-                "text-gray-900": !props.verified,
-                "text-white": props.verified,
-              })}
+              className={clsx(
+                "h-[6.4vw] w-[6.4vw] scale-x-[-1] xs:h-6 xs:w-6 ",
+                {
+                  "text-gray-900": !props.verified,
+                  "text-white": props.verified,
+                },
+              )}
             />
           </div>
         </div>

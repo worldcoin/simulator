@@ -2,7 +2,7 @@ import getFullProof from "@/lib/proof";
 import { encode, isPendingInclusion } from "@/lib/utils";
 import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
-import type { IModalStore } from "@/stores/modalStore";
+import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import type {
   Chain,
@@ -103,7 +103,7 @@ async function rejectRequest(
   });
 }
 
-const getStore = (store: IModalStore) => ({
+const getStore = (store: ModalStore) => ({
   setOpen: store.setOpen,
   setStatus: store.setStatus,
   metadata: store.metadata,

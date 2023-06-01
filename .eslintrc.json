@@ -4,7 +4,11 @@
     "node": false,
     "es6": true
   },
-  "ignorePatterns": ["*.config.js", "*-config.cjs"],
+  "ignorePatterns": [
+    "*.config.js",
+    "*-config.cjs",
+    "/public/service-worker.js"
+  ],
   "extends": [
     "next/core-web-vitals",
     "eslint:recommended",

@@ -78,18 +78,18 @@ export default function Home() {
     });
   };
 
-  // On initial load, restore previous identity from storage
-  useEffect(() => {
-    void retrieveIdentity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Generate persistent identity seed from connected wallet
   useEffect(() => {
     if (!isConnected || identity) return;
 
     signMessage();
   }, [identity, isConnected, signMessage]);
+
+  // On initial load, restore previous identity from storage
+  useEffect(() => {
+    void retrieveIdentity();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     // <div className="px-2 pb-6 xs:pb-0">
@@ -111,12 +111,13 @@ export default function Home() {
                 alt: "The Polygon logo",
                 chain: Chain.Polygon,
               },
-              {
-                label: "Optimism Goerli",
-                src: "/icons/optimism.svg",
-                alt: "The Optimism logo",
-                chain: Chain.Optimism,
-              },
+              // TODO: Re-enable when Optimism is supported
+              // {
+              //   label: "Optimism Goerli",
+              //   src: "/icons/optimism.svg",
+              //   alt: "The Optimism logo",
+              //   chain: Chain.Optimism,
+              // },
             ]}
             setChain={setChain}
           />
