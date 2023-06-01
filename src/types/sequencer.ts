@@ -9,13 +9,8 @@ export interface SequencerRequest {
 }
 
 export interface InclusionProofResponse {
-  root: string;
   status: string;
-  proof: Record<"Left" | "Right", string>[];
-}
-
-export interface InsertIdentityResponse {
-  root: string;
-  status: string;
-  proof: Record<"Left" | "Right", string>[];
+  root: string | null;
+  proof: Record<"Left" | "Right", string>[] | null;
+  message: string;
 }

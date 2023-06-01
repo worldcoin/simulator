@@ -1,6 +1,6 @@
-import type { inclusionProof } from "@/services/sequencer";
 import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { Chain, CredentialType } from "./common";
+import type { InclusionProofResponse } from "./sequencer";
 
 export interface Identity {
   readonly id: string;
@@ -8,10 +8,7 @@ export interface Identity {
   chain: Chain; // TODO: refactor
   persisted: boolean;
   verified: Record<CredentialType, boolean>;
-  inclusionProof: Record<
-    CredentialType,
-    Awaited<ReturnType<typeof inclusionProof>> | null
-  >;
+  inclusionProof: Record<CredentialType, InclusionProofResponse | null>;
 }
 
 export interface StoredIdentity {
@@ -20,8 +17,5 @@ export interface StoredIdentity {
   chain: Chain; // TODO: refactor
   persisted: boolean;
   verified: Record<CredentialType, boolean>;
-  inclusionProof: Record<
-    CredentialType,
-    Awaited<ReturnType<typeof inclusionProof>> | null
-  >;
+  inclusionProof: Record<CredentialType, InclusionProofResponse | null>;
 }

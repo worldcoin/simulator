@@ -5,6 +5,7 @@ import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
+import { isPendingInclusion } from "@/lib/utils";
 import type { IModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
@@ -53,33 +54,27 @@ export function Modal() {
     return orbVerified ?? phoneVerified;
   }, [biometricsChecked, phoneChecked, identity]);
 
-  const isPendingInclusion = (credentialTypes: CredentialType[]): boolean => {
-    for (const credentialType of credentialTypes) {
-      if (identity?.inclusionProof[credentialType]?.status === "pending") {
-        return true;
-      }
-    }
-    return false;
-  };
-
   const handleClick = async () => {
+    if (!identity) return;
     const credentialTypeMap = {
       [CredentialType.Orb]: biometricsChecked,
       [CredentialType.Phone]: phoneChecked,
     };
-
     const credentialTypes = Object.entries(credentialTypeMap)
       .filter(([_type, isChecked]) => isChecked)
       .map(([type]) => type) as CredentialType[];
 
     // Show additional warning if the identity is unverified or still pending inclusion
-    if (!showConfirm && (!isVerified || isPendingInclusion(credentialTypes))) {
+    if (
+      !showConfirm &&
+      (!isVerified || isPendingInclusion(identity, credentialTypes))
+    ) {
       setShowConfirm(true);
       return;
     }
 
     if (event) {
-      setShowConfirm(false); // TODO: Needed?
+      setShowConfirm(false);
       await approveRequest(event, credentialTypes);
     } else {
       console.error("No event found, WalletConnect session may have expired");

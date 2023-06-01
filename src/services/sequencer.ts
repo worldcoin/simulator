@@ -1,9 +1,5 @@
 import { SEQUENCER_ENDPOINT } from "@/lib/utils";
-import type {
-  InclusionProofResponse,
-  InsertIdentityResponse,
-  SequencerRequest,
-} from "@/types";
+import type { InclusionProofResponse, SequencerRequest } from "@/types";
 import { Chain, CredentialType } from "@/types";
 
 const POLYGON_SEQUENCER_STAGING_PASSWORD: Record<
@@ -111,7 +107,7 @@ export async function insertIdentity(
   credentialType: CredentialType,
   commitment: string,
 ) {
-  return await postRequest<InsertIdentityResponse>({
+  return await postRequest<Response>({
     chain,
     endpoint: "insertIdentity",
     credentialType,

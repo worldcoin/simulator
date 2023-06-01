@@ -1,5 +1,5 @@
 import getFullProof from "@/lib/proof";
-import { encode } from "@/lib/utils";
+import { encode, isPendingInclusion } from "@/lib/utils";
 import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
 import type { IModalStore } from "@/stores/modalStore";
@@ -115,7 +115,7 @@ const getStore = (store: IModalStore) => ({
 });
 
 export const useWalletConnect = (ready?: boolean) => {
-  const { identity } = useIdentity();
+  const { identity, updateIdentity } = useIdentity();
   const {
     setOpen,
     setStatus,
@@ -232,12 +232,17 @@ export const useWalletConnect = (ready?: boolean) => {
       }: SessionEvent = event;
       setEvent(event);
 
-      // Generate zero knowledge proof locally
       try {
         if (!identityRef.current) {
           throw new Error("Identity not found");
         }
 
+        // Check for pending inclusions
+        if (isPendingInclusion(identityRef.current)) {
+          await updateIdentity(identityRef.current);
+        }
+
+        // Generate zero knowledge proof locally
         const verification = await generateProof(identityRef.current, request);
         if (!verification.verified) {
           throw new Error("Proof verification failed");

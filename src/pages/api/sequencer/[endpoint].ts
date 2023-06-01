@@ -1,10 +1,5 @@
 import { inclusionProof, insertIdentity } from "@/services/sequencer";
-import type {
-  Chain,
-  CredentialType,
-  InclusionProofResponse,
-  InsertIdentityResponse,
-} from "@/types";
+import type { Chain, CredentialType, InclusionProofResponse } from "@/types";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 interface SequencerRequest extends NextApiRequest {
@@ -32,7 +27,7 @@ export default async function handler(
   try {
     const { endpoint } = req.query;
     const { chain, credentialType, commitment } = req.body;
-    let data: InclusionProofResponse | InsertIdentityResponse;
+    let data: InclusionProofResponse | Response;
 
     switch (endpoint) {
       case "inclusionProof":
