@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build # TODO: workbox generateSW workbox-config.cjs",
+    "build": "rm -rf public/workbox-* && next build && workbox generateSW workbox-config.cjs",
     "start": "next start",
     "lint": "next lint && prettier --check src/**",
     "format": "next lint --fix && prettier --write src/**",
@@ -45,6 +45,7 @@
     "zustand": "^4.3.7"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^13.4.4",
     "@types/node": "18.15.13",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
