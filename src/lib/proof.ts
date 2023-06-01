@@ -56,13 +56,14 @@ function getMerkleProof(
   identity: Identity,
   credentialType: CredentialType,
 ): MerkleProof {
+  const proof = identity.inclusionProof[credentialType]?.proof;
   // Identity has inclusion proof from sequencer
-  if (identity.inclusionProof[credentialType]?.proof) {
-    const siblings = identity.inclusionProof[credentialType]?.proof
+  if (proof) {
+    const siblings = proof
       .flatMap((v) => Object.values(v))
       .map((v) => BigInt(v));
 
-    const pathIndices = identity.inclusionProof[credentialType]?.proof
+    const pathIndices = proof
       .flatMap((v) => Object.keys(v))
       .map((v) => (v == "Left" ? 0 : 1));
 

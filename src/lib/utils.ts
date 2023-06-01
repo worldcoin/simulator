@@ -1,3 +1,4 @@
+import type { Identity } from "@/types";
 import { Chain, CredentialType } from "@/types";
 import {
   OPTIMISM_ORB_SEQUENCER_STAGING,
@@ -8,6 +9,19 @@ import {
 
 export function encode(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
+}
+
+export function isPendingInclusion(
+  identity: Identity,
+  credentialTypes = [CredentialType.Orb, CredentialType.Phone],
+): boolean {
+  for (const credentialType of credentialTypes) {
+    const status = identity.inclusionProof[credentialType]?.status;
+    if (status === "new" || status === "pending") {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Mappings
