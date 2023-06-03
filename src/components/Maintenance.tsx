@@ -35,21 +35,22 @@ export default function Maintenance() {
   return (
     <a
       href="https://status.worldcoin.org"
-      className={clsx("absolute inset-4", { hidden: !visible })}
+      className={clsx(
+        "absolute left-1/2 mt-10 flex w-[340px] -translate-x-1/2 items-center rounded-24 border border-gray-200 bg-gray-0 p-4 xs:mt-20",
+        { hidden: !visible },
+      )}
     >
-      <div className="mt-10 flex items-center rounded-24 border border-gray-200 bg-gray-0 p-4 xs:mt-20">
-        <Icon
-          name="warning"
-          className="h-5 w-5 text-gray-0"
-          bgClassName="bg-warning-700 h-8 w-8 rounded-full shrink-0"
-        />
-        <div className="ml-4 flex flex-col">
-          <h3 className="font-rubik text-s2">Under maintenance</h3>
-          <p className="mt-1 text-b3">
-            Some features of the App are under maintenance. Functionality will
-            be back to normal soon.
-          </p>
-        </div>
+      <Icon
+        name="warning"
+        className="h-5 w-5 text-gray-0"
+        bgClassName="bg-warning-700 h-8 w-8 rounded-full shrink-0"
+      />
+      <div className="ml-4 flex flex-col">
+        <h3 className="font-rubik text-s2">Under maintenance</h3>
+        <p className="mt-1 text-b3">
+          Some features of the App are under maintenance. Functionality will be
+          back to normal soon.
+        </p>
       </div>
     </a>
   );
