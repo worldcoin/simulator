@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import useIdentity from "@/hooks/useIdentity";
 import { CredentialType, Status } from "@/types";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { memo, useState } from "react";
@@ -39,6 +40,14 @@ export const VerifyOrb = memo(function VerifyOrb(props: {
     }
   };
 
+  const pathVariant = {
+    hidden: { pathLength: 0 },
+    visible: {
+      pathLength: 1,
+      transition: { ease: "easeInOut", duration: 1 },
+    },
+  };
+
   return (
     <Drawer
       fullHeight
@@ -51,7 +60,48 @@ export const VerifyOrb = memo(function VerifyOrb(props: {
           onClickLeft={props.onClose}
         />
         <div className="relative mt-10 flex items-center justify-center">
-          <div className="absolute z-10 h-72 w-72 rounded-full border-[8px] border-gray-100" />
+          <motion.svg
+            width="288"
+            height="288"
+            viewBox="0 0 288 288"
+            initial="hidden"
+            animate="visible"
+            className="absolute z-10"
+          >
+            <circle
+              cx="144"
+              cy="144"
+              r="140"
+              fill="none"
+              stroke="#F3F4F5"
+              strokeWidth="8"
+            />
+            {status === Status.Success && (
+              <>
+                <motion.path
+                  d="M144,4 a140,140 0 0,1 0,280"
+                  fill="none"
+                  stroke="#00C313"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  variants={pathVariant}
+                  initial="hidden"
+                  animate="visible"
+                />
+                <motion.path
+                  d="M144,4 a140,140 0 0,0 0,280"
+                  fill="none"
+                  stroke="#00C313"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  variants={pathVariant}
+                  initial="hidden"
+                  animate="visible"
+                  custom={1}
+                />
+              </>
+            )}
+          </motion.svg>
           <Image
             src="/images/orb.png"
             alt="The Worldcoin Orb"

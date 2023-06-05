@@ -1,5 +1,6 @@
 import { Content, Overlay, Root } from "@radix-ui/react-dialog";
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
 export interface DrawerProps {
@@ -11,23 +12,43 @@ export interface DrawerProps {
 }
 
 export const Drawer = React.memo(function Drawer(props: DrawerProps) {
+  const contentVariant = {
+    closed: { y: "100%", transition: { duration: 0.3 } },
+    open: {
+      y: "0%",
+      transition: { type: "spring", stiffness: 500, damping: 30 },
+    },
+  };
+
   return (
     <Root
       open={props.open}
       onOpenChange={props.onClose}
     >
-      <Overlay className="absolute inset-0 z-20 bg-gray-900/70" />
+      <AnimatePresence>
+        <Overlay
+          key="overlay"
+          className="absolute inset-0 z-20 bg-gray-900/70"
+        />
 
-      <Content
-        className={clsx(
-          "absolute inset-x-0 bottom-0 z-30 rounded-t-20 bg-white p-6 outline-none",
-          {
-            "top-[44px]": props.fullHeight,
-          },
-        )}
-      >
-        {props.children}
-      </Content>
+        <Content asChild>
+          <motion.div
+            key="content"
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={contentVariant}
+            className={clsx(
+              "absolute inset-x-0 bottom-0 z-30 rounded-t-20 bg-white p-6 outline-none",
+              {
+                "top-[44px]": props.fullHeight,
+              },
+            )}
+          >
+            {props.children}
+          </motion.div>
+        </Content>
+      </AnimatePresence>
     </Root>
   );
 });
