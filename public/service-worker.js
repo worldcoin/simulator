@@ -22,13 +22,29 @@ self.addEventListener('install', (event) => {
     .then(() => self.clients.matchAll({ includeUncontrolled: true }))
     .then((clients) => {
       clients.forEach((client) =>
-        client.postMessage('semaphore cache complete')
+        client.postMessage('CACHE_COMPLETE')
       );
     })
     .catch((error) => {
       console.error('Error during service worker installation:', error);
     })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data === 'RETRY_DOWNLOAD') {
+    caches.open('semaphore-cache')
+    .then((cache) => cache.addAll(files))
+    .then(() => self.clients.matchAll({ includeUncontrolled: true }))
+    .then((clients) => {
+      clients.forEach((client) =>
+        client.postMessage('CACHE_COMPLETE')
+      );
+    })
+    .catch((error) => {
+      console.error('Error during file download:', error);
+    })
+  }
 });
 
 self.__WB_MANIFEST;

@@ -18,7 +18,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { WagmiConfig, createConfig } from "wagmi";
 
 // Must be loaded after global styles
-import { checkFilesInCache } from "@/lib/utils";
+import { checkCache, retryDownload } from "@/lib/utils";
 import "@/styles/react-toastify.css";
 
 const sora = Sora({
@@ -71,7 +71,7 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("message", (event) => {
-        if (event.data === "semaphore cache complete") {
+        if (event.data === "CACHE_COMPLETE") {
           setComplete(true);
         }
       });
@@ -80,15 +80,15 @@ export default function App({ Component, pageProps }: AppProps) {
 
   // Check if semaphore files already exist in cache
   useEffect(() => {
-    async function checkCache() {
-      const files = ["/semaphore/semaphore.wasm", "/semaphore/semaphore.zkey"];
-      const filesInCache = await checkFilesInCache(files);
-      if (filesInCache.every(Boolean)) {
+    async function checkSemaphoreCache() {
+      if (await checkCache()) {
         setComplete(true);
+      } else {
+        await retryDownload();
       }
     }
 
-    void checkCache();
+    void checkSemaphoreCache();
   }, [setComplete]);
 
   return (

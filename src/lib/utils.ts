@@ -24,7 +24,7 @@ export function isPendingInclusion(
   return false;
 }
 
-export async function checkFilesInCache(files: string[]) {
+async function checkFilesInCache(files: string[]) {
   if (!("caches" in window)) {
     throw new Error("Browser does not support the Cache API");
   }
@@ -42,6 +42,25 @@ export async function checkFilesInCache(files: string[]) {
       return fileInCache.some(Boolean);
     }),
   );
+}
+
+export async function checkCache(): Promise<boolean> {
+  const files = ["/semaphore/semaphore.wasm", "/semaphore/semaphore.zkey"];
+  const filesInCache = await checkFilesInCache(files);
+  return filesInCache.every(Boolean);
+}
+
+export async function retryDownload(): Promise<void> {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.ready
+      .then((registration) => {
+        if (registration.active)
+          registration.active.postMessage("RETRY_DOWNLOAD");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 }
 
 // Mappings
