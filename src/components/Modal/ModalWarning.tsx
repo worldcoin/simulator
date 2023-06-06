@@ -41,8 +41,10 @@ export default function Warning(props: WarningProps) {
       {visible && (
         <p className="mx-2 mt-2 text-b4 text-error-700">
           This action will fail as{" "}
-          {noCredentials ? "no credentials" : "the selected credentials do not"}{" "}
-          exist. Proceed to test an error case.
+          {noCredentials
+            ? "no credentials are selected. "
+            : "the selected credentials do not exist. "}
+          Proceed to test an error case.
         </p>
       )}
     </>
