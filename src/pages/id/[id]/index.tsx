@@ -8,7 +8,7 @@ import { QRScanner } from "@/components/QR/QRScanner";
 import { Settings } from "@/components/Settings";
 import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
-import { encode } from "@/lib/utils";
+import { checkCache, encode, retryDownload } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { pairClient } from "@/services/walletconnect";
 import { CredentialType } from "@worldcoin/idkit";
@@ -29,6 +29,10 @@ export default function Id() {
   };
 
   const performVerification = async (data: string) => {
+    // Check if semaphore files are present
+    const filesInCache = await checkCache();
+    if (!filesInCache) await retryDownload();
+
     const { uri } = parseWorldIDQRCode(data);
     if (identity && uri) {
       await pairClient(uri);
