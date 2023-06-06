@@ -13,7 +13,10 @@ export interface DrawerProps {
 
 export const Drawer = React.memo(function Drawer(props: DrawerProps) {
   const contentVariant = {
-    closed: { y: "100%", transition: { duration: 0.3 } },
+    closed: {
+      y: "100%",
+      transition: { type: "spring", stiffness: 500, damping: 30 },
+    },
     open: {
       y: "0%",
       transition: { type: "spring", stiffness: 500, damping: 30 },
@@ -26,28 +29,35 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
       onOpenChange={props.onClose}
     >
       <AnimatePresence>
-        <Overlay
-          key="overlay"
-          className="absolute inset-0 z-20 bg-gray-900/70"
-        />
+        {props.open && (
+          <>
+            <Overlay
+              key="overlay"
+              className="absolute inset-0 z-20 bg-gray-900/70"
+            />
 
-        <Content asChild>
-          <motion.div
-            key="content"
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={contentVariant}
-            className={clsx(
-              "absolute inset-x-0 bottom-0 z-30 rounded-t-20 bg-white p-6 outline-none",
-              {
-                "top-[44px]": props.fullHeight,
-              },
-            )}
-          >
-            {props.children}
-          </motion.div>
-        </Content>
+            <Content
+              forceMount
+              asChild
+            >
+              <motion.div
+                key="content"
+                initial="closed"
+                animate="open"
+                exit="closed"
+                variants={contentVariant}
+                className={clsx(
+                  "absolute inset-x-0 bottom-0 z-30 rounded-t-20 bg-white p-6 outline-none",
+                  {
+                    "top-[44px]": props.fullHeight,
+                  },
+                )}
+              >
+                {props.children}
+              </motion.div>
+            </Content>
+          </>
+        )}
       </AnimatePresence>
     </Root>
   );
