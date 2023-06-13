@@ -17,6 +17,7 @@ const project = new OttofellerNextjsProject({
   copyrightOwner: 'Tools for Humanity Corporation',
   copyrightPeriod: '2022',
   minNodeVersion: '16.16.0',
+  pnpmVersion: '7.33.1',
 
   deps: [
     '@radix-ui/react-checkbox@^1.0.3',

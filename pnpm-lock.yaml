@@ -2748,7 +2748,7 @@ packages:
       '@motionone/easing': 10.15.1
       '@motionone/types': 10.15.1
       '@motionone/utils': 10.15.1
-      tslib: 2.4.0
+      tslib: 2.5.3
     dev: false
 
   /@motionone/dom@10.12.0:
@@ -2777,7 +2777,7 @@ packages:
     resolution: {integrity: sha512-6hIHBSV+ZVehf9dcKZLT7p5PEKHGhDwky2k8RKkmOvUoYP3S+dXsKupyZpqx5apjd9f+php4vXk4LuS+ADsrWw==}
     dependencies:
       '@motionone/utils': 10.15.1
-      tslib: 2.4.0
+      tslib: 2.5.3
     dev: false
 
   /@motionone/generators@10.15.1:
@@ -2785,7 +2785,7 @@ packages:
     dependencies:
       '@motionone/types': 10.15.1
       '@motionone/utils': 10.15.1
-      tslib: 2.4.0
+      tslib: 2.5.3
     dev: false
 
   /@motionone/svelte@10.16.2:
@@ -2804,7 +2804,7 @@ packages:
     dependencies:
       '@motionone/types': 10.15.1
       hey-listen: 1.0.8
-      tslib: 2.4.0
+      tslib: 2.5.3
     dev: false
 
   /@motionone/vue@10.16.2:
