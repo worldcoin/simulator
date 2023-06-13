@@ -31,6 +31,7 @@ export default function Id() {
   const performVerification = async (data: string) => {
     // Check if semaphore files are present
     const filesInCache = await checkCache()
+
     if (!filesInCache) {
       await retryDownload()
     }
@@ -47,12 +48,13 @@ export default function Id() {
     if (identity) {
       return
     }
+
     void retrieveIdentity()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- FIXME
   }, [])
 
   return (
-    <div className="xs:gap-y-6 xs:pb-6 flex flex-col gap-y-4 px-2 pb-4">
+    <div className="flex flex-col gap-y-4 px-2 pb-4 xs:gap-y-6 xs:pb-6">
       <Header
         iconLeft="barcode"
         iconRight="setting"
@@ -72,9 +74,9 @@ export default function Id() {
         <button className="rounded-12 bg-icons-purple-secondary p-4 text-left" onClick={handleCredentialsCard}>
           <IconGradient name="user" color="#9D50FF" className="h-6 w-6 text-white" bgClassName="h-[44px] w-[44px]" />
 
-          <div className="mt-4.5 text-s4 text-icons-purple-primary/60 font-medium">CREDENTIALS</div>
+          <div className="mt-4.5 text-s4 font-medium text-icons-purple-primary/60">CREDENTIALS</div>
 
-          <div className="text-s1 text-icons-purple-primary mt-2 font-medium">Verify your identity</div>
+          <div className="mt-2 text-s1 font-medium text-icons-purple-primary">Verify your identity</div>
         </button>
 
         <button className="rounded-12 bg-gray-100 p-4 text-left" onClick={() => setOpenQRInput(true)}>
@@ -82,7 +84,7 @@ export default function Id() {
 
           <div className="mt-4.5 text-s4 font-medium text-gray-900/60">SCANNER</div>
 
-          <div className="text-s1 mt-2 font-medium text-gray-900">Insert QR manually</div>
+          <div className="mt-2 text-s1 font-medium text-gray-900">Insert QR manually</div>
         </button>
       </div>
 

@@ -41,10 +41,12 @@ export default async function handler(req: SequencerRequest, res: NextApiRespons
     if (endpoint === 'inclusionProof') {
       res.status(200).json(data)
     }
+
     if (endpoint === 'insertIdentity') {
       res.status(200).end()
     }
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- FIXME
     console.error((error as Error).message)
   }
 

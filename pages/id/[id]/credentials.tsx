@@ -58,15 +58,16 @@ export default function Credentials() {
     if (identity) {
       return
     }
+
     void retrieveIdentity()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- FIXME
   }, [])
 
   return (
-    <div className="xs:pb-0 flex flex-col px-2 pb-6 text-center">
+    <div className="flex flex-col px-2 pb-6 text-center xs:pb-0">
       <Header iconLeft="direction-left" onClickLeft={() => router.back()} />
-      <h1 className="font-sora text-26 mt-10 font-semibold text-gray-900">Obtain your credentials</h1>
-      <p className="font-rubik text-18 mt-4 text-gray-500">
+      <h1 className="mt-10 font-sora text-26 font-semibold text-gray-900">Obtain your credentials</h1>
+      <p className="mt-4 font-rubik text-18 text-gray-500">
         Simulate obtaining different credentials for your World ID.
       </p>
       <VerifyItem
@@ -78,7 +79,11 @@ export default function Credentials() {
         verified={identity?.verified[CredentialType.Orb]}
         onClick={() => setIsOpenVerifyOrb(true)}
       />
-      {identity?.chain !== Chain.Optimism ? (
+      {identity?.chain === Chain.Optimism ? (
+        <p className="mx-2 mt-6 text-left text-b3 text-gray-400">
+          Note: Phone credentials are not currently supported on the Optimism network.
+        </p>
+      ) : (
         <VerifyItem
           heading="Phone"
           text="Obtain the phone verification on the staging network"
@@ -88,10 +93,6 @@ export default function Credentials() {
           verified={identity?.verified[CredentialType.Phone]}
           onClick={() => setIsOpenVerifyPhone(true)}
         />
-      ) : (
-        <p className="text-b3 mx-2 mt-6 text-left text-gray-400">
-          Note: Phone credentials are not currently supported on the Optimism network.
-        </p>
       )}
 
       <VerifyOrb

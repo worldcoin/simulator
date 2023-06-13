@@ -95,7 +95,7 @@ export default function Home() {
   // On initial load, restore previous identity from storage
   useEffect(() => {
     void retrieveIdentity()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- FIXME
   }, [])
 
   return (
@@ -103,10 +103,10 @@ export default function Home() {
     <>
       {!isSigning && (
         <div className="flex flex-col gap-y-4">
-          <h1 className="font-sora text-h2 xs:mt-4 xs:text-h1 mt-1 text-center text-gray-900">
+          <h1 className="mt-1 text-center font-sora text-h2 text-gray-900 xs:mt-4 xs:text-h1">
             Create your test World ID
           </h1>
-          <p className="text-b2 text-center text-gray-500">
+          <p className="text-center text-b2 text-gray-500">
             With the World ID Simulator, you can test different scenarios with your identity.
           </p>
           <Dropdown
@@ -134,7 +134,7 @@ export default function Home() {
           >
             <Button
               onClick={handleConnectWallet}
-              className="font-sora text-14 mt-5 w-full bg-gray-900 py-3 font-semibold text-white"
+              className="mt-5 w-full bg-gray-900 py-3 font-sora text-14 font-semibold text-white"
             >
               Generate Persistent ID
             </Button>
@@ -148,7 +148,7 @@ export default function Home() {
           >
             <Button
               onClick={handleCreateTemporaryIdentity}
-              className="font-sora text-14 mt-5 w-full bg-gray-900 py-3 font-semibold text-white"
+              className="mt-5 w-full bg-gray-900 py-3 font-sora text-14 font-semibold text-white"
             >
               Create Temporary ID
             </Button>
