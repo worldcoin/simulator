@@ -15,7 +15,7 @@
     "pre-compile": "npx projen pre-compile",
     "start": "next start",
     "telemetry": "npx projen telemetry",
-    "test": "npx projen test",
+    "test": "jest --no-cache --all --passWithNoTests",
     "test:watch": "npx projen test:watch",
     "typecheck": "npx projen typecheck",
     "watch": "npx projen watch",

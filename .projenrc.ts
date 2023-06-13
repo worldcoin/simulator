@@ -87,6 +87,7 @@ project.package.setScript('build', 'rm -rf public/workbox-* && next build && wor
 project.package.setScript('spellcheck', 'cspell **/*.{js,ts,tsx,md,mdx,json}')
 project.package.setScript('start', 'next start')
 project.package.setScript('prepare', 'husky install')
+project.package.setScript('test', 'jest --no-cache --all --passWithNoTests')
 
 project.package.setScript(
   'prebuild',
