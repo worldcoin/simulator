@@ -98,9 +98,6 @@ project.github?.tryFindWorkflow('test')?.addJobs({
   spellcheck: job([npmRunJobStep('spellcheck')]),
 })
 
-// ANCHOR: npmrc
-project.npmrc.addConfig('auto-install-peers', 'false')
-
 // ANCHOR: vscode
 VsCodeSettings.of(project)?.add({
   'editor.codeActionsOnSave': {
