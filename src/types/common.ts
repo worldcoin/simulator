@@ -1,18 +1,18 @@
-import type { FullProof } from "@semaphore-protocol/proof";
+import type {FullProof} from '@semaphore-protocol/proof'
 
 export enum Environment {
-  Production = "production",
-  Staging = "staging",
+  Production = 'production',
+  Staging = 'staging',
 }
 
 export enum CredentialType {
-  Orb = "orb",
-  Phone = "phone",
+  Orb = 'orb',
+  Phone = 'phone',
 }
 
 export enum Chain {
-  Polygon = "polygon",
-  Optimism = "optimism",
+  Polygon = 'polygon',
+  Optimism = 'optimism',
 }
 
 export enum Status {
@@ -25,24 +25,24 @@ export enum Status {
 }
 
 export interface Verification {
-  verified: boolean;
-  fullProof: FullProof;
+  verified: boolean
+  fullProof: FullProof
 }
 
 export interface ServiceStatusResponse {
   services: {
-    name: string;
-    id: string;
-    description: string;
-    status: string;
+    name: string
+    id: string
+    description: string
+    status: string
     logs: {
-      id: number;
-      datetime: number;
-      status: string;
-      name: string;
-      description: string;
-    }[];
-    allUptimeRatio: string;
-  }[];
-  lastIncident: number;
+      id: number
+      datetime: number
+      status: string
+      name: string
+      description: string
+    }[]
+    allUptimeRatio: string
+  }[]
+  lastIncident: number
 }

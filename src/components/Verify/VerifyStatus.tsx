@@ -1,16 +1,14 @@
-import { Status } from "@/types";
-import { memo } from "react";
-import Button from "../Button";
-import { Icon } from "../Icon";
+import {Status} from '@/types'
+import {memo} from 'react'
+import Button from '@/components/Button'
+import {Icon} from '@/components/Icon'
 
 interface VerifyStatusProps {
-  status: Status;
-  handleClick: () => void;
+  status: Status
+  handleClick: () => void
 }
 
-export const VerifyStatus = memo(function VerifyStatus(
-  props: VerifyStatusProps,
-) {
+export const VerifyStatus = memo(function VerifyStatus(props: VerifyStatusProps) {
   return (
     <div className="mb-8 flex items-center justify-center">
       {props.status === Status.Waiting && (
@@ -23,39 +21,22 @@ export const VerifyStatus = memo(function VerifyStatus(
       )}
       {props.status === Status.Pending && (
         <>
-          <Icon
-            name="spinner"
-            className="h-6 w-6 animate-spin text-black"
-          />
-          <span className="ml-2 text-16 font-semibold text-gray-500">
-            Verifying
-          </span>
+          <Icon name="spinner" className="h-6 w-6 animate-spin text-black" />
+          <span className="ml-2 text-16 font-semibold text-gray-500">Verifying</span>
         </>
       )}
       {props.status === Status.Success && (
         <>
-          <Icon
-            name="checkmark"
-            className="h-4 w-4 text-white "
-            bgClassName="rounded-full w-6 h-6 bg-success-700"
-          />
-          <span className="ml-2 text-16 font-semibold text-success-700">
-            Verified
-          </span>
+          <Icon name="checkmark" className="h-4 w-4 text-white " bgClassName="rounded-full w-6 h-6 bg-success-700" />
+          <span className="ml-2 text-16 font-semibold text-success-700">Verified</span>
         </>
       )}
       {props.status === Status.Error && (
         <>
-          <Icon
-            name="cross"
-            className="h-4 w-4 text-white "
-            bgClassName="rounded-full w-6 h-6 bg-error-700"
-          />
-          <span className="ml-2 text-16 font-semibold text-error-700">
-            Verification failed
-          </span>
+          <Icon name="cross" className="h-4 w-4 text-white " bgClassName="rounded-full w-6 h-6 bg-error-700" />
+          <span className="ml-2 text-16 font-semibold text-error-700">Verification failed</span>
         </>
       )}
     </div>
-  );
-});
+  )
+})
