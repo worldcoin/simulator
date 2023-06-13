@@ -12,6 +12,11 @@ const project = new OttofellerNextjsProject({
   isGraphqlEnabled: false,
   packageManager: NodePackageManager.PNPM,
   sampleCode: false,
+  tailwind: true,
+  license: 'MIT',
+  copyrightOwner: 'Tools for Humanity Corporation',
+  copyrightPeriod: '2022',
+  minNodeVersion: '16.16.0',
 
   deps: [
     '@radix-ui/react-checkbox@^1.0.3',
@@ -56,12 +61,6 @@ const project = new OttofellerNextjsProject({
     'workbox-routing@^7.0.0',
     'workbox-strategies@^7.0.0',
   ],
-
-  tailwind: true,
-  license: 'MIT',
-  copyrightOwner: 'Tools for Humanity Corporation',
-  copyrightPeriod: '2022',
-  minNodeVersion: '18.12.0',
 })
 
 // ANCHOR: node project settings
