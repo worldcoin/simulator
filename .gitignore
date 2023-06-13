@@ -56,3 +56,6 @@ debug/
 .vscode/tasks.json
 build/
 .lighthouseci/
+public/sw.js*
+public/workbox*.js*
+*.pem

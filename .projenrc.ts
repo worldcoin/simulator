@@ -94,7 +94,7 @@ project.package.setScript(
   "node -e \"const fs = require('fs'); const pkg = require('./package.json'); fs.writeFileSync('./public/version.json', JSON.stringify({ version: pkg.version }));\"",
 )
 
-// ANCHOR: workflows
+// ANCHOR: github workflows
 project.github?.tryFindWorkflow('test')?.addJobs({
   spellcheck: job([npmRunJobStep('spellcheck')]),
 })
@@ -159,5 +159,8 @@ vscodeExtensions?.addOverride('unwantedRecommendations', [
   'GoogleCloudTools.cloudcode',
   'ms-kubernetes-tools.vscode-kubernetes-tools',
 ])
+
+// ANCHOR: gitignore
+project.gitignore.addPatterns('public/sw.js*', 'public/workbox*.js*', '*.pem')
 
 project.synth()
