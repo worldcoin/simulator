@@ -128,7 +128,6 @@ VsCodeSettings.of(project)?.add({
   },
   'css.validate': false,
   'testExplorer.useNativeTesting': true,
-  'cSpell.words': ['Merkle'],
   'typescript.tsdk': 'node_modules/.pnpm/typescript@5.0.4/node_modules/typescript/lib',
   'typescript.enablePromptUseWorkspaceTsdk': true,
 })
