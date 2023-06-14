@@ -128,8 +128,6 @@ VsCodeSettings.of(project)?.add({
   },
   'css.validate': false,
   'testExplorer.useNativeTesting': true,
-  'typescript.tsdk': 'node_modules/.pnpm/typescript@5.0.4/node_modules/typescript/lib',
-  'typescript.enablePromptUseWorkspaceTsdk': true,
 })
 
 const vscodeExtensions = project.tryFindObjectFile('./.vscode/extensions.json')
