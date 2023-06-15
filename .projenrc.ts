@@ -137,30 +137,7 @@ VsCodeSettings.of(project)?.add({
 
 const vscodeExtensions = project.tryFindObjectFile('./.vscode/extensions.json')
 
-vscodeExtensions?.addOverride('recommendations', [
-  'exodiusstudios.comment-anchors',
-  'mikestead.dotenv',
-  'dbaeumer.vscode-eslint',
-  'mohsen1.prettify-json',
-  'github.copilot',
-  'graphql.vscode-graphql',
-  'bradlc.vscode-tailwindcss',
-  'esbenp.prettier-vscode',
-  'github.vscode-pull-request-github',
-  'streetsidesoftware.code-spell-checker',
-  'orta.vscode-jest',
-  'amazonwebservices.aws-toolkit-vscode',
-  'ms-azuretools.vscode-docker',
-  'Quidgest.vscode-velocity',
-  'webben.browserslist',
-  'stylelint.vscode-stylelint',
-])
-
-vscodeExtensions?.addOverride('unwantedRecommendations', [
-  'DavidAnson.vscode-markdownlint',
-  'GoogleCloudTools.cloudcode',
-  'ms-kubernetes-tools.vscode-kubernetes-tools',
-])
+vscodeExtensions?.addToArray('recommendations', 'webben.browserslist', 'stylelint.vscode-stylelint')
 
 // ANCHOR: gitignore
 project.gitignore.addPatterns('public/sw.js*', 'public/workbox*.js*', '*.pem')
