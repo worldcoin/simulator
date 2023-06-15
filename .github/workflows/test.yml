@@ -145,7 +145,28 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ottofeller/github-actions/npm-run@main
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
         with:
           node-version: 16
-          command: npm run spellcheck
+      - name: Install pnpm
+        id: pnpm-install
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+          run_install: false
+      - name: Get pnpm store directory
+        id: pnpm-cache-path
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - name: Cache node_modules
+        id: cache-deps
+        uses: actions/cache@v3
+        with:
+          key: ${{ hashFiles('./pnpm-lock.yaml') }}
+          path: ${{ steps.pnpm-cache-path.outputs.STORE_PATH }}
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+      - name: Execute the command
+        run: pnpm run spellcheck

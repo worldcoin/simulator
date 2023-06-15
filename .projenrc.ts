@@ -1,5 +1,5 @@
 import {OttofellerNextjsProject, VsCodeSettings} from '@ottofeller/templates'
-import {job, npmRunJobStep} from '@ottofeller/templates/lib/common/github'
+import {runScriptJob} from '@ottofeller/templates/lib/common/github'
 import {NodePackageManager} from 'projen/lib/javascript'
 
 const project = new OttofellerNextjsProject({
@@ -96,7 +96,11 @@ project.package.setScript(
 
 // ANCHOR: github workflows
 project.github?.tryFindWorkflow('test')?.addJobs({
-  spellcheck: job([npmRunJobStep('spellcheck')]),
+  spellcheck: runScriptJob({
+    command: 'spellcheck',
+    projectPackage: project.package,
+    runScriptCommand: project.runScriptCommand,
+  }),
 })
 
 // ANCHOR: vscode
