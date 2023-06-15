@@ -1,0 +1,351 @@
+{
+  "dependencies": [
+    {
+      "name": "@lhci/cli",
+      "type": "build"
+    },
+    {
+      "name": "@next/bundle-analyzer",
+      "version": "^13.4.4",
+      "type": "build"
+    },
+    {
+      "name": "@ottofeller/eslint-plugin-ottofeller",
+      "version": "0.1.4",
+      "type": "build"
+    },
+    {
+      "name": "@ottofeller/templates",
+      "type": "build"
+    },
+    {
+      "name": "@tailwindcss/container-queries",
+      "type": "build"
+    },
+    {
+      "name": "@tailwindcss/line-clamp",
+      "type": "build"
+    },
+    {
+      "name": "@testing-library/react",
+      "type": "build"
+    },
+    {
+      "name": "@types/jest",
+      "type": "build"
+    },
+    {
+      "name": "@types/node",
+      "version": "^18",
+      "type": "build"
+    },
+    {
+      "name": "@types/react",
+      "type": "build"
+    },
+    {
+      "name": "@types/react-dom",
+      "type": "build"
+    },
+    {
+      "name": "@typescript-eslint/eslint-plugin",
+      "version": "5.58.0",
+      "type": "build"
+    },
+    {
+      "name": "@typescript-eslint/parser",
+      "version": "5.58.0",
+      "type": "build"
+    },
+    {
+      "name": "@typescript-eslint/typescript-estree",
+      "version": "5.58.0",
+      "type": "build"
+    },
+    {
+      "name": "@walletconnect/types",
+      "version": "^2.7.7",
+      "type": "build"
+    },
+    {
+      "name": "autoprefixer",
+      "type": "build"
+    },
+    {
+      "name": "cspell",
+      "version": "^6.8.0",
+      "type": "build"
+    },
+    {
+      "name": "eslint-config-next",
+      "version": "13.3.0",
+      "type": "build"
+    },
+    {
+      "name": "eslint-config-prettier",
+      "version": "^8.5.0",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-eslint-comments",
+      "version": "3.2.0",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-import",
+      "version": "2.27.5",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-jsx-a11y",
+      "version": "^6.5.1",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-react-hooks",
+      "version": "4.6.0",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-react",
+      "version": "7.32.2",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-tailwindcss",
+      "version": "3.11.0",
+      "type": "build"
+    },
+    {
+      "name": "eslint",
+      "version": "8",
+      "type": "build"
+    },
+    {
+      "name": "husky",
+      "version": "^8.0.3",
+      "type": "build"
+    },
+    {
+      "name": "jest",
+      "type": "build"
+    },
+    {
+      "name": "jest-environment-jsdom",
+      "type": "build"
+    },
+    {
+      "name": "jiti",
+      "type": "build"
+    },
+    {
+      "name": "jscodeshift",
+      "type": "build"
+    },
+    {
+      "name": "postcss",
+      "type": "build"
+    },
+    {
+      "name": "postcss-nesting",
+      "type": "build"
+    },
+    {
+      "name": "prettier-plugin-organize-attributes",
+      "version": "^0.0.5",
+      "type": "build"
+    },
+    {
+      "name": "prettier-plugin-organize-imports",
+      "version": "3.2.2",
+      "type": "build"
+    },
+    {
+      "name": "prettier-plugin-tailwindcss",
+      "version": "0.1.10",
+      "type": "build"
+    },
+    {
+      "name": "prettier",
+      "version": "2.8.7",
+      "type": "build"
+    },
+    {
+      "name": "projen",
+      "type": "build"
+    },
+    {
+      "name": "tailwindcss",
+      "type": "build"
+    },
+    {
+      "name": "ts-node",
+      "type": "build"
+    },
+    {
+      "name": "typescript",
+      "type": "build"
+    },
+    {
+      "name": "workbox-cli",
+      "version": "^6.5.4",
+      "type": "build"
+    },
+    {
+      "name": "workbox-expiration",
+      "version": "^7.0.0",
+      "type": "build"
+    },
+    {
+      "name": "workbox-precaching",
+      "version": "^7.0.0",
+      "type": "build"
+    },
+    {
+      "name": "workbox-routing",
+      "version": "^7.0.0",
+      "type": "build"
+    },
+    {
+      "name": "workbox-strategies",
+      "version": "^7.0.0",
+      "type": "build"
+    },
+    {
+      "name": "yaml",
+      "type": "build"
+    },
+    {
+      "name": "@headlessui/react",
+      "type": "runtime"
+    },
+    {
+      "name": "@radix-ui/react-checkbox",
+      "version": "^1.0.3",
+      "type": "runtime"
+    },
+    {
+      "name": "@radix-ui/react-dialog",
+      "version": "^1.0.3",
+      "type": "runtime"
+    },
+    {
+      "name": "@radix-ui/react-dropdown-menu",
+      "version": "^2.0.4",
+      "type": "runtime"
+    },
+    {
+      "name": "@radix-ui/react-radio-group",
+      "version": "^1.1.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@semaphore-protocol/group",
+      "version": "^3.9.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@semaphore-protocol/identity",
+      "version": "^3.9.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@semaphore-protocol/proof",
+      "version": "^3.9.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@walletconnect/core",
+      "version": "^2.7.7",
+      "type": "runtime"
+    },
+    {
+      "name": "@walletconnect/utils",
+      "version": "^2.7.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@walletconnect/web3wallet",
+      "version": "^1.7.5",
+      "type": "runtime"
+    },
+    {
+      "name": "@worldcoin/idkit",
+      "version": "^0.4.9",
+      "type": "runtime"
+    },
+    {
+      "name": "@zk-kit/incremental-merkle-tree",
+      "version": "^1.0.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@zk-kit/protocols",
+      "version": "^1.11.1",
+      "type": "runtime"
+    },
+    {
+      "name": "clsx",
+      "version": "^1.2.1",
+      "type": "runtime"
+    },
+    {
+      "name": "connectkit",
+      "version": "^1.4.0",
+      "type": "runtime"
+    },
+    {
+      "name": "dayjs",
+      "version": "^1.11.7",
+      "type": "runtime"
+    },
+    {
+      "name": "jsqr",
+      "version": "^1.4.0",
+      "type": "runtime"
+    },
+    {
+      "name": "next",
+      "type": "runtime"
+    },
+    {
+      "name": "react",
+      "type": "runtime"
+    },
+    {
+      "name": "react-dom",
+      "type": "runtime"
+    },
+    {
+      "name": "react-toastify",
+      "version": "^9.1.2",
+      "type": "runtime"
+    },
+    {
+      "name": "snarkjs",
+      "version": "0.4.20",
+      "type": "runtime"
+    },
+    {
+      "name": "usehooks-ts",
+      "version": "^2.9.1",
+      "type": "runtime"
+    },
+    {
+      "name": "viem",
+      "version": "^0.3.37",
+      "type": "runtime"
+    },
+    {
+      "name": "wagmi",
+      "version": "^1.0.8",
+      "type": "runtime"
+    },
+    {
+      "name": "zustand",
+      "version": "^4.3.7",
+      "type": "runtime"
+    }
+  ],
+  "//": "~~ Generated by projen. To modify, edit .projenrc.ts and run \"npx projen\"."
+}

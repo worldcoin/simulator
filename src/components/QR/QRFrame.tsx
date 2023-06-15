@@ -1,45 +1,45 @@
-import type { Bounds } from "@/types/qrcode";
-import clsx from "clsx";
-import type { MutableRefObject } from "react";
-import { useEffect, useState } from "react";
+import type {Bounds} from '@/types/qrcode'
+import clsx from 'clsx'
+import type {MutableRefObject} from 'react'
+import {useEffect, useState} from 'react'
 
 interface QRFrameProps {
-  valid?: boolean | null;
+  valid?: boolean | null
   // position: Bounds | null; // TODO: Add back QR code position calculation
-  videoRef: MutableRefObject<HTMLVideoElement | null>;
-  containerRef: MutableRefObject<HTMLElement | null>;
-  classNames?: string;
+  videoRef: MutableRefObject<HTMLVideoElement | null>
+  containerRef: MutableRefObject<HTMLElement | null>
+  classNames?: string
 }
 
 // NOTE: minify path d attribute value
 const minD = (d: string) =>
   d
-    .replace(/\n+/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/(\s|)([a-z])(\s|)/gi, "$2")
-    .replace(/(\s|)(-)(\s|)/gi, "$2");
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/(\s|)([a-z])(\s|)/gi, '$2')
+    .replace(/(\s|)(-)(\s|)/gi, '$2')
 
 export function QRFrame(props: QRFrameProps) {
-  const [frame, setFrame] = useState("");
-  const [border, setBorder] = useState("");
+  const [frame, setFrame] = useState('')
+  const [border, setBorder] = useState('')
 
   // NOTE: calculate svg paths
   useEffect(() => {
-    const container = props.containerRef.current;
-    const video = props.videoRef.current;
+    const container = props.containerRef.current
+    const video = props.videoRef.current
 
     if (!container || !video) {
-      return;
+      return
     }
 
     // NOTE: calculate frame position
     const calcShapes = () => {
       // NOTE: init frame width
-      const d = 188;
+      const d = 188
 
       // NOTE: container sizes
-      const cw = container.offsetWidth;
-      const ch = container.offsetHeight;
+      const cw = container.offsetWidth
+      const ch = container.offsetHeight
 
       // NOTE: video sizes
       // const vw = video.videoWidth;
@@ -54,7 +54,7 @@ export function QRFrame(props: QRFrameProps) {
       // const hm = rh / vh;
 
       // NOTE: frame bounds
-      const f: Bounds = [cw / 2 - d / 2, cw / 2 + d / 2, ch / 6, ch / 6 + d];
+      const f: Bounds = [cw / 2 - d / 2, cw / 2 + d / 2, ch / 6, ch / 6 + d]
 
       // if (props.position) {
       //   f = [
@@ -66,9 +66,9 @@ export function QRFrame(props: QRFrameProps) {
       // }
 
       // NOTE: padding
-      const p = ((f[1] - f[0]) / 100) * 2;
+      const p = ((f[1] - f[0]) / 100) * 2
 
-      const frame = `
+      const _frame = `
         M ${cw} 0
         H 0
             v ${ch}
@@ -82,9 +82,9 @@ export function QRFrame(props: QRFrameProps) {
             v -${f[3] - f[2] + p}
             c 0 -14 -12 -26 -26 -26
             h -${f[1] - f[0] + p}
-      `;
+      `
 
-      const border = `
+      const _border = `
         M ${f[0] + 26 - 5} ${f[2] - 26 - p}
             h -21
             c -14 0 -26 11 -26 26
@@ -101,46 +101,39 @@ export function QRFrame(props: QRFrameProps) {
             v 21
             c 0 14 12 26 26 26
             h 20
-      `;
+      `
 
-      setFrame(minD(frame));
-      setBorder(minD(border));
-    };
+      setFrame(minD(_frame))
+      setBorder(minD(_border))
+    }
 
-    calcShapes();
+    calcShapes()
 
-    window.addEventListener("resize", calcShapes);
+    window.addEventListener('resize', calcShapes)
 
     return () => {
-      window.removeEventListener("resize", calcShapes);
-    };
-  }, [props.containerRef, props.videoRef]);
+      window.removeEventListener('resize', calcShapes)
+    }
+  }, [props.containerRef, props.videoRef])
 
   return (
     <svg
-      className={clsx("absolute inset-0", props.classNames)}
+      className={clsx('absolute inset-0', props.classNames)}
       xmlns="http://www.w3.org/2000/svg"
       width="100%"
       height="100%"
       fill="none"
     >
-      <path
-        d={frame}
-        fill="#191C20"
-        fillRule="evenodd"
-        clipRule="evenodd"
-        opacity=".7"
-        className="transition-all"
-      />
+      <path d={frame} fill="#191C20" fillRule="evenodd" clipRule="evenodd" opacity=".7" className="transition-all" />
       <path
         d={border}
         strokeLinecap="round"
         strokeWidth="4"
-        className={clsx("transition-all", {
-          "stroke-[#FF5A76]": props.valid === false,
-          "stroke-[#fff]": props.valid !== false,
+        className={clsx('transition-all', {
+          'stroke-[#FF5A76]': props.valid === false,
+          'stroke-[#fff]': props.valid !== false,
         })}
       />
     </svg>
-  );
+  )
 }
