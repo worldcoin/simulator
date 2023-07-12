@@ -19,6 +19,7 @@ export const Settings = memo(function Settings(props: {
   const router = useRouter();
   const { id } = router.query;
   const [version, setVersion] = useState("2.0");
+  const [copiedCommitment, setCopiedCommitment] = useState(false);
 
   const { clearIdentity } = useIdentity();
   const { disconnectSessions, disconnectPairings } = useWalletConnect();
@@ -30,7 +31,10 @@ export const Settings = memo(function Settings(props: {
   const handleCopyCommitment = async () => {
     try {
       await navigator.clipboard.writeText(props.commitment);
+      setCopiedCommitment(true);
       toast.success("Copied commitment");
+
+      setTimeout(() => setCopiedCommitment(false), 500);
     } catch (error) {
       console.error(error);
       toast.error("Failed to copy commitment");
@@ -100,7 +104,7 @@ export const Settings = memo(function Settings(props: {
             className="mt-3 p-4"
             indicator={() => (
               <Icon
-                name="copy"
+                name={copiedCommitment ? "check" : "copy"}
                 className="h-6 w-6 text-gray-400"
               />
             )}
