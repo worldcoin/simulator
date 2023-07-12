@@ -1,5 +1,7 @@
 import type { Identity } from "@/types";
 import { Chain, CredentialType } from "@/types";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import {
   OPTIMISM_ORB_SEQUENCER_STAGING,
   OPTIMISM_PHONE_SEQUENCER_STAGING,
@@ -82,3 +84,5 @@ export const SEQUENCER_ENDPOINT: Record<
   [Chain.Polygon]: POLYGON_SEQUENCER_ENDPOINT,
   [Chain.Optimism]: OPTIMISM_SEQUENCER_ENDPOINT,
 };
+
+export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));

@@ -1,5 +1,5 @@
 import useIdentity from "@/hooks/useIdentity";
-import { isPendingInclusion } from "@/lib/utils";
+import { cn, isPendingInclusion } from "@/lib/utils";
 import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
 import { useEffect, useMemo } from "react";
@@ -32,14 +32,21 @@ export default function Chip() {
 
       if (!identity) return;
       void updateIdentity(identity);
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPending]);
 
   return (
-    <div className="flex h-8 items-center gap-1 rounded-full bg-info-100 px-3 text-s4 font-medium text-info-700">
+    <div
+      className={cn(
+        complete
+          ? "bg-info-100 text-info-700"
+          : "bg-warning-100 text-warning-700",
+        "flex h-8 items-center gap-1 rounded-full px-3 text-s4 font-medium",
+      )}
+    >
       {isReady ? (
         <Icon
           name="user"

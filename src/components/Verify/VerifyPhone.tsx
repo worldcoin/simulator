@@ -3,7 +3,7 @@ import useIdentity from "@/hooks/useIdentity";
 import { CredentialType, Status } from "@/types";
 import { useRouter } from "next/router";
 import { memo, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { Drawer } from "../Drawer";
 import { IconGradient } from "../Icon/IconGradient";
 import { Input } from "../Input";
@@ -78,7 +78,7 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
         <div className="grow" />
         <VerifyStatus
           status={status}
-          handleClick={handleClick}
+          handleClick={() => void handleClick()}
         />
       </div>
     </Drawer>

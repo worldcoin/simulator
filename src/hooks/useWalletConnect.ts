@@ -18,7 +18,7 @@ import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
 import { useCallback, useEffect, useRef } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { encodePacked } from "viem";
 import useIdentity from "./useIdentity";
 
@@ -294,9 +294,9 @@ export const useWalletConnect = (ready?: boolean) => {
   // Setup event listeners
   useEffect(() => {
     if (ready) {
-      client.on("session_proposal", onSessionProposal);
-      client.on("session_request", onSessionRequest);
-      client.on("session_delete", onSessionDisconnect);
+      client.on("session_proposal", (e) => void onSessionProposal(e));
+      client.on("session_request", (e) => void onSessionRequest(e));
+      client.on("session_delete", (e) => void onSessionDisconnect(e));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);

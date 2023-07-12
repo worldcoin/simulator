@@ -1,9 +1,9 @@
 import Button from "@/components/Button";
-import { Dialog } from "@/components/Dialog";
 import useIdentity from "@/hooks/useIdentity";
+import { cn } from "@/lib/utils";
 import { useModalStore } from "@/stores/modalStore";
-import clsx from "clsx";
 import { memo, useEffect, useMemo, useState } from "react";
+import { Drawer } from "../Drawer";
 import { Input } from "../Input";
 
 export const QRInput = memo(function QRInput(props: {
@@ -68,18 +68,18 @@ export const QRInput = memo(function QRInput(props: {
   }, [props.open]);
 
   return (
-    <Dialog
+    <Drawer
       open={props.open}
       onClose={props.onClose}
     >
-      <div className="mt-9 pt-9 text-center font-sora text-h2">
+      <div className="py-3 text-center font-sora text-h2">
         Enter or paste
         <br />
         QR code
       </div>
 
       <div className="mt-4 text-center text-b1 text-gray-500">
-        Verify your randomly generated phone number for World ID simulator.
+        Tap the IDKit QR code to copy it to your clipboard, then paste it below.
       </div>
 
       <Input
@@ -87,12 +87,12 @@ export const QRInput = memo(function QRInput(props: {
         placeholder="QR code"
         invalid={isInvalid}
         value={value}
-        onChange={handleChange}
-        onPaste={handlePaste}
+        onPaste={(e) => void handlePaste(e)}
+        onChange={(e) => void handleChange(e)}
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
           <>
             <button
-              className={clsx("h-10 rounded-10 px-3 text-12 font-medium", {
+              className={cn("h-10 rounded-10 px-3 text-12 font-medium", {
                 "bg-white": !isInvalid && !isFocused,
                 "bg-gray-100": !isInvalid && isFocused,
                 "text-gray-500": !isInvalid,
@@ -130,10 +130,10 @@ export const QRInput = memo(function QRInput(props: {
         type="submit"
         className="mt-8 h-14 w-full bg-gray-900 text-white disabled:bg-gray-100 disabled:text-gray-300"
         isDisabled={isInvalid || !value}
-        onClick={handleSubmit}
+        onClick={(e) => void handleSubmit(e)}
       >
         Submit
       </Button>
-    </Dialog>
+    </Drawer>
   );
 });

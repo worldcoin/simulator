@@ -1,12 +1,12 @@
 import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
+import { cn } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { useModalStore } from "@/stores/modalStore";
 import type { ScanConstraints } from "@/types/qrcode";
-import clsx from "clsx";
 import jsQR from "jsqr";
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { QRFrame } from "./QRFrame";
 
 interface QRScannerProps {
@@ -119,7 +119,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
 
       <div
         ref={containerRef}
-        className={clsx("absolute inset-0 bg-black", props.className)}
+        className={cn("absolute inset-0 bg-black", props.className)}
       >
         {allowed !== false && (
           <Fragment>

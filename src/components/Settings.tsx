@@ -6,7 +6,7 @@ import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { client, core } from "@/services/walletconnect";
 import { useRouter } from "next/router";
 import { memo, useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { Drawer } from "./Drawer";
 import { Icon } from "./Icon";
 import { IconGradient } from "./Icon/IconGradient";
@@ -19,6 +19,7 @@ export const Settings = memo(function Settings(props: {
   const router = useRouter();
   const { id } = router.query;
   const [version, setVersion] = useState("2.0");
+  const [copiedCommitment, setCopiedCommitment] = useState(false);
 
   const { clearIdentity } = useIdentity();
   const { disconnectSessions, disconnectPairings } = useWalletConnect();
@@ -30,7 +31,10 @@ export const Settings = memo(function Settings(props: {
   const handleCopyCommitment = async () => {
     try {
       await navigator.clipboard.writeText(props.commitment);
+      setCopiedCommitment(true);
       toast.success("Copied commitment");
+
+      setTimeout(() => setCopiedCommitment(false), 500);
     } catch (error) {
       console.error(error);
       toast.error("Failed to copy commitment");
@@ -59,7 +63,7 @@ export const Settings = memo(function Settings(props: {
     console.info("Session storage cleared");
 
     // Redirect to landing page
-    toast.info(`Logged out of identity ${id}`);
+    toast.success(`Logged out of identity ${id}`);
     await router.push("/");
   };
 
@@ -100,11 +104,11 @@ export const Settings = memo(function Settings(props: {
             className="mt-3 p-4"
             indicator={() => (
               <Icon
-                name="copy"
+                name={copiedCommitment ? "check" : "copy"}
                 className="h-6 w-6 text-gray-400"
               />
             )}
-            onClick={handleCopyCommitment}
+            onClick={() => void handleCopyCommitment()}
           >
             <IconGradient
               name="note"
@@ -114,7 +118,7 @@ export const Settings = memo(function Settings(props: {
         </div>
         <Button
           className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
-          onClick={handleLogout}
+          onClick={() => void handleLogout()}
         >
           Logout
         </Button>

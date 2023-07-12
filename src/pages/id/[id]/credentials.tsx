@@ -7,7 +7,7 @@ import { encode } from "@/lib/utils";
 import { Chain, CredentialType } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 export default function Credentials() {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function Credentials() {
     try {
       const response = await fetch("/api/sequencer/inclusionProof", init);
       if (response.status === 200) {
-        toast.info(
+        toast.error(
           `Credential type '${credentialType.toString()}' already exists onchain!`,
         );
         return;

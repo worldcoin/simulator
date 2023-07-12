@@ -1,5 +1,5 @@
 import { Icon } from "@/components/Icon";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import bgBlur from "/public/images/bg-blur.svg";
 
@@ -16,6 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
       <div className="z-10 col-start-1 row-start-1 hidden w-full max-w-[290px] content-start gap-y-8 pl-8 pt-8 lg:grid">
         <Icon
+          bgClassName="justify-start"
           name="logo"
           className="h-10 w-10"
         />
@@ -27,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="text-icons-blue-primary"
             rel="noreferrer"
           >
-            Worldcoin app
+            World App
           </a>{" "}
           intended for testing World ID.
         </p>
@@ -44,7 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <section
-        className={clsx(
+        className={cn(
           "h-full w-full px-4 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-gray-900 xs:p-4",
           "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
           "gap-y-3 bg-white transition duration-500 xs:grid-rows-auto/1fr/auto xs:[zoom:.9] md:[zoom:initial]",

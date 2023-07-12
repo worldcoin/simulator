@@ -4,7 +4,7 @@ import { CredentialType, Status } from "@/types";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { memo, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { Drawer } from "../Drawer";
 import { VerifyStatus } from "./VerifyStatus";
 
@@ -71,7 +71,7 @@ export const VerifyOrb = memo(function VerifyOrb(props: {
         <div className="grow" />
         <VerifyStatus
           status={status}
-          handleClick={handleClick}
+          handleClick={() => void handleClick()}
         />
       </div>
     </Drawer>
