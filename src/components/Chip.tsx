@@ -32,7 +32,7 @@ export default function Chip() {
 
       if (!identity) return;
       void updateIdentity(identity);
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
