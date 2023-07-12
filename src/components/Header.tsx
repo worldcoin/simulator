@@ -49,7 +49,7 @@ export default function Header(props: HeaderProps) {
           />
         </Button>
       )}
-      {!props.iconRight && <span />}
+      {!props.iconRight && <div className="h-9 w-9" />}
     </div>
   );
 }
