@@ -71,6 +71,7 @@ module.exports = {
         700: "#00C313"
       },
       warning: {
+        100: '#FFF5E6',
         700: "#FFB11B"
       },
       white: "#FFFFFF",
