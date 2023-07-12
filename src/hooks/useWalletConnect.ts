@@ -18,7 +18,7 @@ import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
 import { useCallback, useEffect, useRef } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { encodePacked } from "viem";
 import useIdentity from "./useIdentity";
 

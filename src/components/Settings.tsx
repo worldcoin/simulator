@@ -6,7 +6,7 @@ import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { client, core } from "@/services/walletconnect";
 import { useRouter } from "next/router";
 import { memo, useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { Drawer } from "./Drawer";
 import { Icon } from "./Icon";
 import { IconGradient } from "./Icon/IconGradient";
@@ -59,7 +59,7 @@ export const Settings = memo(function Settings(props: {
     console.info("Session storage cleared");
 
     // Redirect to landing page
-    toast.info(`Logged out of identity ${id}`);
+    toast.success(`Logged out of identity ${id}`);
     await router.push("/");
   };
 
@@ -114,7 +114,7 @@ export const Settings = memo(function Settings(props: {
         </div>
         <Button
           className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
-          onClick={handleLogout}
+          onClick={() => void handleLogout()}
         >
           Logout
         </Button>

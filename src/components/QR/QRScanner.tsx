@@ -6,7 +6,7 @@ import type { ScanConstraints } from "@/types/qrcode";
 import clsx from "clsx";
 import jsQR from "jsqr";
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { QRFrame } from "./QRFrame";
 
 interface QRScannerProps {

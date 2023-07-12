@@ -12,14 +12,12 @@ import { Rubik, Sora } from "next/font/google";
 import Head from "next/head";
 import Script from "next/script";
 import { useEffect, useState } from "react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "react-hot-toast";
 import { useMediaQuery } from "usehooks-ts";
 import { WagmiConfig, createConfig } from "wagmi";
 
 // Must be loaded after global styles
 import { checkCache, retryDownload } from "@/lib/utils";
-import "@/styles/react-toastify.css";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -136,13 +134,7 @@ export default function App({ Component, pageProps }: AppProps) {
           </Layout>
         </ConnectKitProvider>
       </WagmiConfig>
-      <ToastContainer
-        position={isMobile ? "top-center" : "top-right"}
-        autoClose={3000}
-        hideProgressBar
-        pauseOnHover
-        closeButton={false}
-      />
+      <Toaster position={isMobile ? "top-center" : "top-right"} />
       <style
         jsx
         global
