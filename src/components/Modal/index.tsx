@@ -181,7 +181,7 @@ export function Modal() {
 
           <ModalStatus
             status={status}
-            handleClick={handleClick}
+            handleClick={() => void handleClick()}
           />
         </>
       )}
@@ -190,7 +190,7 @@ export function Modal() {
       {!isLoading && showConfirm && (
         <ModalConfirm
           isVerified={isVerified}
-          handleClick={handleClick}
+          handleClick={() => void handleClick()}
         />
       )}
     </Drawer>

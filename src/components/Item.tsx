@@ -34,16 +34,16 @@ export default function Item(props: {
             <p className="mt-1 text-b4 text-gray-500">{props.text}</p>
           )}
         </div>
+        <span className="flex shrink-0 justify-center">
+          {props.indicator && <props.indicator />}
+          {!props.indicator && (
+            <Icon
+              name={"chevron-thin"}
+              className="h-6 w-6 text-gray-400"
+            />
+          )}
+        </span>
       </button>
-      <span className="flex shrink-0 justify-center">
-        {props.indicator && <props.indicator />}
-        {!props.indicator && (
-          <Icon
-            name={"chevron-thin"}
-            className="h-6 w-6 text-gray-400"
-          />
-        )}
-      </span>
     </div>
   );
 }

@@ -104,7 +104,7 @@ export const Settings = memo(function Settings(props: {
                 className="h-6 w-6 text-gray-400"
               />
             )}
-            onClick={handleCopyCommitment}
+            onClick={() => void handleCopyCommitment()}
           >
             <IconGradient
               name="note"

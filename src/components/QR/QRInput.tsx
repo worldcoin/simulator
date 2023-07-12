@@ -87,8 +87,8 @@ export const QRInput = memo(function QRInput(props: {
         placeholder="QR code"
         invalid={isInvalid}
         value={value}
-        onChange={handleChange}
-        onPaste={handlePaste}
+        onPaste={(e) => void handlePaste(e)}
+        onChange={(e) => void handleChange(e)}
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
           <>
             <button
@@ -130,7 +130,7 @@ export const QRInput = memo(function QRInput(props: {
         type="submit"
         className="mt-8 h-14 w-full bg-gray-900 text-white disabled:bg-gray-100 disabled:text-gray-300"
         isDisabled={isInvalid || !value}
-        onClick={handleSubmit}
+        onClick={(e) => void handleSubmit(e)}
       >
         Submit
       </Button>

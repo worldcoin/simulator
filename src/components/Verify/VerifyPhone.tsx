@@ -78,7 +78,7 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
         <div className="grow" />
         <VerifyStatus
           status={status}
-          handleClick={handleClick}
+          handleClick={() => void handleClick()}
         />
       </div>
     </Drawer>

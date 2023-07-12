@@ -40,6 +40,7 @@ const config = createConfig(
     appUrl: METADATA.url,
     appIcon: METADATA.icons[0],
     infuraId: process.env.NEXT_PUBLIC_INFURA_ID,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PID!,
   }),
 );

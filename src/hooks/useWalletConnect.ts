@@ -294,9 +294,9 @@ export const useWalletConnect = (ready?: boolean) => {
   // Setup event listeners
   useEffect(() => {
     if (ready) {
-      client.on("session_proposal", onSessionProposal);
-      client.on("session_request", onSessionRequest);
-      client.on("session_delete", onSessionDisconnect);
+      client.on("session_proposal", (e) => void onSessionProposal(e));
+      client.on("session_request", (e) => void onSessionRequest(e));
+      client.on("session_delete", (e) => void onSessionDisconnect(e));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
