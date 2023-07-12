@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 const Button = React.memo(function Button(props: {
@@ -13,7 +13,7 @@ const Button = React.memo(function Button(props: {
 }) {
   return (
     <button
-      className={clsx(
+      className={cn(
         "rounded-12 transition-all",
         { "pointer-events-none invisible opacity-0": props.isInvisible },
         props.className,

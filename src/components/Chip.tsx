@@ -1,8 +1,7 @@
 import useIdentity from "@/hooks/useIdentity";
-import { isPendingInclusion } from "@/lib/utils";
+import { cn, isPendingInclusion } from "@/lib/utils";
 import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
-import clsx from "clsx";
 import { useEffect, useMemo } from "react";
 import { Icon } from "./Icon";
 
@@ -41,7 +40,7 @@ export default function Chip() {
 
   return (
     <div
-      className={clsx(
+      className={cn(
         complete
           ? "bg-info-100 text-info-700"
           : "bg-warning-100 text-warning-700",

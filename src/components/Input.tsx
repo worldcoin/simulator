@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -51,17 +51,13 @@ export const Input = React.memo(function Input(props: InputProps) {
 
   return (
     <div
-      className={clsx(
-        className,
-        "flex items-center rounded-12 border-2 p-0.5",
-        {
-          "bg-gray-100": !isFocused,
-          "border-gray-100": !isFocused && !isInvalid,
-          "border-error-700": isInvalid,
-          "bg-white shadow-input": isFocused,
-          "border-gray-200": isFocused && !isInvalid,
-        },
-      )}
+      className={cn(className, "flex items-center rounded-12 border-2 p-0.5", {
+        "bg-gray-100": !isFocused,
+        "border-gray-100": !isFocused && !isInvalid,
+        "border-error-700": isInvalid,
+        "bg-white shadow-input": isFocused,
+        "border-gray-200": isFocused && !isInvalid,
+      })}
     >
       <input
         className="h-10 grow bg-transparent px-3 text-14 outline-0 placeholder:text-gray-500"

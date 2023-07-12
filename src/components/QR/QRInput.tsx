@@ -1,7 +1,7 @@
 import Button from "@/components/Button";
 import useIdentity from "@/hooks/useIdentity";
+import { cn } from "@/lib/utils";
 import { useModalStore } from "@/stores/modalStore";
-import clsx from "clsx";
 import { memo, useEffect, useMemo, useState } from "react";
 import { Drawer } from "../Drawer";
 import { Input } from "../Input";
@@ -92,7 +92,7 @@ export const QRInput = memo(function QRInput(props: {
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
           <>
             <button
-              className={clsx("h-10 rounded-10 px-3 text-12 font-medium", {
+              className={cn("h-10 rounded-10 px-3 text-12 font-medium", {
                 "bg-white": !isInvalid && !isFocused,
                 "bg-gray-100": !isInvalid && isFocused,
                 "text-gray-500": !isInvalid,

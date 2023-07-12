@@ -1,5 +1,5 @@
+import { cn } from "@/lib/utils";
 import { Indicator, Root } from "@radix-ui/react-checkbox";
-import clsx from "clsx";
 import { memo } from "react";
 import { Icon } from "./Icon";
 
@@ -14,7 +14,7 @@ export const Checkbox = memo(function Checkbox(props: CheckboxProps) {
     <Root
       checked={props.checked}
       onCheckedChange={props.setChecked}
-      className={clsx(
+      className={cn(
         "h-5 w-5 rounded-5",
         { "bg-success-700": props.checked },
         { "bg-white": !props.checked },

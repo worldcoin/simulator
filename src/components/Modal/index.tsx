@@ -5,12 +5,11 @@ import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { isPendingInclusion } from "@/lib/utils";
+import { cn, isPendingInclusion } from "@/lib/utils";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
 import { CredentialType } from "@worldcoin/idkit";
-import clsx from "clsx";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import ModalConfirm from "./ModalConfirm";
@@ -110,7 +109,7 @@ export function Modal() {
                 {metadata.name ?? "App Name"}
               </span>
               <div
-                className={clsx(
+                className={cn(
                   "inline-flex items-center gap-x-0.5",
                   { "text-info-700": metadata.is_verified },
                   { "text-gray-500": !metadata.is_verified },

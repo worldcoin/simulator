@@ -1,6 +1,6 @@
 import { SERVICE_STATUS_URL } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import type { ServiceStatusResponse } from "@/types";
-import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Icon } from "./Icon";
 
@@ -35,7 +35,7 @@ export default function Maintenance() {
   return (
     <a
       href="https://status.worldcoin.org"
-      className={clsx(
+      className={cn(
         "absolute left-1/2 mt-10 flex w-[340px] -translate-x-1/2 items-center rounded-24 border border-gray-200 bg-gray-0 p-4 xs:mt-20",
         { hidden: !visible },
       )}

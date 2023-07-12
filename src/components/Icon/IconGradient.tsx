@@ -1,6 +1,6 @@
 import type { IconType } from "@/components/Icon";
 import { Icon } from "@/components/Icon";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 export const IconGradient = React.memo(function IconGradient(props: {
@@ -11,7 +11,7 @@ export const IconGradient = React.memo(function IconGradient(props: {
 }) {
   return (
     <div
-      className={clsx(
+      className={cn(
         "relative flex items-center justify-center",
         { "h-8 w-8 text-white": !props.bgClassName },
         props.bgClassName,
@@ -64,7 +64,7 @@ export const IconGradient = React.memo(function IconGradient(props: {
 
       <Icon
         name={props.name}
-        className={clsx(
+        className={cn(
           { "h-5 w-5 text-white": !props.className },
           props.className,
         )}

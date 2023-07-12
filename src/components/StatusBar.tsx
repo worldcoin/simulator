@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
 
 export default function StatusBar() {
@@ -6,7 +6,7 @@ export default function StatusBar() {
     <header className="z-10 grid grid-cols-1fr/auto px-4">
       <div className="col-span-2 hidden grid-flow-col content-center justify-between xs:grid">
         <span
-          className={clsx(
+          className={cn(
             "font-sora font-semibold leading-none text-gray-900 transition-colors ",
           )}
         >

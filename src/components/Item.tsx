@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import type React from "react";
 import type { ReactNode } from "react";
 import { Icon } from "./Icon";
@@ -16,7 +16,7 @@ export default function Item(props: {
 }) {
   return (
     <div
-      className={clsx(
+      className={cn(
         "flex w-full items-center rounded-16 bg-gray-50",
         { "p-4": !props.className },
         props.className,
