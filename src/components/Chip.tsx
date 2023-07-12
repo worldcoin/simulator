@@ -2,6 +2,7 @@ import useIdentity from "@/hooks/useIdentity";
 import { isPendingInclusion } from "@/lib/utils";
 import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
+import clsx from "clsx";
 import { useEffect, useMemo } from "react";
 import { Icon } from "./Icon";
 
@@ -39,7 +40,14 @@ export default function Chip() {
   }, [isPending]);
 
   return (
-    <div className="flex h-8 items-center gap-1 rounded-full bg-info-100 px-3 text-s4 font-medium text-info-700">
+    <div
+      className={clsx(
+        complete
+          ? "bg-info-100 text-info-700"
+          : "bg-warning-100 text-warning-700",
+        "flex h-8 items-center gap-1 rounded-full px-3 text-s4 font-medium",
+      )}
+    >
       {isReady ? (
         <Icon
           name="user"
