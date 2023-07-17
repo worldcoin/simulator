@@ -5,26 +5,29 @@ import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
 import { Chain, CredentialType } from "@/types";
+import { Identity as ZKIdentity } from "@semaphore-protocol/identity";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Credentials() {
   const router = useRouter();
-  const { identity, retrieveIdentity, updateIdentity } = useIdentity();
+  const { activeIdentity, updateIdentity } = useIdentity();
 
   const [isOpenVerifyOrb, setIsOpenVerifyOrb] = useState(false);
   const [isOpenVerifyPhone, setIsOpenVerifyPhone] = useState(false);
 
   const handleVerifyCredential = async (credentialType: CredentialType) => {
-    if (!identity) return;
+    if (!activeIdentity) return;
+    const zkIdentityStr = activeIdentity.zkIdentity;
+    const zkIdentity = new ZKIdentity(zkIdentityStr);
 
-    const commitment = encode(identity.zkIdentity.commitment);
+    const commitment = encode(zkIdentity.commitment);
     const init = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chain: identity.chain,
+        chain: activeIdentity.chain,
         credentialType,
         commitment,
       }),
@@ -44,22 +47,16 @@ export default function Credentials() {
     // Insert new credentials via sequencer
     try {
       await fetch("/api/sequencer/insertIdentity", init);
-      await updateIdentity(identity);
+      // Why is this needed here? Update verify state?
+      await updateIdentity(activeIdentity);
     } catch (error) {
       throw new Error(
         `Error verifying '${credentialType.toString()}' credential on chain '${
-          identity.chain
+          activeIdentity.chain
         }'`,
       );
     }
   };
-
-  // On initial load, get identity from session storage
-  useEffect(() => {
-    if (identity) return;
-    void retrieveIdentity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className="flex flex-col px-2 pb-6 text-center xs:pb-0">
@@ -79,17 +76,17 @@ export default function Credentials() {
         icon="orb"
         color="#9D50FF"
         className="mt-14 p-5"
-        verified={identity?.verified[CredentialType.Orb]}
+        verified={activeIdentity?.verified[CredentialType.Orb]}
         onClick={() => setIsOpenVerifyOrb(true)}
       />
-      {identity?.chain !== Chain.Optimism ? (
+      {activeIdentity?.chain !== Chain.Optimism ? (
         <VerifyItem
           heading="Phone"
           text="Obtain the phone verification on the staging network"
           icon="phone"
           color="#00C313"
           className="mt-3 p-5"
-          verified={identity?.verified[CredentialType.Phone]}
+          verified={activeIdentity?.verified[CredentialType.Phone]}
           onClick={() => setIsOpenVerifyPhone(true)}
         />
       ) : (

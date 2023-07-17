@@ -31,14 +31,17 @@ export function Modal() {
   const { open, setOpen, status, setStatus, metadata, event } =
     useModalStore(getStore);
   const { approveRequest } = useWalletConnect();
-  const { identity } = useIdentity();
+  const { activeIdentity } = useIdentity();
+
+  console.log("Modal metadata", metadata);
+  console.log("Modal identity", activeIdentity);
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [biometricsChecked, setBiometricsChecked] = useState<
     boolean | "indeterminate"
-  >(identity?.verified[CredentialType.Orb] ?? false);
+  >(activeIdentity?.verified[CredentialType.Orb] ?? false);
   const [phoneChecked, setPhoneChecked] = useState<boolean | "indeterminate">(
-    identity?.verified[CredentialType.Phone] ?? false,
+    activeIdentity?.verified[CredentialType.Phone] ?? false,
   );
 
   const isLoading = useMemo(() => {
@@ -47,14 +50,16 @@ export function Modal() {
 
   const isVerified = useMemo(() => {
     const orbVerified =
-      biometricsChecked && identity?.verified[CredentialType.Orb];
+      biometricsChecked && activeIdentity?.verified[CredentialType.Orb];
     const phoneVerified =
-      phoneChecked && identity?.verified[CredentialType.Phone];
+      phoneChecked && activeIdentity?.verified[CredentialType.Phone];
     return orbVerified ?? phoneVerified;
-  }, [biometricsChecked, phoneChecked, identity]);
+  }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
+
+  console.log("Modal isVerified", isVerified);
 
   const handleClick = async () => {
-    if (!identity) return;
+    if (!activeIdentity) return;
     const credentialTypeMap = {
       [CredentialType.Orb]: biometricsChecked,
       [CredentialType.Phone]: phoneChecked,
@@ -66,7 +71,7 @@ export function Modal() {
     // Show additional warning if the identity is unverified or still pending inclusion
     if (
       !showConfirm &&
-      (!isVerified || isPendingInclusion(identity, credentialTypes))
+      (!isVerified || isPendingInclusion(activeIdentity, credentialTypes))
     ) {
       setShowConfirm(true);
       return;
@@ -173,7 +178,7 @@ export function Modal() {
             />
           </Item>
           <Warning
-            identity={identity}
+            identity={activeIdentity}
             biometricsChecked={biometricsChecked}
             phoneChecked={phoneChecked}
           />

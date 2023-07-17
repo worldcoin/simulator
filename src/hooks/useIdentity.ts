@@ -1,86 +1,41 @@
+import { EMOJIS } from "@/lib/constants";
 import { encode } from "@/lib/utils";
 import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type {
-  Chain,
-  Identity,
-  InclusionProofResponse,
-  StoredIdentity,
-} from "@/types";
+import type { Chain, Identity, InclusionProofResponse } from "@/types";
 import { CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-
-const IDENTITY_STORAGE_KEY = "Identity";
+import { useMemo } from "react";
 
 const getStore = (store: IdentityStore) => ({
-  identity: store.identity,
-  setIdentity: store.setIdentity,
+  activeIdentityID: store.activeIdentityID,
+  identities: store.identities,
+  setActiveIdentityID: store.setActiveIdentityID,
+  insertIdentity: store.insertIdentity,
+  replaceIdentity: store.replaceIdentity,
+  lastIdentityNonce: store.lastIdentityNonce,
+  reset: store.reset,
 });
 
 const useIdentity = () => {
-  const { identity, setIdentity } = useIdentityStore(getStore);
+  const {
+    activeIdentityID,
+    identities,
+    setActiveIdentityID,
+    insertIdentity,
+    replaceIdentity,
+    reset,
+  } = useIdentityStore(getStore);
 
-  const createIdentity = async (chain: Chain) => {
-    const zkIdentity = new ZkIdentity();
-    const identity: Identity = {
-      id: "",
-      zkIdentity,
-      chain,
-      persisted: false,
-      verified: {
-        [CredentialType.Orb]: false,
-        [CredentialType.Phone]: false,
-      },
-      inclusionProof: {
-        [CredentialType.Orb]: null,
-        [CredentialType.Phone]: null,
-      },
-    };
-    return await updateIdentity(identity);
-  };
-
-  const storeIdentity = (identity: Identity) => {
-    try {
-      const storedIdentity: StoredIdentity = {
-        ...identity,
-        zkIdentity: identity.zkIdentity.toString(),
-      };
-      sessionStorage.setItem(
-        IDENTITY_STORAGE_KEY,
-        JSON.stringify(storedIdentity),
-      );
-      console.info(`Saved identity ${identity.id}`);
-    } catch (error) {
-      console.error(`Unable to persist semaphore identity, ${error}`);
-    }
-  };
-
-  const retrieveIdentity = async () => {
-    try {
-      const storage = sessionStorage.getItem(IDENTITY_STORAGE_KEY);
-      if (!storage) {
-        return null;
-      }
-
-      const storedIdentity = JSON.parse(storage) as StoredIdentity;
-      const zkIdentity = new ZkIdentity(storedIdentity.zkIdentity);
-      const identity: Identity = {
-        ...storedIdentity,
-        zkIdentity,
-      };
-      await updateIdentity(identity);
-      console.info(`Restored identity ${identity.id}`);
-
-      return identity;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
+  const resetIdentityStore = () => {
+    reset();
   };
 
   const updateIdentity = async (identity: Identity) => {
+    // Deserialize zkIdentity
+    const zkIdentity = new ZkIdentity(identity.zkIdentity);
     // Generate id value
-    const { commitment } = identity.zkIdentity;
+    const { commitment } = zkIdentity;
     const encodedCommitment = encode(commitment);
     const id = encodedCommitment.slice(0, 10);
 
@@ -110,18 +65,52 @@ const useIdentity = () => {
       },
     };
 
-    setIdentity(newIdentity);
-    storeIdentity(newIdentity);
+    // Store updated identity
+    replaceIdentity(newIdentity);
+
     return newIdentity;
   };
 
-  const clearIdentity = () => {
-    try {
-      sessionStorage.removeItem(IDENTITY_STORAGE_KEY);
-    } catch (error) {
-      console.error(error);
-    }
+  const generateNextIdentity = async (chain: Chain) => {
+    const zkIdentity = new ZkIdentity();
+
+    const emoji = EMOJIS[identities.length];
+    const name = `${identities.length + 1}`;
+    const encodedCommitment = encode(zkIdentity.commitment);
+    const id = encodedCommitment.slice(0, 10);
+
+    const identity: Identity = {
+      id,
+      meta: {
+        name,
+        emoji,
+      },
+      zkIdentity: zkIdentity.toString(),
+      chain,
+      verified: {
+        [CredentialType.Orb]: false,
+        [CredentialType.Phone]: false,
+      },
+      inclusionProof: {
+        [CredentialType.Orb]: null,
+        [CredentialType.Phone]: null,
+      },
+    };
+    insertIdentity(identity);
+    setActiveIdentityID(identity.id);
+    return await updateIdentity(identity).then((identity) => {
+      replaceIdentity(identity);
+      return identity;
+    });
   };
+
+  const activeIdentity = useMemo(() => {
+    // temp fix for rehydration issue
+    if (!activeIdentityID || activeIdentityID === "undefined") {
+      return null;
+    }
+    return identities.find((i) => i.id === activeIdentityID) ?? null;
+  }, [activeIdentityID, identities]);
 
   const getIdentityProof = async (
     chain: Chain,
@@ -151,11 +140,17 @@ const useIdentity = () => {
   };
 
   return {
-    identity,
-    createIdentity,
-    retrieveIdentity,
+    // temp fix for persistence rehydration issue
+    activeIdentityID:
+      activeIdentityID === "undefined" || !activeIdentityID
+        ? null
+        : activeIdentityID,
+    generateNextIdentity,
+    identities,
+    activeIdentity: activeIdentity,
+    resetIdentityStore,
     updateIdentity,
-    clearIdentity,
+    setActiveIdentityID,
   };
 };
 

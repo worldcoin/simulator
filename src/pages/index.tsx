@@ -3,93 +3,92 @@ import { Card } from "@/components/Card";
 import Confirm from "@/components/Confirm";
 import { Dropdown } from "@/components/Dropdown";
 import useIdentity from "@/hooks/useIdentity";
-import type { Identity } from "@/types";
-import { Chain, CredentialType } from "@/types";
-import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { useModal } from "connectkit";
+import { Chain } from "@/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { keccak256 } from "viem";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount } from "wagmi";
+
+// TODO: replace with selectID?
 
 export default function Home() {
   const router = useRouter();
-  const { setOpen } = useModal();
   const { isConnected } = useAccount();
-  const { identity, retrieveIdentity, createIdentity, updateIdentity } =
-    useIdentity();
+  const {
+    activeIdentity,
+    generateNextIdentity,
+    updateIdentity,
+    activeIdentityID,
+    identities,
+  } = useIdentity();
+
+  console.log("identities: ", identities);
 
   const [isSigning, setIsSigning] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [chain, setChain] = useState<Chain>(Chain.Polygon);
 
-  const { signMessage } = useSignMessage({
-    message: "Signature request to generate seed for World ID identity.",
-    onSuccess: async (signature) => {
-      const seed = keccak256(signature);
-      const zkIdentity = new ZkIdentity(seed);
-      const identity: Identity = {
-        id: "",
-        zkIdentity,
-        chain,
-        persisted: true,
-        verified: {
-          [CredentialType.Orb]: false,
-          [CredentialType.Phone]: false,
-        },
-        inclusionProof: {
-          [CredentialType.Orb]: null,
-          [CredentialType.Phone]: null,
-        },
-      };
-      const newIdentity = await updateIdentity(identity);
-
-      // Display confirmed state for 2 seconds
-      setIsConfirmed(true);
-      setTimeout(() => {
-        void router.push(`/id/${newIdentity.id}`);
-      }, 2000);
-    },
-    onError: (error) => {
-      setIsSigning(false);
-      console.error("Error while connecting to identity wallet:", error);
-    },
-  });
-
-  const handleConnectWallet = () => {
-    // Open modal if not connected
-    if (!isConnected) setOpen(true);
-
-    // Replace identity from wallet seed if connected
-    if (isConnected && !identity?.persisted) {
-      setIsSigning(true);
-      signMessage();
+  useEffect(() => {
+    if (
+      activeIdentityID != null &&
+      !router.pathname.includes(`/id/${activeIdentityID}`)
+    ) {
+      console.log("Redirecting to active identity:", activeIdentityID);
+      void router.push(`/id/${activeIdentityID}`);
+    } else if (!activeIdentityID && !router.pathname.includes("/select-id")) {
+      console.log("Redirecting to select identity");
+      void router.push("/select-id");
     }
+  }, [activeIdentityID, router]);
 
-    // Route to identity page if connected and identity is persistent
-    if (isConnected && identity?.persisted) {
-      void router.push(`/id/${identity.id}`);
-    }
-  };
+  // const { signMessage } = useSignMessage({
+  //   message: "Signature request to generate seed for World ID identity.",
+  //   onSuccess: async (signature) => {
+  //     const seed = keccak256(signature);
+  //     const zkIdentity = new ZkIdentity(seed);
+  //     // const identity: Identity = {
+  //     //   id: "",
+  //     //   meta: {
+  //     //     name: "World ID",
+  //     //     emoji: "🌎",
+  //     //   },
+  //     //   zkIdentity: zkIdentity.toString(),
+  //     //   chain,
+  //     //   // persisted: true,
+  //     //   verified: {
+  //     //     [CredentialType.Orb]: false,
+  //     //     [CredentialType.Phone]: false,
+  //     //   },
+  //     //   inclusionProof: {
+  //     //     [CredentialType.Orb]: null,
+  //     //     [CredentialType.Phone]: null,
+  //     //   },
+  //     // };
+  //     const newIdentity = await updateIdentity(identity);
+
+  //     // Display confirmed state for 2 seconds
+  //     setIsConfirmed(true);
+  //     setTimeout(() => {
+  //       void router.push(`/id/${newIdentity.id}`);
+  //     }, 2000);
+  //   },
+  //   onError: (error) => {
+  //     setIsSigning(false);
+  //     console.error("Error while connecting to identity wallet:", error);
+  //   },
+  // });
 
   const handleCreateTemporaryIdentity = () => {
-    void createIdentity(chain).then((newIdentity) => {
+    void generateNextIdentity(chain).then((newIdentity) => {
       void router.push(`/id/${newIdentity.id}`);
     });
   };
 
   // Generate persistent identity seed from connected wallet
-  useEffect(() => {
-    if (!isConnected || identity) return;
+  // useEffect(() => {
+  //   if (!isConnected || activeIdentity) return;
 
-    signMessage();
-  }, [identity, isConnected, signMessage]);
-
-  // On initial load, restore previous identity from storage
-  useEffect(() => {
-    void retrieveIdentity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   signMessage();
+  // }, [activeIdentity, isConnected, signMessage]);
 
   return (
     // <div className="px-2 pb-6 xs:pb-0">
@@ -121,7 +120,7 @@ export default function Home() {
             ]}
             setChain={setChain}
           />
-          <Card
+          {/* <Card
             icon="user"
             heading="Generate persistent identity"
             text="Use WalletConnect to link your wallet and keep your World ID identity consistent for each subsequent connection."
@@ -132,7 +131,7 @@ export default function Home() {
             >
               Generate Persistent ID
             </Button>
-          </Card>
+          </Card> */}
 
           <Card
             icon="clock"

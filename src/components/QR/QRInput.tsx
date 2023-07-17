@@ -12,7 +12,7 @@ export const QRInput = memo(function QRInput(props: {
   performVerification: (uri: string) => Promise<void>;
 }) {
   const [value, setValue] = useState("");
-  const { identity, retrieveIdentity } = useIdentity();
+  const { activeIdentity } = useIdentity();
   const { open } = useModalStore();
 
   const isInvalid = useMemo(() => {
@@ -46,12 +46,12 @@ export const QRInput = memo(function QRInput(props: {
     await props.performVerification(value);
   };
 
-  // On initial load, get identity from session storage
-  useEffect(() => {
-    if (identity) return;
-    void retrieveIdentity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // // On initial load, get identity from session storage
+  // useEffect(() => {
+  //   if (identity) return;
+  //   void retrieveIdentity();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   // Close input once modal opens
   useEffect(() => {

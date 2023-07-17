@@ -21,7 +21,7 @@ export const Settings = memo(function Settings(props: {
   const [version, setVersion] = useState("2.0");
   const [copiedCommitment, setCopiedCommitment] = useState(false);
 
-  const { clearIdentity } = useIdentity();
+  const { resetIdentityStore } = useIdentity();
   const { disconnectSessions, disconnectPairings } = useWalletConnect();
 
   const handleCredentialsMenu = () => {
@@ -59,7 +59,7 @@ export const Settings = memo(function Settings(props: {
     // }
 
     // Clear session storage
-    clearIdentity();
+    resetIdentityStore();
     console.info("Session storage cleared");
 
     // Redirect to landing page

@@ -87,8 +87,8 @@ dependencies:
     specifier: ^1.0.8
     version: 1.0.8(react-dom@18.2.0)(react@18.2.0)(typescript@5.0.4)(viem@0.3.37)
   zustand:
-    specifier: ^4.3.7
-    version: 4.3.7(react@18.2.0)
+    specifier: ^4.3.9
+    version: 4.3.9(react@18.2.0)
 
 devDependencies:
   '@next/bundle-analyzer':
@@ -3619,7 +3619,7 @@ packages:
       eventemitter3: 4.0.7
       typescript: 5.0.4
       viem: 0.3.37(typescript@5.0.4)
-      zustand: 4.3.7(react@18.2.0)
+      zustand: 4.3.9(react@18.2.0)
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
       - bufferutil
@@ -4374,7 +4374,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
       react-frame-component: 5.2.6(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)
       react-shadow: 19.1.0(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)
-      zustand: 4.3.7(react@18.2.0)
+      zustand: 4.3.9(react@18.2.0)
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
       - '@types/react'
@@ -11897,8 +11897,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zustand@4.3.7(react@18.2.0):
-    resolution: {integrity: sha512-dY8ERwB9Nd21ellgkBZFhudER8KVlelZm8388B5nDAXhO/+FZDhYMuRnqDgu5SYyRgz/iaf8RKnbUs/cHfOGlQ==}
+  /zustand@4.3.9(react@18.2.0):
+    resolution: {integrity: sha512-Tat5r8jOMG1Vcsj8uldMyqYKC5IZvQif8zetmLHs9WoZlntTHmIoNM8TpLRY31ExncuUvUOXehd0kvahkuHjDw==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
       immer: '>=9.0'

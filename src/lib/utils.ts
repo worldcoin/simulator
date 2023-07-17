@@ -19,6 +19,9 @@ export function isPendingInclusion(
 ): boolean {
   for (const credentialType of credentialTypes) {
     const status = identity.inclusionProof[credentialType]?.status;
+    console.log(
+      `isPendingInclusion: ${identity.id} ${credentialType} ${status}`,
+    );
     if (status === "new" || status === "pending") {
       return true;
     }

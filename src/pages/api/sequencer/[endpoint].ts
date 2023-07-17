@@ -26,7 +26,11 @@ export default async function handler(
 
   try {
     const { endpoint } = req.query;
+    console.log(`Calling ${endpoint} on sequencer`);
     const { chain, credentialType, commitment } = req.body;
+    console.log(`chain: ${chain}`);
+    console.log(`credentialType: ${credentialType}`);
+    console.log(`commitment: ${commitment}`);
     let data: InclusionProofResponse | Response;
 
     switch (endpoint) {

@@ -1,6 +1,5 @@
 // Dev portal
-export const DEV_PORTAL_PRECHECK_URL =
-  "https://developer.worldcoin.org/api/v1/precheck/";
+export const DEV_PORTAL_PRECHECK_URL = "http://localhost:3000/api/v1/precheck/";
 
 // Sequencers
 export const POLYGON_ORB_SEQUENCER_STAGING =
@@ -21,3 +20,66 @@ export const METADATA = {
 };
 
 export const SERVICE_STATUS_URL = "https://status.worldcoin.org/api/services";
+
+export const EMOJIS = [
+  "🐶",
+  "🐱",
+  "🐭",
+  "🐹",
+  "🐰",
+  "🦊",
+  "🐻",
+  "🐼",
+  "🐻‍❄️",
+  "🐨",
+  "🐯",
+  "🦁",
+  "🐮",
+  "🐷",
+  "🐸",
+  "🐵",
+  "🐔",
+  "🐧",
+  "🐦",
+  "🐤",
+  "🐺",
+  "🐗",
+  "🐴",
+  "🦄",
+  "🐝",
+  "🐛",
+  "🦋",
+  "🐌",
+  "🐞",
+  "🐜",
+  "🦟",
+  "🦠",
+  "🐢",
+  "🐍",
+  "🦎",
+  "🦖",
+  "🦕",
+  "🐙",
+  "🦑",
+  "🦐",
+  "🦀",
+  "🐡",
+  "🐠",
+  "🐟",
+  "🐬",
+  "🐳",
+  "🐋",
+  "🦈",
+  "🐊",
+  "🐅",
+  "🐆",
+  "🦓",
+  "🦍",
+  "🦧",
+  "🦣",
+  "🐘",
+  "🦛",
+  "🦏",
+  "🐪",
+  "🐫",
+];

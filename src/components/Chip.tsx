@@ -10,13 +10,13 @@ const getStore = (store: CacheStore) => ({
 });
 
 export default function Chip() {
-  const { identity, updateIdentity } = useIdentity();
+  const { activeIdentity, updateIdentity } = useIdentity();
   const { complete } = useCacheStore(getStore);
 
   const isPending = useMemo(() => {
-    if (!identity) return false;
-    return isPendingInclusion(identity);
-  }, [identity]);
+    if (!activeIdentity) return false;
+    return isPendingInclusion(activeIdentity);
+  }, [activeIdentity]);
 
   const isReady = useMemo(() => {
     return complete && !isPending;
@@ -30,8 +30,8 @@ export default function Chip() {
         return;
       }
 
-      if (!identity) return;
-      void updateIdentity(identity);
+      if (!activeIdentity) return;
+      void updateIdentity(activeIdentity);
     }, 10000);
 
     return () => clearInterval(interval);
@@ -61,7 +61,8 @@ export default function Chip() {
 
       {isReady && (
         <span className="leading-[1px]">
-          {identity?.persisted ? "Persistent ID" : "Temporary ID"}
+          {/* {activeIdentity?.persisted ? "Persistent ID" : "Temporary ID"} */}
+          {/* {true ? "Persistent ID" : "Temporary ID"} */}
         </span>
       )}
       {!complete && <span className="ml-1">Downloading Semaphore</span>}

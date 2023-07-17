@@ -11,14 +11,21 @@ import useIdentity from "@/hooks/useIdentity";
 import { checkCache, encode, retryDownload } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { pairClient } from "@/services/walletconnect";
+import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { CredentialType } from "@worldcoin/idkit";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Id() {
   const router = useRouter();
   const { id } = router.query;
-  const { identity, retrieveIdentity } = useIdentity();
+  const { activeIdentity, setActiveIdentityID } = useIdentity();
+
+  useEffect(() => {
+    if (id) setActiveIdentityID(id as string);
+  }, [id, setActiveIdentityID]);
+
+  console.log("activeIdentity: ", activeIdentity);
 
   const [isOpenScanner, setOpenScanner] = useState(false);
   const [isOpenQRInput, setOpenQRInput] = useState(false);
@@ -29,38 +36,41 @@ export default function Id() {
   };
 
   const performVerification = async (data: string) => {
-    // Check if semaphore files are present
     const filesInCache = await checkCache();
     if (!filesInCache) await retryDownload();
 
     const { uri } = parseWorldIDQRCode(data);
-    if (identity && uri) {
+    if (activeIdentity && uri) {
+      console.log("Performing verification");
+      console.log("URI: ", uri);
+      console.log("Identity: ", activeIdentity);
       await pairClient(uri);
+      console.log("Verification complete");
     }
   };
 
-  // On initial load, get identity from session storage
-  useEffect(() => {
-    if (identity) return;
-    void retrieveIdentity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const activeCommitment = useMemo(() => {
+    const zkIdentityStr = activeIdentity?.zkIdentity;
+    if (!zkIdentityStr) return null;
+    const zkIdentity = new ZkIdentity(zkIdentityStr);
+    return encode(zkIdentity.commitment);
+  }, [activeIdentity]);
 
   return (
     <div className="flex flex-col gap-y-4 px-2 pb-4 xs:gap-y-6 xs:pb-6">
       <Header
-        iconLeft="barcode"
+        iconLeft="user"
         iconRight="setting"
-        onClickLeft={() => setOpenScanner(true)}
+        onClickLeft={async () => router.push("/select-id")}
         onClickRight={() => setOpenSettings(true)}
       >
         <Chip />
       </Header>
 
       <WorldID
-        verified={identity?.verified[CredentialType.Orb]}
-        bioVerified={identity?.verified[CredentialType.Orb]}
-        phoneVerified={identity?.verified[CredentialType.Phone]}
+        verified={activeIdentity?.verified[CredentialType.Orb]}
+        bioVerified={activeIdentity?.verified[CredentialType.Orb]}
+        phoneVerified={activeIdentity?.verified[CredentialType.Phone]}
       />
 
       <div className="grid grid-cols-2 gap-2">
@@ -120,11 +130,11 @@ export default function Id() {
         performVerification={performVerification}
       />
 
-      {identity && (
+      {activeCommitment && (
         <Settings
           open={isOpenSettings}
           onClose={() => setOpenSettings(false)}
-          commitment={encode(identity.zkIdentity.commitment)}
+          commitment={activeCommitment}
         />
       )}
 
