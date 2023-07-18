@@ -1,87 +1,63 @@
 import { SEQUENCER_ENDPOINT } from "@/lib/utils";
-import type { InclusionProofResponse, SequencerRequest } from "@/types";
-import { Chain, CredentialType } from "@/types";
+import type { Chain, InclusionProofResponse, SequencerRequest } from "@/types";
+import { CredentialType } from "@/types";
 
-const POLYGON_SEQUENCER_STAGING_PASSWORD: Record<
-  CredentialType,
-  string | undefined
-> = {
-  [CredentialType.Orb]: process.env.POLYGON_ORB_SEQUENCER_STAGING_PASSWORD,
-  [CredentialType.Phone]: process.env.POLYGON_PHONE_SEQUENCER_STAGING_PASSWORD,
+const SEQUENCER_STAGING_PASSWORD: Record<CredentialType, string | undefined> = {
+  [CredentialType.Orb]: process.env.ORB_SEQUENCER_STAGING_PASSWORD,
+  [CredentialType.Phone]: process.env.PHONE_SEQUENCER_STAGING_PASSWORD,
 };
 
-const OPTIMISM_SEQUENCER_STAGING_PASSWORD: Record<
-  CredentialType,
-  string | undefined
-> = {
-  [CredentialType.Orb]: process.env.OPTIMISM_ORB_SEQUENCER_STAGING_PASSWORD,
-  // TODO: Add phone sequencer password for Optimism once deployed
-  [CredentialType.Phone]: undefined,
-};
-
-// Password mapping stays here since it's only exposed on the backend
-const SEQUENCER_PASSWORD: Record<
-  Chain,
-  Record<CredentialType, string | undefined>
-> = {
-  [Chain.Polygon]: POLYGON_SEQUENCER_STAGING_PASSWORD,
-  [Chain.Optimism]: OPTIMISM_SEQUENCER_STAGING_PASSWORD,
-};
-
-function buildUrl(
-  endpoint: string,
-  chain: Chain,
-  credentialType: CredentialType,
-) {
-  return new URL(endpoint, SEQUENCER_ENDPOINT[chain][credentialType]);
+function buildUrl(endpoint: string, credentialType: CredentialType) {
+  return new URL(endpoint, SEQUENCER_ENDPOINT[credentialType]);
 }
 
-function buildHeaders(
-  authenticate: boolean,
-  chain: Chain,
-  credentialType: CredentialType,
-): HeadersInit {
+function buildHeaders(authenticate: boolean, credentialType: CredentialType) {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
 
+  console.log(
+    `password for ${credentialType}:`,
+    SEQUENCER_STAGING_PASSWORD[credentialType],
+  );
   if (authenticate) {
     headers.Authorization = `Basic ${btoa(
-      `worldcoin:${SEQUENCER_PASSWORD[chain][credentialType]}`,
+      `worldcoin:${SEQUENCER_STAGING_PASSWORD[credentialType]}`,
     )}`;
   }
   return headers;
 }
 
 async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
+  console.log("\n\n");
   if (
     request.authenticate &&
-    !SEQUENCER_PASSWORD[request.chain][request.credentialType]
+    !SEQUENCER_STAGING_PASSWORD[request.credentialType]
   ) {
     throw new Error(
       `Sequencer password for '${request.credentialType}' is not provided and this request requires authentication. Please set SEQUENCER_PASSWORD environment variables.`,
     );
   }
 
+  const headers = buildHeaders(
+    request.authenticate ?? false,
+    request.credentialType,
+  );
+  console.log(
+    `headers for ${request.endpoint} (${request.credentialType}):`,
+    headers,
+  );
   const response = await fetch(
-    buildUrl(
-      request.endpoint,
-      request.chain,
-      request.credentialType,
-    ).toString(),
+    buildUrl(request.endpoint, request.credentialType).toString(),
     {
       method: "POST",
       body: JSON.stringify({ identityCommitment: request.commitment }),
-      headers: buildHeaders(
-        request.authenticate ?? false,
-        request.chain,
-        request.credentialType,
-      ),
+      headers: headers,
     },
   );
 
   if (!response.ok) {
-    console.log("\n\nresponse", response);
+    console.log("response", response.status);
     throw new Error(
       `Failed to call /${request.endpoint} on sequencer for '${request.credentialType}' on chain '${request.chain}', commitment: ${request.commitment}`,
     );

@@ -3,7 +3,6 @@ import type { InclusionProofResponse } from "./sequencer";
 
 export interface InterfaceMeta {
   readonly name: string;
-  readonly emoji: string;
 }
 
 export interface Identity {
@@ -11,6 +10,7 @@ export interface Identity {
   readonly meta: InterfaceMeta;
   readonly zkIdentity: string;
   verified: Record<CredentialType, boolean>;
+  // TODO: should be the same on both chains?
   inclusionProof: Record<
     Chain,
     Record<CredentialType, InclusionProofResponse | null> | null

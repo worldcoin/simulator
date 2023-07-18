@@ -33,9 +33,6 @@ export function Modal() {
   const { approveRequest } = useWalletConnect();
   const { activeIdentity } = useIdentity();
 
-  console.log("Modal metadata", metadata);
-  console.log("Modal identity", activeIdentity);
-
   const [showConfirm, setShowConfirm] = useState(false);
   const [biometricsChecked, setBiometricsChecked] = useState<
     boolean | "indeterminate"
@@ -55,8 +52,6 @@ export function Modal() {
       phoneChecked && activeIdentity?.verified[CredentialType.Phone];
     return orbVerified ?? phoneVerified;
   }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
-
-  console.log("Modal isVerified", isVerified);
 
   const handleClick = async () => {
     if (!activeIdentity) return;

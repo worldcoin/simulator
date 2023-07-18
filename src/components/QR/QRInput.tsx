@@ -3,7 +3,7 @@ import useIdentity from "@/hooks/useIdentity";
 import { cn } from "@/lib/utils";
 import { useModalStore } from "@/stores/modalStore";
 import { memo, useEffect, useMemo, useState } from "react";
-import { Drawer } from "../Drawer";
+import { Dialog } from "../Dialog";
 import { Input } from "../Input";
 
 export const QRInput = memo(function QRInput(props: {
@@ -12,29 +12,30 @@ export const QRInput = memo(function QRInput(props: {
   performVerification: (uri: string) => Promise<void>;
 }) {
   const [value, setValue] = useState("");
-  const { activeIdentity } = useIdentity();
+  useIdentity();
   const { open } = useModalStore();
 
-  const isInvalid = useMemo(() => {
-    if (!value) return false;
+  const isTextInvalidQRInput = (uri: string) => {
+    if (!uri) return false;
     try {
-      const url = decodeURIComponent(value);
+      const url = decodeURIComponent(uri);
       const regex =
         /^https:\/\/worldcoin\.org\/verify\?w=wc:[a-zA-Z0-9]{64}@2\?relay-protocol=irn&symKey=[a-zA-Z0-9]{64}$/;
-      return url.match(regex) === null;
+      const match = url.match(regex) === null;
+      console.log("match: ", match);
+      return match;
     } catch (e) {
       return true;
     }
+  };
+
+  const isInvalid = useMemo(() => {
+    return isTextInvalidQRInput(value);
   }, [value]);
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = event.target.value;
     if (data || data === "") setValue(data);
-  };
-
-  const handlePaste = async (event: React.ClipboardEvent) => {
-    const data = event.clipboardData.getData("Text");
-    await props.performVerification(data);
   };
 
   const handleSubmit = async (
@@ -45,13 +46,6 @@ export const QRInput = memo(function QRInput(props: {
     if (event) event.preventDefault();
     await props.performVerification(value);
   };
-
-  // // On initial load, get identity from session storage
-  // useEffect(() => {
-  //   if (identity) return;
-  //   void retrieveIdentity();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   // Close input once modal opens
   useEffect(() => {
@@ -68,11 +62,12 @@ export const QRInput = memo(function QRInput(props: {
   }, [props.open]);
 
   return (
-    <Drawer
+    <Dialog
       open={props.open}
       onClose={props.onClose}
+      closeIcon="direction-left"
     >
-      <div className="py-3 text-center font-sora text-h2">
+      <div className="mt-24 py-3 text-center font-sora text-h2">
         Enter or paste
         <br />
         QR code
@@ -87,7 +82,6 @@ export const QRInput = memo(function QRInput(props: {
         placeholder="QR code"
         invalid={isInvalid}
         value={value}
-        onPaste={(e) => void handlePaste(e)}
         onChange={(e) => void handleChange(e)}
         renderButton={({ isEmpty, isFocused, isInvalid }) => (
           <>
@@ -134,6 +128,6 @@ export const QRInput = memo(function QRInput(props: {
       >
         Submit
       </Button>
-    </Drawer>
+    </Dialog>
   );
 });

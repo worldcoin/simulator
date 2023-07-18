@@ -42,8 +42,6 @@ export const Settings = memo(function Settings(props: {
   };
 
   const handleLogout = async () => {
-    // Disconnect all WalletConnect sessions
-    // if (client) {
     const sessions = client.getActiveSessions();
     const sessionTopics = Object.keys(sessions);
     const pairings = core.pairing.getPairings();
@@ -56,7 +54,6 @@ export const Settings = memo(function Settings(props: {
     } catch (error) {
       console.error(`WalletConnect failed to disconnect, ${error}`);
     }
-    // }
 
     // Clear session storage
     resetIdentityStore();
@@ -120,7 +117,7 @@ export const Settings = memo(function Settings(props: {
           className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
           onClick={() => void handleLogout()}
         >
-          Logout
+          Reset Simulator
         </Button>
         <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-gray-400">
           Version {version}

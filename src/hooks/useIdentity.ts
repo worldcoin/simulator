@@ -1,4 +1,3 @@
-import { EMOJIS } from "@/lib/constants";
 import { encode } from "@/lib/utils";
 import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
@@ -68,7 +67,8 @@ const useIdentity = () => {
       id,
       verified: {
         [CredentialType.Orb]:
-          orbProofPolygon !== null && orbProofOptimism !== null,
+          // orbProofPolygon !== null && orbProofOptimism !== null,
+          orbProofPolygon !== null,
         [CredentialType.Phone]: phoneProofPolygon !== null,
       },
       // inclusionProof: {
@@ -93,10 +93,9 @@ const useIdentity = () => {
     return newIdentity;
   };
 
-  const generateNextIdentity = async (chain: Chain) => {
+  const generateNextIdentity = async () => {
     const zkIdentity = new ZkIdentity();
 
-    const emoji = EMOJIS[identities.length];
     const name = `${identities.length + 1}`;
     const encodedCommitment = encode(zkIdentity.commitment);
     const id = encodedCommitment.slice(0, 10);
@@ -105,7 +104,6 @@ const useIdentity = () => {
       id,
       meta: {
         name,
-        emoji,
       },
       zkIdentity: zkIdentity.toString(),
       verified: {

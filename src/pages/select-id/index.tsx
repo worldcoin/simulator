@@ -1,6 +1,5 @@
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
-import { Chain } from "@/types";
 import dynamic from "next/dynamic";
 
 const DynamicList = dynamic(() => import("./IDsList"), {
@@ -12,7 +11,7 @@ export default function Select() {
 
   return (
     <div className="mt-12 flex flex-col pb-6 text-center xs:pb-0">
-      <div className="flex h-full max-h-full flex-col justify-between overflow-y-scroll">
+      <div className="flex h-full max-h-full flex-col overflow-y-scroll scrollbar-hidden">
         <div className="flex w-full flex-col align-middle">
           <div className="py-3 text-center font-sora text-h2">
             Select test identity
@@ -24,8 +23,9 @@ export default function Select() {
         <DynamicList />
         <button
           className="absolute bottom-8 right-8  m-auto h-16 w-16 rounded-full bg-black"
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={async () => {
-            void generateNextIdentity(Chain.Polygon);
+            void generateNextIdentity();
           }}
         >
           <Icon

@@ -5,7 +5,7 @@ export default function IDsList() {
   const { identities } = useIdentity();
 
   return (
-    <div className="mt-12 flex h-full w-full flex-col gap-4 pb-40">
+    <div className="mt-12 flex h-full max-h-[calc(100vh-100rem)] w-full flex-col gap-4 ">
       {identities.map((identity, i) => {
         return (
           <IDRow

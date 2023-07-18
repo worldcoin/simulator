@@ -25,9 +25,7 @@ export default function Credentials() {
     const commitment = encode(zkIdentity.commitment);
 
     const chains =
-      credentialType == CredentialType.Orb
-        ? [Chain.Polygon, Chain.Optimism]
-        : [Chain.Polygon];
+      credentialType == CredentialType.Orb ? [Chain.Polygon] : [Chain.Polygon];
     const pairs = chains.map((chain) => ({ chain, credentialType }));
 
     const inclusionRequests = pairs.map(async ({ chain, credentialType }) => {
