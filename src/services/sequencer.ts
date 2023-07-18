@@ -81,6 +81,7 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
   );
 
   if (!response.ok) {
+    console.log("\n\nresponse", response);
     throw new Error(
       `Failed to call /${request.endpoint} on sequencer for '${request.credentialType}' on chain '${request.chain}', commitment: ${request.commitment}`,
     );

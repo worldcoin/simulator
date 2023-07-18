@@ -2,8 +2,8 @@ import { EMOJIS } from "@/lib/constants";
 import { encode } from "@/lib/utils";
 import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type { Chain, Identity, InclusionProofResponse } from "@/types";
-import { CredentialType } from "@/types";
+import type { Identity, InclusionProofResponse } from "@/types";
+import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useMemo } from "react";
 
@@ -40,15 +40,26 @@ const useIdentity = () => {
     const id = encodedCommitment.slice(0, 10);
 
     // Retrieve inclusion proofs
-    const orbProof = await getIdentityProof(
-      identity.chain,
+    const orbProofOptimism = await getIdentityProof(
+      Chain.Optimism,
       CredentialType.Orb,
       encodedCommitment,
     );
-    const phoneProof = await getIdentityProof(
-      identity.chain,
+    const orbProofPolygon = await getIdentityProof(
+      Chain.Polygon,
+      CredentialType.Orb,
+      encodedCommitment,
+    );
+    const phoneProofPolygon = await getIdentityProof(
+      Chain.Polygon,
       CredentialType.Phone,
       encodedCommitment,
+    );
+
+    console.log(
+      `orbProofOptimism: ${orbProofOptimism != null}\n orbProofPolygon: ${
+        orbProofPolygon != null
+      }\n phoneProofPolygon: ${phoneProofPolygon != null}`,
     );
 
     // Build updated identity object
@@ -56,12 +67,23 @@ const useIdentity = () => {
       ...identity,
       id,
       verified: {
-        [CredentialType.Orb]: orbProof !== null,
-        [CredentialType.Phone]: phoneProof !== null,
+        [CredentialType.Orb]:
+          orbProofPolygon !== null && orbProofOptimism !== null,
+        [CredentialType.Phone]: phoneProofPolygon !== null,
       },
+      // inclusionProof: {
+      //   [CredentialType.Orb]: orbProof,
+      //   [CredentialType.Phone]: phoneProof,
+      // },
       inclusionProof: {
-        [CredentialType.Orb]: orbProof,
-        [CredentialType.Phone]: phoneProof,
+        [Chain.Optimism]: {
+          [CredentialType.Orb]: orbProofOptimism,
+          [CredentialType.Phone]: null,
+        },
+        [Chain.Polygon]: {
+          [CredentialType.Orb]: orbProofPolygon,
+          [CredentialType.Phone]: phoneProofPolygon,
+        },
       },
     };
 
@@ -86,14 +108,19 @@ const useIdentity = () => {
         emoji,
       },
       zkIdentity: zkIdentity.toString(),
-      chain,
       verified: {
         [CredentialType.Orb]: false,
         [CredentialType.Phone]: false,
       },
       inclusionProof: {
-        [CredentialType.Orb]: null,
-        [CredentialType.Phone]: null,
+        [Chain.Optimism]: {
+          [CredentialType.Orb]: null,
+          [CredentialType.Phone]: null,
+        },
+        [Chain.Polygon]: {
+          [CredentialType.Orb]: null,
+          [CredentialType.Phone]: null,
+        },
       },
     };
     insertIdentity(identity);

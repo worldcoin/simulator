@@ -1,12 +1,14 @@
 import type { Identity } from "@/types";
+import { CredentialType } from "@worldcoin/idkit";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 export default function IDRow({ identity }: { identity: Identity }) {
   const router = useRouter();
-  const verififed = true;
   const iconSource = useMemo(() => `/images/emojis/0.png`, []);
+  const verifiedPhone = identity.verified[CredentialType.Phone];
+  const verifiedOrb = identity.verified[CredentialType.Orb];
   return (
     <button
       key={identity.id}
@@ -25,7 +27,13 @@ export default function IDRow({ identity }: { identity: Identity }) {
       <div className="ml-3 flex-1 text-left">
         <h3 className="text-s3">{identity.meta.name}</h3>
         <h4 className="mt-1 text-b4 text-gray-500">
-          {verififed ? "Verified" : "Unverified"}
+          {verifiedOrb && verifiedPhone
+            ? "Verified Phone & Orb"
+            : verifiedOrb
+            ? "Verified Orb"
+            : verifiedPhone
+            ? "Verified Phone"
+            : "Unverified"}
         </h4>
       </div>
     </button>

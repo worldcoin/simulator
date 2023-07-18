@@ -69,10 +69,7 @@ export function Modal() {
       .map(([type]) => type) as CredentialType[];
 
     // Show additional warning if the identity is unverified or still pending inclusion
-    if (
-      !showConfirm &&
-      (!isVerified || isPendingInclusion(activeIdentity, credentialTypes))
-    ) {
+    if (!showConfirm && (!isVerified || isPendingInclusion(activeIdentity))) {
       setShowConfirm(true);
       return;
     }

@@ -1,4 +1,3 @@
-import Chip from "@/components/Chip";
 import Header from "@/components/Header";
 import { IconGradient } from "@/components/Icon/IconGradient";
 import Maintenance from "@/components/Maintenance";
@@ -6,15 +5,22 @@ import { Modal } from "@/components/Modal";
 import { QRInput } from "@/components/QR/QRInput";
 import { QRScanner } from "@/components/QR/QRScanner";
 import { Settings } from "@/components/Settings";
-import { WorldID } from "@/components/WorldID";
 import useIdentity from "@/hooks/useIdentity";
 import { checkCache, encode, retryDownload } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { pairClient } from "@/services/walletconnect";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { CredentialType } from "@worldcoin/idkit";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
+
+const DynamicChip = dynamic(() => import("@/components/Chip"), {
+  ssr: false,
+});
+const DynamicWorldID = dynamic(() => import("@/components/WorldID"), {
+  ssr: false,
+});
 
 export default function Id() {
   const router = useRouter();
@@ -64,10 +70,10 @@ export default function Id() {
         onClickLeft={async () => router.push("/select-id")}
         onClickRight={() => setOpenSettings(true)}
       >
-        <Chip />
+        <DynamicChip />
       </Header>
 
-      <WorldID
+      <DynamicWorldID
         verified={activeIdentity?.verified[CredentialType.Orb]}
         bioVerified={activeIdentity?.verified[CredentialType.Orb]}
         phoneVerified={activeIdentity?.verified[CredentialType.Phone]}

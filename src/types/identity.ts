@@ -10,7 +10,9 @@ export interface Identity {
   readonly id: string;
   readonly meta: InterfaceMeta;
   readonly zkIdentity: string;
-  chain: Chain; // TODO: refactor
   verified: Record<CredentialType, boolean>;
-  inclusionProof: Record<CredentialType, InclusionProofResponse | null>;
+  inclusionProof: Record<
+    Chain,
+    Record<CredentialType, InclusionProofResponse | null> | null
+  >;
 }

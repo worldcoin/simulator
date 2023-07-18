@@ -4,7 +4,7 @@ import { Fragment, useMemo } from "react";
 import { Icon } from "../Icon";
 import styles from "./WorldID.module.css";
 
-export function WorldID(props: {
+export default function WorldID(props: {
   className?: string;
   address?: string;
   animate?: boolean;

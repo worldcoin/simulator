@@ -13,17 +13,19 @@ export function encode(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
 }
 
-export function isPendingInclusion(
-  identity: Identity,
-  credentialTypes = [CredentialType.Orb, CredentialType.Phone],
-): boolean {
-  for (const credentialType of credentialTypes) {
-    const status = identity.inclusionProof[credentialType]?.status;
-    console.log(
-      `isPendingInclusion: ${identity.id} ${credentialType} ${status}`,
-    );
-    if (status === "new" || status === "pending") {
-      return true;
+export function isPendingInclusion(identity: Identity): boolean {
+  const chainTypes = [Chain.Optimism, Chain.Polygon];
+  const credentialTypes = [CredentialType.Orb, CredentialType.Phone];
+  for (const chain of chainTypes) {
+    for (const credentialType of credentialTypes) {
+      const chains = identity.inclusionProof[chain];
+      if (!chains) {
+        continue;
+      }
+      const status = chains[credentialType]?.status;
+      if (status === "new" || status === "pending") {
+        return true;
+      }
     }
   }
   return false;

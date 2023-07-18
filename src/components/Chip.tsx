@@ -14,6 +14,7 @@ export default function Chip() {
   const { complete } = useCacheStore(getStore);
 
   const isPending = useMemo(() => {
+    console.log("Chip activeIdentity", activeIdentity);
     if (!activeIdentity) return false;
     return isPendingInclusion(activeIdentity);
   }, [activeIdentity]);
@@ -25,6 +26,7 @@ export default function Chip() {
   // Check on pending inclusion proofs every 30 seconds until mined
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log("Chip interval", isPending);
       if (!isPending) {
         clearInterval(interval);
         return;

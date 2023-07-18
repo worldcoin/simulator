@@ -23,20 +23,33 @@ export default function Credentials() {
     const zkIdentity = new ZKIdentity(zkIdentityStr);
 
     const commitment = encode(zkIdentity.commitment);
-    const init = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chain: activeIdentity.chain,
-        credentialType,
-        commitment,
-      }),
-    };
+
+    const chains =
+      credentialType == CredentialType.Orb
+        ? [Chain.Polygon, Chain.Optimism]
+        : [Chain.Polygon];
+    const pairs = chains.map((chain) => ({ chain, credentialType }));
+
+    const inclusionRequests = pairs.map(async ({ chain, credentialType }) => {
+      const init = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chain,
+          credentialType,
+          commitment,
+        }),
+      };
+      return await fetch("/api/sequencer/inclusionProof", init);
+    });
 
     // Check if credentials already exist
     try {
-      const response = await fetch("/api/sequencer/inclusionProof", init);
-      if (response.status === 200) {
+      const responses = await Promise.all(inclusionRequests);
+      const responses200 = responses.filter(
+        (response) => response.status === 200,
+      );
+      if (responses200.length > 0) {
         toast.error(
           `Credential type '${credentialType.toString()}' already exists onchain!`,
         );
@@ -45,15 +58,25 @@ export default function Credentials() {
     } catch (e) {} // Intentionally ignored
 
     // Insert new credentials via sequencer
+    const requestsInsert = pairs.map(async ({ chain, credentialType }) => {
+      const init = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chain,
+          credentialType,
+          commitment,
+        }),
+      };
+      return await fetch("/api/sequencer/insertIdentity", init);
+    });
+
     try {
-      await fetch("/api/sequencer/insertIdentity", init);
-      // Why is this needed here? Update verify state?
+      await Promise.all(requestsInsert);
       await updateIdentity(activeIdentity);
     } catch (error) {
       throw new Error(
-        `Error verifying '${credentialType.toString()}' credential on chain '${
-          activeIdentity.chain
-        }'`,
+        `Error verifying '${credentialType.toString()}' error: ${error}`,
       );
     }
   };
@@ -79,22 +102,16 @@ export default function Credentials() {
         verified={activeIdentity?.verified[CredentialType.Orb]}
         onClick={() => setIsOpenVerifyOrb(true)}
       />
-      {activeIdentity?.chain !== Chain.Optimism ? (
-        <VerifyItem
-          heading="Phone"
-          text="Obtain the phone verification on the staging network"
-          icon="phone"
-          color="#00C313"
-          className="mt-3 p-5"
-          verified={activeIdentity?.verified[CredentialType.Phone]}
-          onClick={() => setIsOpenVerifyPhone(true)}
-        />
-      ) : (
-        <p className="mx-2 mt-6 text-left text-b3 text-gray-400">
-          Note: Phone credentials are not currently supported on the Optimism
-          network.
-        </p>
-      )}
+
+      <VerifyItem
+        heading="Phone"
+        text="Obtain the phone verification on the staging network"
+        icon="phone"
+        color="#00C313"
+        className="mt-3 p-5"
+        verified={activeIdentity?.verified[CredentialType.Phone]}
+        onClick={() => setIsOpenVerifyPhone(true)}
+      />
 
       <VerifyOrb
         open={isOpenVerifyOrb}
