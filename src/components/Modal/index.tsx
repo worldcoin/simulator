@@ -50,7 +50,8 @@ export function Modal() {
       biometricsChecked && activeIdentity?.verified[CredentialType.Orb];
     const phoneVerified =
       phoneChecked && activeIdentity?.verified[CredentialType.Phone];
-    return orbVerified ?? phoneVerified;
+    const isVerified = orbVerified ?? phoneVerified;
+    return isVerified;
   }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
 
   const handleClick = async () => {

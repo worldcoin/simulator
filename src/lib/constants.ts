@@ -1,5 +1,6 @@
 // Dev portal
-export const DEV_PORTAL_PRECHECK_URL = "http://localhost:3002/api/v1/precheck/";
+export const DEV_PORTAL_PRECHECK_URL =
+  "https://developer.worldcoin.org/api/v1/precheck/";
 
 // Sequencers
 // export const POLYGON_ORB_SEQUENCER_STAGING =

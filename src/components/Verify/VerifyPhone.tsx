@@ -15,7 +15,7 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
   handleVerify: (credentialType: CredentialType) => Promise<void>;
 }) {
   const router = useRouter();
-  const { identity } = useIdentity();
+  const { activeIdentity } = useIdentity();
 
   const [status, setStatus] = useState<Status>(Status.Waiting);
 
@@ -25,10 +25,10 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await props.handleVerify(CredentialType.Phone);
       setStatus(Status.Success);
-      if (identity) {
+      if (activeIdentity) {
         // Display verified state for 2 seconds
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        void router.push(`/id/${identity.id}`);
+        void router.push(`/id/${activeIdentity.id}`);
       }
     } catch (error) {
       setStatus(Status.Error);

@@ -2,7 +2,7 @@ import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
 import dynamic from "next/dynamic";
 
-const DynamicList = dynamic(() => import("./IDsList"), {
+const DynamicList = dynamic(() => import("@/components/SelectID/IDsList"), {
   ssr: false,
 });
 
