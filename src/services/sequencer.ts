@@ -25,7 +25,6 @@ function buildHeaders(authenticate: boolean, credentialType: CredentialType) {
 }
 
 async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
-  console.log("\n\n");
   if (
     request.authenticate &&
     !SEQUENCER_STAGING_PASSWORD[request.credentialType]
@@ -50,9 +49,8 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
   );
 
   if (!response.ok) {
-    console.log("response", response.status);
     throw new Error(
-      `Failed to call /${request.endpoint} on sequencer for '${request.credentialType}' on chain '${request.chain}', commitment: ${request.commitment}`,
+      `Failed to call /${request.endpoint} on sequencer for '${request.credentialType}' on chain '${request.chain}'.`,
     );
   }
 

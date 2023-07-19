@@ -36,8 +36,6 @@ export default function Id() {
     if (id) setActiveIdentityID(id as string);
   }, [id, setActiveIdentityID]);
 
-  console.log("activeIdentity: ", activeIdentity);
-
   const [isOpenScanner, setOpenScanner] = useState(false);
   const [isOpenQRInput, setOpenQRInput] = useState(false);
   const [isOpenSettings, setOpenSettings] = useState(false);
