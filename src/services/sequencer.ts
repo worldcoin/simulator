@@ -16,10 +16,6 @@ function buildHeaders(authenticate: boolean, credentialType: CredentialType) {
     "Content-Type": "application/json",
   };
 
-  console.log(
-    `password for ${credentialType}:`,
-    SEQUENCER_STAGING_PASSWORD[credentialType],
-  );
   if (authenticate) {
     headers.Authorization = `Basic ${btoa(
       `worldcoin:${SEQUENCER_STAGING_PASSWORD[credentialType]}`,
@@ -43,10 +39,7 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
     request.authenticate ?? false,
     request.credentialType,
   );
-  console.log(
-    `headers for ${request.endpoint} (${request.credentialType}):`,
-    headers,
-  );
+
   const response = await fetch(
     buildUrl(request.endpoint, request.credentialType).toString(),
     {
