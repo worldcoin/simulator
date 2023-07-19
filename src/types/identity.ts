@@ -10,7 +10,7 @@ export interface Identity {
   readonly meta: InterfaceMeta;
   readonly zkIdentity: string;
   verified: Record<CredentialType, boolean>;
-  // TODO: should be the same on both chains?
+  // TODO: should be the same on both chains? can remove chain->type
   inclusionProof: Record<
     Chain,
     Record<CredentialType, InclusionProofResponse | null> | null

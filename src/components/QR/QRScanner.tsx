@@ -98,8 +98,6 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
-        console.log("canvas: ", canvas);
-
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
@@ -146,8 +144,6 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
       const code = jsQR(imageData.data, imageData.width, imageData.height, {
         inversionAttempts: "dontInvert",
       });
-
-      console.log("code: ", code);
 
       if (code) {
         setData(code.data);
@@ -204,7 +200,6 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
               muted
               playsInline
               ref={videoRef}
-              hidden
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
 

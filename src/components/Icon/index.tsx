@@ -32,6 +32,7 @@ const icons = [
   "note",
   "orb",
   "phone",
+  "plus",
   "question",
   "qr-code",
   "setting",

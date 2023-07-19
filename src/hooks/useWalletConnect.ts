@@ -158,7 +158,7 @@ export const useWalletConnect = (ready?: boolean) => {
     // Send response to dapp
     const response = buildResponse(
       id,
-      // identityRef.current.chain,
+      // TODO: Sending back Polygon proof by default but should be the same? If so should refactor when removing chain->type record on Identity
       Chain.Polygon,
       credentialType,
       verification.fullProof,
