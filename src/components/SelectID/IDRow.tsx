@@ -22,7 +22,7 @@ export default function IDRow({ identity }: { identity: Identity }) {
         <h3 className="text-s3">{identity.meta.name}</h3>
         <div
           className={cn(
-            "inline-flex h-full items-center gap-x-0.5",
+            "inline-flex h-full items-center gap-x-1 align-middle",
             { "text-info-700": verifiedOrb || verifiedPhone },
             { "text-gray-500": !(verifiedOrb || verifiedPhone) },
           )}
@@ -33,9 +33,9 @@ export default function IDRow({ identity }: { identity: Identity }) {
                 ? "badge-verified"
                 : "badge-not-verified"
             }
-            className={"mt-1 h-3 w-3"}
+            className={"h-3 w-3 "}
           />
-          <h4 className="mt-1 text-b4 text-gray-500">
+          <h4 className=" text-b4 text-gray-500">
             {verifiedOrb && verifiedPhone
               ? "Verified (Phone & Orb)"
               : verifiedOrb

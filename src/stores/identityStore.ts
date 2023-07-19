@@ -8,7 +8,6 @@ export type IdentityStore = {
   setActiveIdentityID: (id: string) => void;
   insertIdentity: (identity: Identity) => void;
   replaceIdentity: (identity: Identity) => void;
-  lastIdentityNonce: number;
   reset: () => void;
 };
 
@@ -33,7 +32,6 @@ export const useIdentityStore = create<IdentityStore>()(
             return i;
           }),
         })),
-      lastIdentityNonce: 0,
       reset: () =>
         set(() => ({
           identities: [],

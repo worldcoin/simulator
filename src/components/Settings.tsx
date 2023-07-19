@@ -1,4 +1,3 @@
-import Button from "@/components/Button";
 import Header from "@/components/Header";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
@@ -7,6 +6,7 @@ import { client, core } from "@/services/walletconnect";
 import { useRouter } from "next/router";
 import { memo, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Button from "./Button";
 import { Drawer } from "./Drawer";
 import { Icon } from "./Icon";
 import { IconGradient } from "./Icon/IconGradient";
@@ -61,7 +61,7 @@ export const Settings = memo(function Settings(props: {
 
     // Redirect to landing page
     toast.success(`Logged out of identity ${id}`);
-    await router.push("/");
+    await router.push("/select-id");
   };
 
   // On initial load, check for package version
@@ -84,7 +84,7 @@ export const Settings = memo(function Settings(props: {
             iconLeft="chevron-thick"
             onClickLeft={props.onClose}
           />
-          <Item
+          {/* <Item
             heading="Credentials"
             text="Manage your credentials"
             className="mt-5 p-4"
@@ -94,7 +94,7 @@ export const Settings = memo(function Settings(props: {
               name="user"
               color="#9D50FF"
             />
-          </Item>
+          </Item> */}
           <Item
             heading="Identity commitment"
             text="Copy your identity commitment"
@@ -115,7 +115,9 @@ export const Settings = memo(function Settings(props: {
         </div>
         <Button
           className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
-          onClick={() => void handleLogout()}
+          onClick={() => {
+            void handleLogout();
+          }}
         >
           Reset Simulator
         </Button>

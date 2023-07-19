@@ -6,14 +6,16 @@ export default function IDsList() {
 
   return (
     <div className="mt-12 flex h-full max-h-[calc(100vh-100rem)] w-full flex-col gap-4 ">
-      {identities.map((identity, i) => {
-        return (
-          <IDRow
-            key={i}
-            identity={identity}
-          />
-        );
-      })}
+      {identities
+        .sort((a, b) => b.meta.idNumber - a.meta.idNumber)
+        .map((identity, i) => {
+          return (
+            <IDRow
+              key={i}
+              identity={identity}
+            />
+          );
+        })}
     </div>
   );
 }

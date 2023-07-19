@@ -4,7 +4,7 @@ import { useIdentityStore } from "@/stores/identityStore";
 import type { Identity, InclusionProofResponse } from "@/types";
 import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const getStore = (store: IdentityStore) => ({
   activeIdentityID: store.activeIdentityID,
@@ -12,7 +12,6 @@ const getStore = (store: IdentityStore) => ({
   setActiveIdentityID: store.setActiveIdentityID,
   insertIdentity: store.insertIdentity,
   replaceIdentity: store.replaceIdentity,
-  lastIdentityNonce: store.lastIdentityNonce,
   reset: store.reset,
 });
 
@@ -26,107 +25,126 @@ const useIdentity = () => {
     reset,
   } = useIdentityStore(getStore);
 
-  const resetIdentityStore = () => {
+  const updateIdentity = useCallback(
+    async (identity: Identity) => {
+      // Deserialize zkIdentity
+      const zkIdentity = new ZkIdentity(identity.zkIdentity);
+      // Generate id value
+      const { commitment } = zkIdentity;
+      const encodedCommitment = encode(commitment);
+      const id = encodedCommitment.slice(0, 10);
+
+      // Retrieve inclusion proofs
+      const orbProofOptimism = await getIdentityProof(
+        Chain.Optimism,
+        CredentialType.Orb,
+        encodedCommitment,
+      );
+      const orbProofPolygon = await getIdentityProof(
+        Chain.Polygon,
+        CredentialType.Orb,
+        encodedCommitment,
+      );
+      const phoneProofPolygon = await getIdentityProof(
+        Chain.Polygon,
+        CredentialType.Phone,
+        encodedCommitment,
+      );
+
+      // Build updated identity object
+      const newIdentity: Identity = {
+        ...identity,
+        id,
+        verified: {
+          [CredentialType.Orb]: orbProofPolygon !== null,
+          [CredentialType.Phone]: phoneProofPolygon !== null,
+        },
+
+        inclusionProof: {
+          [Chain.Optimism]: {
+            [CredentialType.Orb]: orbProofOptimism,
+            [CredentialType.Phone]: null,
+          },
+          [Chain.Polygon]: {
+            [CredentialType.Orb]: orbProofPolygon,
+            [CredentialType.Phone]: phoneProofPolygon,
+          },
+        },
+      };
+
+      // Store updated identity
+      replaceIdentity(newIdentity);
+
+      return newIdentity;
+    },
+    [replaceIdentity],
+  );
+
+  const generateNextIdentity = useCallback(
+    async (withIDNumber?: number) => {
+      const idNum =
+        withIDNumber || withIDNumber == 0 ? withIDNumber : identities.length;
+      const zkIdentity = new ZkIdentity(idNum.toString());
+      const name = `Identity #${idNum}`;
+      const encodedCommitment = encode(zkIdentity.commitment);
+      const id = encodedCommitment.slice(0, 10);
+
+      const identity: Identity = {
+        id,
+        meta: {
+          name,
+          idNumber: idNum,
+        },
+        zkIdentity: zkIdentity.toString(),
+        verified: {
+          [CredentialType.Orb]: false,
+          [CredentialType.Phone]: false,
+        },
+        inclusionProof: {
+          [Chain.Optimism]: {
+            [CredentialType.Orb]: null,
+            [CredentialType.Phone]: null,
+          },
+          [Chain.Polygon]: {
+            [CredentialType.Orb]: null,
+            [CredentialType.Phone]: null,
+          },
+        },
+      };
+      insertIdentity(identity);
+      setActiveIdentityID(identity.id);
+      return await updateIdentity(identity).then((identity) => {
+        replaceIdentity(identity);
+        return identity;
+      });
+    },
+    [
+      identities.length,
+      insertIdentity,
+      replaceIdentity,
+      setActiveIdentityID,
+      updateIdentity,
+    ],
+  );
+
+  const generateFirstFiveIdentities = useCallback(async () => {
+    for (let i = 0; i < 5; i++) {
+      void generateNextIdentity(i);
+    }
+  }, [generateNextIdentity]);
+
+  const resetIdentityStore = useCallback(() => {
     reset();
-  };
+    void generateFirstFiveIdentities();
+  }, [generateFirstFiveIdentities, reset]);
 
-  const updateIdentity = async (identity: Identity) => {
-    // Deserialize zkIdentity
-    const zkIdentity = new ZkIdentity(identity.zkIdentity);
-    // Generate id value
-    const { commitment } = zkIdentity;
-    const encodedCommitment = encode(commitment);
-    const id = encodedCommitment.slice(0, 10);
-
-    // Retrieve inclusion proofs
-    const orbProofOptimism = await getIdentityProof(
-      Chain.Optimism,
-      CredentialType.Orb,
-      encodedCommitment,
-    );
-    const orbProofPolygon = await getIdentityProof(
-      Chain.Polygon,
-      CredentialType.Orb,
-      encodedCommitment,
-    );
-    const phoneProofPolygon = await getIdentityProof(
-      Chain.Polygon,
-      CredentialType.Phone,
-      encodedCommitment,
-    );
-
-    console.log(
-      `orbProofOptimism: ${orbProofOptimism != null}\n orbProofPolygon: ${
-        orbProofPolygon != null
-      }\n phoneProofPolygon: ${phoneProofPolygon != null}`,
-    );
-
-    // Build updated identity object
-    const newIdentity: Identity = {
-      ...identity,
-      id,
-      verified: {
-        [CredentialType.Orb]:
-          // orbProofPolygon !== null && orbProofOptimism !== null,
-          orbProofPolygon !== null,
-        [CredentialType.Phone]: phoneProofPolygon !== null,
-      },
-      // inclusionProof: {
-      //   [CredentialType.Orb]: orbProof,
-      //   [CredentialType.Phone]: phoneProof,
-      // },
-      inclusionProof: {
-        [Chain.Optimism]: {
-          [CredentialType.Orb]: orbProofOptimism,
-          [CredentialType.Phone]: null,
-        },
-        [Chain.Polygon]: {
-          [CredentialType.Orb]: orbProofPolygon,
-          [CredentialType.Phone]: phoneProofPolygon,
-        },
-      },
-    };
-
-    // Store updated identity
-    replaceIdentity(newIdentity);
-
-    return newIdentity;
-  };
-
-  const generateNextIdentity = async () => {
-    const name = `${identities.length + 1}`;
-    const zkIdentity = new ZkIdentity(name);
-    const encodedCommitment = encode(zkIdentity.commitment);
-    const id = encodedCommitment.slice(0, 10);
-
-    const identity: Identity = {
-      id,
-      meta: {
-        name,
-      },
-      zkIdentity: zkIdentity.toString(),
-      verified: {
-        [CredentialType.Orb]: false,
-        [CredentialType.Phone]: false,
-      },
-      inclusionProof: {
-        [Chain.Optimism]: {
-          [CredentialType.Orb]: null,
-          [CredentialType.Phone]: null,
-        },
-        [Chain.Polygon]: {
-          [CredentialType.Orb]: null,
-          [CredentialType.Phone]: null,
-        },
-      },
-    };
-    insertIdentity(identity);
-    setActiveIdentityID(identity.id);
-    return await updateIdentity(identity).then((identity) => {
-      replaceIdentity(identity);
-      return identity;
-    });
-  };
+  const [hasGeneratedFirstFive, setHasGeneratedFirstFive] = useState(false);
+  useEffect(() => {
+    if (!hasGeneratedFirstFive && identities.length === 0) {
+      setHasGeneratedFirstFive(true);
+      void generateFirstFiveIdentities();
+    }
+  }, [generateFirstFiveIdentities, hasGeneratedFirstFive, identities]);
 
   const activeIdentity = useMemo(() => {
     // temp fix for rehydration issue

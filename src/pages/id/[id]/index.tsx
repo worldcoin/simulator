@@ -89,8 +89,8 @@ export default function Id() {
         phoneVerified={activeIdentity?.verified[CredentialType.Phone]}
       />
 
-      <div className="grid grid-cols-2 gap-2">
-        <button
+      <div className="grid grid-cols-1 gap-2">
+        {/* <button
           className="rounded-12 bg-gray-100 p-4 text-left"
           onClick={handleCredentialsCard}
         >
@@ -108,7 +108,7 @@ export default function Id() {
           <div className="mt-2 text-s1 font-medium text-gray-900">
             Verify your identity
           </div>
-        </button>
+        </button> */}
 
         <button
           className="rounded-12 bg-gray-100 p-4 text-left"
@@ -125,7 +125,7 @@ export default function Id() {
             SCANNER
           </div>
 
-          <div className="mt-2 text-s1 font-medium text-gray-900">
+          <div className="mt-1 text-s1 font-medium text-gray-900">
             Scan QR or Paste data
           </div>
         </button>
