@@ -4,7 +4,15 @@ import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
-  const { activeIdentityID } = useIdentity();
+  const { activeIdentityID, identities, generateFirstFiveIdentities } =
+    useIdentity();
+
+  useEffect(() => {
+    if (identities.length === 0) {
+      console.log("Generating first five identities...");
+      void generateFirstFiveIdentities();
+    }
+  }, [generateFirstFiveIdentities, identities]);
 
   useEffect(() => {
     if (

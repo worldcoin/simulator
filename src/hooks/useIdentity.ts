@@ -4,7 +4,7 @@ import { useIdentityStore } from "@/stores/identityStore";
 import type { Identity, InclusionProofResponse } from "@/types";
 import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 const getStore = (store: IdentityStore) => ({
   activeIdentityID: store.activeIdentityID,
@@ -138,14 +138,6 @@ const useIdentity = () => {
     void generateFirstFiveIdentities();
   }, [generateFirstFiveIdentities, reset]);
 
-  const [hasGeneratedFirstFive, setHasGeneratedFirstFive] = useState(false);
-  useEffect(() => {
-    if (!hasGeneratedFirstFive && identities.length === 0) {
-      setHasGeneratedFirstFive(true);
-      void generateFirstFiveIdentities();
-    }
-  }, [generateFirstFiveIdentities, hasGeneratedFirstFive, identities]);
-
   const activeIdentity = useMemo(() => {
     // temp fix for rehydration issue
     if (!activeIdentityID || activeIdentityID === "undefined") {
@@ -193,6 +185,7 @@ const useIdentity = () => {
     resetIdentityStore,
     updateIdentity,
     setActiveIdentityID,
+    generateFirstFiveIdentities,
   };
 };
 

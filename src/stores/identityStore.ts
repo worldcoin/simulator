@@ -11,7 +11,7 @@ export type IdentityStore = {
   reset: () => void;
 };
 
-const IDENTITY_STORE_STORAGE_KEY = "IdentityStore8";
+const IDENTITY_STORE_STORAGE_KEY = "Simulator_Identity_Store_2";
 
 export const useIdentityStore = create<IdentityStore>()(
   persist(
