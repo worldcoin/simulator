@@ -94,9 +94,8 @@ const useIdentity = () => {
   };
 
   const generateNextIdentity = async () => {
-    const zkIdentity = new ZkIdentity();
-
     const name = `${identities.length + 1}`;
+    const zkIdentity = new ZkIdentity(name);
     const encodedCommitment = encode(zkIdentity.commitment);
     const id = encodedCommitment.slice(0, 10);
 
