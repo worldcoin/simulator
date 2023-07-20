@@ -1,6 +1,6 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
 import type { SignRequest, Verification } from "@/types";
-import { Chain, ProofError, type CredentialType, type Identity } from "@/types";
+import { ProofError, type CredentialType, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { FullProof, Proof, SnarkJSProof } from "@semaphore-protocol/proof";
@@ -57,11 +57,11 @@ function getMerkleProof(
   credentialType: CredentialType,
 ): MerkleProof {
   console.log("identity", identity);
-  const polygonProofs = identity.inclusionProof[Chain.Polygon];
-  if (!polygonProofs) {
+  const proofs = identity.inclusionProof;
+  if (!proofs) {
     throw new Error("Polygon inclusion proof not found");
   }
-  const proof = polygonProofs[credentialType]?.proof;
+  const proof = proofs[credentialType]?.proof;
   // Identity has inclusion proof from sequencer
   if (proof) {
     const siblings = proof

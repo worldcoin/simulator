@@ -1,5 +1,5 @@
 import { SEQUENCER_ENDPOINT } from "@/lib/utils";
-import type { Chain, InclusionProofResponse, SequencerRequest } from "@/types";
+import type { InclusionProofResponse, SequencerRequest } from "@/types";
 import { CredentialType } from "@/types";
 
 const SEQUENCER_STAGING_PASSWORD: Record<CredentialType, string | undefined> = {
@@ -50,7 +50,7 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to call /${request.endpoint} on sequencer for '${request.credentialType}' on chain '${request.chain}'.`,
+      `Failed to call /${request.endpoint} on sequencer for '${request.credentialType}'`,
     );
   }
 
@@ -58,12 +58,10 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
 }
 
 export async function inclusionProof(
-  chain: Chain,
   credentialType: CredentialType,
   commitment: string,
 ) {
   return await postRequest<InclusionProofResponse>({
-    chain,
     endpoint: "inclusionProof",
     credentialType,
     commitment,
@@ -71,12 +69,10 @@ export async function inclusionProof(
 }
 
 export async function insertIdentity(
-  chain: Chain,
   credentialType: CredentialType,
   commitment: string,
 ) {
   return await postRequest<Response>({
-    chain,
     endpoint: "insertIdentity",
     credentialType,
     commitment,

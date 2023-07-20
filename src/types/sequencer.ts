@@ -1,7 +1,6 @@
-import type { Chain, CredentialType } from "./common";
+import type { CredentialType } from "./common";
 
 export interface SequencerRequest {
-  chain: Chain;
   endpoint: string;
   credentialType: CredentialType;
   commitment: string;

@@ -5,6 +5,7 @@ import type { Identity, InclusionProofResponse } from "@/types";
 import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useCallback, useMemo } from "react";
+import { toast } from "react-hot-toast";
 
 const getStore = (store: IdentityStore) => ({
   activeIdentityID: store.activeIdentityID,
@@ -34,12 +35,6 @@ const useIdentity = () => {
       const encodedCommitment = encode(commitment);
       const id = encodedCommitment.slice(0, 10);
 
-      // Retrieve inclusion proofs
-      const orbProofOptimism = await getIdentityProof(
-        Chain.Optimism,
-        CredentialType.Orb,
-        encodedCommitment,
-      );
       const orbProofPolygon = await getIdentityProof(
         Chain.Polygon,
         CredentialType.Orb,
@@ -61,14 +56,8 @@ const useIdentity = () => {
         },
 
         inclusionProof: {
-          [Chain.Optimism]: {
-            [CredentialType.Orb]: orbProofOptimism,
-            [CredentialType.Phone]: null,
-          },
-          [Chain.Polygon]: {
-            [CredentialType.Orb]: orbProofPolygon,
-            [CredentialType.Phone]: phoneProofPolygon,
-          },
+          [CredentialType.Orb]: orbProofPolygon,
+          [CredentialType.Phone]: phoneProofPolygon,
         },
       };
 
@@ -84,6 +73,10 @@ const useIdentity = () => {
     async (withIDNumber?: number) => {
       const idNum =
         withIDNumber || withIDNumber == 0 ? withIDNumber : identities.length;
+      if (idNum > 999) {
+        toast.error("You have reached the maximum number of identities");
+        return;
+      }
       const zkIdentity = new ZkIdentity(idNum.toString());
       const name = `Identity #${idNum}`;
       const encodedCommitment = encode(zkIdentity.commitment);
@@ -97,18 +90,12 @@ const useIdentity = () => {
         },
         zkIdentity: zkIdentity.toString(),
         verified: {
-          [CredentialType.Orb]: false,
-          [CredentialType.Phone]: false,
+          [CredentialType.Orb]: true,
+          [CredentialType.Phone]: true,
         },
         inclusionProof: {
-          [Chain.Optimism]: {
-            [CredentialType.Orb]: null,
-            [CredentialType.Phone]: null,
-          },
-          [Chain.Polygon]: {
-            [CredentialType.Orb]: null,
-            [CredentialType.Phone]: null,
-          },
+          [CredentialType.Orb]: null,
+          [CredentialType.Phone]: null,
         },
       };
       insertIdentity(identity);

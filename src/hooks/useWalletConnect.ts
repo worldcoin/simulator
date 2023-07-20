@@ -1,5 +1,5 @@
 import getFullProof from "@/lib/proof";
-import { encode, isPendingInclusion } from "@/lib/utils";
+import { encode } from "@/lib/utils";
 import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
 import type { ModalStore } from "@/stores/modalStore";
@@ -158,7 +158,6 @@ export const useWalletConnect = (ready?: boolean) => {
     // Send response to dapp
     const response = buildResponse(
       id,
-      // TODO: Sending back Polygon proof by default but should be the same? If so should refactor when removing chain->type record on Identity
       Chain.Polygon,
       credentialType,
       verification.fullProof,
@@ -241,11 +240,6 @@ export const useWalletConnect = (ready?: boolean) => {
       try {
         if (!identityRef.current) {
           throw new Error("Identity not found");
-        }
-
-        // Check for pending inclusions
-        if (isPendingInclusion(identityRef.current)) {
-          await updateIdentity(identityRef.current);
         }
 
         // Generate zero knowledge proof locally

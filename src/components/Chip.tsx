@@ -1,8 +1,8 @@
 import useIdentity from "@/hooks/useIdentity";
-import { cn, isPendingInclusion } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Icon } from "./Icon";
 
 const getStore = (store: CacheStore) => ({
@@ -10,33 +10,12 @@ const getStore = (store: CacheStore) => ({
 });
 
 export default function Chip() {
-  const { activeIdentity, updateIdentity } = useIdentity();
+  useIdentity();
   const { complete } = useCacheStore(getStore);
 
-  const isPending = useMemo(() => {
-    if (!activeIdentity) return false;
-    return isPendingInclusion(activeIdentity);
-  }, [activeIdentity]);
-
   const isReady = useMemo(() => {
-    return complete && !isPending;
-  }, [complete, isPending]);
-
-  // Check on pending inclusion proofs every 30 seconds until mined
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isPending) {
-        clearInterval(interval);
-        return;
-      }
-
-      if (!activeIdentity) return;
-      void updateIdentity(activeIdentity);
-    }, 10000);
-
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPending]);
+    return complete;
+  }, [complete]);
 
   return !isReady ? (
     <div
@@ -66,7 +45,6 @@ export default function Chip() {
         </span>
       )}
       {!complete && <span className="ml-1">Downloading Semaphore</span>}
-      {complete && isPending && <span className="ml-1">Pending Inclusion</span>}
     </div>
   ) : (
     <div></div>

@@ -1,4 +1,4 @@
-import type { Chain, CredentialType } from "./common";
+import type { CredentialType } from "./common";
 import type { InclusionProofResponse } from "./sequencer";
 
 export interface InterfaceMeta {
@@ -11,9 +11,5 @@ export interface Identity {
   readonly meta: InterfaceMeta;
   readonly zkIdentity: string;
   verified: Record<CredentialType, boolean>;
-  // TODO: should be the same on both chains? can remove chain->type
-  inclusionProof: Record<
-    Chain,
-    Record<CredentialType, InclusionProofResponse | null> | null
-  >;
+  inclusionProof: Record<CredentialType, InclusionProofResponse | null> | null;
 }

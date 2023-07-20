@@ -84,17 +84,6 @@ export const Settings = memo(function Settings(props: {
             iconLeft="chevron-thick"
             onClickLeft={props.onClose}
           />
-          {/* <Item
-            heading="Credentials"
-            text="Manage your credentials"
-            className="mt-5 p-4"
-            onClick={handleCredentialsMenu}
-          >
-            <IconGradient
-              name="user"
-              color="#9D50FF"
-            />
-          </Item> */}
           <Item
             heading="Identity commitment"
             text="Copy your identity commitment"

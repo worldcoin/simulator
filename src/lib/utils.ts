@@ -1,30 +1,10 @@
-import type { Identity } from "@/types";
-import { Chain, CredentialType } from "@/types";
+import { CredentialType } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ORB_SEQUENCER_STAGING, PHONE_SEQUENCER_STAGING } from "./constants";
 
 export function encode(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
-}
-
-export function isPendingInclusion(identity: Identity): boolean {
-  const chainTypes = [Chain.Optimism, Chain.Polygon];
-  const credentialTypes = [CredentialType.Orb, CredentialType.Phone];
-  for (const chain of chainTypes) {
-    const proofsForChain = identity.inclusionProof[chain];
-    if (!proofsForChain) {
-      continue;
-    }
-    for (const credentialType of credentialTypes) {
-      const status = proofsForChain[credentialType]?.status;
-      console.log(`status for ${chain} ${credentialType}: ${status}`);
-      if (status === "new" || status === "pending") {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 async function checkFilesInCache(files: string[]) {

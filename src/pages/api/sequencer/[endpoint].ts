@@ -1,10 +1,9 @@
 import { inclusionProof, insertIdentity } from "@/services/sequencer";
-import type { Chain, CredentialType, InclusionProofResponse } from "@/types";
+import type { CredentialType, InclusionProofResponse } from "@/types";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 interface SequencerRequest extends NextApiRequest {
   body: {
-    chain: Chain;
     credentialType: CredentialType;
     commitment: string;
   };
@@ -26,15 +25,15 @@ export default async function handler(
 
   try {
     const { endpoint } = req.query;
-    const { chain, credentialType, commitment } = req.body;
+    const { credentialType, commitment } = req.body;
     let data: InclusionProofResponse | Response;
 
     switch (endpoint) {
       case "inclusionProof":
-        data = await inclusionProof(chain, credentialType, commitment);
+        data = await inclusionProof(credentialType, commitment);
         break;
       case "insertIdentity":
-        data = await insertIdentity(chain, credentialType, commitment);
+        data = await insertIdentity(credentialType, commitment);
         break;
       default:
         return res.status(400).json({ error: "Invalid endpoint" });

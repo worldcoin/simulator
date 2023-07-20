@@ -37,7 +37,7 @@ export default function IDRow({ identity }: { identity: Identity }) {
           />
           <h4 className=" text-b4 text-gray-500">
             {verifiedOrb && verifiedPhone
-              ? "Verified (Phone & Orb)"
+              ? "Verified (Orb & Phone)"
               : verifiedOrb
               ? "Verified (Orb)"
               : verifiedPhone

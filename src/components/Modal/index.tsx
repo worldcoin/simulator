@@ -5,7 +5,7 @@ import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { cn, isPendingInclusion } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
@@ -65,7 +65,7 @@ export function Modal() {
       .map(([type]) => type) as CredentialType[];
 
     // Show additional warning if the identity is unverified or still pending inclusion
-    if (!showConfirm && (!isVerified || isPendingInclusion(activeIdentity))) {
+    if (!showConfirm && !isVerified) {
       setShowConfirm(true);
       return;
     }
