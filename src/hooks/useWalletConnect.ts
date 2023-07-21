@@ -1,11 +1,10 @@
 import getFullProof from "@/lib/proof";
-import { encode, isPendingInclusion } from "@/lib/utils";
+import { encode } from "@/lib/utils";
 import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import type {
-  Chain,
   Identity,
   MetadataParams,
   SessionEvent,
@@ -13,7 +12,7 @@ import type {
   SignResponse,
   Verification,
 } from "@/types";
-import { CredentialType, Status } from "@/types";
+import { Chain, CredentialType, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
@@ -115,7 +114,7 @@ const getStore = (store: ModalStore) => ({
 });
 
 export const useWalletConnect = (ready?: boolean) => {
-  const { identity, updateIdentity } = useIdentity();
+  const { activeIdentity, updateIdentity } = useIdentity();
   const {
     setOpen,
     setStatus,
@@ -126,7 +125,7 @@ export const useWalletConnect = (ready?: boolean) => {
     setVerification,
     reset,
   } = useModalStore(getStore);
-  const identityRef = useRef(identity);
+  const identityRef = useRef(activeIdentity);
   const metadataRef = useRef(metadata);
 
   async function approveRequest(
@@ -136,6 +135,10 @@ export const useWalletConnect = (ready?: boolean) => {
     // Destructure session request
     const { id, topic }: SessionEvent = event;
     const credentialType = getHighestCredentialType(credentialTypes);
+
+    console.log(
+      `approveRequest: id=${id}, topic=${topic} credentialType=${credentialType}`,
+    );
 
     // Show error if identity, verification, or credential types are missing
     setStatus(Status.Pending);
@@ -155,14 +158,16 @@ export const useWalletConnect = (ready?: boolean) => {
     // Send response to dapp
     const response = buildResponse(
       id,
-      identityRef.current.chain,
+      Chain.Polygon,
       credentialType,
       verification.fullProof,
     );
+    console.log("sending response", response);
     await client.respondSessionRequest({
       topic,
       response,
     });
+    console.log("response sent");
     setTimeout(() => setStatus(Status.Success), 1000);
   }
 
@@ -237,11 +242,6 @@ export const useWalletConnect = (ready?: boolean) => {
           throw new Error("Identity not found");
         }
 
-        // Check for pending inclusions
-        if (isPendingInclusion(identityRef.current)) {
-          await updateIdentity(identityRef.current);
-        }
-
         // Generate zero knowledge proof locally
         const verification = await generateProof(identityRef.current, request);
         if (!verification.verified) {
@@ -258,6 +258,7 @@ export const useWalletConnect = (ready?: boolean) => {
         };
 
         const metadata = await fetchMetadata(params);
+        console.log("metadata", metadata);
         if (!metadata.is_staging) {
           throw new Error("Application is not staging");
         }
@@ -303,8 +304,8 @@ export const useWalletConnect = (ready?: boolean) => {
 
   // Keep identity up to date
   useEffect(() => {
-    identityRef.current = identity;
-  }, [identity]);
+    identityRef.current = activeIdentity;
+  }, [activeIdentity]);
 
   // Keep metadata up to date
   useEffect(() => {

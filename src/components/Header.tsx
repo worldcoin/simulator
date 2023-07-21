@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Button from "./Button";
 import type { IconType } from "./Icon";
 import { Icon } from "./Icon";
@@ -5,6 +6,7 @@ import { Icon } from "./Icon";
 interface HeaderProps {
   heading?: string;
   iconLeft?: IconType;
+  imgLeft?: string;
   iconRight?: IconType;
   onClickLeft?: (
     event?: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
@@ -23,10 +25,20 @@ export default function Header(props: HeaderProps) {
           className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200"
           onClick={props.onClickLeft}
         >
-          <Icon
-            name={props.iconLeft}
-            className="h-6 w-6"
-          />
+          {props.imgLeft ? (
+            <Image
+              height={24}
+              width={24}
+              src={props.imgLeft}
+              className="h-6 w-6"
+              alt="back"
+            />
+          ) : (
+            <Icon
+              name={props.iconLeft}
+              className="h-6 w-6"
+            />
+          )}
         </Button>
       )}
       {!props.iconLeft && <span />}

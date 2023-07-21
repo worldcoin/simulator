@@ -5,7 +5,14 @@ import { parseWorldIDQRCode } from "@/lib/validation";
 import { useModalStore } from "@/stores/modalStore";
 import type { ScanConstraints } from "@/types/qrcode";
 import jsQR from "jsqr";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
 import { QRFrame } from "./QRFrame";
 
@@ -23,13 +30,37 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
   const [data, setData] = useState<string | null>(null);
   const [valid, setValid] = useState<boolean | null>(null);
   const [allowed, setAllowed] = useState<boolean | null>(null);
-  // const [position, setPosition] = useState<Bounds | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const { open } = useModalStore();
+
+  const [imageSrc, setImageSrc] = useState(null as string | null);
+  const [uploadedImageLoaded, setUploadedImageLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!imgRef.current) return;
+
+    imgRef.current.onload = () => {
+      if (!imgRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = imgRef.current.width;
+      canvas.height = imgRef.current.height;
+
+      // draw the image onto the canvas
+      if (ctx) ctx.drawImage(imgRef.current, 0, 0, canvas.width, canvas.height);
+      setUploadedImageLoaded(true);
+    };
+    imgRef.current.onerror = (event) => {
+      console.error("error loading image", event);
+    };
+  }, [imageSrc]);
 
   // After data is set, check it's validity and perform verification
   useEffect(() => {
@@ -57,7 +88,9 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
   // On initial load, start scanning the video stream
   useEffect(() => {
     function scan() {
-      if (videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
+      if (!videoRef.current) return;
+      if (uploadedImageLoaded) return;
+      if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
         const video = videoRef.current;
         const canvas = canvasRef.current;
 
@@ -89,7 +122,6 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         const video = videoRef.current;
         if (video) {
           video.srcObject = stream;
-          // video.setAttribute("playsinline", "true");
           void video.play();
           requestAnimationFrame(scan);
         }
@@ -98,7 +130,26 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         console.error(error);
         setAllowed(false);
       });
-  }, []);
+  }, [uploadedImageLoaded]);
+
+  useEffect(() => {
+    if (uploadedImageLoaded) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) return;
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+
+      if (code) {
+        setData(code.data);
+      }
+    }
+  }, [uploadedImageLoaded]);
 
   // Close scanner once modal opens
   useEffect(() => {
@@ -107,13 +158,35 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
     }
   }, [open, props]);
 
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) {
+      return;
+    }
+    const file = acceptedFiles[0];
+    const reader = new FileReader();
+
+    reader.onabort = () => console.log("file reading was aborted");
+    reader.onerror = () => console.error("file reading has failed");
+    reader.onload = () => {
+      const binaryStr = reader.result;
+      if (typeof binaryStr == "string") {
+        setImageSrc(binaryStr);
+        setUploadedImageLoaded(false);
+      } else {
+        throw new Error("binaryStr is not a string");
+      }
+    };
+    reader.readAsDataURL(file);
+  }, []);
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
   return (
     <Dialog
       open={props.open}
       onClose={props.onClose}
       closeIcon="close"
     >
-      <h2 className="relative z-10 py-1.5 text-center text-h3 font-bold text-white">
+      <h2 className="relative z-10 mt-3 py-1.5 text-center text-h3 font-bold text-white">
         Scanner
       </h2>
 
@@ -129,10 +202,20 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
               ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
+
             <canvas
               ref={canvasRef}
               className="hidden"
             />
+            {imageSrc && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                alt="qr code"
+                src={imageSrc}
+                ref={imgRef}
+                className="absolute inset-0 h-full w-full bg-black object-cover object-center"
+              />
+            )}
 
             <QRFrame
               valid={valid}
@@ -169,7 +252,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
           </div>
         )}
 
-        <div className="absolute inset-x-0 bottom-12 flex justify-center">
+        <div className="absolute inset-x-0 bottom-12 flex justify-center gap-8">
           <button
             className="flex flex-col items-center"
             onClick={props.onClickManualInput}
@@ -183,8 +266,25 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
 
             <div className="mt-3 text-b3 text-white">Manual Input</div>
           </button>
+          <button
+            className="flex flex-col items-center"
+            onClick={props.onClickManualInput}
+            {...getRootProps()}
+          >
+            <input {...getInputProps()} />
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
+              <Icon
+                name="gallery"
+                className="h-6 w-6"
+              />
+            </div>
+
+            <div className="mt-3 text-b3 text-white">From Gallery</div>
+          </button>
         </div>
       </div>
     </Dialog>
   );
 });
+
+export default QRScanner;

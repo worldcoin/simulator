@@ -5,7 +5,7 @@ import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { cn, isPendingInclusion } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
@@ -31,14 +31,14 @@ export function Modal() {
   const { open, setOpen, status, setStatus, metadata, event } =
     useModalStore(getStore);
   const { approveRequest } = useWalletConnect();
-  const { identity } = useIdentity();
+  const { activeIdentity } = useIdentity();
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [biometricsChecked, setBiometricsChecked] = useState<
     boolean | "indeterminate"
-  >(identity?.verified[CredentialType.Orb] ?? false);
+  >(activeIdentity?.verified[CredentialType.Orb] ?? false);
   const [phoneChecked, setPhoneChecked] = useState<boolean | "indeterminate">(
-    identity?.verified[CredentialType.Phone] ?? false,
+    activeIdentity?.verified[CredentialType.Phone] ?? false,
   );
 
   const isLoading = useMemo(() => {
@@ -47,14 +47,15 @@ export function Modal() {
 
   const isVerified = useMemo(() => {
     const orbVerified =
-      biometricsChecked && identity?.verified[CredentialType.Orb];
+      biometricsChecked && activeIdentity?.verified[CredentialType.Orb];
     const phoneVerified =
-      phoneChecked && identity?.verified[CredentialType.Phone];
-    return orbVerified ?? phoneVerified;
-  }, [biometricsChecked, phoneChecked, identity]);
+      phoneChecked && activeIdentity?.verified[CredentialType.Phone];
+    const isVerified = orbVerified ?? phoneVerified;
+    return isVerified;
+  }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
 
   const handleClick = async () => {
-    if (!identity) return;
+    if (!activeIdentity) return;
     const credentialTypeMap = {
       [CredentialType.Orb]: biometricsChecked,
       [CredentialType.Phone]: phoneChecked,
@@ -64,10 +65,7 @@ export function Modal() {
       .map(([type]) => type) as CredentialType[];
 
     // Show additional warning if the identity is unverified or still pending inclusion
-    if (
-      !showConfirm &&
-      (!isVerified || isPendingInclusion(identity, credentialTypes))
-    ) {
+    if (!showConfirm && !isVerified) {
       setShowConfirm(true);
       return;
     }
@@ -173,7 +171,7 @@ export function Modal() {
             />
           </Item>
           <Warning
-            identity={identity}
+            identity={activeIdentity}
             biometricsChecked={biometricsChecked}
             phoneChecked={phoneChecked}
           />

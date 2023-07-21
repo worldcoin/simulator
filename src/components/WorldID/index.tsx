@@ -4,7 +4,7 @@ import { Fragment, useMemo } from "react";
 import { Icon } from "../Icon";
 import styles from "./WorldID.module.css";
 
-export function WorldID(props: {
+export default function WorldID(props: {
   className?: string;
   address?: string;
   animate?: boolean;
@@ -57,7 +57,7 @@ export function WorldID(props: {
       className={cn(
         props.className,
         styles.card,
-        "h-full font-rubik xs:aspect-[327/435] xs:h-fit",
+        "h-full font-rubik no-select xs:aspect-[327/435] xs:h-fit",
       )}
     >
       <div
