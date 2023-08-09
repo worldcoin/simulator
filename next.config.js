@@ -1,8 +1,43 @@
+/** @type {import('next-safe').nextSafe} */
+const nextSafe = require("next-safe");
+
+const isDev = process.env.NODE_ENV !== "production";
+
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: nextSafe({
+          isDev,
+          contentSecurityPolicy: {
+            mergeDefaultDirectives: true,
+            "img-src": [
+              "'self'",
+              "https://world-id-public.s3.amazonaws.com",
+              "https://worldcoin.org",
+            ],
+            "style-src": ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+            "prefetch-src": false,
+            "connect-src": [
+              "'self'",
+              "wss://relay.walletconnect.com",
+              "https://app.posthog.com",
+            ],
+            "script-src": ["'self'", "https://app.posthog.com"],
+          },
+          permissionsPolicy: {
+            "clipboard-write": `self`,
+          },
+        }),
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
