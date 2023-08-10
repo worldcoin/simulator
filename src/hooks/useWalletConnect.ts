@@ -241,6 +241,7 @@ export const useWalletConnect = (ready?: boolean) => {
         if (!identityRef.current) {
           throw new Error("Identity not found");
         }
+        await updateIdentity(identityRef.current);
 
         // Generate zero knowledge proof locally
         const verification = await generateProof(identityRef.current, request);
