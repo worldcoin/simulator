@@ -2,7 +2,7 @@ import verificationKeys from "@/public/semaphore/verification_key.json";
 import type { SignRequest, Verification } from "@/types";
 import { ProofError, type CredentialType, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
-import type { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { FullProof, Proof, SnarkJSProof } from "@semaphore-protocol/proof";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import { validateExternalNullifier, validateSignal } from "./validation";
@@ -56,13 +56,19 @@ function getMerkleProof(
   identity: Identity,
   credentialType: CredentialType,
 ): MerkleProof {
+  console.log("identity", identity);
+  const proofs = identity.inclusionProof;
+  if (!proofs) {
+    throw new Error("Polygon inclusion proof not found");
+  }
+  const proof = proofs[credentialType]?.proof;
   // Identity has inclusion proof from sequencer
-  if (identity.inclusionProof[credentialType]?.proof) {
-    const siblings = identity.inclusionProof[credentialType]?.proof
+  if (proof) {
+    const siblings = proof
       .flatMap((v) => Object.values(v))
       .map((v) => BigInt(v));
 
-    const pathIndices = identity.inclusionProof[credentialType]?.proof
+    const pathIndices = proof
       .flatMap((v) => Object.keys(v))
       .map((v) => (v == "Left" ? 0 : 1));
 
@@ -80,7 +86,8 @@ function getMerkleProof(
     "Identity inclusion proof was not found, using dummy proof. Only use this to test failure cases!",
   );
   const group = new Group(1, 30);
-  group.addMember(identity.zkIdentity.commitment);
+  const zkIdentity = new ZkIdentity(identity.zkIdentity);
+  group.addMember(zkIdentity.commitment);
   return group.generateMerkleProof(0);
 }
 
@@ -192,10 +199,12 @@ export default async function getFullProof(
       rawExternalNullifier,
     );
 
+    const zkIdentity = new ZkIdentity(identity.zkIdentity);
+
     // Generate proofs
     const merkleProof = getMerkleProof(identity, credentialType);
     const fullProof = await generateSemaphoreProof(
-      identity.zkIdentity,
+      zkIdentity,
       merkleProof,
       externalNullifier,
       signal,

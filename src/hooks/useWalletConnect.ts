@@ -2,10 +2,9 @@ import getFullProof from "@/lib/proof";
 import { encode } from "@/lib/utils";
 import { fetchMetadata } from "@/services/metadata";
 import { client, core } from "@/services/walletconnect";
-import type { IModalStore } from "@/stores/modalStore";
+import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import type {
-  Chain,
   Identity,
   MetadataParams,
   SessionEvent,
@@ -13,12 +12,12 @@ import type {
   SignResponse,
   Verification,
 } from "@/types";
-import { CredentialType, Status } from "@/types";
+import { Chain, CredentialType, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
 import { useCallback, useEffect, useRef } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { encodePacked } from "viem";
 import useIdentity from "./useIdentity";
 
@@ -103,7 +102,7 @@ async function rejectRequest(
   });
 }
 
-const getStore = (store: IModalStore) => ({
+const getStore = (store: ModalStore) => ({
   setOpen: store.setOpen,
   setStatus: store.setStatus,
   metadata: store.metadata,
@@ -115,7 +114,7 @@ const getStore = (store: IModalStore) => ({
 });
 
 export const useWalletConnect = (ready?: boolean) => {
-  const { identity } = useIdentity();
+  const { activeIdentity, updateIdentity } = useIdentity();
   const {
     setOpen,
     setStatus,
@@ -126,7 +125,7 @@ export const useWalletConnect = (ready?: boolean) => {
     setVerification,
     reset,
   } = useModalStore(getStore);
-  const identityRef = useRef(identity);
+  const identityRef = useRef(activeIdentity);
   const metadataRef = useRef(metadata);
 
   async function approveRequest(
@@ -136,6 +135,10 @@ export const useWalletConnect = (ready?: boolean) => {
     // Destructure session request
     const { id, topic }: SessionEvent = event;
     const credentialType = getHighestCredentialType(credentialTypes);
+
+    console.log(
+      `approveRequest: id=${id}, topic=${topic} credentialType=${credentialType}`,
+    );
 
     // Show error if identity, verification, or credential types are missing
     setStatus(Status.Pending);
@@ -155,14 +158,16 @@ export const useWalletConnect = (ready?: boolean) => {
     // Send response to dapp
     const response = buildResponse(
       id,
-      identityRef.current.chain,
+      Chain.Polygon,
       credentialType,
       verification.fullProof,
     );
+    console.log("sending response", response);
     await client.respondSessionRequest({
       topic,
       response,
     });
+    console.log("response sent");
     setTimeout(() => setStatus(Status.Success), 1000);
   }
 
@@ -232,12 +237,12 @@ export const useWalletConnect = (ready?: boolean) => {
       }: SessionEvent = event;
       setEvent(event);
 
-      // Generate zero knowledge proof locally
       try {
         if (!identityRef.current) {
           throw new Error("Identity not found");
         }
 
+        // Generate zero knowledge proof locally
         const verification = await generateProof(identityRef.current, request);
         if (!verification.verified) {
           throw new Error("Proof verification failed");
@@ -253,6 +258,7 @@ export const useWalletConnect = (ready?: boolean) => {
         };
 
         const metadata = await fetchMetadata(params);
+        console.log("metadata", metadata);
         if (!metadata.is_staging) {
           throw new Error("Application is not staging");
         }
@@ -289,17 +295,17 @@ export const useWalletConnect = (ready?: boolean) => {
   // Setup event listeners
   useEffect(() => {
     if (ready) {
-      client.on("session_proposal", onSessionProposal);
-      client.on("session_request", onSessionRequest);
-      client.on("session_delete", onSessionDisconnect);
+      client.on("session_proposal", (e) => void onSessionProposal(e));
+      client.on("session_request", (e) => void onSessionRequest(e));
+      client.on("session_delete", (e) => void onSessionDisconnect(e));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
   // Keep identity up to date
   useEffect(() => {
-    identityRef.current = identity;
-  }, [identity]);
+    identityRef.current = activeIdentity;
+  }, [activeIdentity]);
 
   // Keep metadata up to date
   useEffect(() => {

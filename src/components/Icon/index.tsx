@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import React from "react";
 import styles from "./Icon.module.css";
 
@@ -25,13 +25,16 @@ const icons = [
   "direction-right",
   "favicon",
   "file",
+  "gallery",
   "info",
   "logo",
   "network",
   "note",
   "orb",
   "phone",
+  "plus",
   "question",
+  "qr-code",
   "setting",
   "shield",
   "spinner",
@@ -52,13 +55,13 @@ export const Icon = React.memo(function Icon(props: {
 }) {
   return (
     <span
-      className={clsx(
+      className={cn(
         "inline-flex items-center justify-center",
         props.bgClassName,
       )}
     >
       <span
-        className={clsx(
+        className={cn(
           styles.icon,
           {
             "bg-current": !props.noMask,

@@ -2,7 +2,6 @@
   "semi": true,
   "trailingComma": "all",
   "singleAttributePerLine": true,
-  "attributeGroups": ["$CODE_GUIDE"],
   "plugins": ["prettier-plugin-tailwindcss"],
   "overrides": [
     {

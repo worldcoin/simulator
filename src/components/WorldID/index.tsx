@@ -1,10 +1,10 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import { Fragment, useMemo } from "react";
 import { Icon } from "../Icon";
 import styles from "./WorldID.module.css";
 
-export function WorldID(props: {
+export default function WorldID(props: {
   className?: string;
   address?: string;
   animate?: boolean;
@@ -20,7 +20,7 @@ export function WorldID(props: {
   const bg = useMemo(() => {
     const verifiedFront = (
       <div
-        className={clsx(
+        className={cn(
           "absolute inset-0",
           'bg-[url("/images/card-bg-verified-front.svg")] bg-cover bg-[position:center] bg-no-repeat',
         )}
@@ -29,7 +29,7 @@ export function WorldID(props: {
 
     const verifiedBack = (
       <div
-        className={clsx(
+        className={cn(
           "absolute inset-0",
           'bg-[url("/images/card-bg-verified-back.svg")] bg-cover bg-[position:center] bg-no-repeat',
         )}
@@ -38,7 +38,7 @@ export function WorldID(props: {
 
     const notVerified = (
       <div
-        className={clsx(
+        className={cn(
           "absolute inset-0",
           'bg-[url("/images/card-bg-not-verified.svg")] bg-cover bg-[position:center] bg-no-repeat',
         )}
@@ -54,20 +54,20 @@ export function WorldID(props: {
 
   return (
     <div
-      className={clsx(
+      className={cn(
         props.className,
         styles.card,
-        "h-full font-rubik xs:aspect-[327/435] xs:h-fit",
+        "h-full font-rubik no-select xs:aspect-[327/435] xs:h-fit",
       )}
     >
       <div
-        className={clsx(styles["card--inner"], {
+        className={cn(styles["card--inner"], {
           [`${styles["animate-flip"]}`]: props.animate,
         })}
       >
         {/* NOTE: face */}
         <div
-          className={clsx(styles["card--face-front"], {
+          className={cn(styles["card--face-front"], {
             "bg-gray-300": !props.verified,
           })}
         >
@@ -75,7 +75,7 @@ export function WorldID(props: {
 
           {/* NOTE: card body */}
           <div
-            className={clsx(
+            className={cn(
               "absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-[calc(-50%-5vw)] xs:translate-y-[calc(-50%-15px)]",
               "grid justify-items-center gap-3",
             )}
@@ -97,19 +97,16 @@ export function WorldID(props: {
             )}
             <div className="space-y-0.5 text-center">
               <p
-                className={clsx(
-                  "text-[6.4vw] font-medium uppercase xs:text-24",
-                  {
-                    "text-white": props.verified,
-                    "text-gray-900": !props.verified,
-                  },
-                )}
+                className={cn("text-[6.4vw] font-medium uppercase xs:text-24", {
+                  "text-white": props.verified,
+                  "text-gray-900": !props.verified,
+                })}
               >
                 Anonymous
               </p>
 
               <p
-                className={clsx("text-[2.6vw] uppercase xs:text-10", {
+                className={cn("text-[2.6vw] uppercase xs:text-10", {
                   "text-white": props.verified,
                   "text-gray-500": !props.verified,
                 })}
@@ -121,7 +118,7 @@ export function WorldID(props: {
 
           {/* NOTE: left stats */}
           <div
-            className={clsx(
+            className={cn(
               "absolute inset-y-0 right-0",
               "flex justify-between",
               "rotate-180 uppercase [writing-mode:vertical-rl]",
@@ -130,7 +127,7 @@ export function WorldID(props: {
           >
             <div className="grid content-end gap-y-0.5">
               <div
-                className={clsx("text-[2.6vw] xs:text-10", {
+                className={cn("text-[2.6vw] xs:text-10", {
                   "text-gray-400": props.verified,
                 })}
               >
@@ -138,7 +135,7 @@ export function WorldID(props: {
               </div>
 
               <div
-                className={clsx("text-[3.2vw] xs:text-12", {
+                className={cn("text-[3.2vw] xs:text-12", {
                   "text-white": props.verified && props.phoneVerified,
                   "text-gray-900": !props.verified && props.phoneVerified,
                 })}
@@ -149,7 +146,7 @@ export function WorldID(props: {
 
             <div className="grid content-end gap-y-0.5">
               <div
-                className={clsx("text-[2.6vw] xs:text-10", {
+                className={cn("text-[2.6vw] xs:text-10", {
                   "text-gray-400": props.verified,
                 })}
               >
@@ -157,7 +154,7 @@ export function WorldID(props: {
               </div>
 
               <div
-                className={clsx("text-[3.2vw] xs:text-12", {
+                className={cn("text-[3.2vw] xs:text-12", {
                   "text-white": props.verified && props.bioVerified,
                   "text-gray-900": !props.verified && props.bioVerified,
                 })}
@@ -168,7 +165,7 @@ export function WorldID(props: {
 
             <div className="grid content-end gap-y-0.5">
               <div
-                className={clsx("text-[2.6vw] xs:text-10", {
+                className={cn("text-[2.6vw] xs:text-10", {
                   "text-gray-400": props.verified,
                 })}
               >
@@ -176,7 +173,7 @@ export function WorldID(props: {
               </div>
 
               <div
-                className={clsx("text-[3.2vw] xs:text-12", {
+                className={cn("text-[3.2vw] xs:text-12", {
                   "text-white": props.verified,
                   "text-gray-900": !props.verified,
                 })}
@@ -187,7 +184,7 @@ export function WorldID(props: {
 
             <Icon
               name="logo"
-              className={clsx("h-[6.4vw] w-[6.4vw] xs:h-6 xs:w-6", {
+              className={cn("h-[6.4vw] w-[6.4vw] scale-x-[-1] xs:h-6 xs:w-6 ", {
                 "text-gray-900": !props.verified,
                 "text-white": props.verified,
               })}
@@ -197,7 +194,7 @@ export function WorldID(props: {
 
         {/* NOTE: back */}
         <div
-          className={clsx(styles["card--face-back"], {
+          className={cn(styles["card--face-back"], {
             "bg-gray-300": !props.verified,
             "bg-gray-900": props.verified,
           })}
@@ -207,7 +204,7 @@ export function WorldID(props: {
           {props.verified && (
             <Fragment>
               <div
-                className={clsx(
+                className={cn(
                   "absolute inset-y-0 left-0 -scale-100 break-all [writing-mode:vertical-rl]",
                   "grid grid-cols-[repeat(34,_1fr)]",
                   "px-1 py-2",

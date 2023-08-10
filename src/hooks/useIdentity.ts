@@ -1,127 +1,137 @@
 import { encode } from "@/lib/utils";
-import type { IIdentityStore } from "@/stores/identityStore";
+import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
-import type {
-  Chain,
-  Identity,
-  InclusionProofResponse,
-  StoredIdentity,
-} from "@/types";
-import { CredentialType } from "@/types";
+import type { Identity, InclusionProofResponse } from "@/types";
+import { Chain, CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import { useCallback, useMemo } from "react";
+import { toast } from "react-hot-toast";
 
-const IDENTITY_STORAGE_KEY = "Identity";
-
-const getStore = (store: IIdentityStore) => ({
-  identity: store.identity,
-  setIdentity: store.setIdentity,
+const getStore = (store: IdentityStore) => ({
+  activeIdentityID: store.activeIdentityID,
+  identities: store.identities,
+  setActiveIdentityID: store.setActiveIdentityID,
+  insertIdentity: store.insertIdentity,
+  replaceIdentity: store.replaceIdentity,
+  reset: store.reset,
 });
 
 const useIdentity = () => {
-  const { identity, setIdentity } = useIdentityStore(getStore);
+  const {
+    activeIdentityID,
+    identities,
+    setActiveIdentityID,
+    insertIdentity,
+    replaceIdentity,
+    reset,
+  } = useIdentityStore(getStore);
 
-  const createIdentity = async (chain: Chain) => {
-    const zkIdentity = new ZkIdentity();
-    const identity: Identity = {
-      id: "",
-      zkIdentity,
-      chain,
-      persisted: false,
-      verified: {
-        [CredentialType.Orb]: false,
-        [CredentialType.Phone]: false,
-      },
-      inclusionProof: {
-        [CredentialType.Orb]: null,
-        [CredentialType.Phone]: null,
-      },
-    };
-    return await updateIdentity(identity);
-  };
+  const updateIdentity = useCallback(
+    async (identity: Identity) => {
+      // Deserialize zkIdentity
+      const zkIdentity = new ZkIdentity(identity.zkIdentity);
+      // Generate id value
+      const { commitment } = zkIdentity;
+      const encodedCommitment = encode(commitment);
+      const id = encodedCommitment.slice(0, 10);
 
-  const storeIdentity = (identity: Identity) => {
-    try {
-      const storedIdentity: StoredIdentity = {
-        ...identity,
-        zkIdentity: identity.zkIdentity.toString(),
-      };
-      sessionStorage.setItem(
-        IDENTITY_STORAGE_KEY,
-        JSON.stringify(storedIdentity),
+      const orbProofPolygon = await getIdentityProof(
+        Chain.Polygon,
+        CredentialType.Orb,
+        encodedCommitment,
       );
-      console.info(`Saved identity ${identity.id}`);
-    } catch (error) {
-      console.error(`Unable to persist semaphore identity, ${error}`);
-    }
-  };
+      const phoneProofPolygon = await getIdentityProof(
+        Chain.Polygon,
+        CredentialType.Phone,
+        encodedCommitment,
+      );
 
-  const retrieveIdentity = async () => {
-    try {
-      const storage = sessionStorage.getItem(IDENTITY_STORAGE_KEY);
-      if (!storage) {
-        return null;
-      }
+      // Build updated identity object
+      const newIdentity: Identity = {
+        ...identity,
+        id,
+        verified: {
+          [CredentialType.Orb]: orbProofPolygon !== null,
+          [CredentialType.Phone]: phoneProofPolygon !== null,
+        },
 
-      const storedIdentity = JSON.parse(storage) as StoredIdentity;
-      const zkIdentity = new ZkIdentity(storedIdentity.zkIdentity);
-      const identity: Identity = {
-        ...storedIdentity,
-        zkIdentity,
+        inclusionProof: {
+          [CredentialType.Orb]: orbProofPolygon,
+          [CredentialType.Phone]: phoneProofPolygon,
+        },
       };
-      await updateIdentity(identity);
-      console.info(`Restored identity ${identity.id}`);
 
-      return identity;
-    } catch (error) {
-      console.error(error);
+      // Store updated identity
+      replaceIdentity(newIdentity);
+
+      return newIdentity;
+    },
+    [replaceIdentity],
+  );
+
+  const generateNextIdentity = useCallback(
+    async (withIDNumber?: number) => {
+      const idNum =
+        withIDNumber || withIDNumber == 0 ? withIDNumber : identities.length;
+      if (idNum > 999) {
+        toast.error("You have reached the maximum number of identities");
+        return;
+      }
+      const zkIdentity = new ZkIdentity(idNum.toString());
+      const name = `Identity #${idNum}`;
+      const encodedCommitment = encode(zkIdentity.commitment);
+      const id = encodedCommitment.slice(0, 10);
+
+      const identity: Identity = {
+        id,
+        meta: {
+          name,
+          idNumber: idNum,
+        },
+        zkIdentity: zkIdentity.toString(),
+        verified: {
+          [CredentialType.Orb]: true,
+          [CredentialType.Phone]: true,
+        },
+        inclusionProof: {
+          [CredentialType.Orb]: null,
+          [CredentialType.Phone]: null,
+        },
+      };
+      insertIdentity(identity);
+      setActiveIdentityID(identity.id);
+      return await updateIdentity(identity).then((identity) => {
+        replaceIdentity(identity);
+        return identity;
+      });
+    },
+    [
+      identities.length,
+      insertIdentity,
+      replaceIdentity,
+      setActiveIdentityID,
+      updateIdentity,
+    ],
+  );
+
+  const generateFirstFiveIdentities = useCallback(async () => {
+    for (let i = 0; i < 5; i++) {
+      void generateNextIdentity(i);
+    }
+  }, [generateNextIdentity]);
+
+  const resetIdentityStore = useCallback(() => {
+    reset();
+    void generateFirstFiveIdentities();
+  }, [generateFirstFiveIdentities, reset]);
+
+  const activeIdentity = useMemo(() => {
+    // temp fix for rehydration issue
+    if (!activeIdentityID || activeIdentityID === "undefined") {
       return null;
     }
-  };
-
-  const updateIdentity = async (identity: Identity) => {
-    // Generate id value
-    const { commitment } = identity.zkIdentity;
-    const encodedCommitment = encode(commitment);
-    const id = encodedCommitment.slice(0, 10);
-
-    // Retrieve inclusion proofs
-    const orbProof = await getIdentityProof(
-      identity.chain,
-      CredentialType.Orb,
-      encodedCommitment,
-    );
-    const phoneProof = await getIdentityProof(
-      identity.chain,
-      CredentialType.Phone,
-      encodedCommitment,
-    );
-
-    // Build updated identity object
-    const newIdentity: Identity = {
-      ...identity,
-      id,
-      verified: {
-        [CredentialType.Orb]: orbProof !== null,
-        [CredentialType.Phone]: phoneProof !== null,
-      },
-      inclusionProof: {
-        [CredentialType.Orb]: orbProof,
-        [CredentialType.Phone]: phoneProof,
-      },
-    };
-
-    setIdentity(newIdentity);
-    storeIdentity(newIdentity);
-    return newIdentity;
-  };
-
-  const clearIdentity = () => {
-    try {
-      sessionStorage.removeItem(IDENTITY_STORAGE_KEY);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    return identities.find((i) => i.id === activeIdentityID) ?? null;
+  }, [activeIdentityID, identities]);
 
   const getIdentityProof = async (
     chain: Chain,
@@ -151,11 +161,18 @@ const useIdentity = () => {
   };
 
   return {
-    identity,
-    createIdentity,
-    retrieveIdentity,
+    // temp fix for persistence rehydration issue
+    activeIdentityID:
+      activeIdentityID === "undefined" || !activeIdentityID
+        ? null
+        : activeIdentityID,
+    generateNextIdentity,
+    identities,
+    activeIdentity: activeIdentity,
+    resetIdentityStore,
     updateIdentity,
-    clearIdentity,
+    setActiveIdentityID,
+    generateFirstFiveIdentities,
   };
 };
 

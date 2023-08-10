@@ -2,7 +2,7 @@ import type { MetadataResponse, SessionEvent, Verification } from "@/types";
 import { Status } from "@/types";
 import { create } from "zustand";
 
-export type IModalStore = {
+export type ModalStore = {
   open: boolean;
   setOpen: (open: boolean) => void;
   status: Status;
@@ -16,7 +16,7 @@ export type IModalStore = {
   reset: () => void;
 };
 
-export const useModalStore = create<IModalStore>((set) => ({
+export const useModalStore = create<ModalStore>((set) => ({
   open: false,
   setOpen: (open) => set(() => ({ open })),
   status: Status.Loading,

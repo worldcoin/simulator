@@ -1,6 +1,7 @@
 module.exports = {
-  globDirectory: "lib/semaphore",
-  globPatterns: ["**/*.{zkey,wasm}"],
+  swSrc: "public/service-worker.js",
   swDest: "public/sw.js",
-  maximumFileSizeToCacheInBytes: 100000000,
+  globDirectory: "public/",
+  globPatterns: ["**/*.{zkey,wasm}"],
+  maximumFileSizeToCacheInBytes: 10000000,
 };

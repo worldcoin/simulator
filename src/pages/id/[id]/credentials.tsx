@@ -5,36 +5,50 @@ import { VerifyPhone } from "@/components/Verify/VerifyPhone";
 import useIdentity from "@/hooks/useIdentity";
 import { encode } from "@/lib/utils";
 import { Chain, CredentialType } from "@/types";
+import { Identity as ZKIdentity } from "@semaphore-protocol/identity";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Credentials() {
   const router = useRouter();
-  const { identity, retrieveIdentity, updateIdentity } = useIdentity();
+  const { activeIdentity, updateIdentity } = useIdentity();
 
   const [isOpenVerifyOrb, setIsOpenVerifyOrb] = useState(false);
   const [isOpenVerifyPhone, setIsOpenVerifyPhone] = useState(false);
 
   const handleVerifyCredential = async (credentialType: CredentialType) => {
-    if (!identity) return;
+    if (!activeIdentity) return;
+    const zkIdentityStr = activeIdentity.zkIdentity;
+    const zkIdentity = new ZKIdentity(zkIdentityStr);
 
-    const commitment = encode(identity.zkIdentity.commitment);
-    const init = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chain: identity.chain,
-        credentialType,
-        commitment,
-      }),
-    };
+    const commitment = encode(zkIdentity.commitment);
+
+    const chains =
+      credentialType == CredentialType.Orb ? [Chain.Polygon] : [Chain.Polygon];
+    const pairs = chains.map((chain) => ({ chain, credentialType }));
+
+    const inclusionRequests = pairs.map(async ({ chain, credentialType }) => {
+      const init = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chain,
+          credentialType,
+          commitment,
+        }),
+      };
+      return await fetch("/api/sequencer/inclusionProof", init);
+    });
 
     // Check if credentials already exist
     try {
-      const response = await fetch("/api/sequencer/inclusionProof", init);
-      if (response.status === 200) {
-        toast.info(
+      const responses = await Promise.all(inclusionRequests);
+      const responses200 = responses.filter(
+        (response) => response.status === 200,
+      );
+      if (responses200.length > 0) {
+        toast.error(
           `Credential type '${credentialType.toString()}' already exists onchain!`,
         );
         return;
@@ -42,24 +56,28 @@ export default function Credentials() {
     } catch (e) {} // Intentionally ignored
 
     // Insert new credentials via sequencer
+    const requestsInsert = pairs.map(async ({ chain, credentialType }) => {
+      const init = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chain,
+          credentialType,
+          commitment,
+        }),
+      };
+      return await fetch("/api/sequencer/insertIdentity", init);
+    });
+
     try {
-      await fetch("/api/sequencer/insertIdentity", init);
-      await updateIdentity(identity);
+      await Promise.all(requestsInsert);
+      await updateIdentity(activeIdentity);
     } catch (error) {
       throw new Error(
-        `Error verifying '${credentialType.toString()}' credential on chain '${
-          identity.chain
-        }'`,
+        `Error verifying '${credentialType.toString()}' error: ${error}`,
       );
     }
   };
-
-  // On initial load, get identity from session storage
-  useEffect(() => {
-    if (identity) return;
-    void retrieveIdentity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className="flex flex-col px-2 pb-6 text-center xs:pb-0">
@@ -79,25 +97,19 @@ export default function Credentials() {
         icon="orb"
         color="#9D50FF"
         className="mt-14 p-5"
-        verified={identity?.verified[CredentialType.Orb]}
+        verified={activeIdentity?.verified[CredentialType.Orb]}
         onClick={() => setIsOpenVerifyOrb(true)}
       />
-      {identity?.chain !== Chain.Optimism ? (
-        <VerifyItem
-          heading="Phone"
-          text="Obtain the phone verification on the staging network"
-          icon="phone"
-          color="#00C313"
-          className="mt-3 p-5"
-          verified={identity?.verified[CredentialType.Phone]}
-          onClick={() => setIsOpenVerifyPhone(true)}
-        />
-      ) : (
-        <p className="mx-2 mt-6 text-left text-b3 text-gray-400">
-          Note: Phone credentials are not currently supported on the Optimism
-          network.
-        </p>
-      )}
+
+      <VerifyItem
+        heading="Phone"
+        text="Obtain the phone verification on the staging network"
+        icon="phone"
+        color="#00C313"
+        className="mt-3 p-5"
+        verified={activeIdentity?.verified[CredentialType.Phone]}
+        onClick={() => setIsOpenVerifyPhone(true)}
+      />
 
       <VerifyOrb
         open={isOpenVerifyOrb}

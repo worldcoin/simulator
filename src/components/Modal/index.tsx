@@ -5,11 +5,11 @@ import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
-import type { IModalStore } from "@/stores/modalStore";
+import { cn } from "@/lib/utils";
+import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
 import { CredentialType } from "@worldcoin/idkit";
-import clsx from "clsx";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import ModalConfirm from "./ModalConfirm";
@@ -18,7 +18,7 @@ import ModalLoading from "./ModalLoading";
 import { ModalStatus } from "./ModalStatus";
 import Warning from "./ModalWarning";
 
-const getStore = (store: IModalStore) => ({
+const getStore = (store: ModalStore) => ({
   open: store.open,
   setOpen: store.setOpen,
   status: store.status,
@@ -31,14 +31,14 @@ export function Modal() {
   const { open, setOpen, status, setStatus, metadata, event } =
     useModalStore(getStore);
   const { approveRequest } = useWalletConnect();
-  const { identity } = useIdentity();
+  const { activeIdentity } = useIdentity();
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [biometricsChecked, setBiometricsChecked] = useState<
     boolean | "indeterminate"
-  >(identity?.verified[CredentialType.Orb] ?? false);
+  >(activeIdentity?.verified[CredentialType.Orb] ?? false);
   const [phoneChecked, setPhoneChecked] = useState<boolean | "indeterminate">(
-    identity?.verified[CredentialType.Phone] ?? false,
+    activeIdentity?.verified[CredentialType.Phone] ?? false,
   );
 
   const isLoading = useMemo(() => {
@@ -47,39 +47,31 @@ export function Modal() {
 
   const isVerified = useMemo(() => {
     const orbVerified =
-      biometricsChecked && identity?.verified[CredentialType.Orb];
+      biometricsChecked && activeIdentity?.verified[CredentialType.Orb];
     const phoneVerified =
-      phoneChecked && identity?.verified[CredentialType.Phone];
-    return orbVerified ?? phoneVerified;
-  }, [biometricsChecked, phoneChecked, identity]);
-
-  const isPendingInclusion = (credentialTypes: CredentialType[]): boolean => {
-    for (const credentialType of credentialTypes) {
-      if (identity?.inclusionProof[credentialType]?.status === "pending") {
-        return true;
-      }
-    }
-    return false;
-  };
+      phoneChecked && activeIdentity?.verified[CredentialType.Phone];
+    const isVerified = orbVerified ?? phoneVerified;
+    return isVerified;
+  }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
 
   const handleClick = async () => {
+    if (!activeIdentity) return;
     const credentialTypeMap = {
       [CredentialType.Orb]: biometricsChecked,
       [CredentialType.Phone]: phoneChecked,
     };
-
     const credentialTypes = Object.entries(credentialTypeMap)
       .filter(([_type, isChecked]) => isChecked)
       .map(([type]) => type) as CredentialType[];
 
     // Show additional warning if the identity is unverified or still pending inclusion
-    if (!showConfirm && (!isVerified || isPendingInclusion(credentialTypes))) {
+    if (!showConfirm && !isVerified) {
       setShowConfirm(true);
       return;
     }
 
     if (event) {
-      setShowConfirm(false); // TODO: Needed?
+      setShowConfirm(false);
       await approveRequest(event, credentialTypes);
     } else {
       console.error("No event found, WalletConnect session may have expired");
@@ -115,7 +107,7 @@ export function Modal() {
                 {metadata.name ?? "App Name"}
               </span>
               <div
-                className={clsx(
+                className={cn(
                   "inline-flex items-center gap-x-0.5",
                   { "text-info-700": metadata.is_verified },
                   { "text-gray-500": !metadata.is_verified },
@@ -179,14 +171,14 @@ export function Modal() {
             />
           </Item>
           <Warning
-            identity={identity}
+            identity={activeIdentity}
             biometricsChecked={biometricsChecked}
             phoneChecked={phoneChecked}
           />
 
           <ModalStatus
             status={status}
-            handleClick={handleClick}
+            handleClick={() => void handleClick()}
           />
         </>
       )}
@@ -195,7 +187,7 @@ export function Modal() {
       {!isLoading && showConfirm && (
         <ModalConfirm
           isVerified={isVerified}
-          handleClick={handleClick}
+          handleClick={() => void handleClick()}
         />
       )}
     </Drawer>

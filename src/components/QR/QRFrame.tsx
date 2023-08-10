@@ -1,5 +1,5 @@
+import { cn } from "@/lib/utils";
 import type { Bounds } from "@/types/qrcode";
-import clsx from "clsx";
 import type { MutableRefObject } from "react";
 import { useEffect, useState } from "react";
 
@@ -118,7 +118,7 @@ export function QRFrame(props: QRFrameProps) {
 
   return (
     <svg
-      className={clsx("absolute inset-0", props.classNames)}
+      className={cn("absolute inset-0", props.classNames)}
       xmlns="http://www.w3.org/2000/svg"
       width="100%"
       height="100%"
@@ -136,7 +136,7 @@ export function QRFrame(props: QRFrameProps) {
         d={border}
         strokeLinecap="round"
         strokeWidth="4"
-        className={clsx("transition-all", {
+        className={cn("transition-all", {
           "stroke-[#FF5A76]": props.valid === false,
           "stroke-[#fff]": props.valid !== false,
         })}
