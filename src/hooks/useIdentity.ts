@@ -59,6 +59,7 @@ const useIdentity = () => {
           [CredentialType.Orb]: orbProofPolygon,
           [CredentialType.Phone]: phoneProofPolygon,
         },
+        proofGenerationTime: Date.now(),
       };
 
       // Store updated identity
@@ -97,6 +98,7 @@ const useIdentity = () => {
           [CredentialType.Orb]: null,
           [CredentialType.Phone]: null,
         },
+        proofGenerationTime: null,
       };
       insertIdentity(identity);
       setActiveIdentityID(identity.id);

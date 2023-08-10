@@ -12,4 +12,5 @@ export interface Identity {
   readonly zkIdentity: string;
   verified: Record<CredentialType, boolean>;
   inclusionProof: Record<CredentialType, InclusionProofResponse | null> | null;
+  proofGenerationTime: number | null;
 }
