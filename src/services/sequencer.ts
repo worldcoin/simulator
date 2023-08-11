@@ -3,8 +3,8 @@ import type { InclusionProofResponse, SequencerRequest } from "@/types";
 import { CredentialType } from "@/types";
 
 const SEQUENCER_STAGING_PASSWORD: Record<CredentialType, string | undefined> = {
-  [CredentialType.Orb]: process.env.ORB_SEQUENCER_STAGING_PASSWORD,
-  [CredentialType.Phone]: process.env.PHONE_SEQUENCER_STAGING_PASSWORD,
+  [CredentialType.Orb]: process.env.POLYGON_ORB_SEQUENCER_STAGING_PASSWORD,
+  [CredentialType.Phone]: process.env.POLYGON_PHONE_SEQUENCER_STAGING_PASSWORD,
 };
 
 function buildUrl(endpoint: string, credentialType: CredentialType) {
