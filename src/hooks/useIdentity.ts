@@ -26,8 +26,16 @@ const useIdentity = () => {
     reset,
   } = useIdentityStore(getStore);
 
-  const updateIdentity = useCallback(
+  const generateIdentityProofsIfNeeded = useCallback(
     async (identity: Identity) => {
+      // If proof was generated in the last 30 minutes, no need to generate again
+      if (
+        identity.proofGenerationTime &&
+        identity.proofGenerationTime > Date.now() - 30 * 60 * 1000
+      ) {
+        return identity;
+      }
+
       // Deserialize zkIdentity
       const zkIdentity = new ZkIdentity(identity.zkIdentity);
       // Generate id value
@@ -59,6 +67,7 @@ const useIdentity = () => {
           [CredentialType.Orb]: orbProofPolygon,
           [CredentialType.Phone]: phoneProofPolygon,
         },
+        proofGenerationTime: Date.now(),
       };
 
       // Store updated identity
@@ -97,10 +106,11 @@ const useIdentity = () => {
           [CredentialType.Orb]: null,
           [CredentialType.Phone]: null,
         },
+        proofGenerationTime: null,
       };
       insertIdentity(identity);
       setActiveIdentityID(identity.id);
-      return await updateIdentity(identity).then((identity) => {
+      return await generateIdentityProofsIfNeeded(identity).then((identity) => {
         replaceIdentity(identity);
         return identity;
       });
@@ -110,7 +120,7 @@ const useIdentity = () => {
       insertIdentity,
       replaceIdentity,
       setActiveIdentityID,
-      updateIdentity,
+      generateIdentityProofsIfNeeded,
     ],
   );
 
@@ -150,7 +160,10 @@ const useIdentity = () => {
       });
 
       if (response.status === 200) {
-        return response.json() as unknown as InclusionProofResponse; // TODO: fix this
+        console.log(
+          `Fetched fresh inclusion proof from sequencer for: ${credentialType}.`,
+        );
+        return (await response.json()) as InclusionProofResponse;
       }
     } catch (error) {
       console.error(
@@ -170,7 +183,7 @@ const useIdentity = () => {
     identities,
     activeIdentity: activeIdentity,
     resetIdentityStore,
-    updateIdentity,
+    generateIdentityProofsIfNeeded,
     setActiveIdentityID,
     generateFirstFiveIdentities,
   };
