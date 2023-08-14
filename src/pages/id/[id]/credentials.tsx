@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 
 export default function Credentials() {
   const router = useRouter();
-  const { activeIdentity, updateIdentity } = useIdentity();
+  const { activeIdentity, generateIdentityProofsIfNeeded } = useIdentity();
 
   const [isOpenVerifyOrb, setIsOpenVerifyOrb] = useState(false);
   const [isOpenVerifyPhone, setIsOpenVerifyPhone] = useState(false);
@@ -71,7 +71,7 @@ export default function Credentials() {
 
     try {
       await Promise.all(requestsInsert);
-      await updateIdentity(activeIdentity);
+      await generateIdentityProofsIfNeeded(activeIdentity);
     } catch (error) {
       throw new Error(
         `Error verifying '${credentialType.toString()}' error: ${error}`,

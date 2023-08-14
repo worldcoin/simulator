@@ -114,7 +114,7 @@ const getStore = (store: ModalStore) => ({
 });
 
 export const useWalletConnect = (ready?: boolean) => {
-  const { activeIdentity, updateIdentity } = useIdentity();
+  const { activeIdentity, generateIdentityProofsIfNeeded } = useIdentity();
   const {
     setOpen,
     setStatus,
@@ -242,13 +242,8 @@ export const useWalletConnect = (ready?: boolean) => {
           throw new Error("Identity not found");
         }
 
-        if (
-          !identityRef.current.proofGenerationTime ||
-          identityRef.current.proofGenerationTime < Date.now() - 30 * 60 * 1000
-        ) {
-          // Generate proof
-          await updateIdentity(identityRef.current);
-        }
+        // Generate proof
+        await generateIdentityProofsIfNeeded(identityRef.current);
 
         // Generate zero knowledge proof locally
         const verification = await generateProof(identityRef.current, request);
