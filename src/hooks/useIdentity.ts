@@ -160,7 +160,10 @@ const useIdentity = () => {
       });
 
       if (response.status === 200) {
-        return response.json() as unknown as InclusionProofResponse; // TODO: fix this
+        console.log(
+          `Fetched fresh inclusion proof from sequencer for: ${credentialType}.`,
+        );
+        return (await response.json()) as InclusionProofResponse;
       }
     } catch (error) {
       console.error(
