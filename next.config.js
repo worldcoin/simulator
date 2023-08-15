@@ -44,6 +44,7 @@ const nextConfig = {
             "frame-src": ["'self'", "https://verify.walletconnect.com/"],
             "worker-src": ["data:"],
           },
+
           permissionsPolicy: {
             camera: `self`,
             "clipboard-write": `self`,
