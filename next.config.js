@@ -29,6 +29,8 @@ const nextConfig = {
               "wss://relay.walletconnect.com",
               "wss://www.walletlink.org/rpc",
               "wss://*.bridge.walletconnect.org",
+              "https://developer.worldcoin.org",
+              "https://verify.walletconnect.com",
               "https://app.posthog.com",
               "https://status.worldcoin.org",
             ],
@@ -40,6 +42,7 @@ const nextConfig = {
               "https://app.posthog.com",
             ],
             "frame-src": ["'self'", "https://verify.walletconnect.com/"],
+            "worker-src": ["data:"],
           },
           permissionsPolicy: {
             camera: `self`,
