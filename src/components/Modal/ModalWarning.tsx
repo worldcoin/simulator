@@ -1,4 +1,5 @@
-import { CredentialType, type Identity } from "@/types";
+import { type Identity } from "@/types";
+import { CredentialType } from "@worldcoin/idkit";
 import { useMemo } from "react";
 
 interface WarningProps {
@@ -9,12 +10,7 @@ interface WarningProps {
 }
 
 export default function Warning(props: WarningProps) {
-  const visible = useMemo(() => {
-    // No credentials are selected
-    if (!props.biometricsChecked && !props.phoneChecked) {
-      return true;
-    }
-
+  const invalidCredential = useMemo(() => {
     // Orb is selected but not verified
     if (
       props.biometricsChecked &&
@@ -28,19 +24,11 @@ export default function Warning(props: WarningProps) {
       return true;
     }
 
-    // only Phone selected and on-chain
-    if (!props.biometricsChecked && props.phoneChecked && props.onChain) {
-      return true;
-    }
     return false;
-  }, [
-    props.biometricsChecked,
-    props.identity?.verified,
-    props.phoneChecked,
-    props.onChain,
-  ]);
+  }, [props.biometricsChecked, props.identity?.verified, props.phoneChecked]);
 
   const noCredentials = useMemo(() => {
+    // No credentials are selected
     if (!props.biometricsChecked && !props.phoneChecked) {
       return true;
     }
@@ -48,21 +36,32 @@ export default function Warning(props: WarningProps) {
   }, [props.biometricsChecked, props.phoneChecked]);
 
   const onlyPhoneOnChain = useMemo(() => {
+    // only Phone is selected for on-chain app
     if (!props.biometricsChecked && props.phoneChecked && props.onChain) {
       return true;
     }
     return false;
   }, [props.biometricsChecked, props.phoneChecked, props.onChain]);
 
+  const visible = useMemo(() => {
+    // visible if any warning states are true
+    if (noCredentials || invalidCredential || onlyPhoneOnChain) {
+      return true;
+    }
+    return false;
+  }, [noCredentials, invalidCredential, onlyPhoneOnChain]);
+
   return (
     <>
       {visible && (
         <p className="mx-2 mt-2 text-b4 text-error-700">
-          {noCredentials
-            ? "This action will fail as no credentials are selected. Proceed to test an error case."
-            : "This action will fail as the selected credentials do not exist. Proceed to test an error case."}
+          {noCredentials &&
+            "This action will fail as no credentials are selected. "}
+          {invalidCredential &&
+            "This action will fail as the selected credential(s) do not exist. "}
           {onlyPhoneOnChain &&
-            "Phone verification is not supported on-chain. Proceed to test an error case."}
+            "This action will fail as phone credentials are not supported on-chain. "}
+          Proceed to test an error case.
         </p>
       )}
     </>
