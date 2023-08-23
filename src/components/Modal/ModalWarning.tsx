@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 interface WarningProps {
   identity: Identity | null;
+  onChain: boolean;
   biometricsChecked: boolean | "indeterminate";
   phoneChecked: boolean | "indeterminate";
 }
@@ -26,8 +27,18 @@ export default function Warning(props: WarningProps) {
     if (props.phoneChecked && !props.identity?.verified[CredentialType.Phone]) {
       return true;
     }
+
+    // only Phone selected and on-chain
+    if (!props.biometricsChecked && props.phoneChecked && props.onChain) {
+      return true;
+    }
     return false;
-  }, [props.biometricsChecked, props.identity?.verified, props.phoneChecked]);
+  }, [
+    props.biometricsChecked,
+    props.identity?.verified,
+    props.phoneChecked,
+    props.onChain,
+  ]);
 
   const noCredentials = useMemo(() => {
     if (!props.biometricsChecked && !props.phoneChecked) {
@@ -36,15 +47,22 @@ export default function Warning(props: WarningProps) {
     return false;
   }, [props.biometricsChecked, props.phoneChecked]);
 
+  const onlyPhoneOnChain = useMemo(() => {
+    if (!props.biometricsChecked && props.phoneChecked && props.onChain) {
+      return true;
+    }
+    return false;
+  }, [props.biometricsChecked, props.phoneChecked, props.onChain]);
+
   return (
     <>
       {visible && (
         <p className="mx-2 mt-2 text-b4 text-error-700">
-          This action will fail as{" "}
           {noCredentials
-            ? "no credentials are selected. "
-            : "the selected credentials do not exist. "}
-          Proceed to test an error case.
+            ? "This action will fail as no credentials are selected. Proceed to test an error case."
+            : "This action will fail as the selected credentials do not exist. Proceed to test an error case."}
+          {onlyPhoneOnChain &&
+            "Phone verification is not supported on-chain. Proceed to test an error case."}
         </p>
       )}
     </>
