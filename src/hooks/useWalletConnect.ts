@@ -12,7 +12,7 @@ import type {
   SignResponse,
   Verification,
 } from "@/types";
-import { Chain, CredentialType, Status } from "@/types";
+import { CredentialType, Status } from "@/types";
 import type { FullProof } from "@semaphore-protocol/proof";
 import type { SignClientTypes } from "@walletconnect/types";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
@@ -32,7 +32,6 @@ function getHighestCredentialType(
 
 function buildResponse(
   id: number,
-  chain: Chain,
   credential_type: CredentialType,
   fullProof: FullProof,
 ): SignResponse {
@@ -61,7 +60,6 @@ function buildResponse(
       ),
       proof: encodePacked(["uint256[8]"], [proof]),
       credential_type,
-      chain,
     },
   };
 }
@@ -156,12 +154,7 @@ export const useWalletConnect = (ready?: boolean) => {
     }
 
     // Send response to dapp
-    const response = buildResponse(
-      id,
-      Chain.Polygon,
-      credentialType,
-      verification.fullProof,
-    );
+    const response = buildResponse(id, credentialType, verification.fullProof);
     console.log("sending response", response);
     await client.respondSessionRequest({
       topic,

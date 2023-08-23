@@ -18,7 +18,7 @@ export default async function handler(
     return;
   }
 
-  const requiredAttributes = ["chain", "credentialType", "commitment"];
+  const requiredAttributes = ["credentialType", "commitment"];
   if (!requiredAttributes.every((attr) => attr in req.body)) {
     return res.status(400).json({ error: `Missing attribute in request body` });
   }

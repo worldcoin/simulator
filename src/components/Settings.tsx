@@ -24,10 +24,6 @@ export const Settings = memo(function Settings(props: {
   const { resetIdentityStore } = useIdentity();
   const { disconnectSessions, disconnectPairings } = useWalletConnect();
 
-  const handleCredentialsMenu = () => {
-    void router.push(`/id/${id}/credentials`);
-  };
-
   const handleCopyCommitment = async () => {
     try {
       await navigator.clipboard.writeText(props.commitment);

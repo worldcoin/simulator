@@ -59,7 +59,7 @@ function getMerkleProof(
   console.log("identity", identity);
   const proofs = identity.inclusionProof;
   if (!proofs) {
-    throw new Error("Polygon inclusion proof not found");
+    throw new Error("Inclusion proof not found");
   }
   const proof = proofs[credentialType]?.proof;
   // Identity has inclusion proof from sequencer
