@@ -172,6 +172,7 @@ export function Modal() {
           </Item>
           <Warning
             identity={activeIdentity}
+            onChain={metadata.can_user_verify === "on-chain" ? true : false}
             biometricsChecked={biometricsChecked}
             phoneChecked={phoneChecked}
           />
