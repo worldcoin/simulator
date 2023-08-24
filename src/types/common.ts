@@ -10,11 +10,6 @@ export enum CredentialType {
   Phone = "phone",
 }
 
-export enum Chain {
-  Polygon = "polygon",
-  Optimism = "optimism",
-}
-
 export enum Status {
   Loading,
   Waiting,

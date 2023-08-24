@@ -2,7 +2,7 @@ import { encode } from "@/lib/utils";
 import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
 import type { Identity, InclusionProofResponse } from "@/types";
-import { Chain, CredentialType } from "@/types";
+import { CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
@@ -43,13 +43,11 @@ const useIdentity = () => {
       const encodedCommitment = encode(commitment);
       const id = encodedCommitment.slice(0, 10);
 
-      const orbProofPolygon = await getIdentityProof(
-        Chain.Polygon,
+      const orbProof = await getIdentityProof(
         CredentialType.Orb,
         encodedCommitment,
       );
-      const phoneProofPolygon = await getIdentityProof(
-        Chain.Polygon,
+      const phoneProof = await getIdentityProof(
         CredentialType.Phone,
         encodedCommitment,
       );
@@ -59,13 +57,13 @@ const useIdentity = () => {
         ...identity,
         id,
         verified: {
-          [CredentialType.Orb]: orbProofPolygon !== null,
-          [CredentialType.Phone]: phoneProofPolygon !== null,
+          [CredentialType.Orb]: orbProof !== null,
+          [CredentialType.Phone]: phoneProof !== null,
         },
 
         inclusionProof: {
-          [CredentialType.Orb]: orbProofPolygon,
-          [CredentialType.Phone]: phoneProofPolygon,
+          [CredentialType.Orb]: orbProof,
+          [CredentialType.Phone]: phoneProof,
         },
         proofGenerationTime: Date.now(),
       };
@@ -144,7 +142,6 @@ const useIdentity = () => {
   }, [activeIdentityID, identities]);
 
   const getIdentityProof = async (
-    chain: Chain,
     credentialType: CredentialType,
     encodedCommitment: string,
   ): Promise<InclusionProofResponse | null> => {
@@ -153,7 +150,6 @@ const useIdentity = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chain,
           credentialType,
           commitment: encodedCommitment,
         }),
@@ -167,7 +163,7 @@ const useIdentity = () => {
       }
     } catch (error) {
       console.error(
-        `Unable to get identity proof for credential type '${credentialType}' on chain '${chain}'. Error: ${error}`,
+        `Unable to get identity proof for credential type '${credentialType}'. Error: ${error}`,
       );
     }
     return null;

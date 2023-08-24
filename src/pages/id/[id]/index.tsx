@@ -40,10 +40,6 @@ export default function Id() {
   const [isOpenQRInput, setOpenQRInput] = useState(false);
   const [isOpenSettings, setOpenSettings] = useState(false);
 
-  const handleCredentialsCard = () => {
-    void router.push(`/id/${id}/credentials`);
-  };
-
   const performVerification = async (data: string) => {
     const filesInCache = await checkCache();
     if (!filesInCache) await retryDownload();
