@@ -1,6 +1,6 @@
 import Layout from "@/components/Layout";
 import StatusBar from "@/components/StatusBar";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
+// import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { METADATA } from "@/lib/constants";
 import { setupClient } from "@/services/walletconnect";
 import type { CacheStore } from "@/stores/cacheStore";
@@ -64,7 +64,7 @@ export default function App({ Component, pageProps }: AppProps) {
       void initialize();
     }
   }, [ready]);
-  useWalletConnect(ready);
+  // useWalletConnect(ready);
 
   // Listen for service worker to complete semaphore downloads
   useEffect(() => {

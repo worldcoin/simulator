@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
+// import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { client, core } from "@/services/walletconnect";
 import { useRouter } from "next/router";
 import { memo, useEffect, useState } from "react";
@@ -22,7 +22,7 @@ export const Settings = memo(function Settings(props: {
   const [copiedCommitment, setCopiedCommitment] = useState(false);
 
   const { resetIdentityStore } = useIdentity();
-  const { disconnectSessions, disconnectPairings } = useWalletConnect();
+  // const { disconnectSessions, disconnectPairings } = useWalletConnect();
 
   const handleCopyCommitment = async () => {
     try {
@@ -44,8 +44,8 @@ export const Settings = memo(function Settings(props: {
     const pairingTopics = pairings.map((pairing) => pairing.topic);
 
     try {
-      await disconnectSessions(sessionTopics);
-      await disconnectPairings(pairingTopics);
+      // await disconnectSessions(sessionTopics);
+      // await disconnectPairings(pairingTopics);
       console.info("WalletConnect disconnected");
     } catch (error) {
       console.error(`WalletConnect failed to disconnect, ${error}`);
