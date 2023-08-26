@@ -1,5 +1,5 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
-import type { SignRequest, Verification } from "@/types";
+import type { MetadataParams, Verification } from "@/types";
 import { ProofError, type CredentialType, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
@@ -186,12 +186,13 @@ async function verifySemaphoreProof(
  * @returns The full semaphore proof and its verification status.
  */
 export default async function getFullProof(
-  request: SignRequest,
+  request: Pick<MetadataParams, "external_nullifier" | "signal">,
   identity: Identity,
   credentialType: CredentialType,
 ): Promise<Verification> {
   const { signal: rawSignal, external_nullifier: rawExternalNullifier } =
-    request.params[0];
+    request;
+
   try {
     // Validate inputs
     const signal = await validateSignal(rawSignal);

@@ -7,7 +7,7 @@ import { Settings } from "@/components/Settings";
 import useIdentity from "@/hooks/useIdentity";
 import { checkCache, encode, retryDownload } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
-import { pairClient } from "@/services/walletconnect";
+import { useModalStore } from "@/stores/modalStore";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { CredentialType } from "@worldcoin/idkit";
 import dynamic from "next/dynamic";
@@ -31,6 +31,7 @@ export default function Id() {
   const router = useRouter();
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
+  const setBridgeConfig = useModalStore((s) => s.setBridgeConfig);
 
   useEffect(() => {
     if (id) setActiveIdentityID(id as string);
@@ -44,12 +45,15 @@ export default function Id() {
     const filesInCache = await checkCache();
     if (!filesInCache) await retryDownload();
 
-    const { uri } = parseWorldIDQRCode(data);
-    if (activeIdentity && uri) {
+    const { valid, key, bridgeUrl, errorMessage } = await parseWorldIDQRCode(
+      data,
+    );
+    console.log(errorMessage);
+    if (activeIdentity && key) {
       console.log("Performing verification");
-      console.log("URI: ", uri);
+      console.log("Key: ", key);
       console.log("Identity: ", activeIdentity);
-      await pairClient(uri);
+      await setBridgeConfig(key, bridgeUrl as string | null);
       console.log("Verification complete");
     }
   };

@@ -1,16 +1,26 @@
-import type { MetadataResponse, SessionEvent, Verification } from "@/types";
+import { getRequestId } from "@/lib/utils";
+import type { MetadataParams, MetadataResponse, Verification } from "@/types";
 import { Status } from "@/types";
 import { create } from "zustand";
 
+const DEFAULT_BRIDGE_URL = "https://bridge.id.worldcoin.org";
+
 export type ModalStore = {
   open: boolean;
-  setOpen: (open: boolean) => void;
   status: Status;
+  bridgeUrl: string;
+  key: CryptoKeyPair | null;
+  requestId: string | null;
+  setOpen: (open: boolean) => void;
   setStatus: (status: Status) => void;
   metadata: Partial<MetadataResponse> | null;
   setMetadata: (metadata: Partial<MetadataResponse> | null) => void;
-  event: SessionEvent | null;
-  setEvent: (event: SessionEvent | null) => void;
+  setBridgeConfig: (
+    key: CryptoKeyPair,
+    bridgeUrl: string | null,
+  ) => Promise<void>;
+  request: MetadataParams | null;
+  setRequest: (event: MetadataParams | null) => void;
   verification: Verification | null;
   setVerification: (verification: Verification | null) => void;
   reset: () => void;
@@ -18,6 +28,15 @@ export type ModalStore = {
 
 export const useModalStore = create<ModalStore>((set) => ({
   open: false,
+  key: null,
+  requestId: null,
+  bridgeUrl: DEFAULT_BRIDGE_URL,
+  setBridgeConfig: async (key, bridgeUrl) => {
+    const requestId = await getRequestId(key.publicKey);
+    set(() => ({ key, bridgeUrl: bridgeUrl ?? DEFAULT_BRIDGE_URL, requestId }));
+  },
+  request: null,
+  setRequest: (request) => set(() => ({ request })),
   setOpen: (open) => set(() => ({ open })),
   status: Status.Loading,
   setStatus: (status) => set(() => ({ status })),
@@ -27,7 +46,6 @@ export const useModalStore = create<ModalStore>((set) => ({
       metadata: { ...state.metadata, ...metadata },
     })),
   event: null,
-  setEvent: (event) => set(() => ({ event })),
   verification: null,
   setVerification: (verification) => set(() => ({ verification })),
   reset: () =>

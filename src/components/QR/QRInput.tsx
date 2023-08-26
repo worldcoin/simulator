@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
 import useIdentity from "@/hooks/useIdentity";
 import { cn } from "@/lib/utils";
+import { validateWorldIDQRCode } from "@/lib/validation";
 import { useModalStore } from "@/stores/modalStore";
 import { memo, useEffect, useMemo, useState } from "react";
 import { Dialog } from "../Dialog";
@@ -17,16 +18,7 @@ export const QRInput = memo(function QRInput(props: {
 
   const isTextInvalidQRInput = (uri: string) => {
     if (!uri) return false;
-    try {
-      const url = decodeURIComponent(uri);
-      const regex =
-        /^https:\/\/worldcoin\.org\/verify\?w=wc:[a-zA-Z0-9]{64}@2\?relay-protocol=irn&symKey=[a-zA-Z0-9]{64}$/;
-      const match = url.match(regex) === null;
-      console.log("match: ", match);
-      return match;
-    } catch (e) {
-      return true;
-    }
+    return !validateWorldIDQRCode(uri);
   };
 
   const isInvalid = useMemo(() => {

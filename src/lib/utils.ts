@@ -3,6 +3,9 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ORB_SEQUENCER_STAGING, PHONE_SEQUENCER_STAGING } from "./constants";
 
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
 export function encode(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
 }
@@ -53,3 +56,39 @@ export const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
 };
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
+
+export const getRequestId = async (key: CryptoKey): Promise<`0x${string}`> => {
+  return encodeKey(
+    await window.crypto.subtle.encrypt(
+      { name: "RSA-OAEP" },
+      key,
+      encoder.encode("world-id-v1"),
+    ),
+  );
+};
+
+export const decryptRequest = async (
+  key: CryptoKey,
+  request: ArrayBuffer,
+): Promise<string> => {
+  return decoder.decode(
+    await window.crypto.subtle.decrypt({ name: "RSA-OAEP" }, key, request),
+  );
+};
+
+export const encryptResponse = async (
+  key: CryptoKey,
+  request: string,
+): Promise<ArrayBuffer> => {
+  return window.crypto.subtle.encrypt(
+    { name: "RSA-OAEP" },
+    key,
+    encoder.encode(request),
+  );
+};
+
+export const encodeKey = (key: ArrayBuffer): `0x${string}` => {
+  return `0x${[...new Uint8Array(key)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")}`;
+};

@@ -1,31 +1,65 @@
 import type { ParseWorldIDQRCodeOutput } from "@/types";
 import { ProofError } from "@/types";
 
-export function parseWorldIDQRCode(data: string): ParseWorldIDQRCodeOutput {
+export function validateWorldIDQRCode(data: string): boolean {
   const url = new URL(data);
-  const uri = url.searchParams.get("w");
-  const wcRegex = /^wc:[A-Za-z0-9]+@2/;
 
-  if (!uri?.match(wcRegex)) {
+  return url.searchParams.get("t") == "wld" && url.searchParams.has("k");
+}
+
+const getPublicJWK = (jwk: JsonWebKey) => {
+  delete jwk.d;
+  delete jwk.dp;
+  delete jwk.dq;
+  delete jwk.q;
+  delete jwk.qi;
+  jwk.key_ops = ["encrypt"];
+
+  return jwk;
+};
+
+export async function parseWorldIDQRCode(
+  data: string,
+): Promise<ParseWorldIDQRCodeOutput> {
+  const url = new URL(data);
+  const key = url.searchParams.get("k");
+
+  if (url.searchParams.get("t") != "wld" || !key) {
     return { valid: false };
   }
 
-  return {
-    uri,
-    valid: true,
-  };
-}
+  const jwk = JSON.parse(
+    Buffer.from(key, "base64").toString("utf-8"),
+  ) as JsonWebKey;
+  const publicJwk = getPublicJWK({ ...jwk });
 
-export function validateImageUrl(data: string): boolean {
   try {
-    const url = new URL(data);
-    return (
-      url.protocol === "data:" ||
-      url.protocol === "https:" ||
-      url.protocol === document.location.protocol
+    const privateKey = await window.crypto.subtle.importKey(
+      "jwk",
+      jwk,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      false,
+      ["decrypt"],
     );
-  } catch {
-    return false;
+    const publicKey = await window.crypto.subtle.importKey(
+      "jwk",
+      publicJwk,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      false,
+      ["encrypt"],
+    );
+
+    return {
+      valid: true,
+      key: { publicKey, privateKey },
+      bridgeUrl: url.searchParams.get("b"),
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      valid: false,
+      errorMessage: "Invalid key",
+    };
   }
 }
 

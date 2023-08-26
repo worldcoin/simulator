@@ -64,25 +64,24 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
 
   // After data is set, check it's validity and perform verification
   useEffect(() => {
-    if (!data) {
-      return;
-    }
+    if (!data) return;
 
     const t = setTimeout(() => setValid(null), 2000);
 
-    try {
-      const res = parseWorldIDQRCode(data);
-      if (res.valid) {
-        clearTimeout(t);
-        setValid(true);
-        void props.performVerification(data);
-      } else {
-        throw res.errorMessage;
-      }
-    } catch (err) {
-      setValid(false);
-      toast.error(typeof err === "string" ? err : "Unsupported QR code");
-    }
+    parseWorldIDQRCode(data)
+      .then((res) => {
+        if (res.valid) {
+          clearTimeout(t);
+          setValid(true);
+          void props.performVerification(data);
+        } else {
+          throw res.errorMessage;
+        }
+      })
+      .catch((err) => {
+        setValid(false);
+        toast.error(typeof err === "string" ? err : "Unsupported QR code");
+      });
   }, [data, props]);
 
   // On initial load, start scanning the video stream
@@ -94,7 +93,6 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         const video = videoRef.current;
         const canvas = canvasRef.current;
 
-        if (!video) return;
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 

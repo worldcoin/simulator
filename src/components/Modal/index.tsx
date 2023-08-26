@@ -3,8 +3,8 @@ import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
+import { useBridge } from "@/hooks/useBridge";
 import useIdentity from "@/hooks/useIdentity";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { cn } from "@/lib/utils";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
@@ -24,13 +24,13 @@ const getStore = (store: ModalStore) => ({
   status: store.status,
   setStatus: store.setStatus,
   metadata: store.metadata,
-  event: store.event,
+  request: store.request,
 });
 
 export function Modal() {
-  const { open, setOpen, status, setStatus, metadata, event } =
+  const { open, setOpen, status, setStatus, metadata, request } =
     useModalStore(getStore);
-  const { approveRequest } = useWalletConnect();
+  const { approveRequest } = useBridge();
   const { activeIdentity } = useIdentity();
 
   const [showConfirm, setShowConfirm] = useState(false);
@@ -72,7 +72,7 @@ export function Modal() {
 
     if (event) {
       setShowConfirm(false);
-      await approveRequest(event, credentialTypes);
+      await approveRequest(credentialTypes);
     } else {
       console.error("No event found, WalletConnect session may have expired");
       setStatus(Status.Error);
