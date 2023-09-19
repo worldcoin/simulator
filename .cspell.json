@@ -30,6 +30,7 @@
     "viem",
     "wagmi",
     "walletconnect",
+    "walletlink",
     "worldcoin",
     "worldid",
     "zkey",
