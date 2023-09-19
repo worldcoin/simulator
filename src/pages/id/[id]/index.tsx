@@ -45,15 +45,14 @@ export default function Id() {
     const filesInCache = await checkCache();
     if (!filesInCache) await retryDownload();
 
-    const { valid, key, bridgeUrl, errorMessage } = await parseWorldIDQRCode(
-      data,
-    );
+    const { key, requestId, bridgeUrl, errorMessage } =
+      await parseWorldIDQRCode(data);
     console.log(errorMessage);
     if (activeIdentity && key) {
       console.log("Performing verification");
       console.log("Key: ", key);
       console.log("Identity: ", activeIdentity);
-      await setBridgeConfig(key, bridgeUrl as string | null);
+      await setBridgeConfig(key, requestId!, bridgeUrl as string | null);
       console.log("Verification complete");
     }
   };

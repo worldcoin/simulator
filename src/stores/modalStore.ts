@@ -1,4 +1,3 @@
-import { getRequestId } from "@/lib/utils";
 import type { MetadataParams, MetadataResponse, Verification } from "@/types";
 import { Status } from "@/types";
 import { create } from "zustand";
@@ -9,19 +8,22 @@ export type ModalStore = {
   open: boolean;
   status: Status;
   bridgeUrl: string;
-  key: CryptoKeyPair | null;
+  key: CryptoKey | null;
+  iv: ArrayBuffer | null;
   requestId: string | null;
   setOpen: (open: boolean) => void;
   setStatus: (status: Status) => void;
   metadata: Partial<MetadataResponse> | null;
   setMetadata: (metadata: Partial<MetadataResponse> | null) => void;
   setBridgeConfig: (
-    key: CryptoKeyPair,
+    key: CryptoKey,
+    requestId: string,
     bridgeUrl: string | null,
   ) => Promise<void>;
   request: MetadataParams | null;
   setRequest: (event: MetadataParams | null) => void;
   verification: Verification | null;
+  setIv: (iv: ArrayBuffer) => void;
   setVerification: (verification: Verification | null) => void;
   reset: () => void;
 };
@@ -29,13 +31,18 @@ export type ModalStore = {
 export const useModalStore = create<ModalStore>((set) => ({
   open: false,
   key: null,
+  iv: null,
   requestId: null,
   bridgeUrl: DEFAULT_BRIDGE_URL,
-  setBridgeConfig: async (key, bridgeUrl) => {
-    const requestId = await getRequestId(key.publicKey);
-    set(() => ({ key, bridgeUrl: bridgeUrl ?? DEFAULT_BRIDGE_URL, requestId }));
+  setBridgeConfig: async (key, requestId, bridgeUrl) => {
+    set(() => ({
+      key,
+      requestId,
+      bridgeUrl: bridgeUrl ?? DEFAULT_BRIDGE_URL,
+    }));
   },
   request: null,
+  setIv: (iv) => set(() => ({ iv })),
   setRequest: (request) => set(() => ({ request })),
   setOpen: (open) => set(() => ({ open })),
   status: Status.Loading,
@@ -51,6 +58,8 @@ export const useModalStore = create<ModalStore>((set) => ({
   reset: () =>
     set(() => ({
       open: false,
+      iv: null,
+      key: null,
       status: Status.Loading,
       metadata: null,
       event: null,

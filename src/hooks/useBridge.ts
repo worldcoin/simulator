@@ -1,5 +1,10 @@
 import getFullProof from "@/lib/proof";
-import { decryptRequest, encode, encryptResponse } from "@/lib/utils";
+import {
+  buffer_decode,
+  decryptRequest,
+  encode,
+  encryptResponse,
+} from "@/lib/utils";
 import { fetchMetadata } from "@/services/metadata";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
@@ -76,6 +81,7 @@ async function generateProof(
 }
 
 const getStore = (store: ModalStore) => ({
+  iv: store.iv,
   setOpen: store.setOpen,
   setStatus: store.setStatus,
   metadata: store.metadata,
@@ -88,23 +94,25 @@ const getStore = (store: ModalStore) => ({
   request: store.request,
   bridgeUrl: store.bridgeUrl,
   requestId: store.requestId,
+  setIv: store.setIv,
 });
 
 export const useBridge = () => {
   const { activeIdentity, generateIdentityProofsIfNeeded } = useIdentity();
   const {
+    iv,
     setOpen,
     setStatus,
     metadata,
     setMetadata,
     key,
+    setIv,
     request,
     bridgeUrl,
     requestId,
     setRequest,
     verification,
     setVerification,
-    reset,
   } = useModalStore(getStore);
   const identityRef = useRef(activeIdentity);
 
@@ -115,14 +123,14 @@ export const useBridge = () => {
         headers: {
           "Content-Type": "application/octet-stream",
         },
-        body: await encryptResponse(key!.publicKey, JSON.stringify(response)),
+        body: await encryptResponse(key!, iv!, JSON.stringify(response)),
       });
 
       if (!res.ok) {
         throw new Error("Failed to send response");
       }
     },
-    [key, bridgeUrl, requestId],
+    [key, iv, bridgeUrl, requestId],
   );
 
   async function approveRequest(
@@ -166,11 +174,17 @@ export const useBridge = () => {
       throw new Error("Request not found");
     }
 
+    const { iv: encoded_iv, payload } = (await response.json()) as {
+      iv: string;
+      payload: string;
+    };
+
+    const iv = buffer_decode(encoded_iv);
+    setIv(iv);
+
     try {
       setRequest(
-        JSON.parse(
-          await decryptRequest(key!.privateKey, await response.arrayBuffer()),
-        ) as MetadataParams,
+        JSON.parse(await decryptRequest(key!, iv, payload)) as MetadataParams,
       );
     } catch {
       setStatus(Status.Error);
@@ -216,11 +230,11 @@ export const useBridge = () => {
       } catch (error) {
         toast.error((error as Error).message);
         setStatus(Status.Error);
-        await sendResponse({ error_code: "generic_error" });
+
+        await sendResponse({ error_code: (error as Error).message });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [sendResponse],
   );
 
   useEffect(() => {

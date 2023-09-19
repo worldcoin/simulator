@@ -1,5 +1,6 @@
 import type { ParseWorldIDQRCodeOutput } from "@/types";
 import { ProofError } from "@/types";
+import { buffer_decode } from "./utils";
 
 export function validateWorldIDQRCode(data: string): boolean {
   const url = new URL(data);
@@ -7,51 +8,28 @@ export function validateWorldIDQRCode(data: string): boolean {
   return url.searchParams.get("t") == "wld" && url.searchParams.has("k");
 }
 
-const getPublicJWK = (jwk: JsonWebKey) => {
-  delete jwk.d;
-  delete jwk.dp;
-  delete jwk.dq;
-  delete jwk.q;
-  delete jwk.qi;
-  jwk.key_ops = ["encrypt"];
-
-  return jwk;
-};
-
 export async function parseWorldIDQRCode(
   data: string,
 ): Promise<ParseWorldIDQRCodeOutput> {
   const url = new URL(data);
-  const key = url.searchParams.get("k");
+  const requestId = url.searchParams.get("i");
+  const encodedKey = url.searchParams.get("k");
 
-  if (url.searchParams.get("t") != "wld" || !key) {
+  if (url.searchParams.get("t") != "wld" || !requestId || !encodedKey) {
     return { valid: false };
   }
 
-  const jwk = JSON.parse(
-    Buffer.from(key, "base64").toString("utf-8"),
-  ) as JsonWebKey;
-  const publicJwk = getPublicJWK({ ...jwk });
-
   try {
-    const privateKey = await window.crypto.subtle.importKey(
-      "jwk",
-      jwk,
-      { name: "RSA-OAEP", hash: "SHA-256" },
-      false,
-      ["decrypt"],
-    );
-    const publicKey = await window.crypto.subtle.importKey(
-      "jwk",
-      publicJwk,
-      { name: "RSA-OAEP", hash: "SHA-256" },
-      false,
-      ["encrypt"],
-    );
-
     return {
+      requestId,
       valid: true,
-      key: { publicKey, privateKey },
+      key: await window.crypto.subtle.importKey(
+        "raw",
+        buffer_decode(decodeURIComponent(encodedKey)),
+        { name: "AES-GCM" },
+        false,
+        ["encrypt", "decrypt"],
+      ),
       bridgeUrl: url.searchParams.get("b"),
     };
   } catch (e) {

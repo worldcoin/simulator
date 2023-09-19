@@ -57,38 +57,52 @@ export const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
 
-export const getRequestId = async (key: CryptoKey): Promise<`0x${string}`> => {
-  return encodeKey(
-    await window.crypto.subtle.encrypt(
-      { name: "RSA-OAEP" },
-      key,
-      encoder.encode("world-id-v1"),
-    ),
-  );
-};
-
 export const decryptRequest = async (
   key: CryptoKey,
-  request: ArrayBuffer,
+  iv: ArrayBuffer,
+  payload: string,
 ): Promise<string> => {
   return decoder.decode(
-    await window.crypto.subtle.decrypt({ name: "RSA-OAEP" }, key, request),
+    await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      key,
+      buffer_decode(payload),
+    ),
   );
 };
 
 export const encryptResponse = async (
   key: CryptoKey,
+  iv: ArrayBuffer,
   request: string,
-): Promise<ArrayBuffer> => {
-  return window.crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    key,
-    encoder.encode(request),
+): Promise<string> => {
+  return buffer_encode(
+    await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv },
+      key,
+      encoder.encode(request),
+    ),
   );
 };
 
-export const encodeKey = (key: ArrayBuffer): `0x${string}` => {
-  return `0x${[...new Uint8Array(key)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")}`;
+export const buffer_encode = (buffer: ArrayBuffer): string => {
+  let encoded = "";
+
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    encoded += String.fromCharCode(bytes[i]);
+  }
+
+  return Buffer.from(encoded).toString("base64");
+};
+
+export const buffer_decode = (encoded: string): ArrayBuffer => {
+  const byteCharacters = Buffer.from(encoded, "base64").toString("utf-8");
+
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  return new Uint8Array(byteNumbers);
 };
