@@ -46,7 +46,7 @@ const generateCsp = () => {
     },
     {
       name: "worker-src",
-      values: ["data:"],
+      values: ["'self'", "https://simulator.worldcoin.org", "data:"],
     },
   ];
 
