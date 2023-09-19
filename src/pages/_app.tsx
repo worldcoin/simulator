@@ -7,7 +7,7 @@ import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
 import "@/styles/globals.css";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
-import type { AppProps } from "next/app";
+import type { AppContext, AppProps } from "next/app";
 import { Rubik, Sora } from "next/font/google";
 import Head from "next/head";
 import Script from "next/script";
@@ -48,7 +48,10 @@ const getStore = (store: CacheStore) => ({
   setComplete: store.setComplete,
 });
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({
+  Component,
+  pageProps,
+}: AppProps<{ nonce: string }>) {
   const [ready, setReady] = useState(false);
   const isMobile = useMediaQuery("(max-width: 499px)");
   const { setComplete } = useCacheStore(getStore);
@@ -144,7 +147,10 @@ export default function App({ Component, pageProps }: AppProps) {
           --font-rubik: ${rubik.style.fontFamily};
         }
       `}</style>
-      <Script id="sw">
+      <Script
+        id="sw"
+        nonce={pageProps.nonce}
+      >
         {`
           if (typeof window !== 'undefined' && "serviceWorker" in navigator) {
             window.addEventListener("load", function() {
@@ -158,3 +164,9 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
 }
+
+App.getInitialProps = async (appContext: AppContext) => ({
+  pageProps: {
+    nonce: appContext.ctx.req?.headers["x-nonce"] as string,
+  },
+});
