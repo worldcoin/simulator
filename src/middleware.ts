@@ -12,6 +12,7 @@ const generateCsp = () => {
         "'self'",
         "'unsafe-eval'",
         `'nonce-${nonce}'`,
+        "https://storage.googleapis.com/workbox-cdn/", // NOTE: required because of import in service-worker.js
         "https://app.posthog.com",
       ],
     },
