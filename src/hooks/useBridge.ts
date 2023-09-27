@@ -133,6 +133,10 @@ export const useBridge = () => {
     [key, iv, bridgeUrl, requestId],
   );
 
+  const declineRequest = useCallback(async () => {
+    await sendResponse({ error_code: "verification_rejected" });
+  }, [sendResponse]);
+
   async function approveRequest(
     credentialTypes: CredentialType[],
   ): Promise<void> {
@@ -258,5 +262,6 @@ export const useBridge = () => {
 
   return {
     approveRequest,
+    declineRequest,
   };
 };
