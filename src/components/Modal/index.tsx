@@ -25,12 +25,13 @@ const getStore = (store: ModalStore) => ({
   setStatus: store.setStatus,
   metadata: store.metadata,
   request: store.request,
+  reset: store.reset,
 });
 
 export function Modal() {
-  const { open, setOpen, status, setStatus, metadata, request } =
+  const { open, setOpen, status, setStatus, metadata, reset } =
     useModalStore(getStore);
-  const { approveRequest } = useBridge();
+  const { approveRequest, declineRequest } = useBridge();
   const { activeIdentity } = useIdentity();
 
   const [showConfirm, setShowConfirm] = useState(false);
@@ -82,7 +83,11 @@ export function Modal() {
   return (
     <Drawer
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={async () => {
+        setOpen(false);
+        reset();
+        await declineRequest();
+      }}
     >
       {!isLoading && !showConfirm && metadata?.is_staging && (
         <>
