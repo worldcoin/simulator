@@ -81,7 +81,6 @@ async function generateProof(
 }
 
 const getStore = (store: ModalStore) => ({
-  iv: store.iv,
   setOpen: store.setOpen,
   setStatus: store.setStatus,
   metadata: store.metadata,
@@ -94,19 +93,16 @@ const getStore = (store: ModalStore) => ({
   request: store.request,
   bridgeUrl: store.bridgeUrl,
   requestId: store.requestId,
-  setIv: store.setIv,
 });
 
 export const useBridge = () => {
   const { activeIdentity, generateIdentityProofsIfNeeded } = useIdentity();
   const {
-    iv,
     setOpen,
     setStatus,
     metadata,
     setMetadata,
     key,
-    setIv,
     request,
     bridgeUrl,
     requestId,
@@ -118,19 +114,22 @@ export const useBridge = () => {
 
   const sendResponse = useCallback(
     async (response: SignResponse | { error_code: string }) => {
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
       const res = await fetch(`${bridgeUrl}/response/${requestId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/octet-stream",
         },
-        body: await encryptResponse(key!, iv!, JSON.stringify(response)),
+        body: JSON.stringify(
+          await encryptResponse(key!, iv, JSON.stringify(response)),
+        ),
       });
 
       if (!res.ok) {
         throw new Error("Failed to send response");
       }
     },
-    [key, iv, bridgeUrl, requestId],
+    [key, bridgeUrl, requestId],
   );
 
   const declineRequest = useCallback(async () => {
@@ -184,7 +183,6 @@ export const useBridge = () => {
     };
 
     const iv = buffer_decode(encoded_iv);
-    setIv(iv);
 
     try {
       setRequest(

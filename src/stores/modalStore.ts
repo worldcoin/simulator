@@ -9,7 +9,6 @@ export type ModalStore = {
   status: Status;
   bridgeUrl: string;
   key: CryptoKey | null;
-  iv: ArrayBuffer | null;
   requestId: string | null;
   setOpen: (open: boolean) => void;
   setStatus: (status: Status) => void;
@@ -23,7 +22,6 @@ export type ModalStore = {
   request: MetadataParams | null;
   setRequest: (event: MetadataParams | null) => void;
   verification: Verification | null;
-  setIv: (iv: ArrayBuffer) => void;
   setVerification: (verification: Verification | null) => void;
   reset: () => void;
 };
@@ -31,7 +29,6 @@ export type ModalStore = {
 export const useModalStore = create<ModalStore>((set) => ({
   open: false,
   key: null,
-  iv: null,
   requestId: null,
   bridgeUrl: DEFAULT_BRIDGE_URL,
   setBridgeConfig: async (key, requestId, bridgeUrl) => {
@@ -42,7 +39,6 @@ export const useModalStore = create<ModalStore>((set) => ({
     }));
   },
   request: null,
-  setIv: (iv) => set(() => ({ iv })),
   setRequest: (request) => set(() => ({ request })),
   setOpen: (open) => set(() => ({ open })),
   status: Status.Loading,

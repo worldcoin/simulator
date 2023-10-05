@@ -75,14 +75,17 @@ export const encryptResponse = async (
   key: CryptoKey,
   iv: ArrayBuffer,
   request: string,
-): Promise<string> => {
-  return buffer_encode(
-    await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      key,
-      encoder.encode(request),
+): Promise<{ payload: string; iv: string }> => {
+  return {
+    iv: buffer_encode(iv),
+    payload: buffer_encode(
+      await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        key,
+        encoder.encode(request),
+      ),
     ),
-  );
+  };
 };
 
 export const buffer_encode = (buffer: ArrayBuffer): string => {
