@@ -64,7 +64,7 @@
     "eslint-plugin-react-hooks": "^4.4.0",
     "eslint-plugin-tailwindcss": "^3.6.0",
     "husky": "^8.0.3",
-    "postcss": "8.4.23",
+    "postcss": "8.4.31",
     "prettier": "^2.7.1",
     "prettier-plugin-organize-attributes": "^0.0.5",
     "prettier-plugin-organize-imports": "^2.3.4",
