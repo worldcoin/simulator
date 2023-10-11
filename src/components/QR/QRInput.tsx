@@ -38,13 +38,34 @@ export const QRInput = memo(function QRInput(props: {
     if (data || data === "") setValue(data);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { performVerification, onClose } = props;
+  useEffect(() => {
+    if (value && !isInvalid) {
+      setIsSubmitting(true);
+      performVerification(value).then(
+        () => {
+          setIsSubmitting(false);
+          onClose();
+        },
+        (error) => {
+          setIsSubmitting(false);
+          console.error("Verification failed", error);
+        },
+      );
+    }
+  }, [value, isInvalid, performVerification, onClose]);
+
   const handleSubmit = async (
     event:
       | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>
       | undefined,
   ) => {
     if (event) event.preventDefault();
+    setIsSubmitting(true);
     await props.performVerification(value);
+    setIsSubmitting(false);
   };
 
   // Close input once modal opens
@@ -123,7 +144,7 @@ export const QRInput = memo(function QRInput(props: {
       <Button
         type="submit"
         className="mt-8 h-14 w-full bg-gray-900 text-white disabled:bg-gray-100 disabled:text-gray-300"
-        isDisabled={isInvalid || !value}
+        isDisabled={isInvalid || !value || isSubmitting}
         onClick={(e) => void handleSubmit(e)}
       >
         Submit
