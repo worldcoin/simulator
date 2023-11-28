@@ -4,13 +4,10 @@ import { CommonValidationMessage } from "@/lib/constants";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { CredentialType } from "@worldcoin/idkit-core";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { encodePacked } from "viem";
 import * as yup from "yup";
 
 //#region Utils
-const hexify = (value: string) => {
-  return `0x${BigInt(value).toString(16)}`;
-};
-
 const buffer_encode = (buffer: ArrayBuffer): string => {
   return Buffer.from(buffer).toString("base64");
 };
@@ -104,10 +101,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   //#endregion
 
   //#region Format payload
-  // REVIEW: ❗❗❗ How to stringify proof?
-  const proofString = hexify(parsedParams.payload.proof.join(""));
-  const merkleRootString = hexify(parsedParams.payload.merkle_root);
-  const nullifierHashString = hexify(parsedParams.payload.nullifier_hash);
+  const bigintProof = parsedParams.payload.proof.map((x) => BigInt(x)) as [
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+  ];
+  const proofString = encodePacked(["uint256[8]"], [bigintProof]);
+
+  const merkleRootString = encodePacked(
+    ["uint256"],
+    [BigInt(parsedParams.payload.merkle_root)],
+  );
+
+  const nullifierHashString = encodePacked(
+    ["uint256"],
+    [BigInt(parsedParams.payload.nullifier_hash)],
+  );
 
   const payload = {
     proof: proofString,
