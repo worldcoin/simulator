@@ -1,4 +1,4 @@
-import type { FullProof } from "@semaphore-protocol/proof";
+import type { SemaphoreProof } from "@semaphore-protocol/proof";
 
 export enum Environment {
   Production = "production",
@@ -21,7 +21,8 @@ export enum Status {
 
 export interface Verification {
   verified: boolean;
-  fullProof: FullProof;
+  fullProof: SemaphoreProof;
+  rawExternalNullifier: string;
 }
 
 export interface ServiceStatusResponse {

@@ -1,14 +1,14 @@
 import { Icon } from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import type { Identity } from "@/types";
-import { CredentialType } from "@worldcoin/idkit";
+import { CredentialType } from "@worldcoin/idkit-core";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 export default function IDRow({ identity }: { identity: Identity }) {
   const router = useRouter();
-  const verifiedPhone = identity.verified[CredentialType.Phone];
+  const verifiedPhone = identity.verified[CredentialType.Device];
   const verifiedOrb = identity.verified[CredentialType.Orb];
   return (
     <button

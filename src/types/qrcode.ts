@@ -16,8 +16,18 @@ export interface ScanConstraints {
   left?: string;
 }
 
-export interface ParseWorldIDQRCodeOutput {
-  valid: boolean;
-  errorMessage?: string;
-  uri?: string;
-}
+export type ParseWorldIDQRCodeOutput =
+  | {
+      valid: false;
+      requestUUID?: never;
+      bridgeURL?: never;
+      key?: never;
+      errorMessage: string;
+    }
+  | {
+      valid: true;
+      requestUUID: string;
+      bridgeURL: string;
+      key: string;
+      errorMessage?: never;
+    };

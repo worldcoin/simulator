@@ -1,5 +1,5 @@
 import { type Identity } from "@/types";
-import { CredentialType } from "@worldcoin/idkit";
+import { CredentialType } from "@worldcoin/idkit-core";
 import { useMemo } from "react";
 
 interface WarningProps {
@@ -20,7 +20,10 @@ export default function Warning(props: WarningProps) {
     }
 
     // Phone is selected but not verified
-    if (props.phoneChecked && !props.identity?.verified[CredentialType.Phone]) {
+    if (
+      props.phoneChecked &&
+      !props.identity?.verified[CredentialType.Device]
+    ) {
       return true;
     }
 

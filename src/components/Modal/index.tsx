@@ -4,14 +4,14 @@ import { Icon } from "@/components/Icon";
 import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { cn } from "@/lib/utils";
+import type { ApproveRequestBody } from "@/pages/api/approve-request";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
-import { CredentialType } from "@worldcoin/idkit";
+import { CredentialType } from "@worldcoin/idkit-core";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import ModalConfirm from "./ModalConfirm";
 import ModalEnvironment from "./ModalEnvironment";
 import ModalLoading from "./ModalLoading";
@@ -24,22 +24,30 @@ const getStore = (store: ModalStore) => ({
   status: store.status,
   setStatus: store.setStatus,
   metadata: store.metadata,
-  event: store.event,
+  url: store.url,
+  payload: store.payload,
+  reset: store.reset,
 });
 
 export function Modal() {
-  const { open, setOpen, status, setStatus, metadata, event } =
-    useModalStore(getStore);
-  const { approveRequest } = useWalletConnect();
   const { activeIdentity } = useIdentity();
-
   const [showConfirm, setShowConfirm] = useState(false);
+
   const [biometricsChecked, setBiometricsChecked] = useState<
     boolean | "indeterminate"
   >(activeIdentity?.verified[CredentialType.Orb] ?? false);
+
   const [phoneChecked, setPhoneChecked] = useState<boolean | "indeterminate">(
-    activeIdentity?.verified[CredentialType.Phone] ?? false,
+    activeIdentity?.verified[CredentialType.Device] ?? false,
   );
+
+  const { open, setOpen, status, setStatus, metadata, url, payload, reset } =
+    useModalStore(getStore);
+
+  const close = useCallback(() => {
+    setOpen(false);
+    reset();
+  }, [reset, setOpen]);
 
   const isLoading = useMemo(() => {
     return status === Status.Loading;
@@ -48,18 +56,22 @@ export function Modal() {
   const isVerified = useMemo(() => {
     const orbVerified =
       biometricsChecked && activeIdentity?.verified[CredentialType.Orb];
+
     const phoneVerified =
-      phoneChecked && activeIdentity?.verified[CredentialType.Phone];
+      phoneChecked && activeIdentity?.verified[CredentialType.Device];
+
     const isVerified = orbVerified ?? phoneVerified;
     return isVerified;
   }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
 
-  const handleClick = async () => {
+  const handleClick = useCallback(async () => {
     if (!activeIdentity) return;
+
     const credentialTypeMap = {
       [CredentialType.Orb]: biometricsChecked,
-      [CredentialType.Phone]: phoneChecked,
+      [CredentialType.Device]: phoneChecked,
     };
+
     const credentialTypes = Object.entries(credentialTypeMap)
       .filter(([_type, isChecked]) => isChecked)
       .map(([type]) => type) as CredentialType[];
@@ -70,19 +82,57 @@ export function Modal() {
       return;
     }
 
-    if (event) {
+    if (url) {
       setShowConfirm(false);
-      await approveRequest(event, credentialTypes);
+      setStatus(Status.Pending);
+
+      try {
+        const res = await fetch("/api/approve-request", {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            url,
+            payload: {
+              ...payload,
+              credential_type: credentialTypes,
+            },
+          } as ApproveRequestBody),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to approve request");
+        }
+
+        setStatus(Status.Success);
+      } catch (error) {
+        console.error(error);
+        setStatus(Status.Error);
+        reset();
+      }
     } else {
-      console.error("No event found, WalletConnect session may have expired");
+      console.error("Something went wrong");
       setStatus(Status.Error);
     }
-  };
+  }, [
+    activeIdentity,
+    biometricsChecked,
+    isVerified,
+    payload,
+    phoneChecked,
+    reset,
+    setStatus,
+    showConfirm,
+    url,
+  ]);
 
   return (
     <Drawer
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={close}
     >
       {!isLoading && !showConfirm && metadata?.is_staging && (
         <>
@@ -106,6 +156,7 @@ export function Modal() {
               <span className="text-h3 font-bold">
                 {metadata.name ?? "App Name"}
               </span>
+
               <div
                 className={cn(
                   "inline-flex items-center gap-x-0.5",
@@ -121,6 +172,7 @@ export function Modal() {
                   }
                   className={"h-4 w-4"}
                 />
+
                 <span className="text-b4 leading-[1px]">
                   {metadata.is_verified ? "Verified" : "Not Verified"}
                 </span>
@@ -154,6 +206,7 @@ export function Modal() {
               color="#9D50FF"
             />
           </Item>
+
           <Item
             heading="Phone"
             className="mt-3 p-4"
@@ -170,6 +223,7 @@ export function Modal() {
               color="#00C313"
             />
           </Item>
+
           <Warning
             identity={activeIdentity}
             onChain={metadata.can_user_verify === "on-chain" ? true : false}
@@ -183,8 +237,10 @@ export function Modal() {
           />
         </>
       )}
+
       {isLoading && <ModalLoading />}
       {!isLoading && !metadata?.is_staging && <ModalEnvironment />}
+
       {!isLoading && showConfirm && (
         <ModalConfirm
           isVerified={isVerified}

@@ -1,18 +1,38 @@
+import { validateRequestSchema } from "@/helpers/validate-request-schema";
 import type { ParseWorldIDQRCodeOutput } from "@/types";
 import { ProofError } from "@/types";
+import * as yup from "yup";
 
-export function parseWorldIDQRCode(data: string): ParseWorldIDQRCodeOutput {
+export async function parseWorldIDQRCode(
+  data: string,
+): Promise<ParseWorldIDQRCodeOutput> {
+  const schema = yup.object({
+    t: yup.string().oneOf(["wld"]).required(),
+    i: yup.string().required(),
+    b: yup.string().required(),
+    k: yup.string().required(),
+  });
+
   const url = new URL(data);
-  const uri = url.searchParams.get("w");
-  const wcRegex = /^wc:[A-Za-z0-9]+@2/;
+  const t = url.searchParams.get("t");
+  const i = url.searchParams.get("i"); // request_uuid
+  const b = url.searchParams.get("b"); // bridge_url
+  const k = url.searchParams.get("k"); // url_base64_encoded_raw_key
 
-  if (!uri?.match(wcRegex)) {
-    return { valid: false };
+  const { parsedParams, isValid, errorMessage } = await validateRequestSchema({
+    schema,
+    value: { t, i, b, k },
+  });
+
+  if (!isValid) {
+    return { valid: isValid, errorMessage };
   }
 
   return {
-    uri,
-    valid: true,
+    valid: isValid,
+    requestUUID: parsedParams.i,
+    bridgeURL: parsedParams.b,
+    key: parsedParams.k,
   };
 }
 
