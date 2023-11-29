@@ -144,7 +144,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   );
 
   try {
-    const result = await fetch(`${bridgeURL}/request/${requestUUID}`, {
+    const result = await fetch(`${bridgeURL}/response/${requestUUID}`, {
       method: "PUT",
 
       headers: {
@@ -161,8 +161,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         `Unable to fetch bridge request data, ${result.status}: ${result.statusText}`,
       );
     }
-
-    // TODO: handle success response from bridge [currently it's 405 method not allowed]
   } catch (error) {
     console.error(error);
 
