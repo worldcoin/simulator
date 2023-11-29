@@ -5,7 +5,7 @@ import { ProofError } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { generateProof, verifyProof } from "@semaphore-protocol/proof";
-import { internal } from "@worldcoin/idkit";
+import { generateExternalNullifier } from "./utils";
 
 /**
  * Performs the Semaphore proof generation and verification process.
@@ -21,8 +21,7 @@ export const getFullProof = async (
     // Validate inputs
     const signal = await validateSignal(payload.signal);
 
-    // TODO: Replace with the newer version of idkit
-    const rawExternalNullifier = internal.generateExternalNullifier(
+    const rawExternalNullifier = generateExternalNullifier(
       payload.app_id,
       payload.action,
     ).digest;

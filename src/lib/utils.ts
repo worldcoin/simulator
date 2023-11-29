@@ -1,4 +1,11 @@
 import { CredentialType } from "@/types";
+import type { AbiEncodedValue, IDKitConfig } from "@worldcoin/idkit-core";
+import type { HashFunctionOutput } from "@worldcoin/idkit-core/hashing";
+import {
+  hashToField,
+  packAndEncode,
+  solidityEncode,
+} from "@worldcoin/idkit-core/hashing";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ORB_SEQUENCER_STAGING, PHONE_SEQUENCER_STAGING } from "./constants";
@@ -53,3 +60,19 @@ export const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
 };
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
+
+export const generateExternalNullifier = (
+  app_id: IDKitConfig["app_id"],
+  action: IDKitConfig["action"],
+): HashFunctionOutput => {
+  if (!action) return packAndEncode([["uint256", hashToField(app_id).hash]]);
+  if (typeof action === "string") action = solidityEncode(["string"], [action]);
+
+  return packAndEncode([
+    ["uint256", hashToField(app_id).hash],
+    ...action.types.map(
+      (type, index) =>
+        [type, (action as AbiEncodedValue).values[index]] as [string, unknown],
+    ),
+  ]);
+};
