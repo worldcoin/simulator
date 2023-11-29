@@ -57,16 +57,12 @@ const schema = yup.object({
       nullifier_hash: yup.string().required(CommonValidationMessage.Required),
 
       credential_type: yup
-        .array(
-          yup
-            .string()
-            .oneOf(
-              Object.values(CredentialType),
-              `credential_type must be one of [${Object.values(
-                CredentialType,
-              ).join(", ")}]`,
-            )
-            .required(CommonValidationMessage.Required),
+        .string()
+        .oneOf(
+          Object.values(CredentialType),
+          `credential_type must be one of [${Object.values(CredentialType).join(
+            ", ",
+          )}]`,
         )
         .required(CommonValidationMessage.Required),
     })

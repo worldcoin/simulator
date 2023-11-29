@@ -125,7 +125,8 @@ export default function Id() {
         proof: fullProof.proof,
         merkle_root: fullProof.merkleTreeRoot,
         nullifier_hash: fullProof.nullifierHash,
-        credential_type: pairingResult.credential_type,
+        // NOTE: we are adding this to the payload when user selects a credential type on modal
+        credential_type: undefined,
       });
 
       setStatus(Status.Waiting);

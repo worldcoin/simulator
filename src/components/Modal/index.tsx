@@ -98,7 +98,10 @@ export function Modal() {
             url,
             payload: {
               ...payload,
-              credential_type: credentialTypes,
+              // REVIEW: Shouldn't we use it as array?
+              credential_type: credentialTypes.find(
+                (i) => i === CredentialType.Orb,
+              ),
             },
           } as ApproveRequestBody),
         });

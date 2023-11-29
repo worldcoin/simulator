@@ -31,7 +31,7 @@ const generateCsp = () => {
         "https://app.posthog.com",
         "https://status.worldcoin.org",
         "https://bridge.worldcoin.org",
-        "https://wallet-bridge.stage-crypto.worldcoin.org",
+        "https://staging-bridge.worldcoin.org/",
       ],
     },
     {

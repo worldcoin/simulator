@@ -3,6 +3,10 @@ import type { MetadataResponse, Verification } from "@/types";
 import { Status } from "@/types";
 import { create } from "zustand";
 
+type Payload = Omit<ApproveRequestBody["payload"], "credential_type"> & {
+  credential_type?: string;
+};
+
 export type ModalStore = {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -15,8 +19,8 @@ export type ModalStore = {
   reset: () => void;
   url: string;
   setUrl: (url: string) => void;
-  payload: ApproveRequestBody["payload"] | null;
-  setPayload: (payload: ApproveRequestBody["payload"] | null) => void;
+  payload: Payload | null;
+  setPayload: (payload: Payload | null) => void;
 };
 
 export const useModalStore = create<ModalStore>((set) => ({
