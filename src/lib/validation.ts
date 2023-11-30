@@ -17,7 +17,7 @@ export async function parseWorldIDQRCode(
   const url = new URL(data);
   const t = url.searchParams.get("t");
   const i = url.searchParams.get("i"); // request_uuid
-  const b = url.searchParams.get("b"); // bridge_url
+  const b = url.searchParams.has("b"); // bridge_url
   const k = url.searchParams.get("k"); // url_base64_encoded_raw_key
 
   const { parsedParams, isValid, errorMessage } = await validateRequestSchema({
