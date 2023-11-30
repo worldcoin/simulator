@@ -28,7 +28,7 @@ export const QRInput = memo(function QRInput(props: {
     try {
       const url = decodeURIComponent(uri);
       const regex =
-        /https:\/\/worldcoin\.org\/verify\?t=wld&i=[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}&k=[^&]*&b=[^&]*/;
+        /https:\/\/worldcoin\.org\/verify\?t=wld&i=[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}&k=[^&]*(b=[^&]*)?/;
       const match = url.match(regex) === null;
       console.log("match: ", match);
       return match;

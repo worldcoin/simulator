@@ -1,6 +1,7 @@
 import { validateRequestSchema } from "@/helpers/validate-request-schema";
 import type { ParseWorldIDQRCodeOutput } from "@/types";
 import { ProofError } from "@/types";
+import { useWorldBridgeStore } from "@worldcoin/idkit-core";
 import * as yup from "yup";
 
 export async function parseWorldIDQRCode(
@@ -9,7 +10,7 @@ export async function parseWorldIDQRCode(
   const schema = yup.object({
     t: yup.string().oneOf(["wld"]).required(),
     i: yup.string().required(),
-    b: yup.string().required(),
+    b: yup.string().nullable(),
     k: yup.string().required(),
   });
 
@@ -28,10 +29,12 @@ export async function parseWorldIDQRCode(
     return { valid: isValid, errorMessage };
   }
 
+  const { bridge_url } = useWorldBridgeStore.getState();
+
   return {
     valid: isValid,
     requestUUID: parsedParams.i,
-    bridgeURL: parsedParams.b,
+    bridgeURL: parsedParams.b ?? bridge_url,
     key: parsedParams.k,
   };
 }

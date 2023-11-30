@@ -1,29 +1,206 @@
-import { validateExternalNullifier, validateSignal } from "@/lib/validation";
-import type { DecryptedPayload } from "@/pages/api/pair-client";
-import type { Identity, Verification } from "@/types";
-import { ProofError } from "@/types";
+import type { BridgeInitialData } from "@/pages/api/pair-client";
+import verificationKeys from "@/public/semaphore/verification_key.json";
+import type { Verification } from "@/types";
+import { ProofError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { generateProof, verifyProof } from "@semaphore-protocol/proof";
+import type { FullProof, Proof, SnarkJSProof } from "@semaphore-protocol/proof";
+import type { CredentialType } from "@worldcoin/idkit-core";
+import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
+import { validateExternalNullifier, validateSignal } from "./validation";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { groth16 } from "snarkjs";
 import { generateExternalNullifier } from "./utils";
 
 /**
- * Performs the Semaphore proof generation and verification process.
- * @param payload The app data from the bridge.
+ * Packs a proof into a format compatible with Semaphore.
+ * @param originalProof The proof generated with SnarkJS.
+ * @returns The proof compatible with Semaphore.
+ */
+function packProof(originalProof: SnarkJSProof): Proof {
+  return [
+    originalProof.pi_a[0],
+    originalProof.pi_a[1],
+    originalProof.pi_b[0][1],
+    originalProof.pi_b[0][0],
+    originalProof.pi_b[1][1],
+    originalProof.pi_b[1][0],
+    originalProof.pi_c[0],
+    originalProof.pi_c[1],
+  ];
+}
+
+/**
+ * Unpacks a proof into its original form.
+ * @param proof The proof compatible with Semaphore.
+ * @returns The proof compatible with SnarkJS.
+ */
+function unpackProof(proof: Proof): SnarkJSProof {
+  return {
+    pi_a: [proof[0], proof[1]],
+    pi_b: [
+      [proof[3], proof[2]],
+      [proof[5], proof[4]],
+    ],
+    pi_c: [proof[6], proof[7]],
+    protocol: "groth16",
+    curve: "bn128",
+  };
+}
+
+/**
+ * Transforms an inclusion proof into the Merkle proof format.
  * @param identity The current simulator identity.
+ * @param credentialType The credential type to generate the proof for.
+ * @returns The Merkle proof of inclusion.
+ */
+function getMerkleProof(
+  identity: Identity,
+  credentialType: CredentialType,
+): MerkleProof {
+  console.log("identity", identity);
+  const proofs = identity.inclusionProof;
+  if (!proofs) {
+    throw new Error("Inclusion proof not found");
+  }
+  const proof = proofs[credentialType]?.proof;
+  // Identity has inclusion proof from sequencer
+  if (proof) {
+    const siblings = proof
+      .flatMap((v) => Object.values(v))
+      .map((v) => BigInt(v));
+
+    const pathIndices = proof
+      .flatMap((v) => Object.keys(v))
+      .map((v) => (v == "Left" ? 0 : 1));
+
+    return {
+      root: null,
+      leaf: null,
+      siblings: siblings,
+      pathIndices: pathIndices,
+    } as MerkleProof;
+  }
+
+  // TODO: Reevaluate if the dummy proof case is needed
+  // Generate a dummy proof for testing against error cases
+  console.warn(
+    "Identity inclusion proof was not found, using dummy proof. Only use this to test failure cases!",
+  );
+  const group = new Group(1, 30);
+  const zkIdentity = new ZkIdentity(identity.zkIdentity);
+  group.addMember(zkIdentity.commitment);
+  return group.generateMerkleProof(0);
+}
+
+/**
+ * Generates a Semaphore proof.
+ * World ID overridden to avoid double hashing the external nullifier and signal hash.
+ * @param identity The Semaphore identity.
+ * @param groupOrMerkleProof The Semaphore group or its Merkle proof.
+ * @param externalNullifier The external nullifier.
+ * @param signal The Semaphore signal.
+ * @param snarkArtifacts The SNARK artifacts.
+ * @returns The Semaphore proof ready to be verified.
+ */
+async function generateSemaphoreProof(
+  { trapdoor, nullifier, commitment }: ZkIdentity,
+  groupOrMerkleProof: Group | MerkleProof,
+  externalNullifier: bigint,
+  signal: bigint,
+): Promise<FullProof> {
+  let merkleProof: MerkleProof;
+
+  if ("depth" in groupOrMerkleProof) {
+    const index = groupOrMerkleProof.indexOf(commitment);
+
+    if (index === -1) {
+      throw new Error("The identity is not part of the group");
+    }
+
+    merkleProof = groupOrMerkleProof.generateMerkleProof(index);
+  } else {
+    merkleProof = groupOrMerkleProof;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  const { proof, publicSignals } = (await groth16.fullProve(
+    {
+      identityTrapdoor: trapdoor,
+      identityNullifier: nullifier,
+      treePathIndices: merkleProof.pathIndices,
+      treeSiblings: merkleProof.siblings,
+      externalNullifier: externalNullifier,
+      signalHash: signal,
+    },
+    "/semaphore/semaphore.wasm",
+    "/semaphore/semaphore.zkey",
+  )) as { proof: SnarkJSProof; publicSignals: string[] };
+
+  return {
+    merkleTreeRoot: publicSignals[0],
+    nullifierHash: publicSignals[1],
+    signal,
+    externalNullifier,
+    proof: packProof(proof),
+  };
+}
+
+/**
+ * Verifies a Semaphore proof.
+ * @param fullProof The SnarkJS Semaphore proof.
+ * @param treeDepth The Merkle tree depth.
+ * @returns True if the proof is valid, false otherwise.
+ */
+async function verifySemaphoreProof(
+  {
+    merkleTreeRoot,
+    nullifierHash,
+    externalNullifier,
+    signal,
+    proof,
+  }: FullProof,
+  treeDepth: number,
+): Promise<boolean> {
+  if (treeDepth < 16 || treeDepth > 32) {
+    throw new TypeError("The tree depth must be a number between 16 and 32");
+  }
+
+  const verificationKey = {
+    ...verificationKeys,
+    vk_delta_2: verificationKeys.vk_delta_2[treeDepth - 16],
+    IC: verificationKeys.IC[treeDepth - 16],
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  return groth16.verify(
+    verificationKey,
+    [merkleTreeRoot, nullifierHash, signal, externalNullifier],
+    unpackProof(proof),
+  );
+}
+
+/**
+ * Performs the Semaphore proof generation and verification process.
+ * @param request The session request from WalletConnect.
+ * @param identity The current simulator identity.
+ * @param credentialType The credential type to generate the proof for.
  * @returns The full semaphore proof and its verification status.
  */
 export const getFullProof = async (
-  payload: DecryptedPayload,
+  bridgeInitialData: Omit<BridgeInitialData, "credential_type"> & {
+    credential_type: CredentialType;
+  },
   identity: Identity,
 ): Promise<Verification> => {
   try {
     // Validate inputs
-    const signal = await validateSignal(payload.signal);
+    const signal = await validateSignal(bridgeInitialData.signal);
 
     const rawExternalNullifier = generateExternalNullifier(
-      payload.app_id,
-      payload.action,
+      bridgeInitialData.app_id,
+      bridgeInitialData.action,
     ).digest;
 
     const externalNullifier = await validateExternalNullifier(
@@ -33,23 +210,20 @@ export const getFullProof = async (
     const zkIdentity = new ZkIdentity(identity.zkIdentity);
 
     // Generate proofs
-    const group = new Group(1, 30);
-    group.addMember(zkIdentity.commitment);
+    const merkleProof = getMerkleProof(
+      identity,
+      bridgeInitialData.credential_type,
+    );
 
-    const fullProof = await generateProof(
+    const fullProof = await generateSemaphoreProof(
       zkIdentity,
-      group,
+      merkleProof,
       externalNullifier,
       signal,
-      {
-        wasmFilePath: "/semaphore/semaphore.wasm",
-        zkeyFilePath: "/semaphore/semaphore.zkey",
-      },
     );
 
     // Verify the full proof
-    const verified = await verifyProof(fullProof, 30);
-
+    const verified = await verifySemaphoreProof(fullProof, 30);
     return { verified, fullProof, rawExternalNullifier };
   } catch (error) {
     console.error(error);

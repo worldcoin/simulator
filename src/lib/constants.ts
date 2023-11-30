@@ -1,6 +1,5 @@
 // Dev portal
-export const DEV_PORTAL_PRECHECK_URL =
-  "https://developer.worldcoin.org/api/v1/precheck/";
+export const DEV_PORTAL_PRECHECK_URL = "http://localhost:3000/api/v1/precheck/";
 
 export const ORB_SEQUENCER_STAGING =
   "https://signup-orb-ethereum.stage-crypto.worldcoin.org";

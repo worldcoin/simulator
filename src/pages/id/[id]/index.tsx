@@ -7,7 +7,7 @@ import { Settings } from "@/components/Settings";
 import useIdentity from "@/hooks/useIdentity";
 import { getFullProof } from "@/lib/proof";
 import { checkCache, encode, retryDownload } from "@/lib/utils";
-import type { DecryptedPayload } from "@/pages/api/pair-client";
+import type { BridgeInitialData } from "@/pages/api/pair-client";
 import { fetchMetadata } from "@/services/metadata";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
@@ -34,12 +34,12 @@ const DynamicHeader = dynamic(() => import("@/components/Header"), {
 });
 
 const getStore = (store: ModalStore) => ({
+  setBridgeInitialData: store.setBridgeInitialData,
+  setFullProof: store.setFullProof,
   setMetadata: store.setMetadata,
   setOpen: store.setOpen,
   setStatus: store.setStatus,
   setUrl: store.setUrl,
-  setPayload: store.setPayload,
-  reset: store.reset,
 });
 
 const getUiStore = (store: UiStore) => ({
@@ -53,8 +53,14 @@ export default function Id() {
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
 
-  const { setMetadata, setOpen, setStatus, setUrl, setPayload, reset } =
-    useModalStore(getStore);
+  const {
+    setOpen,
+    setStatus,
+    setUrl,
+    setBridgeInitialData,
+    setMetadata,
+    setFullProof,
+  } = useModalStore(getStore);
 
   const { scannerOpened, setScannerOpened, setSettingsOpened } =
     useUiStore(getUiStore);
@@ -66,7 +72,6 @@ export default function Id() {
   const performVerification = useCallback(
     async (url: string) => {
       setOpen(true);
-      setStatus(Status.Loading);
       const filesInCache = await checkCache();
       if (!filesInCache) await retryDownload();
 
@@ -74,7 +79,7 @@ export default function Id() {
         return console.error("No active identity");
       }
 
-      let pairingResult: DecryptedPayload | null = null;
+      let bridgeInitialData: BridgeInitialData | null = null;
 
       try {
         const res = await fetch("/api/pair-client", {
@@ -87,56 +92,65 @@ export default function Id() {
           throw new Error("Failed to pair client", { cause: res.statusText });
         }
 
-        pairingResult = (await res.json()) as DecryptedPayload | null;
+        bridgeInitialData = (await res.json()) as BridgeInitialData | null;
       } catch (error) {
+        setStatus(Status.Error);
         console.error(error);
-        reset();
         toast.error("Something went wrong");
       }
 
-      if (!pairingResult) {
+      if (!bridgeInitialData) {
+        setStatus(Status.Error);
         return console.error("Pairing failed");
       }
 
       setUrl(url);
+      setBridgeInitialData(bridgeInitialData);
+
+      console.log({ bridgeInitialData });
+
+      let credential_type: CredentialType | undefined;
+
+      if (bridgeInitialData.credential_types.includes(CredentialType.Orb)) {
+        credential_type = CredentialType.Orb;
+      } else {
+        credential_type = CredentialType.Device;
+      }
 
       const { verified, fullProof, rawExternalNullifier } = await getFullProof(
-        pairingResult,
+        {
+          ...bridgeInitialData,
+          credential_type,
+        },
         activeIdentity,
       );
 
+      setFullProof(fullProof);
+
       if (!verified) {
+        setStatus(Status.Error);
         return console.error("Verification failed");
       }
 
       const metadata = await fetchMetadata({
-        app_id: pairingResult.app_id,
-        action: pairingResult.action,
-        signal: pairingResult.signal,
+        app_id: bridgeInitialData.app_id,
+        action: bridgeInitialData.action,
+        signal: bridgeInitialData.signal,
         external_nullifier: rawExternalNullifier,
-        nullifier_hash: fullProof.nullifierHash,
-        action_description: pairingResult.action_description,
-        credential_types: pairingResult.credential_type,
+        nullifier_hash: fullProof.nullifierHash as string,
+        action_description: bridgeInitialData.action_description,
+        credential_types: bridgeInitialData.credential_types,
       });
 
       setMetadata(metadata);
-
-      setPayload({
-        proof: fullProof.proof,
-        merkle_root: fullProof.merkleTreeRoot,
-        nullifier_hash: fullProof.nullifierHash,
-        // NOTE: we are adding this to the payload when user selects a credential type on modal
-        credential_type: undefined,
-      });
-
       setStatus(Status.Waiting);
     },
     [
       activeIdentity,
-      reset,
+      setBridgeInitialData,
+      setFullProof,
       setMetadata,
       setOpen,
-      setPayload,
       setStatus,
       setUrl,
     ],

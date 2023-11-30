@@ -24,9 +24,10 @@ const getStore = (store: ModalStore) => ({
   status: store.status,
   setStatus: store.setStatus,
   metadata: store.metadata,
+  bridgeInitialData: store.bridgeInitialData,
   url: store.url,
-  payload: store.payload,
   reset: store.reset,
+  fullProof: store.fullProof,
 });
 
 export function Modal() {
@@ -41,8 +42,17 @@ export function Modal() {
     activeIdentity?.verified[CredentialType.Device] ?? false,
   );
 
-  const { open, setOpen, status, setStatus, metadata, url, payload, reset } =
-    useModalStore(getStore);
+  const {
+    open,
+    setOpen,
+    status,
+    setStatus,
+    bridgeInitialData,
+    url,
+    metadata,
+    reset,
+    fullProof,
+  } = useModalStore(getStore);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -72,9 +82,25 @@ export function Modal() {
       [CredentialType.Device]: phoneChecked,
     };
 
-    const credentialTypes = Object.entries(credentialTypeMap)
+    const selectedCredentialTypes = Object.entries(credentialTypeMap)
       .filter(([_type, isChecked]) => isChecked)
       .map(([type]) => type) as CredentialType[];
+
+    const credentialsIntersections = selectedCredentialTypes.filter((value) =>
+      bridgeInitialData?.credential_types.includes(value),
+    );
+
+    let credential_type: CredentialType | undefined;
+
+    if (credentialsIntersections.length === 0) {
+      // TODO: handle this case
+    }
+
+    if (credentialsIntersections.includes(CredentialType.Orb)) {
+      credential_type = CredentialType.Orb;
+    } else {
+      credential_type = CredentialType.Device;
+    }
 
     // Show additional warning if the identity is unverified or still pending inclusion
     if (!showConfirm && !isVerified) {
@@ -82,11 +108,19 @@ export function Modal() {
       return;
     }
 
-    if (url) {
+    if (url && bridgeInitialData && fullProof) {
       setShowConfirm(false);
       setStatus(Status.Pending);
 
       try {
+        const payload = {
+          proof: fullProof.proof,
+          merkle_root: fullProof.merkleTreeRoot,
+          nullifier_hash: fullProof.nullifierHash,
+          // NOTE: we are adding this to the payload when user selects a credential type on modal
+          credential_type,
+        };
+
         const res = await fetch("/api/approve-request", {
           method: "POST",
 
@@ -96,13 +130,7 @@ export function Modal() {
 
           body: JSON.stringify({
             url,
-            payload: {
-              ...payload,
-              // REVIEW: Shouldn't we use it as array?
-              credential_type: credentialTypes.find(
-                (i) => i === CredentialType.Orb,
-              ),
-            },
+            payload,
           } as ApproveRequestBody),
         });
 
@@ -114,7 +142,6 @@ export function Modal() {
       } catch (error) {
         console.error(error);
         setStatus(Status.Error);
-        reset();
       }
     } else {
       console.error("Something went wrong");
@@ -123,10 +150,10 @@ export function Modal() {
   }, [
     activeIdentity,
     biometricsChecked,
+    bridgeInitialData,
+    fullProof,
     isVerified,
-    payload,
     phoneChecked,
-    reset,
     setStatus,
     showConfirm,
     url,
@@ -143,9 +170,7 @@ export function Modal() {
             <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200">
               <Image
                 src={
-                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                   metadata.verified_app_logo ||
-                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                   metadata.logo_url ||
                   "/icons/question.svg"
                 }
@@ -184,8 +209,7 @@ export function Modal() {
           </div>
 
           <p className="mt-4 text-b2 text-gray-500">
-            {metadata.name ?? "App Name"} is asking for permission to{" "}
-            {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
+            {metadata.name ?? "App Name"} is asking for permission to {}
             {metadata.action?.description || "verify with World ID."}
           </p>
 

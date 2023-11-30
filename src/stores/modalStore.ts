@@ -1,26 +1,28 @@
-import type { ApproveRequestBody } from "@/pages/api/approve-request";
+import type { BridgeInitialData } from "@/pages/api/pair-client";
 import type { MetadataResponse, Verification } from "@/types";
 import { Status } from "@/types";
+import type { FullProof } from "@semaphore-protocol/proof";
 import { create } from "zustand";
-
-type Payload = Omit<ApproveRequestBody["payload"], "credential_type"> & {
-  credential_type?: string;
-};
 
 export type ModalStore = {
   open: boolean;
   setOpen: (open: boolean) => void;
   status: Status;
   setStatus: (status: Status) => void;
+
+  bridgeInitialData: BridgeInitialData | null;
+  setBridgeInitialData: (bridgeInitialData: BridgeInitialData) => void;
+
+  fullProof: FullProof | null;
+  setFullProof: (fullProof: FullProof) => void;
+
   metadata: Partial<MetadataResponse> | null;
   setMetadata: (metadata: Partial<MetadataResponse> | null) => void;
   verification: Verification | null;
   setVerification: (verification: Verification | null) => void;
-  reset: () => void;
   url: string;
   setUrl: (url: string) => void;
-  payload: Payload | null;
-  setPayload: (payload: Payload | null) => void;
+  reset: () => void;
 };
 
 export const useModalStore = create<ModalStore>((set) => ({
@@ -35,19 +37,23 @@ export const useModalStore = create<ModalStore>((set) => ({
       metadata: { ...state.metadata, ...metadata },
     })),
 
+  bridgeInitialData: null,
+  setBridgeInitialData: (bridgeInitialData) =>
+    set(() => ({ bridgeInitialData })),
+
+  fullProof: null,
+  setFullProof: (fullProof) => set(() => ({ fullProof })),
+
   verification: null,
   setVerification: (verification) => set(() => ({ verification })),
   url: "",
   setUrl: (url) => set(() => ({ url })),
-  payload: null,
-  setPayload: (payload) => set(() => ({ payload })),
 
   reset: () =>
     set(() => ({
       open: false,
       status: Status.Loading,
-      metadata: null,
+      bridgeInitialData: null,
       url: "",
-      payload: null,
     })),
 }));

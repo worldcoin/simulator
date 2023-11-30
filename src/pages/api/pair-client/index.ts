@@ -5,9 +5,9 @@ import type { CredentialType } from "@worldcoin/idkit-core/*";
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 
-export type DecryptedPayload = {
+export type BridgeInitialData = {
   app_id: string;
-  credential_type: CredentialType[];
+  credential_types: CredentialType[];
   action_description: string;
   action: string;
   signal: string;
@@ -71,7 +71,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   //#endregion
 
   //#region Decrypt bridge request data
-  let decrypted: DecryptedPayload | null = null;
+  let decrypted: BridgeInitialData | null = null;
 
   try {
     const { iv, payload } = bridgeRequestData;
@@ -96,7 +96,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const decoder = new TextDecoder();
     const decodedRaw = decoder.decode(decryptedBuffer);
 
-    decrypted = JSON.parse(decodedRaw) as DecryptedPayload | null;
+    decrypted = JSON.parse(decodedRaw) as BridgeInitialData | null;
 
     if (!decrypted) {
       throw new Error("No decrypted data");
