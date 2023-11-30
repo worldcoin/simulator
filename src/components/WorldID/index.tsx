@@ -131,7 +131,7 @@ export default function WorldID(props: {
                   "text-gray-400": props.verified,
                 })}
               >
-                Phone
+                Device
               </div>
 
               <div

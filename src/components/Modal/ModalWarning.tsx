@@ -19,7 +19,7 @@ export default function Warning(props: WarningProps) {
       return true;
     }
 
-    // Phone is selected but not verified
+    // Device is selected but not verified
     if (
       props.phoneChecked &&
       !props.identity?.verified[CredentialType.Device]
@@ -39,7 +39,7 @@ export default function Warning(props: WarningProps) {
   }, [props.biometricsChecked, props.phoneChecked]);
 
   const onlyPhoneOnChain = useMemo(() => {
-    // only Phone is selected for on-chain app
+    // only Device is selected for on-chain app
     if (!props.biometricsChecked && props.phoneChecked && props.onChain) {
       return true;
     }
@@ -63,7 +63,7 @@ export default function Warning(props: WarningProps) {
           {invalidCredential &&
             "This action will fail as the selected credential(s) do not exist. "}
           {onlyPhoneOnChain &&
-            "This action will fail as phone credentials are not supported on-chain. "}
+            "This action will fail as device credentials are not supported on-chain. "}
           Proceed to test an error case.
         </p>
       )}

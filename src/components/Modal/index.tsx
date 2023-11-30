@@ -235,7 +235,7 @@ export function Modal() {
           </Item>
 
           <Item
-            heading="Phone"
+            heading="Device"
             className="mt-3 p-4"
             onClick={() => setPhoneChecked(!phoneChecked)}
             indicator={() => (
