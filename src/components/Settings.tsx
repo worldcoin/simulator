@@ -47,6 +47,9 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
     resetIdentityStore();
     console.info("Session storage cleared");
 
+    // Close settings drawer
+    close();
+
     // Redirect to landing page
     toast.success(`Logged out of identity ${id}`);
     await router.push("/select-id");
