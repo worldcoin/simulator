@@ -56,7 +56,7 @@ export async function retryDownload(): Promise<void> {
 // Mappings
 export const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
   [CredentialType.Orb]: ORB_SEQUENCER_STAGING,
-  [CredentialType.Phone]: PHONE_SEQUENCER_STAGING,
+  [CredentialType.Device]: PHONE_SEQUENCER_STAGING,
 };
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));

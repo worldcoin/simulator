@@ -1,13 +1,10 @@
 import type { FullProof } from "@semaphore-protocol/proof";
 
+export { CredentialType } from "@worldcoin/idkit-core";
+
 export enum Environment {
   Production = "production",
   Staging = "staging",
-}
-
-export enum CredentialType {
-  Orb = "orb",
-  Phone = "phone",
 }
 
 export enum Status {

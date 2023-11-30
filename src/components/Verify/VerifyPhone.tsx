@@ -23,7 +23,7 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
     setStatus(Status.Pending);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      await props.handleVerify(CredentialType.Phone);
+      await props.handleVerify(CredentialType.Device);
       setStatus(Status.Success);
       if (activeIdentity) {
         // Display verified state for 2 seconds
