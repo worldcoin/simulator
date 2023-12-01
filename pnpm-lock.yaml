@@ -27,8 +27,8 @@ dependencies:
     specifier: 3.9.0
     version: 3.9.0(@semaphore-protocol/group@3.9.0)(@semaphore-protocol/identity@3.9.0)
   '@worldcoin/idkit-core':
-    specifier: ^1.0.0-alpha.2
-    version: 1.0.0-alpha.2(@types/react@18.0.37)(react@18.2.0)(typescript@5.0.4)
+    specifier: ^1.0.0-alpha.4
+    version: 1.0.0-alpha.4(@types/react@18.0.37)(react@18.2.0)(typescript@5.0.4)
   '@zk-kit/incremental-merkle-tree':
     specifier: ^1.0.0
     version: 1.1.0
@@ -46,7 +46,7 @@ dependencies:
     version: 6.9.0
   framer-motion:
     specifier: ^10.12.18
-    version: 10.16.9(react-dom@18.2.0)(react@18.2.0)
+    version: 10.16.12(react-dom@18.2.0)(react@18.2.0)
   jsqr:
     specifier: ^1.4.0
     version: 1.4.0
@@ -1885,8 +1885,8 @@ packages:
       '@ethersproject/strings': 5.7.0
     dev: false
 
-  /@floating-ui/core@1.5.0:
-    resolution: {integrity: sha512-kK1h4m36DQ0UHGj5Ah4db7R0rHemTqqO0QLvUqi1/mUUp3LuAWbWxdxSIf/XsnH9VS6rRVPLJCncjRzUvyCLXg==}
+  /@floating-ui/core@1.5.1:
+    resolution: {integrity: sha512-QgcKYwzcc8vvZ4n/5uklchy8KVdjJwcOeI+HnnTNclJjs2nYsy23DOCf+sSV1kBwD9yDAoVKCkv/gEPzgQU3Pw==}
     dependencies:
       '@floating-ui/utils': 0.1.6
     dev: false
@@ -1894,7 +1894,7 @@ packages:
   /@floating-ui/dom@1.5.3:
     resolution: {integrity: sha512-ClAbQnEqJAKCJOEbbLo5IUlZHkNszqhuxS4fHAVxRPXPya6Ysf2G8KypnYcOTpx6I8xcgF9bbHb6g/2KpbV8qA==}
     dependencies:
-      '@floating-ui/core': 1.5.0
+      '@floating-ui/core': 1.5.1
       '@floating-ui/utils': 0.1.6
     dev: false
 
@@ -3128,8 +3128,8 @@ packages:
       typescript: 5.0.4
     dev: false
 
-  /@worldcoin/idkit-core@1.0.0-alpha.2(@types/react@18.0.37)(react@18.2.0)(typescript@5.0.4):
-    resolution: {integrity: sha512-znaMJY6bgzXD+gWcjXttpzBiWJ4akuQ3qojOw3drAASYdX/+sOinZnzB0vRJW2snTdxaeafLNcAkm6lKaXTMqw==}
+  /@worldcoin/idkit-core@1.0.0-alpha.4(@types/react@18.0.37)(react@18.2.0)(typescript@5.0.4):
+    resolution: {integrity: sha512-G5SI4+wMcxF0DPW4WAwmA8GaOgFsRKseBAXcsItz5H9nE0mjBjxYptWJyZzOsGGWB8SbOgTbRdYLDBqnp/99QA==}
     engines: {node: '>=12.4'}
     dependencies:
       buffer: 6.0.3
@@ -3703,8 +3703,8 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001565
-      electron-to-chromium: 1.4.597
-      node-releases: 2.0.13
+      electron-to-chromium: 1.4.600
+      node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.22.1)
 
   /bs58@4.0.1:
@@ -4518,8 +4518,8 @@ packages:
     dependencies:
       jake: 10.8.7
 
-  /electron-to-chromium@1.4.597:
-    resolution: {integrity: sha512-0XOQNqHhg2YgRVRUrS4M4vWjFCFIP2ETXcXe/0KIQBjXE9Cpy+tgzzYfuq6HGai3hWq0YywtG+5XK8fyG08EjA==}
+  /electron-to-chromium@1.4.600:
+    resolution: {integrity: sha512-KD6CWjf1BnQG+NsXuyiTDDT1eV13sKuYsOUioXkQweYTQIbgHkXPry9K7M+7cKtYHnSUPitVaLrXYB1jTkkYrw==}
 
   /elliptic@6.5.4:
     resolution: {integrity: sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==}
@@ -4595,7 +4595,7 @@ packages:
       is-weakref: 1.0.2
       object-inspect: 1.13.1
       object-keys: 1.1.1
-      object.assign: 4.1.4
+      object.assign: 4.1.5
       regexp.prototype.flags: 1.5.1
       safe-array-concat: 1.0.1
       safe-regex-test: 1.0.0
@@ -5372,8 +5372,8 @@ packages:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
     dev: true
 
-  /framer-motion@10.16.9(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-tcLz4X7PplYu6f4KHmclZFhHe8bFhCqfIG0z0Ssb+xi6OTfYeAb8BuVD235PMvypwi232VQ68KYlu3pfMKwPzA==}
+  /framer-motion@10.16.12(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-w7Yzx0OzQ5Uh6uNkxaX+4TuAPuOKz3haSbjmHpdrqDpGuCJCpq6YP9Dy7JJWdZ6mJjndrg3Ao3vUwDajKNikCA==}
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
@@ -6389,7 +6389,7 @@ packages:
     dependencies:
       array-includes: 3.1.7
       array.prototype.flat: 1.3.2
-      object.assign: 4.1.4
+      object.assign: 4.1.5
       object.values: 1.1.7
     dev: true
 
@@ -6888,8 +6888,8 @@ packages:
     hasBin: true
     dev: false
 
-  /node-releases@2.0.13:
-    resolution: {integrity: sha512-uYr7J37ae/ORWdZeQ1xxMJe3NtdmqMC/JZK+geofDrkLUApKRHPd18/TxtBOJ4A0/+uUIliorNrfYV6s1b02eQ==}
+  /node-releases@2.0.14:
+    resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
 
   /normalize-package-data@2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
@@ -6949,8 +6949,8 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /object.assign@4.1.4:
-    resolution: {integrity: sha512-1mxKf0e58bvyjSCtKYY4sRe9itRk3PJpquJOjeIkz885CczcI4IvJJDLPS72oowuSh+pBxUFROpX+TU++hxhZQ==}
+  /object.assign@4.1.5:
+    resolution: {integrity: sha512-byy+U7gp+FVwmyzKPYhW2h5l3crpmGsxl7X2s8y43IgxvG4g3QZ6CffDtsNQy1WsmZpQbO+ybo0AlW7TY6DcBQ==}
     engines: {node: '>= 0.4'}
     dependencies:
       call-bind: 1.0.5
