@@ -94,7 +94,6 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         const video = videoRef.current;
         const canvas = canvasRef.current;
 
-        if (!video) return;
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
