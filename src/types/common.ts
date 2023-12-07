@@ -1,4 +1,7 @@
 import type { FullProof } from "@semaphore-protocol/proof";
+import type { NumericString } from "snarkjs";
+
+export type FP = Omit<FullProof, "proof"> & { proof: NumericString[] };
 
 export enum Environment {
   Production = "production",
@@ -21,7 +24,7 @@ export enum Status {
 
 export interface Verification {
   verified: boolean;
-  fullProof: FullProof;
+  fullProof: FP;
 }
 
 export interface ServiceStatusResponse {

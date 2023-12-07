@@ -154,7 +154,11 @@ export const useWalletConnect = (ready?: boolean) => {
     }
 
     // Send response to dapp
-    const response = buildResponse(id, credentialType, verification.fullProof);
+    const response = buildResponse(
+      id,
+      credentialType,
+      verification.fullProof as FullProof,
+    );
     console.log("sending response", response);
     await client.respondSessionRequest({
       topic,

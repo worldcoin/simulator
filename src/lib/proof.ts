@@ -1,21 +1,19 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
-import type { SignRequest, Verification } from "@/types";
+import type { FP, SignRequest, Verification } from "@/types";
 import { ProofError, type CredentialType, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import type { FullProof, Proof, SnarkJSProof } from "@semaphore-protocol/proof";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
-import { validateExternalNullifier, validateSignal } from "./validation";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
+import { validateExternalNullifier, validateSignal } from "./validation";
 
 /**
  * Packs a proof into a format compatible with Semaphore.
  * @param originalProof The proof generated with SnarkJS.
  * @returns The proof compatible with Semaphore.
  */
-function packProof(originalProof: SnarkJSProof): Proof {
+function packProof(originalProof: Groth16Proof): NumericString[] {
   return [
     originalProof.pi_a[0],
     originalProof.pi_a[1],
@@ -33,7 +31,7 @@ function packProof(originalProof: SnarkJSProof): Proof {
  * @param proof The proof compatible with Semaphore.
  * @returns The proof compatible with SnarkJS.
  */
-function unpackProof(proof: Proof): SnarkJSProof {
+function unpackProof(proof: NumericString[]): Groth16Proof {
   return {
     pi_a: [proof[0], proof[1]],
     pi_b: [
@@ -106,7 +104,7 @@ async function generateSemaphoreProof(
   groupOrMerkleProof: Group | MerkleProof,
   externalNullifier: bigint,
   signal: bigint,
-): Promise<FullProof> {
+): Promise<FP> {
   let merkleProof: MerkleProof;
 
   if ("depth" in groupOrMerkleProof) {
@@ -121,7 +119,6 @@ async function generateSemaphoreProof(
     merkleProof = groupOrMerkleProof;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   const { proof, publicSignals } = (await groth16.fullProve(
     {
       identityTrapdoor: trapdoor,
@@ -133,7 +130,7 @@ async function generateSemaphoreProof(
     },
     "/semaphore/semaphore.wasm",
     "/semaphore/semaphore.zkey",
-  )) as { proof: SnarkJSProof; publicSignals: string[] };
+  )) as { proof: Groth16Proof; publicSignals: string[] };
 
   return {
     merkleTreeRoot: publicSignals[0],
@@ -151,13 +148,7 @@ async function generateSemaphoreProof(
  * @returns True if the proof is valid, false otherwise.
  */
 async function verifySemaphoreProof(
-  {
-    merkleTreeRoot,
-    nullifierHash,
-    externalNullifier,
-    signal,
-    proof,
-  }: FullProof,
+  { merkleTreeRoot, nullifierHash, externalNullifier, signal, proof }: FP,
   treeDepth: number,
 ): Promise<boolean> {
   if (treeDepth < 16 || treeDepth > 32) {
@@ -170,10 +161,15 @@ async function verifySemaphoreProof(
     IC: verificationKeys.IC[treeDepth - 16],
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   return groth16.verify(
     verificationKey,
-    [merkleTreeRoot, nullifierHash, signal, externalNullifier],
+    [merkleTreeRoot, nullifierHash, signal, externalNullifier] as [
+      string,
+      string,
+      string,
+      string,
+    ],
+
     unpackProof(proof),
   );
 }
