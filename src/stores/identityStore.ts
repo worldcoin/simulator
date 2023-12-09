@@ -15,7 +15,7 @@ const IDENTITY_STORE_STORAGE_KEY = "Simulator_Identity_Store_2";
 
 export const useIdentityStore = create<IdentityStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       activeIdentityID: null,
       identities: [],
       setActiveIdentityID: (id) => set({ activeIdentityID: id }),

@@ -1,4 +1,7 @@
 import type { FullProof } from "@semaphore-protocol/proof";
+import type { NumericString } from "snarkjs";
+
+export type FP = Omit<FullProof, "proof"> & { proof: NumericString[] };
 
 export { CredentialType } from "@worldcoin/idkit-core";
 
@@ -18,8 +21,7 @@ export enum Status {
 
 export interface Verification {
   verified: boolean;
-  fullProof: FullProof;
-  rawExternalNullifier: string;
+  fullProof: FP;
 }
 
 export interface ServiceStatusResponse {
