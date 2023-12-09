@@ -8,7 +8,6 @@ async function precheckAction(
   const body = {
     action: request.action,
     nullifier_hash: request.nullifier_hash,
-    external_nullifier: request.external_nullifier,
   };
 
   try {

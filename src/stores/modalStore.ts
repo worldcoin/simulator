@@ -1,7 +1,6 @@
 import type { BridgeInitialData } from "@/pages/api/pair-client";
-import type { MetadataResponse, Verification } from "@/types";
+import type { FP, MetadataResponse, Verification } from "@/types";
 import { Status } from "@/types";
-import type { FullProof } from "@semaphore-protocol/proof";
 import { create } from "zustand";
 
 export type ModalStore = {
@@ -13,8 +12,8 @@ export type ModalStore = {
   bridgeInitialData: BridgeInitialData | null;
   setBridgeInitialData: (bridgeInitialData: BridgeInitialData) => void;
 
-  fullProof: FullProof | null;
-  setFullProof: (fullProof: FullProof) => void;
+  fullProof: FP | null;
+  setFullProof: (fullProof: FP) => void;
 
   metadata: Partial<MetadataResponse> | null;
   setMetadata: (metadata: Partial<MetadataResponse> | null) => void;

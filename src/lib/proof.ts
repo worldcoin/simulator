@@ -219,7 +219,7 @@ export const getFullProof = async (
 
     // Verify the full proof
     const verified = await verifySemaphoreProof(fullProof, 30);
-    return { verified, fullProof, rawExternalNullifier };
+    return { verified, fullProof };
   } catch (error) {
     console.error(error);
     if (error instanceof ProofError) {

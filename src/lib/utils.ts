@@ -8,10 +8,20 @@ import {
 } from "@worldcoin/idkit-core/hashing";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { encodePacked } from "viem";
 import { ORB_SEQUENCER_STAGING, PHONE_SEQUENCER_STAGING } from "./constants";
 
 export function encode(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
+}
+
+/**
+ * Encodes a BigInt value for output to other systems (e.g. nullifier hash or Merkle root)
+ * @param value
+ * @returns
+ */
+export function encodeBigInt(value: bigint): string {
+  return encodePacked(["uint256"], [value]);
 }
 
 async function checkFilesInCache(files: string[]) {

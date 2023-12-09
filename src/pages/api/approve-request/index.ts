@@ -1,6 +1,7 @@
 import { errorResponse } from "@/helpers/error-response";
 import { validateRequestSchema } from "@/helpers/validate-request-schema";
 import { CommonValidationMessage } from "@/lib/constants";
+import { encodeBigInt } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { CredentialType } from "@worldcoin/idkit-core";
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -109,14 +110,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   ];
   const proofString = encodePacked(["uint256[8]"], [bigintProof]);
 
-  const merkleRootString = encodePacked(
-    ["uint256"],
-    [BigInt(parsedParams.payload.merkle_root)],
+  const merkleRootString = encodeBigInt(
+    BigInt(parsedParams.payload.merkle_root),
   );
 
-  const nullifierHashString = encodePacked(
-    ["uint256"],
-    [BigInt(parsedParams.payload.nullifier_hash)],
+  const nullifierHashString = encodeBigInt(
+    BigInt(parsedParams.payload.nullifier_hash),
   );
 
   const payload = {

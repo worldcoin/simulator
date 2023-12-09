@@ -4,7 +4,6 @@ export interface MetadataParams {
   app_id: string;
   action: string;
   signal: string;
-  external_nullifier: string;
   nullifier_hash?: string;
   action_description?: string;
   credential_types: CredentialType[];

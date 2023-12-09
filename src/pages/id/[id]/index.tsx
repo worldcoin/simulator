@@ -6,7 +6,7 @@ import { identityIDToEmoji } from "@/components/SelectID/IDRow";
 import { Settings } from "@/components/Settings";
 import useIdentity from "@/hooks/useIdentity";
 import { getFullProof } from "@/lib/proof";
-import { checkCache, encode, retryDownload } from "@/lib/utils";
+import { checkCache, encode, encodeBigInt, retryDownload } from "@/lib/utils";
 import type { BridgeInitialData } from "@/pages/api/pair-client";
 import { fetchMetadata } from "@/services/metadata";
 import type { ModalStore } from "@/stores/modalStore";
@@ -107,8 +107,6 @@ export default function Id() {
       setUrl(url);
       setBridgeInitialData(bridgeInitialData);
 
-      console.log({ bridgeInitialData });
-
       let credential_type: CredentialType | undefined;
 
       if (bridgeInitialData.credential_types.includes(CredentialType.Orb)) {
@@ -117,7 +115,7 @@ export default function Id() {
         credential_type = CredentialType.Device;
       }
 
-      const { verified, fullProof, rawExternalNullifier } = await getFullProof(
+      const { verified, fullProof } = await getFullProof(
         {
           ...bridgeInitialData,
           credential_type,
@@ -136,8 +134,7 @@ export default function Id() {
         app_id: bridgeInitialData.app_id,
         action: bridgeInitialData.action,
         signal: bridgeInitialData.signal,
-        external_nullifier: rawExternalNullifier,
-        nullifier_hash: fullProof.nullifierHash as string,
+        nullifier_hash: encodeBigInt(BigInt(fullProof.nullifierHash)),
         action_description: bridgeInitialData.action_description,
         credential_types: bridgeInitialData.credential_types,
       });
