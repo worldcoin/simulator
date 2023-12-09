@@ -1,5 +1,6 @@
 import { inclusionProof, insertIdentity } from "@/services/sequencer";
-import type { CredentialType, InclusionProofResponse } from "@/types";
+import type { InclusionProofResponse } from "@/types";
+import type { CredentialType } from "@worldcoin/idkit-core";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 interface SequencerRequest extends NextApiRequest {

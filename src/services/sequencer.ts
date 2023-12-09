@@ -1,6 +1,6 @@
 import { SEQUENCER_ENDPOINT } from "@/lib/utils";
 import type { InclusionProofResponse, SequencerRequest } from "@/types";
-import { CredentialType } from "@/types";
+import { CredentialType } from "@worldcoin/idkit-core";
 
 const SEQUENCER_STAGING_PASSWORD: Record<CredentialType, string | undefined> = {
   [CredentialType.Orb]: process.env.POLYGON_ORB_SEQUENCER_STAGING_PASSWORD,

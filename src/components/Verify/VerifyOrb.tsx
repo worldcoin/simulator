@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import useIdentity from "@/hooks/useIdentity";
-import { CredentialType, Status } from "@/types";
+import { Status } from "@/types";
+import { CredentialType } from "@worldcoin/idkit-core";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { memo, useState } from "react";

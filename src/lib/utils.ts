@@ -1,5 +1,5 @@
-import { CredentialType } from "@/types";
 import type { AbiEncodedValue, IDKitConfig } from "@worldcoin/idkit-core";
+import { CredentialType } from "@worldcoin/idkit-core";
 import type { HashFunctionOutput } from "@worldcoin/idkit-core/hashing";
 import {
   hashToField,

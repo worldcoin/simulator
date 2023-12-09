@@ -1,9 +1,10 @@
 import type { BridgeInitialData } from "@/pages/api/pair-client";
 import verificationKeys from "@/public/semaphore/verification_key.json";
 import type { FP, Verification } from "@/types";
-import { ProofError, type CredentialType, type Identity } from "@/types";
+import { ProofError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import type { CredentialType } from "@worldcoin/idkit-core";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
