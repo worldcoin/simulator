@@ -45,7 +45,7 @@ const icons = [
   "world-id",
 ] as const;
 
-export type IconType = typeof icons[number];
+export type IconType = (typeof icons)[number];
 
 export const Icon = React.memo(function Icon(props: {
   name: IconType;
