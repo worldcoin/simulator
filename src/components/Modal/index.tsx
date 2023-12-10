@@ -63,17 +63,6 @@ export function Modal() {
     return status === Status.Loading;
   }, [status]);
 
-  const isVerified = useMemo(() => {
-    const orbVerified =
-      biometricsChecked && activeIdentity?.verified[CredentialType.Orb];
-
-    const phoneVerified =
-      phoneChecked && activeIdentity?.verified[CredentialType.Device];
-
-    const isVerified = orbVerified ?? phoneVerified;
-    return isVerified;
-  }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
-
   const handleClick = useCallback(async () => {
     if (!activeIdentity) return;
 
@@ -103,7 +92,7 @@ export function Modal() {
     }
 
     // Show additional warning if the identity is unverified or still pending inclusion
-    if (!showConfirm && !isVerified) {
+    if (!showConfirm && !activeIdentity.verified[credential_type]) {
       setShowConfirm(true);
       return;
     }
@@ -152,7 +141,6 @@ export function Modal() {
     biometricsChecked,
     bridgeInitialData,
     fullProof,
-    isVerified,
     phoneChecked,
     setStatus,
     showConfirm,
@@ -170,8 +158,8 @@ export function Modal() {
             <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200">
               <Image
                 src={
-                  metadata.verified_app_logo ||
-                  metadata.logo_url ||
+                  metadata.verified_app_logo ??
+                  metadata.logo_url ??
                   "/icons/question.svg"
                 }
                 alt={metadata.name ?? "App logo"}
@@ -210,7 +198,7 @@ export function Modal() {
 
           <p className="mt-4 text-b2 text-gray-500">
             {metadata.name ?? "App Name"} is asking for permission to {}
-            {metadata.action?.description || "verify with World ID."}
+            {metadata.action?.description ?? "verify with World ID."}
           </p>
 
           <h3 className="mt-8 text-12 font-medium uppercase leading-[1.25] text-gray-500">
@@ -269,10 +257,7 @@ export function Modal() {
       {!isLoading && !metadata?.is_staging && <ModalEnvironment />}
 
       {!isLoading && showConfirm && (
-        <ModalConfirm
-          isVerified={isVerified}
-          handleClick={() => void handleClick()}
-        />
+        <ModalConfirm handleClick={() => void handleClick()} />
       )}
     </Drawer>
   );
