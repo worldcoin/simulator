@@ -5,7 +5,7 @@ import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import { cn } from "@/lib/utils";
-import type { ApproveRequestBody } from "@/pages/api/approve-request";
+import { approveRequest } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
@@ -112,37 +112,18 @@ export function Modal() {
       setShowConfirm(false);
       setStatus(Status.Pending);
 
-      try {
-        const payload = {
-          proof: fullProof.proof,
-          merkle_root: fullProof.merkleTreeRoot,
-          nullifier_hash: fullProof.nullifierHash,
-          // NOTE: we are adding this to the payload when user selects a credential type on modal
-          credential_type,
-        };
+      const approveResult = await approveRequest({
+        url,
+        fullProof,
+        credentialType: credential_type,
+      });
 
-        const res = await fetch("/api/approve-request", {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({
-            url,
-            payload,
-          } as ApproveRequestBody),
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to approve request");
-        }
-
-        setStatus(Status.Success);
-      } catch (error) {
-        console.error(error);
+      if (!approveResult.success) {
         setStatus(Status.Error);
+        return console.error(approveResult.error);
       }
+
+      setStatus(Status.Success);
     } else {
       console.error("Something went wrong");
       setStatus(Status.Error);

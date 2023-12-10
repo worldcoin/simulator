@@ -1,5 +1,10 @@
-import type { BridgeInitialData } from "@/pages/api/pair-client";
-import type { FP, MetadataResponse, Verification } from "@/types";
+import type {
+  BridgeInitialData,
+  FP,
+  MetadataResponse,
+  Verification,
+} from "@/types";
+
 import { Status } from "@/types";
 import { create } from "zustand";
 

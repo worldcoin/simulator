@@ -5,10 +5,8 @@ import { QRInput } from "@/components/QR/QRInput";
 import { identityIDToEmoji } from "@/components/SelectID/IDRow";
 import { Settings } from "@/components/Settings";
 import useIdentity from "@/hooks/useIdentity";
-import { getFullProof } from "@/lib/proof";
-import { checkCache, encode, encodeBigInt, retryDownload } from "@/lib/utils";
-import type { BridgeInitialData } from "@/pages/api/pair-client";
-import { fetchMetadata } from "@/services/metadata";
+import { checkCache, encode, retryDownload } from "@/lib/utils";
+import { pairClient } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { useUiStore, type UiStore } from "@/stores/ui";
@@ -18,7 +16,6 @@ import { CredentialType } from "@worldcoin/idkit-core";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo } from "react";
-import toast from "react-hot-toast";
 
 const DynamicChip = dynamic(() => import("@/components/Chip"), {
   ssr: false,
@@ -79,66 +76,18 @@ export default function Id() {
         return console.error("No active identity");
       }
 
-      let bridgeInitialData: BridgeInitialData | null = null;
+      const pairingResult = await pairClient({ url, activeIdentity });
 
-      try {
-        const res = await fetch("/api/pair-client", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to pair client", { cause: res.statusText });
-        }
-
-        bridgeInitialData = (await res.json()) as BridgeInitialData | null;
-      } catch (error) {
+      if (!pairingResult.success) {
         setStatus(Status.Error);
-        console.error(error);
-        toast.error("Something went wrong");
+        return console.error(pairingResult.error);
       }
 
-      if (!bridgeInitialData) {
-        setStatus(Status.Error);
-        return console.error("Pairing failed");
-      }
+      const { metadata, fullProof, bridgeInitialData } = pairingResult;
 
       setUrl(url);
       setBridgeInitialData(bridgeInitialData);
-
-      let credential_type: CredentialType | undefined;
-
-      if (bridgeInitialData.credential_types.includes(CredentialType.Orb)) {
-        credential_type = CredentialType.Orb;
-      } else {
-        credential_type = CredentialType.Device;
-      }
-
-      const { verified, fullProof } = await getFullProof(
-        {
-          ...bridgeInitialData,
-          credential_type,
-        },
-        activeIdentity,
-      );
-
       setFullProof(fullProof);
-
-      if (!verified) {
-        setStatus(Status.Error);
-        return console.error("Verification failed");
-      }
-
-      const metadata = await fetchMetadata({
-        app_id: bridgeInitialData.app_id,
-        action: bridgeInitialData.action,
-        signal: bridgeInitialData.signal,
-        nullifier_hash: encodeBigInt(BigInt(fullProof.nullifierHash)),
-        action_description: bridgeInitialData.action_description,
-        credential_types: bridgeInitialData.credential_types,
-      });
-
       setMetadata(metadata);
       setStatus(Status.Waiting);
     },

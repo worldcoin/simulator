@@ -27,6 +27,7 @@
     "@worldcoin/idkit-core": "^1.0.0-alpha.5",
     "@zk-kit/incremental-merkle-tree": "^1.0.0",
     "@zk-kit/protocols": "^1.11.1",
+    "buffer": "^6.0.3",
     "clsx": "^1.2.1",
     "dayjs": "^1.11.7",
     "ethers": "^6.9.0",
