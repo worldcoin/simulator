@@ -35,6 +35,7 @@ const getStore = (store: ModalStore) => ({
   setMetadata: store.setMetadata,
   setOpen: store.setOpen,
   setStatus: store.setStatus,
+  setErrorCode: store.setErrorCode,
   setUrl: store.setUrl,
 });
 
@@ -49,8 +50,14 @@ export default function Id() {
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
 
-  const { setOpen, setStatus, setUrl, setBridgeInitialData, setMetadata } =
-    useModalStore(getStore);
+  const {
+    setOpen,
+    setStatus,
+    setErrorCode,
+    setUrl,
+    setBridgeInitialData,
+    setMetadata,
+  } = useModalStore(getStore);
 
   const { scannerOpened, setScannerOpened, setSettingsOpened } =
     useUiStore(getUiStore);
@@ -73,6 +80,9 @@ export default function Id() {
 
       if (!pairingResult.success) {
         setStatus(Status.Error);
+        if (pairingResult.error.message == "input_error") {
+          setErrorCode("input_error");
+        }
         return console.error(pairingResult.error);
       }
 

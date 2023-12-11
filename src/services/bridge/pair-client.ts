@@ -31,6 +31,12 @@ export const pairClient = async ({
     const response = await fetch(`${bridgeURL}/request/${requestUUID}`);
 
     if (!response.ok) {
+      if (response.status == 404) {
+        return {
+          success: false,
+          error: handleError({ message: "input_error" }),
+        };
+      }
       throw new Error("Failed to fetch bridge request data");
     }
 
