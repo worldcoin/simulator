@@ -88,7 +88,7 @@ export const approveRequest = async ({
 
     if (!result.ok) {
       throw new Error(
-        `Unable to fetch bridge request data, ${result.status}: ${result.statusText}`,
+        `Unable to set bridge request data, ${result.status}: ${result.statusText}`,
       );
     }
   } catch (error) {
