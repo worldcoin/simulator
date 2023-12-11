@@ -12,6 +12,8 @@ export type ModalStore = {
   setOpen: (open: boolean) => void;
   status: Status;
   setStatus: (status: Status) => void;
+  errorCode: string;
+  setErrorCode: (errorCode: string) => void;
 
   bridgeInitialData: BridgeInitialData | null;
   setBridgeInitialData: (bridgeInitialData: BridgeInitialData) => void;
@@ -30,6 +32,8 @@ export const useModalStore = create<ModalStore>((set) => ({
   setOpen: (open) => set(() => ({ open })),
   status: Status.Loading,
   setStatus: (status) => set(() => ({ status })),
+  errorCode: "",
+  setErrorCode: (errorCode) => set(() => ({ errorCode })),
   metadata: null,
 
   setMetadata: (metadata: Partial<MetadataResponse> | null) =>
