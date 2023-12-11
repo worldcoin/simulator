@@ -1,5 +1,5 @@
 import { type Identity } from "@/types";
-import { CredentialType } from "@worldcoin/idkit";
+import { CredentialType } from "@worldcoin/idkit-core";
 import { useMemo } from "react";
 
 interface WarningProps {
@@ -7,6 +7,7 @@ interface WarningProps {
   onChain: boolean;
   biometricsChecked: boolean | "indeterminate";
   phoneChecked: boolean | "indeterminate";
+  isAllowedCredentialTypesSelected: boolean;
 }
 
 export default function Warning(props: WarningProps) {
@@ -19,8 +20,11 @@ export default function Warning(props: WarningProps) {
       return true;
     }
 
-    // Phone is selected but not verified
-    if (props.phoneChecked && !props.identity?.verified[CredentialType.Phone]) {
+    // Device is selected but not verified
+    if (
+      props.phoneChecked &&
+      !props.identity?.verified[CredentialType.Device]
+    ) {
       return true;
     }
 
@@ -36,7 +40,7 @@ export default function Warning(props: WarningProps) {
   }, [props.biometricsChecked, props.phoneChecked]);
 
   const onlyPhoneOnChain = useMemo(() => {
-    // only Phone is selected for on-chain app
+    // only Device is selected for on-chain app
     if (!props.biometricsChecked && props.phoneChecked && props.onChain) {
       return true;
     }
@@ -45,11 +49,21 @@ export default function Warning(props: WarningProps) {
 
   const visible = useMemo(() => {
     // visible if any warning states are true
-    if (noCredentials || invalidCredential || onlyPhoneOnChain) {
+    if (
+      noCredentials ||
+      invalidCredential ||
+      onlyPhoneOnChain ||
+      !props.isAllowedCredentialTypesSelected
+    ) {
       return true;
     }
     return false;
-  }, [noCredentials, invalidCredential, onlyPhoneOnChain]);
+  }, [
+    noCredentials,
+    invalidCredential,
+    onlyPhoneOnChain,
+    props.isAllowedCredentialTypesSelected,
+  ]);
 
   return (
     <>
@@ -60,7 +74,10 @@ export default function Warning(props: WarningProps) {
           {invalidCredential &&
             "This action will fail as the selected credential(s) do not exist. "}
           {onlyPhoneOnChain &&
-            "This action will fail as phone credentials are not supported on-chain. "}
+            "This action will fail as device credentials are not supported on-chain. "}
+          {!props.isAllowedCredentialTypesSelected &&
+            !noCredentials &&
+            "This action will fail as the selected credential(s) are not allowed for this app. "}
           Proceed to test an error case.
         </p>
       )}

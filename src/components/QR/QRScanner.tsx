@@ -3,6 +3,8 @@ import { Icon } from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { useModalStore } from "@/stores/modalStore";
+import type { UiStore } from "@/stores/ui";
+import { useUiStore } from "@/stores/ui";
 import type { ScanConstraints } from "@/types/qrcode";
 import jsQR from "jsqr";
 import React, {
@@ -17,29 +19,39 @@ import toast from "react-hot-toast";
 import { QRFrame } from "./QRFrame";
 
 interface QRScannerProps {
-  open: boolean;
-  onClose: () => void;
   className?: string;
   // NOTE: constraints in percents
   scanConstraints?: ScanConstraints;
   performVerification: (data: string) => Promise<void>;
-  onClickManualInput?: () => void;
 }
+
+const getUiStore = (store: UiStore) => ({
+  scannerOpened: store.scannerOpened,
+  setScannerOpened: store.setScannerOpened,
+  setQrInputOpened: store.setQrInputOpened,
+});
 
 export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
   const [data, setData] = useState<string | null>(null);
   const [valid, setValid] = useState<boolean | null>(null);
   const [allowed, setAllowed] = useState<boolean | null>(null);
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const containerRef = useRef<HTMLDivElement | null>(null);
-
   const { open } = useModalStore();
-
   const [imageSrc, setImageSrc] = useState(null as string | null);
   const [uploadedImageLoaded, setUploadedImageLoaded] = useState(false);
+
+  const { scannerOpened, setScannerOpened, setQrInputOpened } =
+    useUiStore(getUiStore);
+
+  const close = useCallback(() => setScannerOpened(false), [setScannerOpened]);
+
+  const onClickManualInput = useCallback(
+    () => setQrInputOpened(true),
+    [setQrInputOpened],
+  );
 
   useEffect(() => {
     if (!imgRef.current) return;
@@ -71,14 +83,17 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
     const t = setTimeout(() => setValid(null), 2000);
 
     try {
-      const res = parseWorldIDQRCode(data);
-      if (res.valid) {
-        clearTimeout(t);
-        setValid(true);
-        void props.performVerification(data);
-      } else {
-        throw res.errorMessage;
-      }
+      parseWorldIDQRCode(data)
+        .then((res) => {
+          if (res.valid) {
+            clearTimeout(t);
+            setValid(true);
+            void props.performVerification(data);
+          } else {
+            throw res.errorMessage;
+          }
+        })
+        .catch((err) => console.error(err));
     } catch (err) {
       setValid(false);
       toast.error(typeof err === "string" ? err : "Unsupported QR code");
@@ -153,9 +168,9 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
   // Close scanner once modal opens
   useEffect(() => {
     if (open) {
-      props.onClose();
+      close();
     }
-  }, [open, props]);
+  }, [open, close]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) {
@@ -181,8 +196,8 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
 
   return (
     <Dialog
-      open={props.open}
-      onClose={props.onClose}
+      open={scannerOpened}
+      onClose={close}
       closeIcon="close"
     >
       <h2 className="relative z-10 mt-3 py-1.5 text-center text-h3 font-bold text-white">
@@ -254,7 +269,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         <div className="absolute inset-x-0 bottom-12 flex justify-center gap-8">
           <button
             className="flex flex-col items-center"
-            onClick={props.onClickManualInput}
+            onClick={onClickManualInput}
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
               <Icon
@@ -267,7 +282,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
           </button>
           <button
             className="flex flex-col items-center"
-            onClick={props.onClickManualInput}
+            onClick={onClickManualInput}
             {...getRootProps()}
           >
             <input {...getInputProps()} />

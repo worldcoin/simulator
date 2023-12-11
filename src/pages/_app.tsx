@@ -1,20 +1,16 @@
 import Layout from "@/components/Layout";
 import StatusBar from "@/components/StatusBar";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { METADATA } from "@/lib/constants";
-import { setupClient } from "@/services/walletconnect";
 import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
 import "@/styles/globals.css";
-import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import type { AppContext, AppProps } from "next/app";
 import { Rubik, Sora } from "next/font/google";
 import Head from "next/head";
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { useMediaQuery } from "usehooks-ts";
-import { WagmiConfig, createConfig } from "wagmi";
 
 // Must be loaded after global styles
 import { checkCache, retryDownload } from "@/lib/utils";
@@ -31,18 +27,6 @@ const rubik = Rubik({
   weight: ["400", "500", "600"],
 });
 
-const config = createConfig(
-  getDefaultConfig({
-    appName: METADATA.name,
-    appDescription: METADATA.description,
-    appUrl: METADATA.url,
-    appIcon: METADATA.icons[0],
-    infuraId: process.env.NEXT_PUBLIC_INFURA_ID,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PID!,
-  }),
-);
-
 const getStore = (store: CacheStore) => ({
   complete: store.complete,
   setComplete: store.setComplete,
@@ -52,22 +36,8 @@ export default function App({
   Component,
   pageProps,
 }: AppProps<{ nonce: string }>) {
-  const [ready, setReady] = useState(false);
   const isMobile = useMediaQuery("(max-width: 499px)");
   const { setComplete } = useCacheStore(getStore);
-
-  // Initialize WalletConnect
-  useEffect(() => {
-    const initialize = async () => {
-      await setupClient();
-      setReady(true);
-    };
-
-    if (!ready) {
-      void initialize();
-    }
-  }, [ready]);
-  useWalletConnect(ready);
 
   // Listen for service worker to complete semaphore downloads
   useEffect(() => {
@@ -129,14 +99,12 @@ export default function App({
           href="/favicon/favicon-16x16.png"
         />
       </Head>
-      <WagmiConfig config={config}>
-        <ConnectKitProvider>
-          <Layout>
-            <StatusBar />
-            <Component {...pageProps} />
-          </Layout>
-        </ConnectKitProvider>
-      </WagmiConfig>
+
+      <Layout>
+        <StatusBar />
+        <Component {...pageProps} />
+      </Layout>
+
       <Toaster position={isMobile ? "top-center" : "top-right"} />
       <style
         jsx

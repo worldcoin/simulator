@@ -1,10 +1,30 @@
-import { CredentialType } from "@/types";
+import type { AbiEncodedValue, IDKitConfig } from "@worldcoin/idkit-core";
+import { CredentialType } from "@worldcoin/idkit-core";
+import type { HashFunctionOutput } from "@worldcoin/idkit-core/hashing";
+
+import {
+  hashToField,
+  packAndEncode,
+  solidityEncode,
+} from "@worldcoin/idkit-core/hashing";
+
+import { Buffer } from "buffer/";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { encodePacked } from "viem";
 import { ORB_SEQUENCER_STAGING, PHONE_SEQUENCER_STAGING } from "./constants";
 
 export function encode(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
+}
+
+/**
+ * Encodes a BigInt value for output to other systems (e.g. nullifier hash or Merkle root)
+ * @param value
+ * @returns
+ */
+export function encodeBigInt(value: bigint): string {
+  return encodePacked(["uint256"], [value]);
 }
 
 async function checkFilesInCache(files: string[]) {
@@ -49,7 +69,58 @@ export async function retryDownload(): Promise<void> {
 // Mappings
 export const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
   [CredentialType.Orb]: ORB_SEQUENCER_STAGING,
-  [CredentialType.Phone]: PHONE_SEQUENCER_STAGING,
+  [CredentialType.Device]: PHONE_SEQUENCER_STAGING,
 };
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
+
+export const generateExternalNullifier = (
+  app_id: IDKitConfig["app_id"],
+  action: IDKitConfig["action"],
+): HashFunctionOutput => {
+  if (!action) return packAndEncode([["uint256", hashToField(app_id).hash]]);
+  if (typeof action === "string") action = solidityEncode(["string"], [action]);
+
+  return packAndEncode([
+    ["uint256", hashToField(app_id).hash],
+    ...action.types.map(
+      (type, index) =>
+        [type, (action as AbiEncodedValue).values[index]] as [string, unknown],
+    ),
+  ]);
+};
+
+export const buffer_encode = (buffer: ArrayBuffer): string => {
+  return Buffer.from(buffer).toString("base64");
+};
+
+export const buffer_decode = (encoded: string): ArrayBuffer => {
+  return Buffer.from(encoded, "base64");
+};
+
+export const encryptRequest = async (
+  key: CryptoKey,
+  iv: ArrayBuffer,
+  request: string,
+): Promise<{ payload: string; iv: string }> => {
+  const encoder = new TextEncoder();
+
+  return {
+    iv: buffer_encode(iv),
+    payload: buffer_encode(
+      await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        key,
+        encoder.encode(request),
+      ),
+    ),
+  };
+};
+
+export const handleError = (params: { error?: unknown; message?: string }) => {
+  if (params.error && params.error instanceof Error) {
+    return params.error;
+  }
+
+  return new Error(params.message, { cause: params.error });
+};

@@ -1,28 +1,33 @@
 import Header from "@/components/Header";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { client, core } from "@/services/walletconnect";
+import type { UiStore } from "@/stores/ui";
+import { useUiStore } from "@/stores/ui";
 import { useRouter } from "next/router";
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Button from "./Button";
 import { Drawer } from "./Drawer";
 import { Icon } from "./Icon";
 import { IconGradient } from "./Icon/IconGradient";
 
-export const Settings = memo(function Settings(props: {
-  open: boolean;
-  onClose: () => void;
-  commitment: string;
-}) {
+const getUiStore = (store: UiStore) => ({
+  settingsOpened: store.settingsOpened,
+  setSettingsOpened: store.setSettingsOpened,
+});
+
+export const Settings = memo(function Settings(props: { commitment: string }) {
+  const { settingsOpened, setSettingsOpened } = useUiStore(getUiStore);
   const router = useRouter();
   const { id } = router.query;
   const [version, setVersion] = useState("2.0");
   const [copiedCommitment, setCopiedCommitment] = useState(false);
-
   const { resetIdentityStore } = useIdentity();
-  const { disconnectSessions, disconnectPairings } = useWalletConnect();
+
+  const close = useCallback(
+    () => setSettingsOpened(false),
+    [setSettingsOpened],
+  );
 
   const handleCopyCommitment = async () => {
     try {
@@ -38,22 +43,12 @@ export const Settings = memo(function Settings(props: {
   };
 
   const handleLogout = async () => {
-    const sessions = client.getActiveSessions();
-    const sessionTopics = Object.keys(sessions);
-    const pairings = core.pairing.getPairings();
-    const pairingTopics = pairings.map((pairing) => pairing.topic);
-
-    try {
-      await disconnectSessions(sessionTopics);
-      await disconnectPairings(pairingTopics);
-      console.info("WalletConnect disconnected");
-    } catch (error) {
-      console.error(`WalletConnect failed to disconnect, ${error}`);
-    }
-
     // Clear session storage
     resetIdentityStore();
     console.info("Session storage cleared");
+
+    // Close settings drawer
+    close();
 
     // Redirect to landing page
     toast.success(`Logged out of identity ${id}`);
@@ -70,15 +65,15 @@ export const Settings = memo(function Settings(props: {
   return (
     <Drawer
       fullHeight
-      open={props.open}
-      onClose={props.onClose}
+      open={settingsOpened}
+      onClose={close}
     >
       <div className="flex h-full flex-col justify-between">
         <div>
           <Header
             heading="Settings"
             iconLeft="chevron-thick"
-            onClickLeft={props.onClose}
+            onClickLeft={close}
           />
           <Item
             heading="Identity commitment"

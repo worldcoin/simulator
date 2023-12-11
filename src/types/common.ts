@@ -8,11 +8,6 @@ export enum Environment {
   Staging = "staging",
 }
 
-export enum CredentialType {
-  Orb = "orb",
-  Phone = "phone",
-}
-
 export enum Status {
   Loading,
   Waiting,

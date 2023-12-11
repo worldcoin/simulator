@@ -1,11 +1,13 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
-import type { FP, SignRequest, Verification } from "@/types";
-import { ProofError, type CredentialType, type Identity } from "@/types";
+import type { BridgeInitialData, FP, Verification } from "@/types";
+import { ProofError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import type { CredentialType } from "@worldcoin/idkit-core";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
+import { generateExternalNullifier } from "./utils";
 import { validateExternalNullifier, validateSignal } from "./validation";
 
 /**
@@ -181,16 +183,21 @@ async function verifySemaphoreProof(
  * @param credentialType The credential type to generate the proof for.
  * @returns The full semaphore proof and its verification status.
  */
-export default async function getFullProof(
-  request: SignRequest,
+export const getFullProof = async (
+  bridgeInitialData: Omit<BridgeInitialData, "credential_type"> & {
+    credential_type: CredentialType;
+  },
   identity: Identity,
-  credentialType: CredentialType,
-): Promise<Verification> {
-  const { signal: rawSignal, external_nullifier: rawExternalNullifier } =
-    request.params[0];
+): Promise<Verification> => {
   try {
     // Validate inputs
-    const signal = await validateSignal(rawSignal);
+    const signal = await validateSignal(bridgeInitialData.signal);
+
+    const rawExternalNullifier = generateExternalNullifier(
+      bridgeInitialData.app_id,
+      bridgeInitialData.action,
+    ).digest;
+
     const externalNullifier = await validateExternalNullifier(
       rawExternalNullifier,
     );
@@ -198,7 +205,11 @@ export default async function getFullProof(
     const zkIdentity = new ZkIdentity(identity.zkIdentity);
 
     // Generate proofs
-    const merkleProof = getMerkleProof(identity, credentialType);
+    const merkleProof = getMerkleProof(
+      identity,
+      bridgeInitialData.credential_type,
+    );
+
     const fullProof = await generateSemaphoreProof(
       zkIdentity,
       merkleProof,
@@ -217,4 +228,4 @@ export default async function getFullProof(
       throw new ProofError(-32602, "generic_error");
     }
   }
-}
+};

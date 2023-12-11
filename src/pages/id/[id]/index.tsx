@@ -6,13 +6,16 @@ import { identityIDToEmoji } from "@/components/SelectID/IDRow";
 import { Settings } from "@/components/Settings";
 import useIdentity from "@/hooks/useIdentity";
 import { checkCache, encode, retryDownload } from "@/lib/utils";
-import { parseWorldIDQRCode } from "@/lib/validation";
-import { pairClient } from "@/services/walletconnect";
+import { pairClient } from "@/services/bridge";
+import type { ModalStore } from "@/stores/modalStore";
+import { useModalStore } from "@/stores/modalStore";
+import { useUiStore, type UiStore } from "@/stores/ui";
+import { Status } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { CredentialType } from "@worldcoin/idkit";
+import { CredentialType } from "@worldcoin/idkit-core";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 const DynamicChip = dynamic(() => import("@/components/Chip"), {
   ssr: false,
@@ -27,32 +30,68 @@ const DynamicHeader = dynamic(() => import("@/components/Header"), {
   ssr: false,
 });
 
+const getStore = (store: ModalStore) => ({
+  setBridgeInitialData: store.setBridgeInitialData,
+  setMetadata: store.setMetadata,
+  setOpen: store.setOpen,
+  setStatus: store.setStatus,
+  setUrl: store.setUrl,
+});
+
+const getUiStore = (store: UiStore) => ({
+  scannerOpened: store.scannerOpened,
+  setScannerOpened: store.setScannerOpened,
+  setSettingsOpened: store.setSettingsOpened,
+});
+
 export default function Id() {
   const router = useRouter();
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
 
+  const { setOpen, setStatus, setUrl, setBridgeInitialData, setMetadata } =
+    useModalStore(getStore);
+
+  const { scannerOpened, setScannerOpened, setSettingsOpened } =
+    useUiStore(getUiStore);
+
   useEffect(() => {
     if (id) setActiveIdentityID(id as string);
   }, [id, setActiveIdentityID]);
 
-  const [isOpenScanner, setOpenScanner] = useState(false);
-  const [isOpenQRInput, setOpenQRInput] = useState(false);
-  const [isOpenSettings, setOpenSettings] = useState(false);
+  const performVerification = useCallback(
+    async (url: string) => {
+      setOpen(true);
+      const filesInCache = await checkCache();
+      if (!filesInCache) await retryDownload();
 
-  const performVerification = async (data: string) => {
-    const filesInCache = await checkCache();
-    if (!filesInCache) await retryDownload();
+      if (!activeIdentity) {
+        return console.error("No active identity");
+      }
 
-    const { uri } = parseWorldIDQRCode(data);
-    if (activeIdentity && uri) {
-      console.log("Performing verification");
-      console.log("URI: ", uri);
-      console.log("Identity: ", activeIdentity);
-      await pairClient(uri);
-      console.log("Verification complete");
-    }
-  };
+      const pairingResult = await pairClient({ url });
+
+      if (!pairingResult.success) {
+        setStatus(Status.Error);
+        return console.error(pairingResult.error);
+      }
+
+      const { metadata, bridgeInitialData } = pairingResult;
+
+      setUrl(url);
+      setBridgeInitialData(bridgeInitialData);
+      setMetadata(metadata);
+      setStatus(Status.Waiting);
+    },
+    [
+      activeIdentity,
+      setBridgeInitialData,
+      setMetadata,
+      setOpen,
+      setStatus,
+      setUrl,
+    ],
+  );
 
   const activeCommitment = useMemo(() => {
     const zkIdentityStr = activeIdentity?.zkIdentity;
@@ -74,7 +113,7 @@ export default function Id() {
         iconRight="setting"
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClickLeft={async () => router.push("/select-id")}
-        onClickRight={() => setOpenSettings(true)}
+        onClickRight={() => setSettingsOpened(true)}
       >
         <DynamicChip />
       </DynamicHeader>
@@ -82,7 +121,7 @@ export default function Id() {
       <DynamicWorldID
         verified={activeIdentity?.verified[CredentialType.Orb]}
         bioVerified={activeIdentity?.verified[CredentialType.Orb]}
-        phoneVerified={activeIdentity?.verified[CredentialType.Phone]}
+        phoneVerified={activeIdentity?.verified[CredentialType.Device]}
       />
 
       <div className="grid grid-cols-1 gap-2">
@@ -108,7 +147,7 @@ export default function Id() {
 
         <button
           className="rounded-12 bg-gray-100 p-4 text-left"
-          onClick={() => setOpenScanner(true)}
+          onClick={() => setScannerOpened(true)}
         >
           <IconGradient
             name="qr-code"
@@ -127,31 +166,13 @@ export default function Id() {
         </button>
       </div>
 
-      {isOpenScanner && (
-        <DynamicQRScanner
-          open={isOpenScanner}
-          onClose={() => setOpenScanner(false)}
-          onClickManualInput={() => setOpenQRInput(true)}
-          performVerification={performVerification}
-        />
+      {scannerOpened && (
+        <DynamicQRScanner performVerification={performVerification} />
       )}
 
-      <QRInput
-        open={isOpenQRInput}
-        onClose={() => setOpenQRInput(false)}
-        performVerification={performVerification}
-      />
-
-      {activeCommitment && (
-        <Settings
-          open={isOpenSettings}
-          onClose={() => setOpenSettings(false)}
-          commitment={activeCommitment}
-        />
-      )}
-
+      <QRInput performVerification={performVerification} />
+      {activeCommitment && <Settings commitment={activeCommitment} />}
       <Modal />
-
       <Maintenance />
     </div>
   );

@@ -1,4 +1,4 @@
-import type { CredentialType } from "./common";
+import type { CredentialType } from "@worldcoin/idkit-core";
 
 export interface SequencerRequest {
   endpoint: string;

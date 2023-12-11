@@ -8,7 +8,6 @@ async function precheckAction(
   const body = {
     action: request.action,
     nullifier_hash: request.nullifier_hash,
-    external_nullifier: request.external_nullifier,
   };
 
   try {
@@ -39,12 +38,14 @@ export async function fetchMetadata(
 ): Promise<Partial<MetadataResponse>> {
   let metadata: Partial<MetadataResponse> = {
     id: request.app_id,
+
     action: {
       description: request.action_description,
     },
   };
 
   const response = await precheckAction(request);
+
   if (response) {
     metadata = {
       ...metadata,

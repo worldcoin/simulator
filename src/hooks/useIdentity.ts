@@ -2,8 +2,8 @@ import { encode } from "@/lib/utils";
 import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
 import type { Identity, InclusionProofResponse } from "@/types";
-import { CredentialType } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
+import { CredentialType } from "@worldcoin/idkit-core";
 import { useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
 
@@ -47,8 +47,8 @@ const useIdentity = () => {
         CredentialType.Orb,
         encodedCommitment,
       );
-      const phoneProof = await getIdentityProof(
-        CredentialType.Phone,
+      const deviceProof = await getIdentityProof(
+        CredentialType.Device,
         encodedCommitment,
       );
 
@@ -58,12 +58,12 @@ const useIdentity = () => {
         id,
         verified: {
           [CredentialType.Orb]: orbProof !== null,
-          [CredentialType.Phone]: phoneProof !== null,
+          [CredentialType.Device]: deviceProof !== null,
         },
 
         inclusionProof: {
           [CredentialType.Orb]: orbProof,
-          [CredentialType.Phone]: phoneProof,
+          [CredentialType.Device]: deviceProof,
         },
         proofGenerationTime: Date.now(),
       };
@@ -98,11 +98,11 @@ const useIdentity = () => {
         zkIdentity: zkIdentity.toString(),
         verified: {
           [CredentialType.Orb]: true,
-          [CredentialType.Phone]: true,
+          [CredentialType.Device]: true,
         },
         inclusionProof: {
           [CredentialType.Orb]: null,
-          [CredentialType.Phone]: null,
+          [CredentialType.Device]: null,
         },
         proofGenerationTime: null,
       };

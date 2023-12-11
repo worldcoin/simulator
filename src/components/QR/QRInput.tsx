@@ -2,28 +2,44 @@ import Button from "@/components/Button";
 import useIdentity from "@/hooks/useIdentity";
 import { cn } from "@/lib/utils";
 import { useModalStore } from "@/stores/modalStore";
-import { memo, useEffect, useMemo, useState } from "react";
+import { useUiStore, type UiStore } from "@/stores/ui";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog } from "../Dialog";
 import { Input } from "../Input";
 
+const getUiStore = (store: UiStore) => ({
+  qrInputOpened: store.qrInputOpened,
+  setQrInputOpened: store.setQrInputOpened,
+});
+
 export const QRInput = memo(function QRInput(props: {
-  open: boolean;
-  onClose: () => void;
   performVerification: (uri: string) => Promise<void>;
 }) {
   const [value, setValue] = useState("");
-  useIdentity();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { open } = useModalStore();
+  const { qrInputOpened, setQrInputOpened } = useUiStore(getUiStore);
+  useIdentity();
+
+  const close = useCallback(() => setQrInputOpened(false), [setQrInputOpened]);
 
   const isTextInvalidQRInput = (uri: string) => {
     if (!uri) return false;
     try {
-      const url = decodeURIComponent(uri);
-      const regex =
-        /^https:\/\/worldcoin\.org\/verify\?w=wc:[a-zA-Z0-9]{64}@2\?relay-protocol=irn&symKey=[a-zA-Z0-9]{64}$/;
-      const match = url.match(regex) === null;
-      console.log("match: ", match);
-      return match;
+      const url = new URL(uri);
+
+      return !(
+        url.protocol == "https:" &&
+        url.host == "worldcoin.org" &&
+        url.pathname == "/verify" &&
+        url.searchParams.get("t") == "wld" &&
+        url.searchParams
+          .get("i")
+          ?.match(
+            /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/,
+          ) &&
+        url.searchParams.get("k")?.match(/[^&]*/)
+      );
     } catch (e) {
       return true;
     }
@@ -38,24 +54,19 @@ export const QRInput = memo(function QRInput(props: {
     if (data || data === "") setValue(data);
   };
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { performVerification, onClose } = props;
   useEffect(() => {
     if (value && !isInvalid) {
       setIsSubmitting(true);
-      performVerification(value).then(
-        () => {
+
+      props
+        .performVerification(value)
+        .then(() => {
           setIsSubmitting(false);
-          onClose();
-        },
-        (error) => {
-          setIsSubmitting(false);
-          console.error("Verification failed", error);
-        },
-      );
+          close();
+        })
+        .catch((e) => console.error(e));
     }
-  }, [value, isInvalid, performVerification, onClose]);
+  }, [value, isInvalid, props, close]);
 
   const handleSubmit = async (
     event:
@@ -71,21 +82,21 @@ export const QRInput = memo(function QRInput(props: {
   // Close input once modal opens
   useEffect(() => {
     if (open) {
-      props.onClose();
+      close();
     }
-  }, [open, props]);
+  }, [close, open]);
 
   // Clear input once dialog is closed
   useEffect(() => {
-    if (!props.open) {
+    if (!qrInputOpened) {
       setValue("");
     }
-  }, [props.open]);
+  }, [qrInputOpened]);
 
   return (
     <Dialog
-      open={props.open}
-      onClose={props.onClose}
+      open={qrInputOpened}
+      onClose={close}
       closeIcon="direction-left"
     >
       <div className="mt-24 py-3 text-center font-sora text-h2">

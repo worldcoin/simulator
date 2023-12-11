@@ -1,14 +1,14 @@
 import { Icon } from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import type { Identity } from "@/types";
-import { CredentialType } from "@worldcoin/idkit";
+import { CredentialType } from "@worldcoin/idkit-core";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 export default function IDRow({ identity }: { identity: Identity }) {
   const router = useRouter();
-  const verifiedPhone = identity.verified[CredentialType.Phone];
+  const verifiedPhone = identity.verified[CredentialType.Device];
   const verifiedOrb = identity.verified[CredentialType.Orb];
   return (
     <button
@@ -37,11 +37,11 @@ export default function IDRow({ identity }: { identity: Identity }) {
           />
           <h4 className=" text-b4 text-gray-500">
             {verifiedOrb && verifiedPhone
-              ? "Verified (Orb & Phone)"
+              ? "Verified (Orb & Device)"
               : verifiedOrb
               ? "Verified (Orb)"
               : verifiedPhone
-              ? "Verified (Phone)"
+              ? "Verified (Device)"
               : "Unverified"}
           </h4>
         </div>

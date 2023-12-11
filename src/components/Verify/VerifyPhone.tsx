@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import useIdentity from "@/hooks/useIdentity";
-import { CredentialType, Status } from "@/types";
+import { Status } from "@/types";
+import { CredentialType } from "@worldcoin/idkit-core";
 import { useRouter } from "next/router";
 import { memo, useState } from "react";
 import toast from "react-hot-toast";
@@ -23,7 +24,7 @@ export const VerifyPhone = memo(function VerifyPhone(props: {
     setStatus(Status.Pending);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      await props.handleVerify(CredentialType.Phone);
+      await props.handleVerify(CredentialType.Device);
       setStatus(Status.Success);
       if (activeIdentity) {
         // Display verified state for 2 seconds
