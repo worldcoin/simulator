@@ -1,12 +1,9 @@
-import type { CredentialType } from "@worldcoin/idkit-core";
-
 export interface MetadataParams {
   app_id: string;
   action: string;
   signal: string;
   nullifier_hash?: string;
   action_description?: string;
-  credential_types: CredentialType[];
 }
 
 export interface MetadataResponse {

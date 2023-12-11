@@ -32,7 +32,6 @@ const DynamicHeader = dynamic(() => import("@/components/Header"), {
 
 const getStore = (store: ModalStore) => ({
   setBridgeInitialData: store.setBridgeInitialData,
-  setFullProof: store.setFullProof,
   setMetadata: store.setMetadata,
   setOpen: store.setOpen,
   setStatus: store.setStatus,
@@ -50,14 +49,8 @@ export default function Id() {
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
 
-  const {
-    setOpen,
-    setStatus,
-    setUrl,
-    setBridgeInitialData,
-    setMetadata,
-    setFullProof,
-  } = useModalStore(getStore);
+  const { setOpen, setStatus, setUrl, setBridgeInitialData, setMetadata } =
+    useModalStore(getStore);
 
   const { scannerOpened, setScannerOpened, setSettingsOpened } =
     useUiStore(getUiStore);
@@ -76,25 +69,23 @@ export default function Id() {
         return console.error("No active identity");
       }
 
-      const pairingResult = await pairClient({ url, activeIdentity });
+      const pairingResult = await pairClient({ url });
 
       if (!pairingResult.success) {
         setStatus(Status.Error);
         return console.error(pairingResult.error);
       }
 
-      const { metadata, fullProof, bridgeInitialData } = pairingResult;
+      const { metadata, bridgeInitialData } = pairingResult;
 
       setUrl(url);
       setBridgeInitialData(bridgeInitialData);
-      setFullProof(fullProof);
       setMetadata(metadata);
       setStatus(Status.Waiting);
     },
     [
       activeIdentity,
       setBridgeInitialData,
-      setFullProof,
       setMetadata,
       setOpen,
       setStatus,

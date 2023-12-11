@@ -4,6 +4,7 @@ import { Icon } from "@/components/Icon";
 import { IconGradient } from "@/components/Icon/IconGradient";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
+import { getFullProof } from "@/lib/proof";
 import { cn } from "@/lib/utils";
 import { approveRequest } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
@@ -27,7 +28,6 @@ const getStore = (store: ModalStore) => ({
   bridgeInitialData: store.bridgeInitialData,
   url: store.url,
   reset: store.reset,
-  fullProof: store.fullProof,
 });
 
 export function Modal() {
@@ -38,7 +38,7 @@ export function Modal() {
     boolean | "indeterminate"
   >(activeIdentity?.verified[CredentialType.Orb] ?? false);
 
-  const [phoneChecked, setPhoneChecked] = useState<boolean | "indeterminate">(
+  const [deviceChecked, setDeviceChecked] = useState<boolean | "indeterminate">(
     activeIdentity?.verified[CredentialType.Device] ?? false,
   );
 
@@ -51,7 +51,6 @@ export function Modal() {
     url,
     metadata,
     reset,
-    fullProof,
   } = useModalStore(getStore);
 
   const close = useCallback(() => {
@@ -68,35 +67,34 @@ export function Modal() {
       biometricsChecked && activeIdentity?.verified[CredentialType.Orb];
 
     const phoneVerified =
-      phoneChecked && activeIdentity?.verified[CredentialType.Device];
+      deviceChecked && activeIdentity?.verified[CredentialType.Device];
 
     const isVerified = orbVerified ?? phoneVerified;
     return isVerified;
-  }, [biometricsChecked, activeIdentity?.verified, phoneChecked]);
+  }, [biometricsChecked, activeIdentity?.verified, deviceChecked]);
 
   const handleClick = useCallback(async () => {
     if (!activeIdentity) return;
 
     const credentialTypeMap = {
       [CredentialType.Orb]: biometricsChecked,
-      [CredentialType.Device]: phoneChecked,
+      [CredentialType.Device]: deviceChecked,
     };
+
+    if (!bridgeInitialData) {
+      setStatus(Status.Error);
+      return console.error("No bridge initial data");
+    }
 
     const selectedCredentialTypes = Object.entries(credentialTypeMap)
       .filter(([_type, isChecked]) => isChecked)
       .map(([type]) => type) as CredentialType[];
 
-    const credentialsIntersections = selectedCredentialTypes.filter((value) =>
-      bridgeInitialData?.credential_types.includes(value),
-    );
-
     let credential_type: CredentialType | undefined;
 
-    if (credentialsIntersections.length === 0) {
-      // TODO: handle this case
-    }
-
-    if (credentialsIntersections.includes(CredentialType.Orb)) {
+    // NOTE: Orb can be checked in two cases - picked orb only or picked both.
+    // In both cases we should prefer orb, otherwise device
+    if (selectedCredentialTypes.includes(CredentialType.Orb)) {
       credential_type = CredentialType.Orb;
     } else {
       credential_type = CredentialType.Device;
@@ -108,7 +106,20 @@ export function Modal() {
       return;
     }
 
-    if (url && bridgeInitialData && fullProof) {
+    const { verified, fullProof } = await getFullProof(
+      {
+        ...bridgeInitialData,
+        credential_type,
+      },
+      activeIdentity,
+    );
+
+    if (!verified) {
+      setStatus(Status.Error);
+      return console.error("Not verified");
+    }
+
+    if (url) {
       setShowConfirm(false);
       setStatus(Status.Pending);
 
@@ -132,9 +143,8 @@ export function Modal() {
     activeIdentity,
     biometricsChecked,
     bridgeInitialData,
-    fullProof,
     isVerified,
-    phoneChecked,
+    deviceChecked,
     setStatus,
     showConfirm,
     url,
@@ -218,11 +228,11 @@ export function Modal() {
           <Item
             heading="Device"
             className="mt-3 p-4"
-            onClick={() => setPhoneChecked(!phoneChecked)}
+            onClick={() => setDeviceChecked(!deviceChecked)}
             indicator={() => (
               <Checkbox
-                checked={phoneChecked}
-                setChecked={setPhoneChecked}
+                checked={deviceChecked}
+                setChecked={setDeviceChecked}
               />
             )}
           >
@@ -236,7 +246,7 @@ export function Modal() {
             identity={activeIdentity}
             onChain={metadata.can_user_verify === "on-chain" ? true : false}
             biometricsChecked={biometricsChecked}
-            phoneChecked={phoneChecked}
+            phoneChecked={deviceChecked}
           />
 
           <ModalStatus

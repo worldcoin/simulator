@@ -1,32 +1,20 @@
-import { getFullProof } from "@/lib/proof";
-import { buffer_decode, encodeBigInt, handleError } from "@/lib/utils";
+import { buffer_decode, handleError } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { fetchMetadata } from "@/services/metadata";
-
-import type {
-  BridgeServiceReturnType,
-  FP,
-  Identity,
-  MetadataResponse,
-} from "@/types";
-
+import type { BridgeServiceReturnType, MetadataResponse } from "@/types";
 import { type BridgeInitialData, type BridgeRequestData } from "@/types";
-import { CredentialType } from "@worldcoin/idkit-core";
 
 type Props = {
   url: string;
-  activeIdentity: Identity;
 };
 
 type PairClientReturnType = BridgeServiceReturnType<{
-  fullProof: FP;
   metadata: Partial<MetadataResponse>;
   bridgeInitialData: BridgeInitialData;
 }>;
 
 export const pairClient = async ({
   url,
-  activeIdentity,
 }: Props): Promise<PairClientReturnType> => {
   const { valid, requestUUID, bridgeURL, key } = await parseWorldIDQRCode(url);
 
@@ -106,37 +94,13 @@ export const pairClient = async ({
     };
   }
 
-  let credential_type: CredentialType | undefined;
-
-  if (bridgeInitialData.credential_types.includes(CredentialType.Orb)) {
-    credential_type = CredentialType.Orb;
-  } else {
-    credential_type = CredentialType.Device;
-  }
-
-  const { verified, fullProof } = await getFullProof(
-    {
-      ...bridgeInitialData,
-      credential_type,
-    },
-    activeIdentity,
-  );
-
-  if (!verified) {
-    return {
-      success: false,
-      error: handleError({ message: "Failed to generate full proof" }),
-    };
-  }
-
   const metadata = await fetchMetadata({
     app_id: bridgeInitialData.app_id,
     action: bridgeInitialData.action,
     signal: bridgeInitialData.signal,
-    nullifier_hash: encodeBigInt(BigInt(fullProof.nullifierHash)),
+    nullifier_hash: "",
     action_description: bridgeInitialData.action_description,
-    credential_types: bridgeInitialData.credential_types,
   });
 
-  return { success: true, fullProof, metadata, bridgeInitialData };
+  return { success: true, metadata, bridgeInitialData };
 };

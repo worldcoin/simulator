@@ -1,6 +1,5 @@
 import type {
   BridgeInitialData,
-  FP,
   MetadataResponse,
   Verification,
 } from "@/types";
@@ -16,9 +15,6 @@ export type ModalStore = {
 
   bridgeInitialData: BridgeInitialData | null;
   setBridgeInitialData: (bridgeInitialData: BridgeInitialData) => void;
-
-  fullProof: FP | null;
-  setFullProof: (fullProof: FP) => void;
 
   metadata: Partial<MetadataResponse> | null;
   setMetadata: (metadata: Partial<MetadataResponse> | null) => void;
@@ -44,9 +40,6 @@ export const useModalStore = create<ModalStore>((set) => ({
   bridgeInitialData: null,
   setBridgeInitialData: (bridgeInitialData) =>
     set(() => ({ bridgeInitialData })),
-
-  fullProof: null,
-  setFullProof: (fullProof) => set(() => ({ fullProof })),
 
   verification: null,
   setVerification: (verification) => set(() => ({ verification })),
