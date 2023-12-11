@@ -157,11 +157,7 @@ export function Modal() {
           <div className="flex items-center gap-x-4">
             <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200">
               <Image
-                src={
-                  metadata.verified_app_logo ??
-                  metadata.logo_url ??
-                  "/icons/question.svg"
-                }
+                src={metadata.verified_app_logo ?? "/icons/question.svg"}
                 alt={metadata.name ?? "App logo"}
                 width={40}
                 height={40}
