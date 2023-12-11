@@ -10,7 +10,12 @@ import { approveRequest } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
-import { CredentialType } from "@worldcoin/idkit-core";
+
+import {
+  CredentialType,
+  verification_level_to_credential_types,
+} from "@worldcoin/idkit-core";
+
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import ModalConfirm from "./ModalConfirm";
@@ -62,22 +67,49 @@ export function Modal() {
     return status === Status.Loading;
   }, [status]);
 
-  const handleClick = useCallback(async () => {
-    if (!activeIdentity) return;
-
-    const credentialTypeMap = {
+  const credentialTypeMap = useMemo(
+    () => ({
       [CredentialType.Orb]: biometricsChecked,
       [CredentialType.Device]: deviceChecked,
-    };
+    }),
+    [biometricsChecked, deviceChecked],
+  );
+
+  const selectedCredentialTypes = useMemo(
+    () =>
+      Object.entries(credentialTypeMap)
+        .filter(([_type, isChecked]) => isChecked)
+        .map(([type]) => type) as CredentialType[],
+    [credentialTypeMap],
+  );
+
+  const allowedCredentials = useMemo(() => {
+    if (!bridgeInitialData) return [];
+
+    if (bridgeInitialData.verification_level) {
+      return verification_level_to_credential_types(
+        bridgeInitialData.verification_level,
+      ) as CredentialType[];
+    } else if (bridgeInitialData.credential_types) {
+      return bridgeInitialData.credential_types;
+    }
+
+    return [];
+  }, [bridgeInitialData]);
+
+  const isAllowedCredentialsSelected = useMemo(
+    () =>
+      allowedCredentials.some((cred) => selectedCredentialTypes.includes(cred)),
+    [allowedCredentials, selectedCredentialTypes],
+  );
+
+  const handleClick = useCallback(async () => {
+    if (!activeIdentity) return;
 
     if (!bridgeInitialData) {
       setStatus(Status.Error);
       return console.error("No bridge initial data");
     }
-
-    const selectedCredentialTypes = Object.entries(credentialTypeMap)
-      .filter(([_type, isChecked]) => isChecked)
-      .map(([type]) => type) as CredentialType[];
 
     let credential_type: CredentialType | undefined;
 
@@ -130,9 +162,8 @@ export function Modal() {
     }
   }, [
     activeIdentity,
-    biometricsChecked,
     bridgeInitialData,
-    deviceChecked,
+    selectedCredentialTypes,
     setStatus,
     showConfirm,
     url,
@@ -235,6 +266,7 @@ export function Modal() {
             onChain={metadata.can_user_verify === "on-chain" ? true : false}
             biometricsChecked={biometricsChecked}
             phoneChecked={deviceChecked}
+            isAllowedCredentialTypesSelected={isAllowedCredentialsSelected}
           />
 
           <ModalStatus
