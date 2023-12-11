@@ -1,11 +1,14 @@
 import type { AbiEncodedValue, IDKitConfig } from "@worldcoin/idkit-core";
 import { CredentialType } from "@worldcoin/idkit-core";
 import type { HashFunctionOutput } from "@worldcoin/idkit-core/hashing";
+
 import {
   hashToField,
   packAndEncode,
   solidityEncode,
 } from "@worldcoin/idkit-core/hashing";
+
+import { Buffer } from "buffer/";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { encodePacked } from "viem";
@@ -85,4 +88,39 @@ export const generateExternalNullifier = (
         [type, (action as AbiEncodedValue).values[index]] as [string, unknown],
     ),
   ]);
+};
+
+export const buffer_encode = (buffer: ArrayBuffer): string => {
+  return Buffer.from(buffer).toString("base64");
+};
+
+export const buffer_decode = (encoded: string): ArrayBuffer => {
+  return Buffer.from(encoded, "base64");
+};
+
+export const encryptRequest = async (
+  key: CryptoKey,
+  iv: ArrayBuffer,
+  request: string,
+): Promise<{ payload: string; iv: string }> => {
+  const encoder = new TextEncoder();
+
+  return {
+    iv: buffer_encode(iv),
+    payload: buffer_encode(
+      await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        key,
+        encoder.encode(request),
+      ),
+    ),
+  };
+};
+
+export const handleError = (params: { error?: unknown; message?: string }) => {
+  if (params.error && params.error instanceof Error) {
+    return params.error;
+  }
+
+  return new Error(params.message, { cause: params.error });
 };

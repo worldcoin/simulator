@@ -47,7 +47,7 @@ const useIdentity = () => {
         CredentialType.Orb,
         encodedCommitment,
       );
-      const phoneProof = await getIdentityProof(
+      const deviceProof = await getIdentityProof(
         CredentialType.Device,
         encodedCommitment,
       );
@@ -58,12 +58,12 @@ const useIdentity = () => {
         id,
         verified: {
           [CredentialType.Orb]: orbProof !== null,
-          [CredentialType.Device]: phoneProof !== null,
+          [CredentialType.Device]: deviceProof !== null,
         },
 
         inclusionProof: {
           [CredentialType.Orb]: orbProof,
-          [CredentialType.Device]: phoneProof,
+          [CredentialType.Device]: deviceProof,
         },
         proofGenerationTime: Date.now(),
       };

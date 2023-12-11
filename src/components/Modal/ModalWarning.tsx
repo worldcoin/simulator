@@ -7,6 +7,7 @@ interface WarningProps {
   onChain: boolean;
   biometricsChecked: boolean | "indeterminate";
   phoneChecked: boolean | "indeterminate";
+  isAllowedCredentialTypesSelected: boolean;
 }
 
 export default function Warning(props: WarningProps) {
@@ -48,11 +49,21 @@ export default function Warning(props: WarningProps) {
 
   const visible = useMemo(() => {
     // visible if any warning states are true
-    if (noCredentials || invalidCredential || onlyPhoneOnChain) {
+    if (
+      noCredentials ||
+      invalidCredential ||
+      onlyPhoneOnChain ||
+      !props.isAllowedCredentialTypesSelected
+    ) {
       return true;
     }
     return false;
-  }, [noCredentials, invalidCredential, onlyPhoneOnChain]);
+  }, [
+    noCredentials,
+    invalidCredential,
+    onlyPhoneOnChain,
+    props.isAllowedCredentialTypesSelected,
+  ]);
 
   return (
     <>
@@ -64,6 +75,9 @@ export default function Warning(props: WarningProps) {
             "This action will fail as the selected credential(s) do not exist. "}
           {onlyPhoneOnChain &&
             "This action will fail as device credentials are not supported on-chain. "}
+          {!props.isAllowedCredentialTypesSelected &&
+            !noCredentials &&
+            "This action will fail as the selected credential(s) are not allowed for this app. "}
           Proceed to test an error case.
         </p>
       )}

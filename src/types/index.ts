@@ -1,3 +1,6 @@
+export * from "./bridge-initial-data";
+export * from "./bridge-request-data";
+export * from "./bridge-service-return-type";
 export * from "./common";
 export * from "./errors";
 export * from "./identity";
