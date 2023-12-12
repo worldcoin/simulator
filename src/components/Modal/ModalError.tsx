@@ -22,8 +22,10 @@ export default function ModalError(props: {
           className="h-10 w-10 text-white"
           bgClassName="h-20 w-20 rounded-full bg-gray-400"
         />
-        <h2 className="mt-4 bg-gray-900 text-h2 font-bold">Expired QR Code</h2>
-        <p className="mt-4 bg-gray-500 text-center">
+        <h2 className="mt-4 text-h2 font-bold text-gray-900">
+          Expired QR Code
+        </h2>
+        <p className="mt-4 text-center text-gray-500">
           This connection has expired <br></br> Please try again.
         </p>
       </div>
@@ -46,8 +48,8 @@ export default function ModalError(props: {
           className="h-10 w-10 text-white"
           bgClassName="h-12 w-12 rounded-full bg-gray-400"
         />
-        <h2 className="mt-4 bg-gray-900 text-h2 font-bold">Error</h2>
-        <p className="mt-4 bg-gray-500 text-center">
+        <h2 className="mt-4 text-h2 font-bold text-gray-900">Error</h2>
+        <p className="mt-4 text-center text-gray-500">
           Something went wrong <br></br> Please try again later.
         </p>
       </div>
