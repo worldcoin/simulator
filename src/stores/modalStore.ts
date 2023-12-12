@@ -1,6 +1,6 @@
 import type {
   BridgeInitialData,
-  Errors,
+  ErrorsCode,
   MetadataResponse,
   Verification,
 } from "@/types";
@@ -13,8 +13,8 @@ export type ModalStore = {
   setOpen: (open: boolean) => void;
   status: Status;
   setStatus: (status: Status) => void;
-  errorCode: Errors | null;
-  setErrorCode: (errorCode: Errors) => void;
+  errorCode: ErrorsCode | null;
+  setErrorCode: (errorCode: ErrorsCode) => void;
 
   bridgeInitialData: BridgeInitialData | null;
   setBridgeInitialData: (bridgeInitialData: BridgeInitialData) => void;

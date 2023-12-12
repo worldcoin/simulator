@@ -2,7 +2,7 @@ import { buffer_decode, encodeBigInt, encryptRequest } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import {
   CodedError,
-  Errors,
+  ErrorsCode,
   type BridgeServiceReturnType,
   type FP,
 } from "@/types";
@@ -27,7 +27,7 @@ export const approveRequest = async ({
   if (!valid) {
     return {
       success: false,
-      error: new CodedError(Errors.QRCodeInvalid, "Invalid QR code"),
+      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
     };
   }
 
@@ -96,7 +96,7 @@ export const approveRequest = async ({
     return {
       success: false,
       error: new CodedError(
-        Errors.BridgeFetchError,
+        ErrorsCode.BridgeFetchError,
         "Failed to fetch bridge request data",
       ),
     };

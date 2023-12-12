@@ -1,9 +1,9 @@
-import type { Errors } from "./common";
+import type { ErrorsCode } from "./common";
 
 export class CodedError extends Error {
-  code: Errors;
+  code: ErrorsCode;
 
-  constructor(code: Errors, message: string) {
+  constructor(code: ErrorsCode, message?: string) {
     super(message);
     this.name = this.constructor.name;
     this.code = code;

@@ -1,6 +1,6 @@
 import { validateRequestSchema } from "@/helpers/validate-request-schema";
 import type { ParseWorldIDQRCodeOutput } from "@/types";
-import { CodedError, Errors } from "@/types";
+import { CodedError, ErrorsCode } from "@/types";
 import { useWorldBridgeStore } from "@worldcoin/idkit-core";
 import * as yup from "yup";
 
@@ -56,7 +56,7 @@ export async function validateSignal(signal: string) {
   try {
     return BigInt(signal);
   } catch (error) {
-    throw new CodedError(Errors.ProofError, "invalid_signal");
+    throw new CodedError(ErrorsCode.ProofError, "invalid_signal");
   }
 }
 
@@ -64,6 +64,6 @@ export async function validateExternalNullifier(externalNullifier: string) {
   try {
     return BigInt(externalNullifier);
   } catch (error) {
-    throw new CodedError(Errors.ProofError, "invalid_external_nullifier");
+    throw new CodedError(ErrorsCode.ProofError, "invalid_external_nullifier");
   }
 }

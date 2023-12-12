@@ -10,7 +10,7 @@ import { pairClient } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { useUiStore, type UiStore } from "@/stores/ui";
-import { Errors, Status } from "@/types";
+import { ErrorsCode, Status } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { CredentialType } from "@worldcoin/idkit-core";
 import dynamic from "next/dynamic";
@@ -80,8 +80,8 @@ export default function Id() {
 
       if (!pairingResult.success) {
         setStatus(Status.Error);
-        if (pairingResult.error.code == Errors.InputError) {
-          setErrorCode(Errors.InputError);
+        if (pairingResult.error.code == ErrorsCode.InputError) {
+          setErrorCode(ErrorsCode.InputError);
         }
         return console.error(pairingResult.error);
       }

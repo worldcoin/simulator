@@ -1,11 +1,11 @@
-import { Errors } from "@/types";
+import { ErrorsCode } from "@/types";
 import { Icon } from "../Icon";
 
 export default function ModalError(props: {
-  errorCode: Errors | null;
+  errorCode: ErrorsCode | null;
   close: () => void;
 }) {
-  if (props.errorCode == Errors.InputError) {
+  if (props.errorCode == ErrorsCode.InputError) {
     return (
       <div className="flex h-[360px] flex-col items-center justify-center">
         <button

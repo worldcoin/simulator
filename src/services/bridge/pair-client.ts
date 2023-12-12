@@ -4,7 +4,7 @@ import { fetchMetadata } from "@/services/metadata";
 import type { BridgeServiceReturnType, MetadataResponse } from "@/types";
 import {
   CodedError,
-  Errors,
+  ErrorsCode,
   type BridgeInitialData,
   type BridgeRequestData,
 } from "@/types";
@@ -26,7 +26,7 @@ export const pairClient = async ({
   if (!valid) {
     return {
       success: false,
-      error: new CodedError(Errors.QRCodeInvalid, "Invalid QR code"),
+      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
     };
   }
 
@@ -40,7 +40,7 @@ export const pairClient = async ({
         return {
           success: false,
           error: new CodedError(
-            Errors.InputError,
+            ErrorsCode.InputError,
             "The QR code you have entered is either expired or has already been used.",
           ),
         };
@@ -53,7 +53,7 @@ export const pairClient = async ({
     return {
       success: false,
       error: new CodedError(
-        Errors.BridgeFetchError,
+        ErrorsCode.BridgeFetchError,
         "Failed to fetch bridge request data",
       ),
     };
@@ -62,7 +62,7 @@ export const pairClient = async ({
   if (!bridgeRequestData) {
     return {
       success: false,
-      error: new CodedError(Errors.BridgeNoData, "No bridge request data"),
+      error: new CodedError(ErrorsCode.BridgeNoData, "No bridge request data"),
     };
   }
 
@@ -96,7 +96,7 @@ export const pairClient = async ({
     return {
       success: false,
       error: new CodedError(
-        Errors.BridgeDecryptError,
+        ErrorsCode.BridgeDecryptError,
         "Failed to decrypt bridge initial data",
       ),
     };
@@ -106,7 +106,7 @@ export const pairClient = async ({
     return {
       success: false,
       error: new CodedError(
-        Errors.BridgeNoInitialData,
+        ErrorsCode.BridgeNoInitialData,
         "No bridge initial data",
       ),
     };
