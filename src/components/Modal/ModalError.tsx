@@ -5,7 +5,7 @@ export default function ModalError(props: {
   errorCode: Errors | null;
   close: () => void;
 }) {
-  if (props.errorCode != Errors.InputError) {
+  if (props.errorCode == Errors.InputError) {
     return (
       <div className="flex h-[360px] flex-col items-center justify-center">
         <button
