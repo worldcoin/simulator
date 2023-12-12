@@ -96,6 +96,7 @@ export default function Id() {
     [
       activeIdentity,
       setBridgeInitialData,
+      setErrorCode,
       setMetadata,
       setOpen,
       setStatus,
