@@ -1,6 +1,6 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
 import type { BridgeInitialData, FP, Verification } from "@/types";
-import { ProofError, type Identity } from "@/types";
+import { CodedError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { CredentialType } from "@worldcoin/idkit-core";
@@ -222,10 +222,10 @@ export const getFullProof = async (
     return { verified, fullProof };
   } catch (error) {
     console.error(error);
-    if (error instanceof ProofError) {
+    if (error instanceof CodedError) {
       throw error;
     } else {
-      throw new ProofError(-32602, "generic_error");
+      throw new CodedError(-32602, "generic_error");
     }
   }
 };

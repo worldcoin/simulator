@@ -1,7 +1,9 @@
-export class ProofError extends Error {
-  code: number;
+import type { Errors } from "./common";
 
-  constructor(code: number, message: string) {
+export class CodedError extends Error {
+  code: Errors;
+
+  constructor(code: Errors, message: string) {
     super(message);
     this.name = this.constructor.name;
     this.code = code;
