@@ -20,6 +20,7 @@ import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import ModalConfirm from "./ModalConfirm";
 import ModalEnvironment from "./ModalEnvironment";
+import ModalError from "./ModalError";
 import ModalLoading from "./ModalLoading";
 import { ModalStatus } from "./ModalStatus";
 import Warning from "./ModalWarning";
@@ -29,6 +30,7 @@ const getStore = (store: ModalStore) => ({
   setOpen: store.setOpen,
   status: store.status,
   setStatus: store.setStatus,
+  errorCode: store.errorCode,
   metadata: store.metadata,
   bridgeInitialData: store.bridgeInitialData,
   url: store.url,
@@ -52,6 +54,7 @@ export function Modal() {
     setOpen,
     status,
     setStatus,
+    errorCode,
     bridgeInitialData,
     url,
     metadata,
@@ -174,106 +177,117 @@ export function Modal() {
       open={open}
       onClose={close}
     >
-      {!isLoading && !showConfirm && metadata?.is_staging && (
-        <>
-          <div className="flex items-center gap-x-4">
-            <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200">
-              <Image
-                src={metadata.verified_app_logo ?? "/icons/question.svg"}
-                alt={metadata.name ?? "App logo"}
-                width={40}
-                height={40}
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-h3 font-bold">
-                {metadata.name ?? "App Name"}
-              </span>
-
-              <div
-                className={cn(
-                  "inline-flex items-center gap-x-0.5",
-                  { "text-info-700": metadata.is_verified },
-                  { "text-gray-500": !metadata.is_verified },
-                )}
-              >
-                <Icon
-                  name={
-                    metadata.is_verified
-                      ? "badge-verified"
-                      : "badge-not-verified"
-                  }
-                  className={"h-4 w-4"}
+      {!isLoading && status == Status.Error && (
+        <ModalError
+          errorCode={errorCode}
+          close={close}
+        />
+      )}
+      {!isLoading &&
+        !showConfirm &&
+        metadata?.is_staging &&
+        status != Status.Error && (
+          <>
+            <div className="flex items-center gap-x-4">
+              <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200">
+                <Image
+                  src={metadata.verified_app_logo ?? "/icons/question.svg"}
+                  alt={metadata.name ?? "App logo"}
+                  width={40}
+                  height={40}
                 />
+              </div>
 
-                <span className="text-b4 leading-[1px]">
-                  {metadata.is_verified ? "Verified" : "Not Verified"}
+              <div className="flex flex-col">
+                <span className="text-h3 font-bold">
+                  {metadata.name ?? "App Name"}
                 </span>
+
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-x-0.5",
+                    { "text-info-700": metadata.is_verified },
+                    { "text-gray-500": !metadata.is_verified },
+                  )}
+                >
+                  <Icon
+                    name={
+                      metadata.is_verified
+                        ? "badge-verified"
+                        : "badge-not-verified"
+                    }
+                    className={"h-4 w-4"}
+                  />
+
+                  <span className="text-b4 leading-[1px]">
+                    {metadata.is_verified ? "Verified" : "Not Verified"}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <p className="mt-4 text-b2 text-gray-500">
-            {metadata.name ?? "App Name"} is asking for permission to {}
-            {metadata.action?.description ?? "verify with World ID."}
-          </p>
+            <p className="mt-4 text-b2 text-gray-500">
+              {metadata.name ?? "App Name"} is asking for permission to {}
+              {metadata.action?.description ?? "verify with World ID."}
+            </p>
 
-          <h3 className="mt-8 text-12 font-medium uppercase leading-[1.25] text-gray-500">
-            Choose Credentials
-          </h3>
+            <h3 className="mt-8 text-12 font-medium uppercase leading-[1.25] text-gray-500">
+              Choose Credentials
+            </h3>
 
-          <Item
-            heading="Biometrics"
-            className="mt-3 p-4"
-            onClick={() => setBiometricsChecked(!biometricsChecked)}
-            indicator={() => (
-              <Checkbox
-                checked={biometricsChecked}
-                setChecked={setBiometricsChecked}
+            <Item
+              heading="Biometrics"
+              className="mt-3 p-4"
+              onClick={() => setBiometricsChecked(!biometricsChecked)}
+              indicator={() => (
+                <Checkbox
+                  checked={biometricsChecked}
+                  setChecked={setBiometricsChecked}
+                />
+              )}
+            >
+              <IconGradient
+                name="user"
+                color="#9D50FF"
               />
-            )}
-          >
-            <IconGradient
-              name="user"
-              color="#9D50FF"
-            />
-          </Item>
+            </Item>
 
-          <Item
-            heading="Device"
-            className="mt-3 p-4"
-            onClick={() => setDeviceChecked(!deviceChecked)}
-            indicator={() => (
-              <Checkbox
-                checked={deviceChecked}
-                setChecked={setDeviceChecked}
+            <Item
+              heading="Device"
+              className="mt-3 p-4"
+              onClick={() => setDeviceChecked(!deviceChecked)}
+              indicator={() => (
+                <Checkbox
+                  checked={deviceChecked}
+                  setChecked={setDeviceChecked}
+                />
+              )}
+            >
+              <IconGradient
+                name="phone"
+                color="#00C313"
               />
-            )}
-          >
-            <IconGradient
-              name="phone"
-              color="#00C313"
+            </Item>
+
+            <Warning
+              identity={activeIdentity}
+              onChain={metadata.can_user_verify === "on-chain" ? true : false}
+              biometricsChecked={biometricsChecked}
+              phoneChecked={deviceChecked}
+              isAllowedCredentialTypesSelected={isAllowedCredentialsSelected}
             />
-          </Item>
 
-          <Warning
-            identity={activeIdentity}
-            onChain={metadata.can_user_verify === "on-chain" ? true : false}
-            biometricsChecked={biometricsChecked}
-            phoneChecked={deviceChecked}
-            isAllowedCredentialTypesSelected={isAllowedCredentialsSelected}
-          />
-
-          <ModalStatus
-            status={status}
-            handleClick={() => void handleClick()}
-          />
-        </>
-      )}
+            <ModalStatus
+              status={status}
+              handleClick={() => void handleClick()}
+            />
+          </>
+        )}
 
       {isLoading && <ModalLoading />}
-      {!isLoading && !metadata?.is_staging && <ModalEnvironment />}
+      {!isLoading && !metadata?.is_staging && status != Status.Error && (
+        <ModalEnvironment />
+      )}
 
       {!isLoading && showConfirm && (
         <ModalConfirm handleClick={() => void handleClick()} />

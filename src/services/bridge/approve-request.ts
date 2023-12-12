@@ -1,11 +1,11 @@
-import {
-  buffer_decode,
-  encodeBigInt,
-  encryptRequest,
-  handleError,
-} from "@/lib/utils";
+import { buffer_decode, encodeBigInt, encryptRequest } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
-import type { BridgeServiceReturnType, FP } from "@/types";
+import {
+  CodedError,
+  ErrorsCode,
+  type BridgeServiceReturnType,
+  type FP,
+} from "@/types";
 import type { CredentialType } from "@worldcoin/idkit-core";
 import { encodePacked } from "viem";
 
@@ -27,7 +27,7 @@ export const approveRequest = async ({
   if (!valid) {
     return {
       success: false,
-      error: handleError({ message: "Invalid QR code" }),
+      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
     };
   }
 
@@ -92,12 +92,13 @@ export const approveRequest = async ({
       );
     }
   } catch (error) {
+    console.error(error);
     return {
       success: false,
-      error: handleError({
-        error,
-        message: "Failed to fetch bridge request data",
-      }),
+      error: new CodedError(
+        ErrorsCode.BridgeFetchError,
+        "Failed to fetch bridge request data",
+      ),
     };
   }
 

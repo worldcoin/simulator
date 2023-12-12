@@ -116,11 +116,3 @@ export const encryptRequest = async (
     ),
   };
 };
-
-export const handleError = (params: { error?: unknown; message?: string }) => {
-  if (params.error && params.error instanceof Error) {
-    return params.error;
-  }
-
-  return new Error(params.message, { cause: params.error });
-};

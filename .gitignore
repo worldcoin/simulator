@@ -39,3 +39,4 @@ public/sw.js*
 public/workbox*.js*
 .eslintcache
 notes.txt
+yarn.lock

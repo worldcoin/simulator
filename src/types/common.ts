@@ -17,6 +17,16 @@ export enum Status {
   Error,
 }
 
+export enum ErrorsCode {
+  InputError = "input_error",
+  BridgeFetchError = "bridge_fetch_error",
+  BridgeNoData = "bridge_no_data",
+  BridgeDecryptError = "bridge_decrypt_error",
+  BridgeNoInitialData = "bridge_no_initial_data",
+  QRCodeInvalid = "qr_code_invalid",
+  ProofError = -32602,
+}
+
 export interface Verification {
   verified: boolean;
   fullProof: FP;

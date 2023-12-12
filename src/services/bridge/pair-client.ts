@@ -1,8 +1,13 @@
-import { buffer_decode, handleError } from "@/lib/utils";
+import { buffer_decode } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { fetchMetadata } from "@/services/metadata";
 import type { BridgeServiceReturnType, MetadataResponse } from "@/types";
-import { type BridgeInitialData, type BridgeRequestData } from "@/types";
+import {
+  CodedError,
+  ErrorsCode,
+  type BridgeInitialData,
+  type BridgeRequestData,
+} from "@/types";
 
 type Props = {
   url: string;
@@ -21,7 +26,7 @@ export const pairClient = async ({
   if (!valid) {
     return {
       success: false,
-      error: new Error("Invalid QR code"),
+      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
     };
   }
 
@@ -31,6 +36,15 @@ export const pairClient = async ({
     const response = await fetch(`${bridgeURL}/request/${requestUUID}`);
 
     if (!response.ok) {
+      if (response.status == 404) {
+        return {
+          success: false,
+          error: new CodedError(
+            ErrorsCode.InputError,
+            "The QR code you have entered is either expired or has already been used.",
+          ),
+        };
+      }
       throw new Error("Failed to fetch bridge request data");
     }
 
@@ -38,17 +52,17 @@ export const pairClient = async ({
   } catch (error) {
     return {
       success: false,
-      error: handleError({
-        error,
-        message: "Failed to fetch bridge request data",
-      }),
+      error: new CodedError(
+        ErrorsCode.BridgeFetchError,
+        "Failed to fetch bridge request data",
+      ),
     };
   }
 
   if (!bridgeRequestData) {
     return {
       success: false,
-      error: handleError({ message: "No bridge request data" }),
+      error: new CodedError(ErrorsCode.BridgeNoData, "No bridge request data"),
     };
   }
 
@@ -78,19 +92,23 @@ export const pairClient = async ({
     const decodedRaw = decoder.decode(decryptedBuffer);
     bridgeInitialData = JSON.parse(decodedRaw) as BridgeInitialData | null;
   } catch (error) {
+    console.error(error);
     return {
       success: false,
-      error: handleError({
-        error,
-        message: "Failed to decrypt bridge initial data",
-      }),
+      error: new CodedError(
+        ErrorsCode.BridgeDecryptError,
+        "Failed to decrypt bridge initial data",
+      ),
     };
   }
 
   if (!bridgeInitialData) {
     return {
       success: false,
-      error: handleError({ message: "No bridge initial data" }),
+      error: new CodedError(
+        ErrorsCode.BridgeNoInitialData,
+        "No bridge initial data",
+      ),
     };
   }
 

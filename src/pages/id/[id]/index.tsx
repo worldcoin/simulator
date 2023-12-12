@@ -10,7 +10,7 @@ import { pairClient } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { useUiStore, type UiStore } from "@/stores/ui";
-import { Status } from "@/types";
+import { ErrorsCode, Status } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { CredentialType } from "@worldcoin/idkit-core";
 import dynamic from "next/dynamic";
@@ -35,6 +35,7 @@ const getStore = (store: ModalStore) => ({
   setMetadata: store.setMetadata,
   setOpen: store.setOpen,
   setStatus: store.setStatus,
+  setErrorCode: store.setErrorCode,
   setUrl: store.setUrl,
 });
 
@@ -49,8 +50,14 @@ export default function Id() {
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
 
-  const { setOpen, setStatus, setUrl, setBridgeInitialData, setMetadata } =
-    useModalStore(getStore);
+  const {
+    setOpen,
+    setStatus,
+    setErrorCode,
+    setUrl,
+    setBridgeInitialData,
+    setMetadata,
+  } = useModalStore(getStore);
 
   const { scannerOpened, setScannerOpened, setSettingsOpened } =
     useUiStore(getUiStore);
@@ -73,6 +80,9 @@ export default function Id() {
 
       if (!pairingResult.success) {
         setStatus(Status.Error);
+        if (pairingResult.error.code == ErrorsCode.InputError) {
+          setErrorCode(ErrorsCode.InputError);
+        }
         return console.error(pairingResult.error);
       }
 
@@ -86,6 +96,7 @@ export default function Id() {
     [
       activeIdentity,
       setBridgeInitialData,
+      setErrorCode,
       setMetadata,
       setOpen,
       setStatus,
