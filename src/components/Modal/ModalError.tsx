@@ -2,7 +2,7 @@ import { Errors } from "@/types";
 import { Icon } from "../Icon";
 
 export default function ModalError(props: {
-  errorCode: Errors;
+  errorCode: Errors | null;
   close: () => void;
 }) {
   if (props.errorCode != Errors.InputError) {
