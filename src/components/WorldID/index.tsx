@@ -20,7 +20,7 @@ export default function WorldID(props: {
       <div
         className={cn(
           "absolute inset-0",
-          'bg-[url("/images/card-bg-verified-front.svg")] bg-cover bg-[position:center] bg-no-repeat',
+          'bg-[url("/images/card-bg-verified-front.png")] bg-cover bg-[position:center] bg-no-repeat',
         )}
       />
     );
@@ -29,7 +29,7 @@ export default function WorldID(props: {
       <div
         className={cn(
           "absolute inset-0",
-          'bg-[url("/images/card-bg-verified-back.svg")] bg-cover bg-[position:center] bg-no-repeat',
+          'bg-[url("/images/card-bg-verified-back.png")] bg-cover bg-[position:center] bg-no-repeat',
         )}
       />
     );
@@ -38,7 +38,7 @@ export default function WorldID(props: {
       <div
         className={cn(
           "absolute inset-0",
-          'bg-[url("/images/card-bg-not-verified.svg")] bg-cover bg-[position:center] bg-no-repeat',
+          'bg-[url("/images/card-bg-not-verified.png")] bg-cover bg-[position:center] bg-no-repeat',
         )}
       />
     );
