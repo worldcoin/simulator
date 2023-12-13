@@ -43,15 +43,9 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
   const [imageSrc, setImageSrc] = useState(null as string | null);
   const [uploadedImageLoaded, setUploadedImageLoaded] = useState(false);
 
-  const { scannerOpened, setScannerOpened, setQrInputOpened } =
-    useUiStore(getUiStore);
+  const { scannerOpened, setScannerOpened } = useUiStore(getUiStore);
 
   const close = useCallback(() => setScannerOpened(false), [setScannerOpened]);
-
-  const onClickManualInput = useCallback(
-    () => setQrInputOpened(true),
-    [setQrInputOpened],
-  );
 
   useEffect(() => {
     if (!imgRef.current) return;
@@ -206,7 +200,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
 
       <div
         ref={containerRef}
-        className={cn("absolute inset-0 bg-black", props.className)}
+        className={cn("absolute inset-0 bg-gray-900", props.className)}
       >
         {allowed !== false && (
           <Fragment>
@@ -269,27 +263,13 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         <div className="absolute inset-x-0 bottom-12 flex justify-center gap-8">
           <button
             className="flex flex-col items-center"
-            onClick={onClickManualInput}
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
-              <Icon
-                name="text"
-                className="h-6 w-6"
-              />
-            </div>
-
-            <div className="mt-3 text-b3 text-white">Manual Input</div>
-          </button>
-          <button
-            className="flex flex-col items-center"
-            onClick={onClickManualInput}
             {...getRootProps()}
           >
             <input {...getInputProps()} />
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
               <Icon
                 name="gallery"
-                className="h-6 w-6"
+                className="h-5 w-5"
               />
             </div>
 
