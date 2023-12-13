@@ -1,12 +1,14 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
-import type { FP } from "@/types";
-import { type Identity } from "@/types";
+import type { BridgeInitialData, FP, Verification } from "@/types";
+import { CodedError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { CredentialType } from "@worldcoin/idkit-core";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
+import { generateExternalNullifier } from "./utils";
+import { validateExternalNullifier, validateSignal } from "./validation";
 
 /**
  * Packs a proof into a format compatible with Semaphore.
@@ -181,3 +183,57 @@ async function verifySemaphoreProof(
     unpackProof(proof),
   );
 }
+
+/**
+ * Performs the Semaphore proof generation and verification process.
+ * @param request The session request from WalletConnect.
+ * @param identity The current simulator identity.
+ * @param credentialType The credential type to generate the proof for.
+ * @returns The full semaphore proof and its verification status.
+ */
+export const getFullProof = async (
+  bridgeInitialData: Omit<BridgeInitialData, "credential_type"> & {
+    credential_type: CredentialType;
+  },
+  identity: Identity,
+  malicious?: boolean,
+): Promise<Verification> => {
+  try {
+    // Validate inputs
+    const signal = await validateSignal(bridgeInitialData.signal);
+
+    const rawExternalNullifier = generateExternalNullifier(
+      bridgeInitialData.app_id,
+      bridgeInitialData.action,
+    ).digest;
+
+    const externalNullifier = await validateExternalNullifier(
+      rawExternalNullifier,
+    );
+
+    const zkIdentity = new ZkIdentity(identity.zkIdentity);
+
+    // Generate proofs
+    const merkleProof = malicious
+      ? generateDummyProof(identity)
+      : getMerkleProof(identity, bridgeInitialData.credential_type);
+
+    const fullProof = await generateSemaphoreProof(
+      zkIdentity,
+      merkleProof,
+      externalNullifier,
+      signal,
+    );
+
+    // Verify the full proof
+    const verified = await verifySemaphoreProof(fullProof, 30);
+    return { verified, fullProof };
+  } catch (error) {
+    console.error(error);
+    if (error instanceof CodedError) {
+      throw error;
+    } else {
+      throw new CodedError(-32602, "generic_error");
+    }
+  }
+};

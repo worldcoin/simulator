@@ -10,18 +10,14 @@ interface ModalStatusProps {
 
 export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
   return (
-    <div className="my-8 flex items-center justify-center">
+    <div className="my-6 flex items-center justify-center">
       {props.status === Status.Waiting && (
         <Button
           onClick={props.handleClick}
           className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
         >
           <>
-            <Icon
-              name="world-id"
-              className="h-6 w-6"
-            />
-            <span className="ml-3">Verify with World ID</span>
+            <span className="ml-3">Approve with World ID</span>
           </>
         </Button>
       )}
