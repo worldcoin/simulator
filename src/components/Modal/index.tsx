@@ -87,8 +87,7 @@ export function Modal() {
 
       let credential_type: CredentialType | undefined;
 
-      // NOTE: Orb can be checked in two cases - picked orb only or picked both.
-      // In both cases we should prefer orb, otherwise device
+      // NOTE: We use the highest available credential type
       if (credentialTypeMap[CredentialType.Orb]) {
         credential_type = CredentialType.Orb;
       } else {
