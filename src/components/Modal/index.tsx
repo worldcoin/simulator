@@ -1,7 +1,7 @@
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
-import { getFullProof } from "@/lib/proof";
+import { getDummyFullProof, getFullProof } from "@/lib/proof";
 import { cn } from "@/lib/utils";
 import { approveRequest } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
@@ -79,14 +79,21 @@ export function Modal() {
         return;
       }
 
-      const { verified, fullProof } = await getFullProof(
-        {
-          ...bridgeInitialData,
-          credential_type,
-        },
-        activeIdentity,
-        malicious,
-      );
+      const { verified, fullProof } = malicious
+        ? await getDummyFullProof(
+            {
+              ...bridgeInitialData,
+              credential_type,
+            },
+            activeIdentity,
+          )
+        : await getFullProof(
+            {
+              ...bridgeInitialData,
+              credential_type,
+            },
+            activeIdentity,
+          );
 
       if (!verified) {
         setStatus(Status.Error);
