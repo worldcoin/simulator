@@ -10,7 +10,6 @@ import { Status } from "@/types";
 
 import { CredentialType } from "@worldcoin/idkit-core";
 
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import ModalConfirm from "./ModalConfirm";
@@ -31,21 +30,9 @@ const getStore = (store: ModalStore) => ({
   reset: store.reset,
 });
 
-const DynamicWorldID = dynamic(() => import("@/components/WorldID"), {
-  ssr: false,
-});
-
 export function Modal() {
   const { activeIdentity } = useIdentity();
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const biometricsChecked = useMemo(() => {
-    return activeIdentity?.verified[CredentialType.Orb];
-  }, [activeIdentity?.verified]);
-
-  const deviceChecked = useMemo(() => {
-    return activeIdentity?.verified[CredentialType.Device];
-  }, [activeIdentity?.verified]);
 
   const {
     open,
@@ -68,14 +55,6 @@ export function Modal() {
     return status === Status.Loading;
   }, [status]);
 
-  const credentialTypeMap = useMemo(
-    () => ({
-      [CredentialType.Orb]: biometricsChecked,
-      [CredentialType.Device]: deviceChecked,
-    }),
-    [biometricsChecked, deviceChecked],
-  );
-
   const handleClick = useCallback(
     async (malicious?: boolean) => {
       if (!activeIdentity) return;
@@ -88,7 +67,7 @@ export function Modal() {
       let credential_type: CredentialType | undefined;
 
       // NOTE: We use the highest available credential type
-      if (credentialTypeMap[CredentialType.Orb]) {
+      if (activeIdentity.verified[CredentialType.Orb]) {
         credential_type = CredentialType.Orb;
       } else {
         credential_type = CredentialType.Device;
@@ -135,14 +114,7 @@ export function Modal() {
         setStatus(Status.Error);
       }
     },
-    [
-      activeIdentity,
-      bridgeInitialData,
-      credentialTypeMap,
-      setStatus,
-      showConfirm,
-      url,
-    ],
+    [activeIdentity, bridgeInitialData, setStatus, showConfirm, url],
   );
 
   return (
@@ -172,10 +144,16 @@ export function Modal() {
               />
             </button>
             <div className="flex w-full justify-center p-8">
-              <DynamicWorldID
-                verified={activeIdentity?.verified[CredentialType.Orb]}
-                className="w-7/12"
-              />
+              <div className="z-40 w-2/3 no-select xs:aspect-[330/435] ">
+                <div
+                  className={cn(
+                    activeIdentity?.verified[CredentialType.Orb]
+                      ? 'bg-[url("/images/card-bg-verified-front.png")]'
+                      : 'bg-[url("/images/card-bg-not-verified.png")]',
+                    "h-full w-full bg-contain bg-[position:center] bg-no-repeat",
+                  )}
+                />
+              </div>
             </div>
             <div className="flex flex-col rounded-18 bg-gray-50 p-4">
               <div className="mb-3 flex w-full flex-row items-center gap-x-4 p-1">
@@ -216,8 +194,8 @@ export function Modal() {
               </div>
               <hr className="h-[1px] w-full rounded-full bg-gray-200 xs:block" />
               <p className="mt-4 px-2 text-b3 text-gray-500">
-                {metadata.name ?? "App Name"} is asking for permission to your
-                World ID
+                {metadata.name ?? "App Name"} is asking for permission to verify
+                you with your World ID.
               </p>
             </div>
 
@@ -237,7 +215,7 @@ export function Modal() {
               className="mb-4 font-bold text-error-700"
               onClick={() => void handleClick(true)}
             >
-              Test Malicious Proof
+              Test Invalid Proof
             </button>
           </div>
         )}
