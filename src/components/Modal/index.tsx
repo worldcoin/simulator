@@ -1,7 +1,11 @@
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
-import { getDummyFullProof, getFullProof } from "@/lib/proof";
+import {
+  generateDummyMerkleProof,
+  getFullProof,
+  getMerkleProof,
+} from "@/lib/proof";
 import { cn } from "@/lib/utils";
 import { approveRequest } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
@@ -78,22 +82,19 @@ export function Modal() {
         setShowConfirm(true);
         return;
       }
+      // Generate proofs
+      const merkleProof = malicious
+        ? generateDummyMerkleProof(activeIdentity)
+        : getMerkleProof(activeIdentity, credential_type);
 
-      const { verified, fullProof } = malicious
-        ? await getDummyFullProof(
-            {
-              ...bridgeInitialData,
-              credential_type,
-            },
-            activeIdentity,
-          )
-        : await getFullProof(
-            {
-              ...bridgeInitialData,
-              credential_type,
-            },
-            activeIdentity,
-          );
+      const { verified, fullProof } = await getFullProof(
+        {
+          ...bridgeInitialData,
+          credential_type,
+        },
+        activeIdentity,
+        merkleProof,
+      );
 
       if (!verified) {
         setStatus(Status.Error);
@@ -219,7 +220,7 @@ export function Modal() {
         status != Status.Error && (
           <div className="flex w-full justify-center">
             <button
-              className="mb-4 font-bold text-error-700"
+              className="mb-4 font-bold text-gray-500"
               onClick={() => void handleClick(true)}
             >
               Test Invalid Proof

@@ -47,110 +47,6 @@ function unpackProof(proof: NumericString[]): Groth16Proof {
 }
 
 /**
- * Transforms an inclusion proof into the Merkle proof format.
- * @param identity The current simulator identity.
- * @param credentialType The credential type to generate the proof for.
- * @returns The Merkle proof of inclusion.
- */
-function getMerkleProof(
-  identity: Identity,
-  credentialType: CredentialType,
-): MerkleProof {
-  console.log("identity", identity);
-  const proofs = identity.inclusionProof;
-  if (!proofs) {
-    throw new Error("Inclusion proof not found");
-  }
-  const proof = proofs[credentialType]?.proof;
-  // Identity has inclusion proof from sequencer
-  if (proof) {
-    const siblings = proof
-      .flatMap((v) => Object.values(v))
-      .map((v) => BigInt(v));
-
-    const pathIndices = proof
-      .flatMap((v) => Object.keys(v))
-      .map((v) => (v == "Left" ? 0 : 1));
-
-    return {
-      root: null,
-      leaf: null,
-      siblings: siblings,
-      pathIndices: pathIndices,
-    } as MerkleProof;
-  }
-
-  // TODO: Reevaluate if the dummy proof case is needed
-  // Generate a dummy proof for testing against error cases
-  console.warn("Identity inclusion proof was not found, using dummy proof");
-  return generateDummyMerkleProof(identity);
-}
-
-/**
- * Generates a dummy proof for testing failure cases
- * @param identity The current simulator identity.
- * @returns The proof compatible with SnarkJS.
- */
-function generateDummyMerkleProof(identity: Identity): MerkleProof {
-  console.warn("Only use this to test failure cases!");
-  const group = new Group(1, 30);
-  const zkIdentity = new ZkIdentity(identity.zkIdentity);
-  group.addMember(zkIdentity.commitment);
-  return group.generateMerkleProof(0);
-}
-
-/**
- * Creates an Valid Proof from an invalid inclusion proof.
- * @param request The session request from WalletConnect.
- * @param identity The current simulator identity.
- * @param credentialType The credential type to generate the proof for.
- * @returns The full semaphore proof and its verification status.
- */
-export const getDummyFullProof = async (
-  bridgeInitialData: Omit<BridgeInitialData, "credential_type"> & {
-    credential_type: CredentialType;
-  },
-  identity: Identity,
-): Promise<Verification> => {
-  try {
-    // Validate inputs
-    const signal = await validateSignal(bridgeInitialData.signal);
-
-    const rawExternalNullifier = generateExternalNullifier(
-      bridgeInitialData.app_id,
-      bridgeInitialData.action,
-    ).digest;
-
-    const externalNullifier = await validateExternalNullifier(
-      rawExternalNullifier,
-    );
-
-    const zkIdentity = new ZkIdentity(identity.zkIdentity);
-
-    // Generate proofs
-    const merkleProof = generateDummyMerkleProof(identity);
-
-    const fullProof = await generateSemaphoreProof(
-      zkIdentity,
-      merkleProof,
-      externalNullifier,
-      signal,
-    );
-
-    // Verify the full proof
-    const verified = await verifySemaphoreProof(fullProof, 30);
-    return { verified, fullProof };
-  } catch (error) {
-    console.error(error);
-    if (error instanceof CodedError) {
-      throw error;
-    } else {
-      throw new CodedError(-32602, "generic_error");
-    }
-  }
-};
-
-/**
  * Generates a Semaphore proof.
  * World ID overridden to avoid double hashing the external nullifier and signal hash.
  * @param identity The Semaphore identity.
@@ -236,6 +132,59 @@ async function verifySemaphoreProof(
 }
 
 /**
+ * Transforms an inclusion proof into the Merkle proof format.
+ * @param identity The current simulator identity.
+ * @param credentialType The credential type to generate the proof for.
+ * @returns The Merkle proof of inclusion.
+ */
+export function getMerkleProof(
+  identity: Identity,
+  credentialType: CredentialType,
+): MerkleProof {
+  console.log("identity", identity);
+  const proofs = identity.inclusionProof;
+  if (!proofs) {
+    throw new Error("Inclusion proof not found");
+  }
+  const proof = proofs[credentialType]?.proof;
+  // Identity has inclusion proof from sequencer
+  if (proof) {
+    const siblings = proof
+      .flatMap((v) => Object.values(v))
+      .map((v) => BigInt(v));
+
+    const pathIndices = proof
+      .flatMap((v) => Object.keys(v))
+      .map((v) => (v == "Left" ? 0 : 1));
+
+    return {
+      root: null,
+      leaf: null,
+      siblings: siblings,
+      pathIndices: pathIndices,
+    } as MerkleProof;
+  }
+
+  // TODO: Reevaluate if the dummy proof case is needed
+  // Generate a dummy proof for testing against error cases
+  console.warn("Identity inclusion proof was not found, using dummy proof");
+  return generateDummyMerkleProof(identity);
+}
+
+/**
+ * Generates a dummy proof for testing failure cases. The root is invalid since it's a new tree but the proof verifies.
+ * @param identity The current simulator identity.
+ * @returns The proof compatible with SnarkJS.
+ */
+export function generateDummyMerkleProof(identity: Identity): MerkleProof {
+  console.warn("Only use this to test failure cases!");
+  const group = new Group(1, 30);
+  const zkIdentity = new ZkIdentity(identity.zkIdentity);
+  group.addMember(zkIdentity.commitment);
+  return group.generateMerkleProof(0);
+}
+
+/**
  * Performs the Semaphore proof generation and verification process.
  * @param request The session request from WalletConnect.
  * @param identity The current simulator identity.
@@ -247,6 +196,7 @@ export const getFullProof = async (
     credential_type: CredentialType;
   },
   identity: Identity,
+  merkleProof: MerkleProof,
 ): Promise<Verification> => {
   try {
     // Validate inputs
@@ -263,19 +213,12 @@ export const getFullProof = async (
 
     const zkIdentity = new ZkIdentity(identity.zkIdentity);
 
-    // Generate proofs
-    const merkleProof = getMerkleProof(
-      identity,
-      bridgeInitialData.credential_type,
-    );
-
     const fullProof = await generateSemaphoreProof(
       zkIdentity,
       merkleProof,
       externalNullifier,
       signal,
     );
-
     // Verify the full proof
     const verified = await verifySemaphoreProof(fullProof, 30);
     return { verified, fullProof };
