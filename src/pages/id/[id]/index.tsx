@@ -43,6 +43,7 @@ const getUiStore = (store: UiStore) => ({
   scannerOpened: store.scannerOpened,
   setScannerOpened: store.setScannerOpened,
   setSettingsOpened: store.setSettingsOpened,
+  setQrInputOpened: store.setQrInputOpened,
 });
 
 export default function Id() {
@@ -59,8 +60,12 @@ export default function Id() {
     setMetadata,
   } = useModalStore(getStore);
 
-  const { scannerOpened, setScannerOpened, setSettingsOpened } =
-    useUiStore(getUiStore);
+  const {
+    scannerOpened,
+    setScannerOpened,
+    setSettingsOpened,
+    setQrInputOpened,
+  } = useUiStore(getUiStore);
 
   useEffect(() => {
     if (id) setActiveIdentityID(id as string);
@@ -135,44 +140,43 @@ export default function Id() {
         phoneVerified={activeIdentity?.verified[CredentialType.Device]}
       />
 
-      <div className="grid grid-cols-1 gap-2">
-        {/* <button
-          className="rounded-12 bg-gray-100 p-4 text-left"
-          onClick={handleCredentialsCard}
-        >
-          <IconGradient
-            name="user"
-            color="#191C20"
-            className="h-6 w-6 text-white"
-            bgClassName="h-[44px] w-[44px]"
-          />
-
-          <div className="mt-4.5 text-s4 font-medium text-gray-900/60">
-            CREDENTIALS
-          </div>
-
-          <div className="mt-2 text-s1 font-medium text-gray-900">
-            Verify your identity
-          </div>
-        </button> */}
-
+      <div className="grid grid-cols-2 gap-2">
         <button
-          className="rounded-12 bg-gray-100 p-4 text-left"
+          className="rounded-16 border-4 border-gray-100 p-4 text-left"
           onClick={() => setScannerOpened(true)}
         >
           <IconGradient
-            name="qr-code"
-            color="#191C20"
+            name="scanner"
+            color="black"
             className="h-6 w-6 text-white"
-            bgClassName="h-[44px] w-[44px]"
+            bgClassName="h-[44px] w-[44px] rounded-full"
           />
 
-          <div className="mt-4.5 text-s4 font-medium text-gray-900/60">
-            SCANNER
+          <div className="mt-4.5 text-s2 font-medium text-gray-900">
+            Scanner
           </div>
 
-          <div className="mt-1 text-s1 font-medium text-gray-900">
-            Scan QR or Paste data
+          <div className="mt-1 text-s4 font-normal text-gray-500">
+            Scan QR Code
+          </div>
+        </button>
+        <button
+          className="rounded-16 border-4 border-gray-100 p-4 text-left"
+          onClick={() => setQrInputOpened(true)}
+        >
+          <IconGradient
+            name="paste"
+            color="black"
+            className="h-6 w-6 text-white"
+            bgClassName="h-[44px] w-[44px] rounded-full"
+          />
+
+          <div className="mt-4.5 text-s2 font-medium text-gray-900">
+            Paste Code
+          </div>
+
+          <div className="mt-1 text-s4 font-normal text-gray-500">
+            Manual Input
           </div>
         </button>
       </div>
