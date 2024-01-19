@@ -1,25 +1,36 @@
 import { Status } from "@/types";
+import { CredentialType } from "@worldcoin/idkit-core";
 import { memo } from "react";
 import Button from "../Button";
 import { Icon } from "../Icon";
 
 interface ModalStatusProps {
   status: Status;
-  handleClick: () => void;
+  handleClick: (credential_type: CredentialType) => void;
 }
 
 export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
   return (
     <div className="my-6 flex items-center justify-center">
       {props.status === Status.Waiting && (
-        <Button
-          onClick={props.handleClick}
-          className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
-        >
-          <>
-            <span className="ml-3">Verify with World ID</span>
-          </>
-        </Button>
+        <div className="flex w-full flex-col space-y-2">
+          <Button
+            onClick={() => props.handleClick(CredentialType.Orb)}
+            className="flex h-12 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
+          >
+            <>
+              <span className="mx-3">Verify with World ID Orb</span>
+            </>
+          </Button>
+          <Button
+            onClick={() => props.handleClick(CredentialType.Device)}
+            className="flex h-12 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
+          >
+            <>
+              <span className="mx-3">Verify with World ID Device</span>
+            </>
+          </Button>
+        </div>
       )}
       {props.status === Status.Pending && (
         <>
