@@ -35,7 +35,7 @@ const getStore = (store: ModalStore) => ({
 });
 
 export function Modal() {
-  const { activeIdentity } = useIdentity();
+  const { activeIdentity, generateIdentityProofsIfNeeded } = useIdentity();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const {
@@ -62,6 +62,8 @@ export function Modal() {
   const handleClick = useCallback(
     async (malicious?: boolean) => {
       if (!activeIdentity) return;
+
+      await generateIdentityProofsIfNeeded(activeIdentity);
 
       if (!bridgeInitialData) {
         setStatus(Status.Error);
@@ -122,7 +124,14 @@ export function Modal() {
         setStatus(Status.Error);
       }
     },
-    [activeIdentity, bridgeInitialData, setStatus, showConfirm, url],
+    [
+      activeIdentity,
+      bridgeInitialData,
+      setStatus,
+      showConfirm,
+      url,
+      generateIdentityProofsIfNeeded,
+    ],
   );
 
   return (
