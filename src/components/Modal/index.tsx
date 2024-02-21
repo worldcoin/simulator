@@ -60,7 +60,10 @@ export function Modal() {
   }, [status]);
 
   const handleClick = useCallback(
-    async (malicious?: boolean) => {
+    async (
+      malicious?: boolean,
+      credential_type: CredentialType = CredentialType.Orb,
+    ) => {
       if (!activeIdentity) return;
 
       await generateIdentityProofsIfNeeded(activeIdentity);
@@ -68,15 +71,6 @@ export function Modal() {
       if (!bridgeInitialData) {
         setStatus(Status.Error);
         return console.error("No bridge initial data");
-      }
-
-      let credential_type: CredentialType | undefined;
-
-      // NOTE: We use the highest available credential type
-      if (activeIdentity.verified[CredentialType.Orb]) {
-        credential_type = CredentialType.Orb;
-      } else {
-        credential_type = CredentialType.Device;
       }
 
       // Show additional warning if the identity is unverified or still pending inclusion
@@ -218,7 +212,9 @@ export function Modal() {
 
             <ModalStatus
               status={status}
-              handleClick={() => void handleClick(false)}
+              handleClick={(credential_type) =>
+                void handleClick(false, credential_type)
+              }
             />
           </>
         )}
