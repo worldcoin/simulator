@@ -15,7 +15,7 @@ import { validateExternalNullifier, validateSignal } from "./validation";
  * @param originalProof The proof generated with SnarkJS.
  * @returns The proof compatible with Semaphore.
  */
-function packProof(originalProof: Groth16Proof): NumericString[] {
+export function packProof(originalProof: Groth16Proof): NumericString[] {
   return [
     originalProof.pi_a[0],
     originalProof.pi_a[1],
@@ -56,7 +56,7 @@ function unpackProof(proof: NumericString[]): Groth16Proof {
  * @param snarkArtifacts The SNARK artifacts.
  * @returns The Semaphore proof ready to be verified.
  */
-async function generateSemaphoreProof(
+export async function generateSemaphoreProof(
   { trapdoor, nullifier, commitment }: ZkIdentity,
   groupOrMerkleProof: Group | MerkleProof,
   externalNullifier: bigint,
