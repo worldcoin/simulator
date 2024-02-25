@@ -16,7 +16,7 @@ import { encodePacked } from "viem";
 type ProofRequest = {
   identityIndex: string;
   verificationLevel: VerificationLevel;
-  app_id: `app_${string}`;
+  app_id: `app_staging_${string}`;
   action: string;
   signal: string;
 };
