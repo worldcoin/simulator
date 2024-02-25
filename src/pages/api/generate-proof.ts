@@ -1,3 +1,4 @@
+import { validateRequestSchema } from "@/helpers/validate-request-schema";
 import { packProof } from "@/lib/proof";
 import { encode, encodeBigInt, generateExternalNullifier } from "@/lib/utils";
 import { inclusionProof } from "@/services/sequencer";
@@ -13,26 +14,49 @@ import path from "path";
 import type { Groth16Proof } from "snarkjs";
 import { groth16 } from "snarkjs";
 import { encodePacked } from "viem";
+import * as yup from "yup";
 
 type ProofRequest = {
-  identityIndex: string;
-  verificationLevel: VerificationLevel;
+  identityIndex?: string;
+  verificationLevel?: VerificationLevel;
   app_id: `app_staging_${string}`;
-  action: string;
-  signal: string;
+  action?: string;
+  signal?: string;
 };
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  const schema = yup.object({
+    identityIndex: yup.string().default("1"),
+    verificationLevel: yup.string().oneOf(["orb", "device"]).default("orb"),
+    app_id: yup
+      .string()
+      .required()
+      .test("app_id", "app_id must start with app_staging_", (value) =>
+        value.startsWith("app_staging_"),
+      ),
+    action: yup.string().default(""),
+    signal: yup.string().default(""),
+  });
+
   const { identityIndex, verificationLevel, app_id, action, signal } =
     req.body as ProofRequest;
 
-  const zkIdentity = new ZkIdentity(identityIndex);
+  const { parsedParams, isValid, errorMessage } = await validateRequestSchema({
+    schema,
+    value: { identityIndex, verificationLevel, app_id, action, signal },
+  });
+
+  if (!isValid) {
+    return res.status(400).json({ error: errorMessage });
+  }
+
+  const zkIdentity = new ZkIdentity(parsedParams.identityIndex);
   const encodedCommitment = encode(zkIdentity.commitment);
   const inclProof: InclusionProofResponse = await inclusionProof(
-    verificationLevel as string as CredentialType,
+    parsedParams.verificationLevel as string as CredentialType,
     encodedCommitment,
   );
 
@@ -65,8 +89,11 @@ export default async function handler(
       identityNullifier: zkIdentity.nullifier,
       treePathIndices: merkleProof.pathIndices,
       treeSiblings: merkleProof.siblings,
-      externalNullifier: generateExternalNullifier(app_id, action).hash,
-      signalHash: generateSignal(signal).hash,
+      externalNullifier: generateExternalNullifier(
+        parsedParams.app_id as `app_${string}`,
+        parsedParams.action,
+      ).hash,
+      signalHash: generateSignal(parsedParams.signal).hash,
     },
     wasm,
     zkey,
