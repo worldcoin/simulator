@@ -46,7 +46,11 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
   const { scannerOpened, setScannerOpened, setQrInputOpened } =
     useUiStore(getUiStore);
 
-  const close = useCallback(() => setScannerOpened(false), [setScannerOpened]);
+  const close = useCallback(() => {
+    setScannerOpened(false);
+    const stream = videoRef.current?.srcObject as MediaStream | null;
+    stream?.getTracks().forEach((track) => track.stop());
+  }, [setScannerOpened]);
 
   const onClickManualInput = useCallback(
     () => setQrInputOpened(true),
