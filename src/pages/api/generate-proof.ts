@@ -9,6 +9,7 @@ import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import { promises as fs } from "fs";
 import type { NextApiResponse } from "next";
 import { type NextApiRequest } from "next";
+import path from "path";
 import type { Groth16Proof } from "snarkjs";
 import { groth16 } from "snarkjs";
 import { encodePacked } from "viem";
@@ -52,10 +53,10 @@ export default async function handler(
   };
 
   const wasm = (await fs.readFile(
-    process.cwd() + "/public/semaphore/semaphore.wasm",
+    path.join(process.cwd(), "/public/semaphore/semaphore.wasm"),
   )) as Uint8Array;
   const zkey = (await fs.readFile(
-    process.cwd() + "/public/semaphore/semaphore.zkey",
+    path.join(process.cwd(), "/public/semaphore/semaphore.zkey"),
   )) as Uint8Array;
 
   const { proof, publicSignals } = (await groth16.fullProve(
