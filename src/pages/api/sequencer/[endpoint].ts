@@ -15,8 +15,7 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (!req.method || !["POST", "OPTIONS"].includes(req.method)) {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const requiredAttributes = ["credentialType", "commitment"];
@@ -32,16 +31,13 @@ export default async function handler(
     switch (endpoint) {
       case "inclusionProof":
         data = await inclusionProof(credentialType, commitment);
-        break;
+        return res.status(200).json(data);
       case "insertIdentity":
         data = await insertIdentity(credentialType, commitment);
-        break;
+        return res.status(200).end();
       default:
         return res.status(400).json({ error: "Invalid endpoint" });
     }
-
-    if (endpoint === "inclusionProof") res.status(200).json(data);
-    if (endpoint === "insertIdentity") res.status(200).end();
   } catch (error) {
     console.error((error as Error).message);
   }
