@@ -16,7 +16,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <div className="flex w-full flex-col space-y-4">
           <Button
             onClick={() => props.handleClick(CredentialType.Orb)}
-            className="flex h-12 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
+            className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
           >
             <Icon
               name="orb"
@@ -26,7 +26,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
           </Button>
           <Button
             onClick={() => props.handleClick(CredentialType.Device)}
-            className="flex h-12 w-full items-center justify-center bg-gray-200 font-sora text-16 font-semibold"
+            className="flex h-14 w-full items-center justify-center bg-gray-200 font-sora text-16 font-semibold"
           >
             <Icon
               name="smart-phone"
