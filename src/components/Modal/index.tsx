@@ -52,6 +52,7 @@ export function Modal() {
 
   const close = useCallback(() => {
     setOpen(false);
+    setShowConfirm(false);
     reset();
   }, [reset, setOpen]);
 
