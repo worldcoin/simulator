@@ -13,22 +13,26 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
   return (
     <div className="my-6 flex items-center justify-center">
       {props.status === Status.Waiting && (
-        <div className="flex w-full flex-col space-y-2">
+        <div className="flex w-full flex-col space-y-4">
           <Button
             onClick={() => props.handleClick(CredentialType.Orb)}
-            className="flex h-12 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
+            className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
           >
-            <>
-              <span className="mx-3">Verify with World ID Orb</span>
-            </>
+            <Icon
+              name="orb"
+              className="h-6 w-6 text-white"
+            />
+            <span className="mx-2">Verify with Orb</span>
           </Button>
           <Button
             onClick={() => props.handleClick(CredentialType.Device)}
-            className="flex h-12 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
+            className="flex h-14 w-full items-center justify-center bg-gray-200 font-sora text-16 font-semibold"
           >
-            <>
-              <span className="mx-3">Verify with World ID Device</span>
-            </>
+            <Icon
+              name="smart-phone"
+              className="h-6 w-6 text-gray-500"
+            />
+            <span className="mx-2 text-gray-900">Verify with Device</span>
           </Button>
         </div>
       )}
