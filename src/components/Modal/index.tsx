@@ -66,6 +66,8 @@ export function Modal() {
     ) => {
       if (!activeIdentity) return;
 
+      setStatus(Status.Pending);
+
       await generateIdentityProofsIfNeeded(activeIdentity);
 
       if (!bridgeInitialData) {
@@ -99,7 +101,6 @@ export function Modal() {
 
       if (url) {
         setShowConfirm(false);
-        setStatus(Status.Pending);
 
         const approveResult = await approveRequest({
           url,
