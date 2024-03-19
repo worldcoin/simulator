@@ -52,6 +52,7 @@ export function Modal() {
 
   const close = useCallback(() => {
     setOpen(false);
+    setShowConfirm(false);
     reset();
   }, [reset, setOpen]);
 
@@ -65,6 +66,8 @@ export function Modal() {
       credential_type: CredentialType = CredentialType.Orb,
     ) => {
       if (!activeIdentity) return;
+
+      setStatus(Status.Pending);
 
       await generateIdentityProofsIfNeeded(activeIdentity);
 
@@ -99,7 +102,6 @@ export function Modal() {
 
       if (url) {
         setShowConfirm(false);
-        setStatus(Status.Pending);
 
         const approveResult = await approveRequest({
           url,
