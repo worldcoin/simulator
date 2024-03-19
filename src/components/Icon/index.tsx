@@ -39,6 +39,7 @@ const icons = [
   "scanner",
   "setting",
   "shield",
+  "smart-phone",
   "spinner",
   "text",
   "user",

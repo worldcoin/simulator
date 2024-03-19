@@ -225,7 +225,7 @@ export function Modal() {
         status != Status.Error && (
           <div className="flex w-full justify-center">
             <button
-              className="mb-4 font-bold text-gray-500"
+              className="mb-2 font-medium uppercase text-gray-400"
               onClick={() => void handleClick(true)}
             >
               Test Invalid Proof
