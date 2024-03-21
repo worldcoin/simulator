@@ -6,16 +6,16 @@ import { Icon } from "../Icon";
 
 interface ModalStatusProps {
   status: Status;
-  handleClick: (credential_type: CredentialType) => void;
+  handleClick: (malicious: boolean, credential_type: CredentialType) => void;
 }
 
 export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
   return (
-    <div className="my-6 flex items-center justify-center">
+    <div className="mt-6 flex items-center justify-center">
       {props.status === Status.Waiting && (
         <div className="flex w-full flex-col space-y-4">
           <Button
-            onClick={() => props.handleClick(CredentialType.Orb)}
+            onClick={() => props.handleClick(false, CredentialType.Orb)}
             className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
           >
             <Icon
@@ -25,7 +25,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
             <span className="mx-2">Verify with Orb</span>
           </Button>
           <Button
-            onClick={() => props.handleClick(CredentialType.Device)}
+            onClick={() => props.handleClick(false, CredentialType.Device)}
             className="flex h-14 w-full items-center justify-center bg-gray-200 font-sora text-16 font-semibold"
           >
             <Icon
@@ -34,6 +34,14 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
             />
             <span className="mx-2 text-gray-900">Verify with Device</span>
           </Button>
+          <div className="flex w-full justify-center">
+            <button
+              className="my-2 text-14 font-medium uppercase text-gray-400"
+              onClick={() => props.handleClick(true, CredentialType.Orb)}
+            >
+              Test Invalid Proof
+            </button>
+          </div>
         </div>
       )}
       {props.status === Status.Pending && (
