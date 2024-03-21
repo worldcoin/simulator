@@ -214,27 +214,12 @@ export function Modal() {
 
             <ModalStatus
               status={status}
-              handleClick={(credential_type) =>
-                void handleClick(false, credential_type)
+              handleClick={(malicious, credential_type) =>
+                void handleClick(malicious, credential_type)
               }
             />
           </>
         )}
-      {!isLoading &&
-        !showConfirm &&
-        status !== Status.Success &&
-        metadata?.is_staging &&
-        status != Status.Error && (
-          <div className="flex w-full justify-center">
-            <button
-              className="mb-2 text-14 font-medium uppercase text-gray-400"
-              onClick={() => void handleClick(true)}
-            >
-              Test Invalid Proof
-            </button>
-          </div>
-        )}
-
       {isLoading && <ModalLoading />}
       {!isLoading && !metadata?.is_staging && status != Status.Error && (
         <ModalEnvironment />
