@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Button from "../Button";
 import { Icon } from "../Icon";
 
@@ -19,7 +18,9 @@ export default function ModalEnvironment() {
         </p>
       </div>
       <Button
-        onClick={() => redirect("https://worldcoin.org/download?world-id=true")}
+        onClick={() =>
+          window.open("https://worldcoin.org/download?worldid=true")
+        }
         className="mt-6 flex h-14 w-full items-center justify-center self-end bg-gray-900 font-sora text-16 font-semibold text-white"
       >
         <Icon
