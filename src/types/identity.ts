@@ -1,7 +1,7 @@
 import type { CredentialType } from "@worldcoin/idkit-core";
 import type { InclusionProofResponse } from "./sequencer";
 
-export interface InterfaceMeta {
+interface InterfaceMeta {
   readonly name: string;
   readonly idNumber: number;
 }

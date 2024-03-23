@@ -9,13 +9,6 @@ export type Bounds = [
   number,
 ];
 
-export interface ScanConstraints {
-  top?: string;
-  right?: string;
-  bottom?: string;
-  left?: string;
-}
-
 export type ParseWorldIDQRCodeOutput =
   | {
       valid: false;

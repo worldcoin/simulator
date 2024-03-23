@@ -1,12 +1,12 @@
 import { create } from "zustand";
 
-export type UiState = {
+type UiState = {
   scannerOpened: boolean;
   qrInputOpened: boolean;
   settingsOpened: boolean;
 };
 
-export type UiActions = {
+type UiActions = {
   setScannerOpened: (scannerOpened: boolean) => void;
   setQrInputOpened: (qrInputOpened: boolean) => void;
   setSettingsOpened: (settingsOpened: boolean) => void;

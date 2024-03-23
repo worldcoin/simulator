@@ -55,7 +55,7 @@ export function identityIDToEmoji(identityID: string) {
   return `/images/emojis/${intID % 32}.png`;
 }
 
-export function IDEmoji({ identityID }: { identityID: string }) {
+function IDEmoji({ identityID }: { identityID: string }) {
   const iconSource = useMemo(() => identityIDToEmoji(identityID), [identityID]);
   return (
     <div className="flex h-12 w-12 justify-center rounded-full bg-gray-100 align-middle">

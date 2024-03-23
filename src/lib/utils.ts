@@ -90,7 +90,7 @@ export const generateExternalNullifier = (
   ]);
 };
 
-export const buffer_encode = (buffer: ArrayBuffer): string => {
+const buffer_encode = (buffer: ArrayBuffer): string => {
   return Buffer.from(buffer).toString("base64");
 };
 
