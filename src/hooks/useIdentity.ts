@@ -3,7 +3,7 @@ import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
 import type { Identity, InclusionProofResponse } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { CredentialType } from "@worldcoin/idkit-core";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 import { useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
 
@@ -44,11 +44,11 @@ const useIdentity = () => {
       const id = encodedCommitment.slice(0, 10);
 
       const orbProof = await getIdentityProof(
-        CredentialType.Orb,
+        VerificationLevel.Orb,
         encodedCommitment,
       );
       const deviceProof = await getIdentityProof(
-        CredentialType.Device,
+        VerificationLevel.Device,
         encodedCommitment,
       );
 
@@ -57,13 +57,13 @@ const useIdentity = () => {
         ...identity,
         id,
         verified: {
-          [CredentialType.Orb]: orbProof !== null,
-          [CredentialType.Device]: deviceProof !== null,
+          [VerificationLevel.Orb]: orbProof !== null,
+          [VerificationLevel.Device]: deviceProof !== null,
         },
 
         inclusionProof: {
-          [CredentialType.Orb]: orbProof,
-          [CredentialType.Device]: deviceProof,
+          [VerificationLevel.Orb]: orbProof,
+          [VerificationLevel.Device]: deviceProof,
         },
         proofGenerationTime: Date.now(),
       };
@@ -97,12 +97,12 @@ const useIdentity = () => {
         },
         zkIdentity: zkIdentity.toString(),
         verified: {
-          [CredentialType.Orb]: true,
-          [CredentialType.Device]: true,
+          [VerificationLevel.Orb]: true,
+          [VerificationLevel.Device]: true,
         },
         inclusionProof: {
-          [CredentialType.Orb]: null,
-          [CredentialType.Device]: null,
+          [VerificationLevel.Orb]: null,
+          [VerificationLevel.Device]: null,
         },
         proofGenerationTime: null,
       };
@@ -142,7 +142,7 @@ const useIdentity = () => {
   }, [activeIdentityID, identities]);
 
   const getIdentityProof = async (
-    credentialType: CredentialType,
+    verificationLevel: VerificationLevel,
     encodedCommitment: string,
   ): Promise<InclusionProofResponse | null> => {
     try {
@@ -150,20 +150,20 @@ const useIdentity = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          credentialType,
+          verificationLevel,
           commitment: encodedCommitment,
         }),
       });
 
       if (response.status === 200) {
         console.log(
-          `Fetched fresh inclusion proof from sequencer for: ${credentialType}.`,
+          `Fetched fresh inclusion proof from sequencer for: ${verificationLevel}.`,
         );
         return (await response.json()) as InclusionProofResponse;
       }
     } catch (error) {
       console.error(
-        `Unable to get identity proof for credential type '${credentialType}'. Error: ${error}`,
+        `Unable to get identity proof for credential type '${verificationLevel}'. Error: ${error}`,
       );
     }
     return null;

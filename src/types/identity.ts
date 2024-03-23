@@ -1,4 +1,4 @@
-import type { CredentialType } from "@worldcoin/idkit-core";
+import type { VerificationLevel } from "@worldcoin/idkit-core";
 import type { InclusionProofResponse } from "./sequencer";
 
 interface InterfaceMeta {
@@ -10,7 +10,10 @@ export interface Identity {
   readonly id: string;
   readonly meta: InterfaceMeta;
   readonly zkIdentity: string;
-  verified: Record<CredentialType, boolean>;
-  inclusionProof: Record<CredentialType, InclusionProofResponse | null> | null;
+  verified: Record<VerificationLevel, boolean>;
+  inclusionProof: Record<
+    VerificationLevel,
+    InclusionProofResponse | null
+  > | null;
   proofGenerationTime: number | null;
 }

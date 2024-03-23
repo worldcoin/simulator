@@ -1,11 +1,11 @@
 import { inclusionProof, insertIdentity } from "@/services/sequencer";
 import type { InclusionProofResponse } from "@/types";
-import type { CredentialType } from "@worldcoin/idkit-core";
+import type { VerificationLevel } from "@worldcoin/idkit-core";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 interface SequencerRequest extends NextApiRequest {
   body: {
-    credentialType: CredentialType;
+    verificationLevel: VerificationLevel;
     commitment: string;
   };
 }
@@ -18,22 +18,22 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const requiredAttributes = ["credentialType", "commitment"];
+  const requiredAttributes = ["verificationLevel", "commitment"];
   if (!requiredAttributes.every((attr) => attr in req.body)) {
     return res.status(400).json({ error: `Missing attribute in request body` });
   }
 
   try {
     const { endpoint } = req.query;
-    const { credentialType, commitment } = req.body;
+    const { verificationLevel, commitment } = req.body;
     let data: InclusionProofResponse | Response;
 
     switch (endpoint) {
       case "inclusionProof":
-        data = await inclusionProof(credentialType, commitment);
+        data = await inclusionProof(verificationLevel, commitment);
         return res.status(200).json(data);
       case "insertIdentity":
-        data = await insertIdentity(credentialType, commitment);
+        data = await insertIdentity(verificationLevel, commitment);
         return res.status(200).end();
       default:
         return res.status(400).json({ error: "Invalid endpoint" });

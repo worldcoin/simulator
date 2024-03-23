@@ -1,24 +1,31 @@
 import { SEQUENCER_ENDPOINT } from "@/lib/utils";
 import type { InclusionProofResponse, SequencerRequest } from "@/types";
-import { CredentialType } from "@worldcoin/idkit-core";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 
-const SEQUENCER_STAGING_PASSWORD: Record<CredentialType, string | undefined> = {
-  [CredentialType.Orb]: process.env.POLYGON_ORB_SEQUENCER_STAGING_PASSWORD,
-  [CredentialType.Device]: process.env.POLYGON_PHONE_SEQUENCER_STAGING_PASSWORD,
+const SEQUENCER_STAGING_PASSWORD: Record<
+  VerificationLevel,
+  string | undefined
+> = {
+  [VerificationLevel.Orb]: process.env.POLYGON_ORB_SEQUENCER_STAGING_PASSWORD,
+  [VerificationLevel.Device]:
+    process.env.POLYGON_PHONE_SEQUENCER_STAGING_PASSWORD,
 };
 
-function buildUrl(endpoint: string, credentialType: CredentialType) {
-  return new URL(endpoint, SEQUENCER_ENDPOINT[credentialType]);
+function buildUrl(endpoint: string, verificationLevel: VerificationLevel) {
+  return new URL(endpoint, SEQUENCER_ENDPOINT[verificationLevel]);
 }
 
-function buildHeaders(authenticate: boolean, credentialType: CredentialType) {
+function buildHeaders(
+  authenticate: boolean,
+  verificationLevel: VerificationLevel,
+) {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
 
   if (authenticate) {
     headers.Authorization = `Basic ${btoa(
-      `worldcoin:${SEQUENCER_STAGING_PASSWORD[credentialType]}`,
+      `worldcoin:${SEQUENCER_STAGING_PASSWORD[verificationLevel]}`,
     )}`;
   }
   return headers;
@@ -27,20 +34,20 @@ function buildHeaders(authenticate: boolean, credentialType: CredentialType) {
 async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
   if (
     request.authenticate &&
-    !SEQUENCER_STAGING_PASSWORD[request.credentialType]
+    !SEQUENCER_STAGING_PASSWORD[request.verificationLevel]
   ) {
     throw new Error(
-      `Sequencer password for '${request.credentialType}' is not provided and this request requires authentication. Please set SEQUENCER_PASSWORD environment variables.`,
+      `Sequencer password for '${request.verificationLevel}' is not provided and this request requires authentication. Please set SEQUENCER_PASSWORD environment variables.`,
     );
   }
 
   const headers = buildHeaders(
     request.authenticate ?? false,
-    request.credentialType,
+    request.verificationLevel,
   );
 
   const response = await fetch(
-    buildUrl(request.endpoint, request.credentialType).toString(),
+    buildUrl(request.endpoint, request.verificationLevel).toString(),
     {
       method: "POST",
       body: JSON.stringify({ identityCommitment: request.commitment }),
@@ -50,7 +57,7 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to call /${request.endpoint} on sequencer for '${request.credentialType}'`,
+      `Failed to call /${request.endpoint} on sequencer for '${request.verificationLevel}'`,
     );
   }
 
@@ -58,23 +65,23 @@ async function postRequest<T = unknown>(request: SequencerRequest): Promise<T> {
 }
 
 export async function inclusionProof(
-  credentialType: CredentialType,
+  verificationLevel: VerificationLevel,
   commitment: string,
 ) {
   return await postRequest<InclusionProofResponse>({
     endpoint: "inclusionProof",
-    credentialType,
+    verificationLevel,
     commitment,
   });
 }
 
 export async function insertIdentity(
-  credentialType: CredentialType,
+  verificationLevel: VerificationLevel,
   commitment: string,
 ) {
   return await postRequest<Response>({
     endpoint: "insertIdentity",
-    credentialType,
+    verificationLevel,
     commitment,
     authenticate: true,
   });

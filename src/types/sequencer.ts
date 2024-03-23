@@ -1,8 +1,8 @@
-import type { CredentialType } from "@worldcoin/idkit-core";
+import type { VerificationLevel } from "@worldcoin/idkit-core";
 
 export interface SequencerRequest {
   endpoint: string;
-  credentialType: CredentialType;
+  verificationLevel: VerificationLevel;
   commitment: string;
   authenticate?: boolean;
 }

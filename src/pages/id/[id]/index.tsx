@@ -12,7 +12,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { useUiStore, type UiStore } from "@/stores/ui";
 import { ErrorsCode, Status } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { CredentialType } from "@worldcoin/idkit-core";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo } from "react";
@@ -135,9 +135,9 @@ export default function Id() {
       </DynamicHeader>
 
       <DynamicWorldID
-        verified={activeIdentity?.verified[CredentialType.Orb]}
-        bioVerified={activeIdentity?.verified[CredentialType.Orb]}
-        phoneVerified={activeIdentity?.verified[CredentialType.Device]}
+        verified={activeIdentity?.verified[VerificationLevel.Orb]}
+        bioVerified={activeIdentity?.verified[VerificationLevel.Orb]}
+        deviceVerified={activeIdentity?.verified[VerificationLevel.Device]}
       />
 
       <div className="grid grid-cols-2 gap-2">

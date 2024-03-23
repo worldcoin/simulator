@@ -1,5 +1,5 @@
 import type { AbiEncodedValue, IDKitConfig } from "@worldcoin/idkit-core";
-import { CredentialType } from "@worldcoin/idkit-core";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 import type { HashFunctionOutput } from "@worldcoin/idkit-core/hashing";
 
 import {
@@ -67,9 +67,9 @@ export async function retryDownload(): Promise<void> {
 }
 
 // Mappings
-export const SEQUENCER_ENDPOINT: Record<CredentialType, string> = {
-  [CredentialType.Orb]: ORB_SEQUENCER_STAGING,
-  [CredentialType.Device]: PHONE_SEQUENCER_STAGING,
+export const SEQUENCER_ENDPOINT: Record<VerificationLevel, string> = {
+  [VerificationLevel.Orb]: ORB_SEQUENCER_STAGING,
+  [VerificationLevel.Device]: PHONE_SEQUENCER_STAGING,
 };
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));

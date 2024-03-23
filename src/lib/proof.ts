@@ -3,7 +3,7 @@ import type { BridgeInitialData, FP, Verification } from "@/types";
 import { CodedError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import type { CredentialType } from "@worldcoin/idkit-core";
+import type { VerificationLevel } from "@worldcoin/idkit-core";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
@@ -134,19 +134,19 @@ async function verifySemaphoreProof(
 /**
  * Transforms an inclusion proof into the Merkle proof format.
  * @param identity The current simulator identity.
- * @param credentialType The credential type to generate the proof for.
+ * @param verificationLevel The credential type to generate the proof for.
  * @returns The Merkle proof of inclusion.
  */
 export function getMerkleProof(
   identity: Identity,
-  credentialType: CredentialType,
+  verificationLevel: VerificationLevel,
 ): MerkleProof {
   console.log("identity", identity);
   const proofs = identity.inclusionProof;
   if (!proofs) {
     throw new Error("Inclusion proof not found");
   }
-  const proof = proofs[credentialType]?.proof;
+  const proof = proofs[verificationLevel]?.proof;
   // Identity has inclusion proof from sequencer
   if (proof) {
     const siblings = proof
@@ -188,12 +188,12 @@ export function generateDummyMerkleProof(identity: Identity): MerkleProof {
  * Performs the Semaphore proof generation and verification process.
  * @param request The session request from WalletConnect.
  * @param identity The current simulator identity.
- * @param credentialType The credential type to generate the proof for.
+ * @param verificationLevel The credential type to generate the proof for.
  * @returns The full semaphore proof and its verification status.
  */
 export const getFullProof = async (
-  bridgeInitialData: Omit<BridgeInitialData, "credential_type"> & {
-    credential_type: CredentialType;
+  bridgeInitialData: Omit<BridgeInitialData, "verification_level"> & {
+    verification_level: VerificationLevel;
   },
   identity: Identity,
   merkleProof: MerkleProof,
