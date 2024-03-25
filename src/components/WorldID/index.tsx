@@ -8,7 +8,7 @@ export default function WorldID(props: {
   animate?: boolean;
   bioVerified?: boolean;
   expiration?: Date;
-  phoneVerified?: boolean;
+  deviceVerified?: boolean;
   signAt?: Date;
   verified?: boolean;
   verifiedIn?: string;

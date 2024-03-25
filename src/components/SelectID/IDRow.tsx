@@ -1,15 +1,15 @@
 import { Icon } from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import type { Identity } from "@/types";
-import { CredentialType } from "@worldcoin/idkit-core";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 export default function IDRow({ identity }: { identity: Identity }) {
   const router = useRouter();
-  const verifiedPhone = identity.verified[CredentialType.Device];
-  const verifiedOrb = identity.verified[CredentialType.Orb];
+  const verifiedDevice = identity.verified[VerificationLevel.Device];
+  const verifiedOrb = identity.verified[VerificationLevel.Orb];
   return (
     <button
       key={identity.id}
@@ -23,24 +23,24 @@ export default function IDRow({ identity }: { identity: Identity }) {
         <div
           className={cn(
             "inline-flex h-full items-center gap-x-1 align-middle",
-            { "text-info-700": verifiedOrb || verifiedPhone },
-            { "text-gray-500": !(verifiedOrb || verifiedPhone) },
+            { "text-info-700": verifiedOrb || verifiedDevice },
+            { "text-gray-500": !(verifiedOrb || verifiedDevice) },
           )}
         >
           <Icon
             name={
-              verifiedOrb || verifiedPhone
+              verifiedOrb || verifiedDevice
                 ? "badge-verified"
                 : "badge-not-verified"
             }
             className={"h-3 w-3 "}
           />
           <h4 className=" text-b4 text-gray-500">
-            {verifiedOrb && verifiedPhone
+            {verifiedOrb && verifiedDevice
               ? "Verified (Orb & Device)"
               : verifiedOrb
               ? "Verified (Orb)"
-              : verifiedPhone
+              : verifiedDevice
               ? "Verified (Device)"
               : "Unverified"}
           </h4>
@@ -55,7 +55,7 @@ export function identityIDToEmoji(identityID: string) {
   return `/images/emojis/${intID % 32}.png`;
 }
 
-export function IDEmoji({ identityID }: { identityID: string }) {
+function IDEmoji({ identityID }: { identityID: string }) {
   const iconSource = useMemo(() => identityIDToEmoji(identityID), [identityID]);
   return (
     <div className="flex h-12 w-12 justify-center rounded-full bg-gray-100 align-middle">

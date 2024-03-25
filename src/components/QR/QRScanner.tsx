@@ -5,7 +5,6 @@ import { parseWorldIDQRCode } from "@/lib/validation";
 import { useModalStore } from "@/stores/modalStore";
 import type { UiStore } from "@/stores/ui";
 import { useUiStore } from "@/stores/ui";
-import type { ScanConstraints } from "@/types/qrcode";
 import jsQR from "jsqr";
 import React, {
   Fragment,
@@ -20,8 +19,6 @@ import { QRFrame } from "./QRFrame";
 
 interface QRScannerProps {
   className?: string;
-  // NOTE: constraints in percents
-  scanConstraints?: ScanConstraints;
   performVerification: (data: string) => Promise<void>;
 }
 

@@ -12,7 +12,7 @@ import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
 
-import { CredentialType } from "@worldcoin/idkit-core";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
@@ -63,7 +63,7 @@ export function Modal() {
   const handleClick = useCallback(
     async (
       malicious?: boolean,
-      credential_type: CredentialType = CredentialType.Orb,
+      verification_level: VerificationLevel = VerificationLevel.Orb,
     ) => {
       if (!activeIdentity) return;
 
@@ -77,19 +77,19 @@ export function Modal() {
       }
 
       // Show additional warning if the identity is unverified or still pending inclusion
-      if (!showConfirm && !activeIdentity.verified[credential_type]) {
+      if (!showConfirm && !activeIdentity.verified[verification_level]) {
         setShowConfirm(true);
         return;
       }
       // Generate proofs
       const merkleProof = malicious
         ? generateDummyMerkleProof(activeIdentity)
-        : getMerkleProof(activeIdentity, credential_type);
+        : getMerkleProof(activeIdentity, verification_level);
 
       const { verified, fullProof } = await getFullProof(
         {
           ...bridgeInitialData,
-          credential_type,
+          verification_level,
         },
         activeIdentity,
         merkleProof,
@@ -106,7 +106,7 @@ export function Modal() {
         const approveResult = await approveRequest({
           url,
           fullProof,
-          credentialType: credential_type,
+          verificationLevel: verification_level,
         });
 
         if (!approveResult.success) {
@@ -160,7 +160,7 @@ export function Modal() {
               <div className="z-40 w-2/3 no-select xs:aspect-[330/435] ">
                 <div
                   className={cn(
-                    activeIdentity?.verified[CredentialType.Orb]
+                    activeIdentity?.verified[VerificationLevel.Orb]
                       ? 'bg-[url("/images/card-bg-verified-front.png")]'
                       : 'bg-[url("/images/card-bg-not-verified.png")]',
                     "h-full w-full bg-contain bg-[position:center] bg-no-repeat",
@@ -214,8 +214,8 @@ export function Modal() {
 
             <ModalStatus
               status={status}
-              handleClick={(malicious, credential_type) =>
-                void handleClick(malicious, credential_type)
+              handleClick={(malicious, verification_level) =>
+                void handleClick(malicious, verification_level)
               }
             />
           </>

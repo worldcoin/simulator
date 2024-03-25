@@ -4,7 +4,7 @@ import type { PanInfo } from "framer-motion";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef } from "react";
 
-export interface DrawerProps {
+interface DrawerProps {
   open: boolean;
   onClose: () => void;
   className?: string;

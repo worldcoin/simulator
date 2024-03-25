@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { Bounds } from "@/types/qrcode";
+import type { Bounds } from "@/types";
 import type { MutableRefObject } from "react";
 import { useEffect, useState } from "react";
 

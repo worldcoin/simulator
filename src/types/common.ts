@@ -3,11 +3,6 @@ import type { NumericString } from "snarkjs";
 
 export type FP = Omit<FullProof, "proof"> & { proof: NumericString[] };
 
-export enum Environment {
-  Production = "production",
-  Staging = "staging",
-}
-
 export enum Status {
   Loading,
   Waiting,

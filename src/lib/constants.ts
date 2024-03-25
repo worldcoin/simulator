@@ -16,7 +16,3 @@ export const METADATA = {
 };
 
 export const SERVICE_STATUS_URL = "https://status.worldcoin.org/api/services";
-
-export enum CommonValidationMessage {
-  Required = "This field is required.",
-}

@@ -39,19 +39,6 @@ export async function parseWorldIDQRCode(
   };
 }
 
-export function validateImageUrl(data: string): boolean {
-  try {
-    const url = new URL(data);
-    return (
-      url.protocol === "data:" ||
-      url.protocol === "https:" ||
-      url.protocol === document.location.protocol
-    );
-  } catch {
-    return false;
-  }
-}
-
 export async function validateSignal(signal: string) {
   try {
     return BigInt(signal);

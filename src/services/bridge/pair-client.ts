@@ -1,13 +1,13 @@
 import { buffer_decode } from "@/lib/utils";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { fetchMetadata } from "@/services/metadata";
-import type { BridgeServiceReturnType, MetadataResponse } from "@/types";
-import {
-  CodedError,
-  ErrorsCode,
-  type BridgeInitialData,
-  type BridgeRequestData,
+import type {
+  BridgeInitialData,
+  BridgeRequestData,
+  BridgeServiceReturnType,
+  MetadataResponse,
 } from "@/types";
+import { CodedError, ErrorsCode } from "@/types";
 
 type Props = {
   url: string;

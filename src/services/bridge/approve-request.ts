@@ -6,13 +6,13 @@ import {
   type BridgeServiceReturnType,
   type FP,
 } from "@/types";
-import type { CredentialType } from "@worldcoin/idkit-core";
+import type { VerificationLevel } from "@worldcoin/idkit-core";
 import { encodePacked } from "viem";
 
 type Props = {
   url: string;
   fullProof: FP;
-  credentialType: CredentialType;
+  verificationLevel: VerificationLevel;
 };
 
 type ApproveRequestReturnType = BridgeServiceReturnType;
@@ -20,7 +20,7 @@ type ApproveRequestReturnType = BridgeServiceReturnType;
 export const approveRequest = async ({
   url,
   fullProof,
-  credentialType,
+  verificationLevel,
 }: Props): Promise<ApproveRequestReturnType> => {
   const { valid, requestUUID, bridgeURL, key } = await parseWorldIDQRCode(url);
 
@@ -36,7 +36,7 @@ export const approveRequest = async ({
     merkle_root: fullProof.merkleTreeRoot,
     nullifier_hash: fullProof.nullifierHash,
     // NOTE: we are adding this to the payload when user selects a credential type on modal
-    credentialType,
+    verificationLevel,
   };
 
   const bigintProof = params.proof.map((x) => BigInt(x)) as [
@@ -59,7 +59,7 @@ export const approveRequest = async ({
     proof: proofString,
     merkle_root: merkleRootString,
     nullifier_hash: nullifierHashString,
-    credential_type: params.credentialType,
+    verification_level: params.verificationLevel,
   };
 
   const iv = crypto.getRandomValues(new Uint8Array(12));
