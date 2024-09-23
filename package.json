@@ -27,7 +27,7 @@
     "clsx": "^1.2.1",
     "framer-motion": "^10.12.18",
     "jsqr": "^1.4.0",
-    "next": "^14.0.3",
+    "next": "^14.2.13",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
