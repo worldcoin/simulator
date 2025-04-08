@@ -9,7 +9,7 @@ const SEQUENCER_STAGING_PASSWORD: Record<
   [VerificationLevel.Orb]: process.env.POLYGON_ORB_SEQUENCER_STAGING_PASSWORD,
   [VerificationLevel.Device]:
     process.env.POLYGON_PHONE_SEQUENCER_STAGING_PASSWORD,
-};
+} as Record<VerificationLevel, string | undefined>;
 
 function buildUrl(endpoint: string, verificationLevel: VerificationLevel) {
   return new URL(endpoint, SEQUENCER_ENDPOINT[verificationLevel]);

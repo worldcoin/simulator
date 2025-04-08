@@ -70,7 +70,7 @@ export async function retryDownload(): Promise<void> {
 export const SEQUENCER_ENDPOINT: Record<VerificationLevel, string> = {
   [VerificationLevel.Orb]: ORB_SEQUENCER_STAGING,
   [VerificationLevel.Device]: PHONE_SEQUENCER_STAGING,
-};
+} as Record<VerificationLevel, string>;
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
 
