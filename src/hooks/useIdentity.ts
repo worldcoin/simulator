@@ -59,12 +59,11 @@ const useIdentity = () => {
         verified: {
           [VerificationLevel.Orb]: orbProof !== null,
           [VerificationLevel.Device]: deviceProof !== null,
-        },
-
+        } as Record<VerificationLevel, boolean>,
         inclusionProof: {
           [VerificationLevel.Orb]: orbProof,
           [VerificationLevel.Device]: deviceProof,
-        },
+        } as Record<VerificationLevel, InclusionProofResponse | null>,
         proofGenerationTime: Date.now(),
       };
 
@@ -99,11 +98,11 @@ const useIdentity = () => {
         verified: {
           [VerificationLevel.Orb]: true,
           [VerificationLevel.Device]: true,
-        },
+        } as Record<VerificationLevel, boolean>,
         inclusionProof: {
           [VerificationLevel.Orb]: null,
           [VerificationLevel.Device]: null,
-        },
+        } as Record<VerificationLevel, InclusionProofResponse | null>,
         proofGenerationTime: null,
       };
       insertIdentity(identity);
