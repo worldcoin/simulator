@@ -12,7 +12,12 @@ import { Buffer } from "buffer/";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { encodePacked } from "viem";
-import { ORB_SEQUENCER_STAGING, PHONE_SEQUENCER_STAGING } from "./constants";
+import {
+  DOCUMENT_SEQUENCER_STAGING_URL,
+  ORB_SEQUENCER_STAGING_URL,
+  PHONE_SEQUENCER_STAGING_URL,
+  SECURE_DOCUMENT_SEQUENCER_STAGING_URL,
+} from "./constants";
 
 export function encode(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
@@ -68,9 +73,11 @@ export async function retryDownload(): Promise<void> {
 
 // Mappings
 export const SEQUENCER_ENDPOINT: Record<VerificationLevel, string> = {
-  [VerificationLevel.Orb]: ORB_SEQUENCER_STAGING,
-  [VerificationLevel.Device]: PHONE_SEQUENCER_STAGING,
-} as Record<VerificationLevel, string>;
+  [VerificationLevel.Orb]: ORB_SEQUENCER_STAGING_URL,
+  [VerificationLevel.Device]: PHONE_SEQUENCER_STAGING_URL,
+  [VerificationLevel.SecureDocument]: SECURE_DOCUMENT_SEQUENCER_STAGING_URL,
+  [VerificationLevel.Document]: DOCUMENT_SEQUENCER_STAGING_URL,
+};
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
 
