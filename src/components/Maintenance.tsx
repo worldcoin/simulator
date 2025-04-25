@@ -14,6 +14,7 @@ export default function Maintenance() {
         headers: { "Content-Type": "application/json" },
       });
       const { services } = (await response.json()) as ServiceStatusResponse;
+      // TODO: This service does't exist anymore
       const sdkStagingNetwork = services.find(
         (service) => service.name === "SDK Staging Network",
       );
