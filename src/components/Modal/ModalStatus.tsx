@@ -27,6 +27,25 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
             />
             <span className="mx-2">Verify with Orb</span>
           </Button>
+          <div className="flex flex-row space-x-2 text-14">
+            <Button
+              onClick={() =>
+                props.handleClick(false, VerificationLevel.Document)
+              }
+              className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora font-semibold text-white"
+            >
+              <span className="mx-2">Verify with Document</span>
+            </Button>
+            <Button
+              onClick={() =>
+                props.handleClick(false, VerificationLevel.SecureDocument)
+              }
+              className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora  font-semibold text-white"
+            >
+              <span className="mx-2">Verify with Secure Document</span>
+            </Button>
+          </div>
+
           <Button
             onClick={() => props.handleClick(false, VerificationLevel.Device)}
             className="flex h-14 w-full items-center justify-center bg-gray-200 font-sora text-16 font-semibold"
