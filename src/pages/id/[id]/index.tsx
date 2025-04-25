@@ -1,5 +1,4 @@
 import { IconGradient } from "@/components/Icon/IconGradient";
-import Maintenance from "@/components/Maintenance";
 import { Modal } from "@/components/Modal";
 import { QRInput } from "@/components/QR/QRInput";
 import { identityIDToEmoji } from "@/components/SelectID/IDRow";
@@ -188,7 +187,6 @@ export default function Id() {
       <QRInput performVerification={performVerification} />
       {activeCommitment && <Settings commitment={activeCommitment} />}
       <Modal />
-      <Maintenance />
     </div>
   );
 }
