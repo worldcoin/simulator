@@ -8,8 +8,41 @@ import { useMemo } from "react";
 
 export default function IDRow({ identity }: { identity: Identity }) {
   const router = useRouter();
-  const verifiedDevice = identity.verified[VerificationLevel.Device];
-  const verifiedOrb = identity.verified[VerificationLevel.Orb];
+
+  // Check verification status for all levels
+  const verifiedLevels = Object.entries(identity.verified)
+    .filter(([_, isVerified]) => isVerified)
+    .map(([level]) => level);
+
+  const isVerified = verifiedLevels.length > 0;
+
+  // Format the verification text
+  const getVerificationText = () => {
+    if (!isVerified) return "Unverified";
+
+    if (verifiedLevels.length === Object.keys(VerificationLevel).length) {
+      return "Verified (All)";
+    }
+
+    // Map verification level enum keys to readable names
+    const levelNames = verifiedLevels.map((level) => {
+      switch (level) {
+        case VerificationLevel.Orb:
+          return "Orb";
+        case VerificationLevel.Device:
+          return "Device";
+        case VerificationLevel.SecureDocument:
+          return "Secure Document";
+        case VerificationLevel.Document:
+          return "Document";
+        default:
+          return level;
+      }
+    });
+
+    return `Verified (${levelNames.join(", ")})`;
+  };
+
   return (
     <button
       key={identity.id}
@@ -23,27 +56,15 @@ export default function IDRow({ identity }: { identity: Identity }) {
         <div
           className={cn(
             "inline-flex h-full items-center gap-x-1 align-middle",
-            { "text-info-700": verifiedOrb || verifiedDevice },
-            { "text-gray-500": !(verifiedOrb || verifiedDevice) },
+            { "text-info-700": isVerified },
+            { "text-gray-500": !isVerified },
           )}
         >
           <Icon
-            name={
-              verifiedOrb || verifiedDevice
-                ? "badge-verified"
-                : "badge-not-verified"
-            }
+            name={isVerified ? "badge-verified" : "badge-not-verified"}
             className={"h-3 w-3 "}
           />
-          <h4 className=" text-b4 text-gray-500">
-            {verifiedOrb && verifiedDevice
-              ? "Verified (Orb & Device)"
-              : verifiedOrb
-              ? "Verified (Orb)"
-              : verifiedDevice
-              ? "Verified (Device)"
-              : "Unverified"}
-          </h4>
+          <h4 className="text-b4 text-gray-500">{getVerificationText()}</h4>
         </div>
       </div>
     </button>

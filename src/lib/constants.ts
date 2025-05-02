@@ -2,10 +2,14 @@
 export const DEV_PORTAL_PRECHECK_URL =
   "https://developer.worldcoin.org/api/v1/precheck/";
 
-export const ORB_SEQUENCER_STAGING =
+export const ORB_SEQUENCER_STAGING_URL =
   "https://signup-orb-ethereum.stage-crypto.worldcoin.org";
-export const PHONE_SEQUENCER_STAGING =
+export const PHONE_SEQUENCER_STAGING_URL =
   "https://signup-phone-ethereum.stage-crypto.worldcoin.org";
+export const DOCUMENT_SEQUENCER_STAGING_URL =
+  "https://signup-document.stage-crypto.worldcoin.org";
+export const SECURE_DOCUMENT_SEQUENCER_STAGING_URL =
+  "https://signup-document-secure.stage-crypto.worldcoin.org";
 
 // Site Metadata
 export const METADATA = {

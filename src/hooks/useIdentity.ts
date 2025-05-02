@@ -51,7 +51,14 @@ const useIdentity = () => {
         VerificationLevel.Device,
         encodedCommitment,
       );
-
+      const secureDocumentProof = await getIdentityProof(
+        VerificationLevel.SecureDocument,
+        encodedCommitment,
+      );
+      const documentProof = await getIdentityProof(
+        VerificationLevel.Document,
+        encodedCommitment,
+      );
       // Build updated identity object
       const newIdentity: Identity = {
         ...identity,
@@ -59,11 +66,15 @@ const useIdentity = () => {
         verified: {
           [VerificationLevel.Orb]: orbProof !== null,
           [VerificationLevel.Device]: deviceProof !== null,
-        } as Record<VerificationLevel, boolean>,
+          [VerificationLevel.SecureDocument]: secureDocumentProof !== null,
+          [VerificationLevel.Document]: documentProof !== null,
+        },
         inclusionProof: {
           [VerificationLevel.Orb]: orbProof,
           [VerificationLevel.Device]: deviceProof,
-        } as Record<VerificationLevel, InclusionProofResponse | null>,
+          [VerificationLevel.SecureDocument]: secureDocumentProof,
+          [VerificationLevel.Document]: documentProof,
+        },
         proofGenerationTime: Date.now(),
       };
 
@@ -98,11 +109,15 @@ const useIdentity = () => {
         verified: {
           [VerificationLevel.Orb]: true,
           [VerificationLevel.Device]: true,
-        } as Record<VerificationLevel, boolean>,
+          [VerificationLevel.SecureDocument]: true,
+          [VerificationLevel.Document]: true,
+        },
         inclusionProof: {
           [VerificationLevel.Orb]: null,
           [VerificationLevel.Device]: null,
-        } as Record<VerificationLevel, InclusionProofResponse | null>,
+          [VerificationLevel.SecureDocument]: null,
+          [VerificationLevel.Document]: null,
+        },
         proofGenerationTime: null,
       };
       insertIdentity(identity);
