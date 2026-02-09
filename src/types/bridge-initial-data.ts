@@ -6,4 +6,6 @@ export type BridgeInitialData = {
   action_description: string;
   action: string;
   signal: string;
+  // IDKit v4: indicates the app environment, absent in older payloads
+  environment?: "production" | "staging";
 };

@@ -30,7 +30,9 @@ export const QRInput = memo(function QRInput(props: {
 
       return !(
         url.protocol == "https:" &&
-        (url.host == "worldcoin.org" || url.host == "world.org") &&
+        (url.host == "worldcoin.org" ||
+          url.host == "world.org" ||
+          url.host == "staging.world.org") &&
         url.pathname == "/verify" &&
         url.searchParams.get("t") == "wld" &&
         url.searchParams

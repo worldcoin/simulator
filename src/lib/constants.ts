@@ -1,6 +1,8 @@
 // Dev portal
-export const DEV_PORTAL_PRECHECK_URL =
-  "https://developer.worldcoin.org/api/v1/precheck/";
+const DEV_PORTAL_URL =
+  process.env.NEXT_PUBLIC_DEV_PORTAL_URL ?? "https://developer.worldcoin.org";
+export const DEV_PORTAL_PRECHECK_URL = `${DEV_PORTAL_URL}/api/v1/precheck/`;
+export const DEV_PORTAL_PROOF_CONTEXT_URL = `${DEV_PORTAL_URL}/api/v4/proof-context/`;
 
 export const ORB_SEQUENCER_STAGING_URL =
   "https://signup-orb-ethereum.stage-crypto.worldcoin.org";
