@@ -28,6 +28,7 @@ const generateCsp = () => {
       values: [
         "'self'",
         "https://developer.worldcoin.org",
+        "https://staging-developer.worldcoin.org",
         "https://app.posthog.com",
         "https://status.worldcoin.org",
         "https://bridge.worldcoin.org",
