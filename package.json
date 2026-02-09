@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "engines": {
-    "node": "18"
+    "node": "22"
   },
   "scripts": {
     "dev": "next dev",
@@ -27,7 +27,7 @@
     "clsx": "^1.2.1",
     "framer-motion": "^10.16.16",
     "jsqr": "^1.4.0",
-    "next": "^14.2.25",
+    "next": "^14.2.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.5.6",
-    "@types/node": "18.15.13",
+    "@types/node": "22",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
     "@types/snarkjs": "^0.7.7",

@@ -4,6 +4,7 @@ export interface MetadataParams {
   signal: string;
   nullifier_hash?: string;
   action_description?: string;
+  environment?: "production" | "staging"; // IDKit v4
 }
 
 export interface MetadataResponse {

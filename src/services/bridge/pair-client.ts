@@ -118,6 +118,7 @@ export const pairClient = async ({
     signal: bridgeInitialData.signal,
     nullifier_hash: "",
     action_description: bridgeInitialData.action_description,
+    environment: bridgeInitialData.environment, // IDKit v4
   });
 
   return { success: true, metadata, bridgeInitialData };

@@ -152,7 +152,7 @@ export function Modal() {
             >
               <Icon
                 name="close"
-                className="h-6 w-6 text-black"
+                className="size-6 text-black"
                 bgClassName="h-9 w-9 rounded-full bg-gray-200"
               />
             </button>
@@ -170,9 +170,9 @@ export function Modal() {
             </div>
             <div className="flex flex-col rounded-18 bg-gray-50 p-4">
               <div className="mb-3 flex w-full flex-row items-center gap-x-4 p-1">
-                <div className="flex h-15 w-15 items-center justify-center rounded-full border border-gray-200 bg-white">
+                <div className="flex size-15 items-center justify-center rounded-full border border-gray-200 bg-white">
                   <Image
-                    src={metadata.verified_app_logo ?? "/icons/question.svg"}
+                    src={metadata.verified_app_logo || "/icons/question.svg"}
                     alt={metadata.name ?? "App logo"}
                     width={40}
                     height={40}
@@ -196,16 +196,16 @@ export function Modal() {
                           ? "badge-verified"
                           : "badge-not-verified"
                       }
-                      className={"h-4 w-4"}
+                      className={"size-4"}
                     />
 
-                    <span className="text-b4 leading-[1px]">
+                    <span className="text-b4 leading-1px">
                       {metadata.is_verified ? "Verified" : "Not Verified"}
                     </span>
                   </div>
                 </div>
               </div>
-              <hr className="h-[1px] w-full rounded-full bg-gray-200 xs:block" />
+              <hr className="h-px w-full rounded-full bg-gray-200 xs:block" />
               <p className="mt-4 px-2 text-b3 text-gray-500">
                 {metadata.name ?? "App Name"} is asking for permission to verify
                 you with your World ID.

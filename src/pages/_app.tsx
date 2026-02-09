@@ -100,10 +100,22 @@ export default function App({
         />
       </Head>
 
-      <Layout>
-        <StatusBar />
-        <Component {...pageProps} />
-      </Layout>
+      <a
+        href="https://world.org/blog/engineering/introducing-world-id-4.0"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed top-0 z-50 flex w-full items-center justify-center gap-x-2 bg-warning-100 px-4 py-2 text-center text-b4 font-medium text-warning-700"
+      >
+        This simulator will change with the adoption of World ID 4.0. Learn
+        more.
+      </a>
+
+      <div className="pt-10">
+        <Layout>
+          <StatusBar />
+          <Component {...pageProps} />
+        </Layout>
+      </div>
 
       <Toaster position={isMobile ? "top-center" : "top-right"} />
       <style
