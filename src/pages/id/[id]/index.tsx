@@ -4,6 +4,11 @@ import { QRInput } from "@/components/QR/QRInput";
 import { identityIDToEmoji } from "@/components/SelectID/IDRow";
 import { Settings } from "@/components/Settings";
 import useIdentity from "@/hooks/useIdentity";
+import {
+  CONNECT_URL_QUERY_KEY,
+  isValidConnectUrl,
+  readSingleQueryValue,
+} from "@/lib/connect-url";
 import { checkCache, encode, retryDownload } from "@/lib/utils";
 import { pairClient } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
@@ -14,7 +19,8 @@ import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { VerificationLevel } from "@worldcoin/idkit-core";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import toast from "react-hot-toast";
 
 const DynamicChip = dynamic(() => import("@/components/Chip"), {
   ssr: false,
@@ -49,6 +55,7 @@ export default function Id() {
   const router = useRouter();
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
+  const consumedConnectUrlRef = useRef<string | null>(null);
 
   const {
     setOpen,
@@ -120,6 +127,46 @@ export default function Id() {
     [activeIdentity],
   );
 
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (typeof id !== "string") return;
+    if (!activeIdentity || activeIdentity.id !== id) return;
+
+    const connectUrl = readSingleQueryValue(
+      router.query[CONNECT_URL_QUERY_KEY],
+    );
+
+    if (!connectUrl) {
+      consumedConnectUrlRef.current = null;
+      return;
+    }
+
+    const connectUrlValue = connectUrl;
+
+    if (consumedConnectUrlRef.current === connectUrlValue) return;
+    consumedConnectUrlRef.current = connectUrlValue;
+
+    async function consumeConnectUrl() {
+      try {
+        const valid = await isValidConnectUrl(connectUrlValue);
+        if (!valid) {
+          toast.error("Invalid connection URL");
+          return;
+        }
+
+        await performVerification(connectUrlValue);
+      } finally {
+        await router.replace(
+          { pathname: "/id/[id]", query: { id } },
+          `/id/${id}`,
+          { shallow: true },
+        );
+      }
+    }
+
+    void consumeConnectUrl();
+  }, [activeIdentity, id, performVerification, router]);
+
   return (
     <div className="flex flex-col gap-y-4 px-2 pb-4 xs:gap-y-6 xs:pb-6">
       <DynamicHeader
@@ -147,7 +194,7 @@ export default function Id() {
           <IconGradient
             name="scanner"
             color="black"
-            className="h-6 w-6 text-white"
+            className="size-6 text-white"
             bgClassName="h-[44px] w-[44px] rounded-full"
           />
 
@@ -166,7 +213,7 @@ export default function Id() {
           <IconGradient
             name="paste"
             color="black"
-            className="h-6 w-6 text-white"
+            className="size-6 text-white"
             bgClassName="h-[44px] w-[44px] rounded-full"
           />
 

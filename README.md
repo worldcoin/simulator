@@ -57,3 +57,15 @@ All the technical docs for the Worldcoin SDK, World ID Protocol, examples, guide
   ```bash
   yarn dev
   ```
+
+## 🔗 Deep-link testing
+
+You can trigger verification directly from the root route with a URL-encoded
+World ID QR URL:
+
+```text
+/?connect_url=<url-encoded-world-id-verify-url>
+```
+
+When valid, the simulator will auto-select an identity and open the existing
+verification modal flow. Invalid URLs show a toast and are ignored.
