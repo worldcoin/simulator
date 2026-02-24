@@ -91,8 +91,11 @@ export default function Id() {
 
       if (!pairingResult.success) {
         setStatus(Status.Error);
-        if (pairingResult.error.code == ErrorsCode.InputError) {
-          setErrorCode(ErrorsCode.InputError);
+        if (
+          pairingResult.error.code == ErrorsCode.InputError ||
+          pairingResult.error.code == ErrorsCode.MissingAction
+        ) {
+          setErrorCode(pairingResult.error.code);
         }
         return console.error(pairingResult.error);
       }
