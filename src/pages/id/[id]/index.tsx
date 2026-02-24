@@ -84,8 +84,11 @@ export default function Id() {
 
       if (!pairingResult.success) {
         setStatus(Status.Error);
-        if (pairingResult.error.code == ErrorsCode.InputError) {
-          setErrorCode(ErrorsCode.InputError);
+        if (
+          pairingResult.error.code == ErrorsCode.InputError ||
+          pairingResult.error.code == ErrorsCode.MissingAction
+        ) {
+          setErrorCode(pairingResult.error.code);
         }
         return console.error(pairingResult.error);
       }
@@ -147,7 +150,7 @@ export default function Id() {
           <IconGradient
             name="scanner"
             color="black"
-            className="h-6 w-6 text-white"
+            className="size-6 text-white"
             bgClassName="h-[44px] w-[44px] rounded-full"
           />
 
@@ -166,7 +169,7 @@ export default function Id() {
           <IconGradient
             name="paste"
             color="black"
-            className="h-6 w-6 text-white"
+            className="size-6 text-white"
             bgClassName="h-[44px] w-[44px] rounded-full"
           />
 

@@ -112,14 +112,22 @@ export const pairClient = async ({
     };
   }
 
-  const metadata = await fetchMetadata({
-    app_id: bridgeInitialData.app_id,
-    action: bridgeInitialData.action,
-    signal: bridgeInitialData.signal,
-    nullifier_hash: "",
-    action_description: bridgeInitialData.action_description,
-    environment: bridgeInitialData.environment, // IDKit v4
-  });
+  let metadata: Partial<MetadataResponse>;
+  try {
+    metadata = await fetchMetadata({
+      app_id: bridgeInitialData.app_id,
+      action: bridgeInitialData.action,
+      signal: bridgeInitialData.signal,
+      nullifier_hash: "",
+      action_description: bridgeInitialData.action_description,
+      environment: bridgeInitialData.environment, // IDKit v4
+    });
+  } catch (error) {
+    if (error instanceof CodedError) {
+      return { success: false, error };
+    }
+    throw error;
+  }
 
   return { success: true, metadata, bridgeInitialData };
 };

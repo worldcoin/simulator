@@ -1,6 +1,8 @@
 import { ErrorsCode } from "@/types";
 import { Icon } from "../Icon";
 
+const DEVELOPER_PORTAL_URL = "https://developer.world.org";
+
 export default function ModalError(props: {
   errorCode: ErrorsCode | null;
   close: () => void;
@@ -14,13 +16,13 @@ export default function ModalError(props: {
         >
           <Icon
             name="close"
-            className="h-6 w-6 text-black"
+            className="size-6 text-black"
             bgClassName="h-9 w-9 rounded-full bg-gray-200"
           />
         </button>
         <Icon
           name="qr-code"
-          className="h-10 w-10 text-white"
+          className="size-10 text-white"
           bgClassName="h-20 w-20 rounded-full bg-gray-400"
         />
         <h2 className="mt-4 text-h2 font-bold text-gray-900">
@@ -29,6 +31,42 @@ export default function ModalError(props: {
         <p className="mt-4 text-center text-gray-500">
           This connection has expired <br></br> Please try a different code.
         </p>
+      </div>
+    );
+  } else if (props.errorCode == ErrorsCode.MissingAction) {
+    return (
+      <div className="flex h-[360px] flex-col items-center justify-center px-8">
+        <button
+          className="absolute right-5 top-5 flex w-full justify-end"
+          onClick={props.close}
+        >
+          <Icon
+            name="close"
+            className="size-6 text-black"
+            bgClassName="h-9 w-9 rounded-full bg-gray-200"
+          />
+        </button>
+        <Icon
+          name="warning"
+          className="size-10 text-white"
+          bgClassName="h-16 w-16 rounded-full bg-error-700"
+        />
+        <h2 className="mt-4 text-center text-h2 font-bold text-gray-900">
+          Action Required
+        </h2>
+        <p className="mt-4 text-center text-gray-500">
+          No action found for this app.
+          <br></br>
+          Create one in the Developer Portal.
+        </p>
+        <a
+          className="mt-4 text-b3 font-medium text-info-700 underline"
+          href={DEVELOPER_PORTAL_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          developer.world.org
+        </a>
       </div>
     );
   } else {
@@ -40,13 +78,13 @@ export default function ModalError(props: {
         >
           <Icon
             name="close"
-            className="h-6 w-6 text-black"
+            className="size-6 text-black"
             bgClassName="h-9 w-9 rounded-full bg-gray-200"
           />
         </button>
         <Icon
           name="warning"
-          className="h-10 w-10 text-white"
+          className="size-10 text-white"
           bgClassName="h-16 w-16 rounded-full bg-error-700"
         />
         <h2 className="mt-4 text-h2 font-bold text-gray-900">Error</h2>

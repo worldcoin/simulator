@@ -2,7 +2,12 @@ import {
   DEV_PORTAL_PRECHECK_URL,
   DEV_PORTAL_PROOF_CONTEXT_URL,
 } from "@/lib/constants";
-import type { MetadataParams, MetadataResponse } from "@/types";
+import {
+  CodedError,
+  ErrorsCode,
+  type MetadataParams,
+  type MetadataResponse,
+} from "@/types";
 
 async function precheckAction(
   request: MetadataParams,
@@ -20,10 +25,39 @@ async function precheckAction(
       body: JSON.stringify(body),
     });
 
-    if (!response.ok && response.status === 404) {
-      console.warn("Action is not registered in the Developer Portal");
-      return null;
-    } else if (!response.ok) {
+    if (!response.ok) {
+      let precheckError: {
+        code?: string;
+        attribute?: string;
+        detail?: string;
+      } | null = null;
+
+      try {
+        precheckError = (await response.json()) as {
+          code?: string;
+          attribute?: string;
+          detail?: string;
+        };
+      } catch {
+        // Ignore non-JSON responses and continue with generic error handling.
+      }
+
+      if (response.status === 404) {
+        console.warn("Action is not registered in the Developer Portal");
+        return null;
+      }
+
+      if (
+        response.status === 400 &&
+        precheckError?.code === "required" &&
+        precheckError.attribute === "action"
+      ) {
+        throw new CodedError(
+          ErrorsCode.MissingAction,
+          precheckError.detail ?? "No action found for this app.",
+        );
+      }
+
       throw new Error(
         `Unable to fetch metadata, ${response.status}: ${response.statusText}`,
       );
@@ -31,6 +65,9 @@ async function precheckAction(
 
     return (await response.json()) as MetadataResponse;
   } catch (error) {
+    if (error instanceof CodedError) {
+      throw error;
+    }
     console.error(`Error fetching metadata, ${error}`);
   }
   return null;
