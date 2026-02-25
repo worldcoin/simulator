@@ -130,16 +130,11 @@ export async function fetchMetadata(
     },
   };
 
-  // Attempt to call /proof-context to get app/action context
-  // This could fail:
-  // 1. If RPs haven't migrated in the Dev Portal
-  // 2. If the app is a legacy `app_staging_...`
-  // Fallback to legacy precheck action
-  // TODO: Clean this up once we add World ID 4.0 to the simulator
-  let response = await proofContextAction(request);
-  if (response === null) {
-    response = await precheckAction(request);
-  }
+  // IDKit v4: use /proof-context when environment is provided
+  // Legacy: fall back to /precheck
+  const response = request.environment
+    ? await proofContextAction(request)
+    : await precheckAction(request);
 
   if (response) {
     metadata = {
