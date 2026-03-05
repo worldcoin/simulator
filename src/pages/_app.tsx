@@ -110,7 +110,7 @@ export default function App({
         more.
       </a>
 
-      <div className="pt-10">
+      <div className="h-dvh overflow-hidden pt-10">
         <Layout>
           <StatusBar />
           <Component {...pageProps} />

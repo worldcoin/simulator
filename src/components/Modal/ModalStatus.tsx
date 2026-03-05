@@ -14,51 +14,42 @@ interface ModalStatusProps {
 
 export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
   return (
-    <div className="mt-6 flex items-center justify-center">
+    <div className="flex w-full items-center justify-center">
       {props.status === Status.Waiting && (
-        <div className="flex w-full flex-col space-y-4">
-          <Button
-            onClick={() => props.handleClick(false, VerificationLevel.Orb)}
-            className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
-          >
-            <Icon
-              name="orb"
-              className="h-6 w-6 text-white"
-            />
-            <span className="mx-2">Verify with Orb</span>
-          </Button>
-          <div className="flex flex-row space-x-2 text-14">
+        <div className="flex w-full flex-col gap-3">
+          <div className="grid w-full grid-cols-2 gap-3">
             <Button
-              onClick={() =>
-                props.handleClick(false, VerificationLevel.Document)
-              }
-              className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora font-semibold text-white"
+              onClick={() => props.handleClick(false, VerificationLevel.Orb)}
+              className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
             >
-              <span className="mx-2">Verify with Document</span>
+              Orb
             </Button>
             <Button
               onClick={() =>
                 props.handleClick(false, VerificationLevel.SecureDocument)
               }
-              className="flex h-14 w-full items-center justify-center bg-gray-900 font-sora  font-semibold text-white"
+              className="h-14 w-full rounded-full bg-[#181818] px-3 font-sora text-15 font-semibold text-white"
             >
-              <span className="mx-2">Verify with Secure Document</span>
+              Secure Document
+            </Button>
+            <Button
+              onClick={() =>
+                props.handleClick(false, VerificationLevel.Document)
+              }
+              className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
+            >
+              Document
+            </Button>
+            <Button
+              onClick={() => props.handleClick(false, VerificationLevel.Device)}
+              className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
+            >
+              Device
             </Button>
           </div>
-
-          <Button
-            onClick={() => props.handleClick(false, VerificationLevel.Device)}
-            className="flex h-14 w-full items-center justify-center bg-gray-200 font-sora text-16 font-semibold"
-          >
-            <Icon
-              name="smart-phone"
-              className="h-6 w-6 text-gray-500"
-            />
-            <span className="mx-2 text-gray-900">Verify with Device</span>
-          </Button>
           <div className="flex w-full justify-center">
             <button
-              className="my-2 text-14 font-medium uppercase text-gray-400"
+              className="mt-1 text-12 font-semibold uppercase tracking-[0.04em] text-gray-400"
               onClick={() => props.handleClick(true, VerificationLevel.Orb)}
             >
               Test Invalid Proof
@@ -70,7 +61,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="spinner"
-            className="h-6 w-6 animate-spin text-black"
+            className="size-6 animate-spin text-black"
           />
           <span className="ml-2 text-16 font-semibold text-gray-500">
             Verifying
@@ -81,7 +72,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="checkmark"
-            className="h-4 w-4 text-white "
+            className="size-4 text-white "
             bgClassName="rounded-full w-6 h-6 bg-success-700"
           />
           <span className="ml-2 text-16 font-semibold text-success-700">
@@ -93,7 +84,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="close"
-            className="h-4 w-4 text-white "
+            className="size-4 text-white "
             bgClassName="rounded-full w-6 h-6 bg-warning-700"
           />
           <span className="ml-2 text-16 font-semibold text-warning-700">
@@ -105,7 +96,7 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
         <>
           <Icon
             name="cross"
-            className="h-4 w-4 text-white "
+            className="size-4 text-white "
             bgClassName="rounded-full w-6 h-6 bg-error-700"
           />
           <span className="ml-2 text-16 font-semibold text-error-700">

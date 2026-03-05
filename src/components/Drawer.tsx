@@ -61,8 +61,8 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
               className={cn(
                 "absolute z-30 outline-none",
                 props.fullHeight
-                  ? "inset-x-0 bottom-0 top-[44px] rounded-t-20 bg-white p-6"
-                  : "inset-x-3 bottom-[33px] rounded-[28px] bg-white px-8 pb-[68px] pt-8",
+                  ? "inset-x-0 bottom-0 top-[44px] overflow-y-auto rounded-t-20 bg-white p-6"
+                  : "inset-x-3 bottom-[33px] max-h-[calc(100%_-_45px)] overflow-y-auto rounded-[28px] bg-white px-8 pb-8 pt-8 scrollbar-hidden",
                 props.className,
               )}
             >
