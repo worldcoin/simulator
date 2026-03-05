@@ -15,6 +15,7 @@ export enum Status {
 export enum ErrorsCode {
   InputError = "input_error",
   MissingAction = "missing_action",
+  AppNotRegisteredV4 = "app_not_registered_v4",
   BridgeFetchError = "bridge_fetch_error",
   BridgeNoData = "bridge_no_data",
   BridgeDecryptError = "bridge_decrypt_error",

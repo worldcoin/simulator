@@ -93,7 +93,8 @@ export default function Id() {
         setStatus(Status.Error);
         if (
           pairingResult.error.code == ErrorsCode.InputError ||
-          pairingResult.error.code == ErrorsCode.MissingAction
+          pairingResult.error.code == ErrorsCode.MissingAction ||
+          pairingResult.error.code == ErrorsCode.AppNotRegisteredV4
         ) {
           setErrorCode(pairingResult.error.code);
         }
