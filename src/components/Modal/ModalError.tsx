@@ -22,8 +22,9 @@ export default function ModalError(props: {
         </button>
         <Icon
           name="qr-code"
-          className="size-10 text-white"
+          className="size-10"
           bgClassName="h-20 w-20 rounded-full bg-gray-400"
+          noMask
         />
         <h2 className="mt-4 text-h2 font-bold text-gray-900">
           Expired QR Code
