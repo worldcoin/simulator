@@ -39,7 +39,7 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 bg-gray-900/70"
+              className="absolute inset-0 z-20 bg-[rgba(24,24,24,0.4)]"
             />
           </Overlay>
         )}
@@ -57,12 +57,13 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "120%" }}
-              transition={{ type: "spring", stiffness: 2000, damping: 120 }}
+              transition={{ type: "spring", stiffness: 420, damping: 44 }}
               className={cn(
-                "absolute inset-x-0 bottom-0 z-30 rounded-t-20 bg-white p-6 outline-none",
-                {
-                  "top-[44px]": props.fullHeight,
-                },
+                "absolute z-30 outline-none",
+                props.fullHeight
+                  ? "inset-x-0 bottom-0 top-[44px] rounded-t-20 bg-white p-6"
+                  : "inset-x-3 bottom-[33px] rounded-[28px] bg-white px-8 pb-[68px] pt-8",
+                props.className,
               )}
             >
               {props.children}
