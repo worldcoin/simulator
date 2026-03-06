@@ -106,7 +106,7 @@ async function proofContextAction(
     // Map proof-context response to MetadataResponse shape
     return {
       id: data.app_id,
-      is_staging: true, // Allow simulator to proceed for any valid v4 app
+      is_staging: request.environment === "staging",
       is_verified: data.is_verified,
       name: data.name,
       verified_app_logo: data.verified_app_logo,

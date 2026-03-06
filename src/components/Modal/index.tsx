@@ -6,7 +6,6 @@ import {
   getFullProof,
   getMerkleProof,
 } from "@/lib/proof";
-import { cn } from "@/lib/utils";
 import { approveRequest } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
@@ -59,6 +58,10 @@ export function Modal() {
   const isLoading = useMemo(() => {
     return status === Status.Loading;
   }, [status]);
+  const isProductionRequest = bridgeInitialData?.environment === "production";
+  const showStagingContent = !isProductionRequest && metadata?.is_staging;
+  const showEnvironmentError =
+    !isLoading && !showStagingContent && status != Status.Error;
 
   const handleClick = useCallback(
     async (
@@ -134,6 +137,9 @@ export function Modal() {
     <Drawer
       open={open}
       onClose={close}
+      className={
+        showStagingContent || showEnvironmentError ? "pb-8" : undefined
+      }
     >
       {!isLoading && status == Status.Error && (
         <ModalError
@@ -143,73 +149,79 @@ export function Modal() {
       )}
       {!isLoading &&
         !showConfirm &&
-        metadata?.is_staging &&
+        showStagingContent &&
         status != Status.Error && (
-          <>
-            <button
-              className="absolute right-5 top-5 flex w-full justify-end"
-              onClick={close}
-            >
-              <Icon
-                name="close"
-                className="size-6 text-black"
-                bgClassName="h-9 w-9 rounded-full bg-gray-200"
-              />
-            </button>
-            <div className="flex w-full justify-center p-8">
-              <div className="z-40 w-2/3 no-select xs:aspect-[330/435] ">
-                <div
-                  className={cn(
-                    activeIdentity?.verified[VerificationLevel.Orb]
-                      ? 'bg-[url("/images/card-bg-verified-front.png")]'
-                      : 'bg-[url("/images/card-bg-not-verified.png")]',
-                    "h-full w-full bg-contain bg-[position:center] bg-no-repeat",
-                  )}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col rounded-18 bg-gray-50 p-4">
-              <div className="mb-3 flex w-full flex-row items-center gap-x-4 p-1">
-                <div className="flex size-15 items-center justify-center rounded-full border border-gray-200 bg-white">
+          <div className="flex w-full flex-col gap-6">
+            <div className="flex items-start justify-between">
+              <div className="flex size-[52px] items-center justify-center overflow-hidden rounded-16 bg-gray-900">
+                {metadata.verified_app_logo ? (
                   <Image
-                    src={metadata.verified_app_logo || "/icons/question.svg"}
+                    src={metadata.verified_app_logo}
                     alt={metadata.name ?? "App logo"}
-                    width={40}
-                    height={40}
+                    width={52}
+                    height={52}
+                    className="size-full object-cover"
                   />
-                </div>
-                <div className="flex flex-col py-2">
-                  <span className=" text-b2 font-bold">
-                    {metadata.name ?? "App Name"}
+                ) : (
+                  <Icon
+                    name="question"
+                    className="size-8 text-white"
+                  />
+                )}
+              </div>
+              <button
+                className="flex"
+                onClick={close}
+              >
+                <Icon
+                  name="close"
+                  className="size-6 text-black"
+                  bgClassName="h-9 w-9 rounded-full bg-gray-200"
+                />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-1">
+                <h2 className="font-sora text-26 font-semibold tracking-[-0.01em] text-[#181818]">
+                  Verify with World ID
+                </h2>
+                <div className="inline-flex items-center gap-1">
+                  <span className="text-17 font-sora text-[#717680]">
+                    to {metadata.name ?? "App Name"}
                   </span>
-
-                  <div
-                    className={cn(
-                      "inline-flex items-center gap-x-0.5 pt-0.5",
-                      { "text-info-700": metadata.is_verified },
-                      { "text-gray-500": !metadata.is_verified },
-                    )}
-                  >
+                  {metadata.is_verified ? (
                     <Icon
-                      name={
-                        metadata.is_verified
-                          ? "badge-verified"
-                          : "badge-not-verified"
-                      }
-                      className={"size-4"}
+                      name="badge-verified"
+                      className="size-5 text-[#005CFF]"
                     />
-
-                    <span className="text-b4 leading-1px">
-                      {metadata.is_verified ? "Verified" : "Not Verified"}
-                    </span>
-                  </div>
+                  ) : (
+                    <Icon
+                      name="badge-not-verified"
+                      className="size-5 text-gray-500"
+                    />
+                  )}
                 </div>
               </div>
-              <hr className="h-px w-full rounded-full bg-gray-200 xs:block" />
-              <p className="mt-4 px-2 text-b3 text-gray-500">
-                {metadata.name ?? "App Name"} is asking for permission to verify
-                you with your World ID.
-              </p>
+
+              <hr className="h-px w-full rounded-full bg-gray-200" />
+
+              <div className="flex flex-col gap-3">
+                <p className="font-sora text-15 text-[#717680]">
+                  App will see your
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex size-5 items-center justify-center rounded-full bg-[#181818]">
+                    <Icon
+                      name="check"
+                      className="size-3 text-white"
+                    />
+                  </span>
+                  <span className="text-17 font-sora text-[#181818]">
+                    Verification level
+                  </span>
+                </div>
+              </div>
             </div>
 
             <ModalStatus
@@ -218,12 +230,10 @@ export function Modal() {
                 void handleClick(malicious, verification_level)
               }
             />
-          </>
+          </div>
         )}
       {isLoading && <ModalLoading />}
-      {!isLoading && !metadata?.is_staging && status != Status.Error && (
-        <ModalEnvironment />
-      )}
+      {showEnvironmentError && <ModalEnvironment />}
 
       {!isLoading && showConfirm && (
         <ModalConfirm handleClick={() => void handleClick()} />

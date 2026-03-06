@@ -5,20 +5,20 @@ import bgBlur from "/public/images/bg-blur.svg";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed grid h-[calc(100dvh)] w-full overflow-y-scroll bg-gray-100 xs:min-h-screen">
+    <div className="grid size-full overflow-hidden bg-gray-100">
       <div className="group pointer-events-none fixed h-screen w-full overflow-hidden bg-gray-100">
         <Image
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           src={bgBlur}
           alt="blur"
-          className="fixed h-full w-full object-cover"
+          className="fixed size-full object-cover"
         />
       </div>
       <div className="z-10 col-start-1 row-start-1 hidden w-full max-w-[290px] content-start gap-y-8 pl-8 pt-8 lg:grid">
         <Icon
           bgClassName="justify-start"
           name="logo"
-          className="h-10 w-10"
+          className="size-10"
         />
         <p className="w-full text-gray-500">
           This is a simulator of the{" "}
@@ -48,7 +48,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={cn(
           "h-full w-full px-4 xs:h-[812px] xs:w-[375px] xs:overflow-hidden xs:rounded-40 xs:border-4 xs:border-gray-900 xs:p-4",
           "relative col-start-1 row-start-1 grid grid-rows-auto/1fr self-center justify-self-center",
-          "gap-y-3 bg-white transition duration-500 xs:grid-rows-auto/1fr/auto xs:[zoom:.9] md:[zoom:initial]",
+          "gap-y-3 bg-white transition duration-500 xs:grid-rows-auto/1fr/auto xs:[zoom:.9] [@media(max-height:820px)]:[zoom:.74] [@media(max-height:900px)]:[zoom:.82]",
         )}
       >
         {children}
