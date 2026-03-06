@@ -90,6 +90,27 @@ async function proofContextAction(
     });
 
     if (!response.ok) {
+      let proofContextError: { code?: string; detail?: string } | null = null;
+      try {
+        proofContextError = (await response.json()) as {
+          code?: string;
+          detail?: string;
+        };
+      } catch {
+        // Ignore non-JSON responses.
+      }
+
+      if (
+        response.status === 400 &&
+        proofContextError?.code === "not_registered"
+      ) {
+        throw new CodedError(
+          ErrorsCode.AppNotRegisteredV4,
+          proofContextError.detail ??
+            "This app has not been registered for World ID 4.0.",
+        );
+      }
+
       console.warn(
         `proof-context failed (${response.status}), will fall back to precheck`,
       );
@@ -115,6 +136,9 @@ async function proofContextAction(
         : undefined,
     };
   } catch (error) {
+    if (error instanceof CodedError) {
+      throw error;
+    }
     console.error(`Error fetching proof-context: ${error}`);
     return null;
   }
