@@ -148,9 +148,7 @@ export function Modal() {
     setStatus(Status.Pending);
 
     const identityIndex = parseInt(activeIdentity.id, 10);
-    const isSession = !!(
-      bridgeInitialData.proof_request as Record<string, unknown>
-    ).session_id;
+    const isSession = !!bridgeInitialData.proof_request.session_id;
     const endpoint = isSession ? "proof/session" : "proof/uniqueness";
 
     try {

@@ -25,6 +25,7 @@ export default async function handler(
       body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data = await response.json();
     return res.status(response.status).json(data);
   } catch (error) {
