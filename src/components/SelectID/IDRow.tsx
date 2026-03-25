@@ -62,7 +62,7 @@ export default function IDRow({ identity }: { identity: Identity }) {
         >
           <Icon
             name={isVerified ? "badge-verified" : "badge-not-verified"}
-            className={"h-3 w-3 "}
+            className={"size-3 "}
           />
           <h4 className="text-b4 text-gray-500">{getVerificationText()}</h4>
         </div>
@@ -79,11 +79,11 @@ export function identityIDToEmoji(identityID: string) {
 function IDEmoji({ identityID }: { identityID: string }) {
   const iconSource = useMemo(() => identityIDToEmoji(identityID), [identityID]);
   return (
-    <div className="flex h-12 w-12 justify-center rounded-full bg-gray-100 align-middle">
+    <div className="flex size-12 justify-center rounded-full bg-gray-100 align-middle">
       <Image
         width={72}
         height={72}
-        className="m-auto h-8 w-8"
+        className="m-auto size-8"
         src={iconSource}
         alt="icon"
       />

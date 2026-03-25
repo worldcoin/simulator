@@ -82,7 +82,7 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
             indicator={() => (
               <Icon
                 name={copiedCommitment ? "check" : "copy"}
-                className="h-6 w-6 text-gray-400"
+                className="size-6 text-gray-400"
               />
             )}
             onClick={() => void handleCopyCommitment()}
