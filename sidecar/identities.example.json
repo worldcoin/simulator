@@ -1,0 +1,37 @@
+{
+  "protocol": {
+    "chain_id": 480,
+    "registry_address": "0x8556d07D75025f286fe757C7EeEceC40D54FA16D",
+    "indexer_url": "https://indexer.eu.id-infra.worldcoin.dev",
+    "gateway_url": "https://gateway.id-infra.worldcoin.dev",
+    "nullifier_oracle_urls": [
+      "https://node0.eu.staging.world.oprf.taceo.network",
+      "https://node1.eu.staging.world.oprf.taceo.network",
+      "https://node2.eu.staging.world.oprf.taceo.network",
+      "https://node3.eu.staging.world.oprf.taceo.network",
+      "https://node4.eu.staging.world.oprf.taceo.network"
+    ],
+    "nullifier_oracle_threshold": 3
+  },
+  "identities": [
+    {
+      "seed": "0x01",
+      "credentials": [
+        {
+          "id": 1,
+          "version": "V1",
+          "issuer_schema_id": 128,
+          "sub": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "genesis_issued_at": 1,
+          "expires_at": 1,
+          "claims": [
+            "0x0000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "associated_data_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "signature": null,
+          "issuer": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ]
+}

@@ -40,3 +40,7 @@ public/workbox*.js*
 .eslintcache
 notes.txt
 yarn.lock
+
+# sidecar
+sidecar/target/
+sidecar/identities.json

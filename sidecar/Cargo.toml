@@ -1,0 +1,22 @@
+[package]
+name = "world-id-simulator-sidecar"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+world-id-core = { git = "https://github.com/worldcoin/world-id-protocol", features = [
+    "authenticator",
+    "compress-zkeys",
+] }
+
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tower-http = { version = "0.6", features = ["cors"] }
+eyre = "0.6"
+hex = "0.4"
+rand = "0.8"
+rustls = { version = "0.23", features = ["ring"] }

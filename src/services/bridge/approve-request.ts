@@ -17,6 +17,9 @@ type Props = {
 
 type ApproveRequestReturnType = BridgeServiceReturnType;
 
+/**
+ * Send a v3 proof response to the bridge (existing flow).
+ */
 export const approveRequest = async ({
   url,
   fullProof,
@@ -62,6 +65,72 @@ export const approveRequest = async ({
     verification_level: params.verificationLevel,
   };
 
+  return sendEncryptedBridgeResponse(bridgeURL, requestUUID, key, payload);
+};
+
+/**
+ * Send a v4 proof response (ProofResponse from sidecar) to the bridge.
+ * The payload matches IDKit's BridgeResponse::ResponseV2 format.
+ */
+export const approveRequestV4 = async ({
+  url,
+  proofResponse,
+}: {
+  url: string;
+  proofResponse: Record<string, unknown>;
+}): Promise<ApproveRequestReturnType> => {
+  const { valid, requestUUID, bridgeURL, key } = await parseWorldIDQRCode(url);
+
+  if (!valid) {
+    return {
+      success: false,
+      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
+    };
+  }
+
+  // v4: send the ProofResponse directly (untagged serde matches ResponseV2 variant in IDKit)
+  return sendEncryptedBridgeResponse(
+    bridgeURL,
+    requestUUID,
+    key,
+    proofResponse,
+  );
+};
+
+/**
+ * Send a v4 error response to the bridge.
+ * The payload matches IDKit's BridgeResponse::Error format.
+ */
+export const rejectRequestV4 = async ({
+  url,
+  errorCode,
+}: {
+  url: string;
+  errorCode: string;
+}): Promise<ApproveRequestReturnType> => {
+  const { valid, requestUUID, bridgeURL, key } = await parseWorldIDQRCode(url);
+
+  if (!valid) {
+    return {
+      success: false,
+      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
+    };
+  }
+
+  return sendEncryptedBridgeResponse(bridgeURL, requestUUID, key, {
+    error_code: errorCode,
+  });
+};
+
+/**
+ * Shared helper: encrypt a JSON payload and PUT it to the bridge.
+ */
+async function sendEncryptedBridgeResponse(
+  bridgeURL: string,
+  requestUUID: string,
+  key: string,
+  payload: Record<string, unknown>,
+): Promise<ApproveRequestReturnType> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const keyBuffer = buffer_decode(key);
 
@@ -103,4 +172,4 @@ export const approveRequest = async ({
   }
 
   return { success: true };
-};
+}
