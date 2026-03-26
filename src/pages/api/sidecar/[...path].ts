@@ -21,7 +21,12 @@ export default async function handler(
   try {
     const response = await fetch(targetUrl, {
       method: req.method,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(process.env.BEARER_TOKEN && {
+          Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+        }),
+      },
       body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
     });
 

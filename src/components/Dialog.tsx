@@ -18,10 +18,10 @@ export const Dialog = React.memo(function Dialog(props: {
 
       <Content className="absolute inset-0 bg-white px-6 pb-6 outline-none xs:pt-6 md:pt-11">
         <div className="absolute mt-3">
-          <Close className="absolute left-0 top-0 z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-200">
+          <Close className="absolute left-0 top-0 z-20 flex size-9 cursor-pointer items-center justify-center rounded-full bg-gray-200">
             <Icon
               name={props.closeIcon ?? "direction-down"}
-              className="h-6 w-6"
+              className="size-6"
             />
           </Close>
         </div>

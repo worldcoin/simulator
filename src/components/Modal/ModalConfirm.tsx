@@ -10,7 +10,7 @@ export default function ModalConfirm(props: ModalConfirmProps) {
     <div className="flex flex-col items-center justify-center">
       <Icon
         name="info"
-        className="h-10 w-10 text-gray-900"
+        className="size-10 text-gray-900"
         bgClassName="h-20 w-20 rounded-full bg-gray-200 mt-8"
       />
 

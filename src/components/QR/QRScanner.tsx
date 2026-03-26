@@ -215,7 +215,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
               muted
               playsInline
               ref={videoRef}
-              className="absolute inset-0 h-full w-full object-cover object-center"
+              className="absolute inset-0 size-full object-cover object-center"
             />
 
             <canvas
@@ -228,7 +228,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
                 alt="qr code"
                 src={imageSrc}
                 ref={imgRef}
-                className="absolute inset-0 h-full w-full bg-black object-cover object-center"
+                className="absolute inset-0 size-full bg-black object-cover object-center"
               />
             )}
 
@@ -249,11 +249,11 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
         )}
 
         {allowed === false && (
-          <div className="absolute inset-x-0 top-1/2 grid -translate-y-1/2 items-center justify-items-center space-y-8">
+          <div className="absolute inset-x-0 top-1/2 grid -translate-y-1/2 place-items-center space-y-8">
             <span className="rounded-full bg-gray-100 p-7">
               <Icon
                 name="camera-off"
-                className="h-8 w-8 text-gray-400"
+                className="size-8 text-gray-400"
               />
             </span>
 
@@ -272,10 +272,10 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
             className="flex flex-col items-center"
             onClick={onClickManualInput}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
+            <div className="flex size-9 items-center justify-center rounded-full bg-gray-200">
               <Icon
                 name="text"
-                className="h-6 w-6"
+                className="size-6"
               />
             </div>
 
@@ -287,10 +287,10 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
             {...getRootProps()}
           >
             <input {...getInputProps()} />
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
+            <div className="flex size-9 items-center justify-center rounded-full bg-gray-200">
               <Icon
                 name="gallery"
-                className="h-6 w-6"
+                className="size-6"
               />
             </div>
 

@@ -28,10 +28,10 @@ export default function Chip() {
     >
       <Icon
         name="user"
-        className="h-4 w-4"
+        className="size-4"
       />
 
-      <span className="leading-[1px]">
+      <span className="leading-1px">
         {/* {activeIdentity?.persisted ? "Persistent ID" : "Temporary ID"} */}
         {/* {true ? "Persistent ID" : "Temporary ID"} */}
       </span>

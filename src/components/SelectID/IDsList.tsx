@@ -5,7 +5,7 @@ export default function IDsList() {
   const { identities } = useIdentity();
 
   return (
-    <div className="mt-12 flex h-full max-h-[calc(100vh-100rem)] w-full flex-col gap-4 ">
+    <div className="mt-12 flex size-full max-h-[calc(100vh-100rem)] flex-col gap-4 ">
       {identities
         .sort((a, b) => b.meta.idNumber - a.meta.idNumber)
         .map((identity, i) => {
