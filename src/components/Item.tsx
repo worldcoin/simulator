@@ -39,7 +39,7 @@ export default function Item(props: {
           {!props.indicator && (
             <Icon
               name={"chevron-thin"}
-              className="h-6 w-6 text-gray-400"
+              className="size-6 text-gray-400"
             />
           )}
         </span>

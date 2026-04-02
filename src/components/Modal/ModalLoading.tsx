@@ -5,7 +5,7 @@ export default function ModalLoading() {
     <div className="flex h-[360px] items-center justify-center">
       <Icon
         name="spinner"
-        className="h-8 w-8 animate-spin text-gray-500"
+        className="size-8 animate-spin text-gray-500"
       />
     </div>
   );

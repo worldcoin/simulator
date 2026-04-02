@@ -23,7 +23,7 @@ export const IconGradient = React.memo(function IconGradient(props: {
       }
     >
       <svg
-        className="absolute inset-0 h-full w-full"
+        className="absolute inset-0 size-full"
         viewBox="0 0 44 44"
         fill="none"
       >

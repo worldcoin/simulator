@@ -43,7 +43,7 @@ export default function Maintenance() {
     >
       <Icon
         name="warning"
-        className="h-5 w-5 text-gray-0"
+        className="size-5 text-gray-0"
         bgClassName="bg-warning-700 h-8 w-8 rounded-full shrink-0"
       />
       <div className="ml-4 flex flex-col">

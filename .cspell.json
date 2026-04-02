@@ -19,14 +19,21 @@
     "jsqr",
     "keccak",
     "merkle",
+    "Oprf",
+    "OPRF",
+    "oprf",
     "personhood",
     "precache",
     "precaching",
     "precheck",
     "qrcode",
+    "rngs",
+    "rustls",
     "Sempahore",
+    "serde",
     "snarkjs",
     "srcset",
+    "trixie",
     "typecheck",
     "usehooks",
     "viem",
@@ -36,7 +43,11 @@
     "worldcoin",
     "worldid",
     "zkey",
+    "zkeys",
     "zustand",
     "zxing"
+  ],
+  "ignorePaths": [
+    "sidecar/target/**"
   ]
 }

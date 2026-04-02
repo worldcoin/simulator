@@ -6,7 +6,11 @@ import {
   getFullProof,
   getMerkleProof,
 } from "@/lib/proof";
-import { approveRequest } from "@/services/bridge";
+import {
+  approveRequest,
+  approveRequestV4,
+  rejectRequestV4,
+} from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
 import { Status } from "@/types";
@@ -63,6 +67,7 @@ export function Modal() {
   const showEnvironmentError =
     !isLoading && !showStagingContent && status != Status.Error;
 
+  // v3 proof flow (existing)
   const handleClick = useCallback(
     async (
       malicious?: boolean,
@@ -132,6 +137,61 @@ export function Modal() {
       generateIdentityProofsIfNeeded,
     ],
   );
+
+  // v4 proof flow: calls sidecar, sends response (or error) to bridge
+  const handleV4Click = useCallback(async () => {
+    if (!activeIdentity || !bridgeInitialData?.proof_request || !url) {
+      setStatus(Status.Error);
+      return;
+    }
+
+    setStatus(Status.Pending);
+
+    const identityIndex = parseInt(activeIdentity.id, 10);
+    const isSession = !!bridgeInitialData.proof_request.session_id;
+    const endpoint = isSession ? "proof/session" : "proof/uniqueness";
+
+    try {
+      const response = await fetch(`/api/sidecar/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          identity_index: identityIndex,
+          proof_request: bridgeInitialData.proof_request,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as Record<string, unknown>;
+
+        // Credential unavailable: respond to bridge with error
+        if (errorData.error_code === "credential_unavailable") {
+          await rejectRequestV4({ url, errorCode: "credential_unavailable" });
+          setStatus(Status.Error);
+          return;
+        }
+
+        console.error("Sidecar error:", errorData);
+        setStatus(Status.Error);
+        return;
+      }
+
+      const proofResponse = (await response.json()) as Record<string, unknown>;
+
+      // Send v4 ProofResponse to bridge
+      const bridgeResult = await approveRequestV4({ url, proofResponse });
+
+      if (!bridgeResult.success) {
+        setStatus(Status.Error);
+        return console.error(bridgeResult.error);
+      }
+
+      setStatus(Status.Success);
+    } catch (error) {
+      console.error("V4 proof generation failed:", error);
+      setStatus(Status.Error);
+    }
+  }, [activeIdentity, bridgeInitialData, url, setStatus]);
 
   return (
     <Drawer
@@ -226,9 +286,11 @@ export function Modal() {
 
             <ModalStatus
               status={status}
+              hasProofRequest={!!bridgeInitialData?.proof_request}
               handleClick={(malicious, verification_level) =>
                 void handleClick(malicious, verification_level)
               }
+              handleV4Click={() => void handleV4Click()}
             />
           </div>
         )}

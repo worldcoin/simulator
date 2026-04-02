@@ -22,7 +22,7 @@ export default function Select() {
         </div>
         <DynamicList />
         <button
-          className="absolute bottom-8 right-8  m-auto flex h-12 w-12 items-center justify-center rounded-full bg-black"
+          className="absolute bottom-8 right-8  m-auto flex size-12 items-center justify-center rounded-full bg-black"
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={async () => {
             void generateNextIdentity();
@@ -30,7 +30,7 @@ export default function Select() {
         >
           <Icon
             name="plus"
-            className="m-auto h-5  w-5 text-white"
+            className="m-auto size-5  text-white"
           />
         </button>
       </div>

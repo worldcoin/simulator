@@ -22,7 +22,7 @@ export default function Header(props: HeaderProps) {
     <div className="flex w-full items-center justify-between xs:mt-3">
       {props.iconLeft && props.onClickLeft && (
         <Button
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200"
+          className="flex size-9 items-center justify-center rounded-full bg-gray-200"
           onClick={props.onClickLeft}
         >
           {props.imgLeft ? (
@@ -30,13 +30,13 @@ export default function Header(props: HeaderProps) {
               height={24}
               width={24}
               src={props.imgLeft}
-              className="h-6 w-6"
+              className="size-6"
               alt="back"
             />
           ) : (
             <Icon
               name={props.iconLeft}
-              className="h-6 w-6"
+              className="size-6"
             />
           )}
         </Button>
@@ -52,16 +52,16 @@ export default function Header(props: HeaderProps) {
 
       {props.iconRight && props.onClickRight && (
         <Button
-          className="flex h-9 w-9 items-center justify-center justify-self-end rounded-full bg-gray-200"
+          className="flex size-9 items-center justify-center justify-self-end rounded-full bg-gray-200"
           onClick={props.onClickRight}
         >
           <Icon
             name={props.iconRight}
-            className="h-6 w-6"
+            className="size-6"
           />
         </Button>
       )}
-      {!props.iconRight && <div className="h-9 w-9" />}
+      {!props.iconRight && <div className="size-9" />}
     </div>
   );
 }
