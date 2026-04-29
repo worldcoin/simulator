@@ -111,10 +111,10 @@ async fn generate_proof_inner(
         .ok_or(SidecarError::IdentityNotFound)?;
 
     let proof_request = ProofRequest::from_json(&req.proof_request.to_string())
-        .map_err(|e| SidecarError::Internal(format!("invalid proof_request: {e}")))?;
+        .map_err(|e| SidecarError::BadRequest(format!("invalid proof_request: {e}")))?;
 
     if is_session != proof_request.is_session_proof() {
-        return Err(SidecarError::Internal(
+        return Err(SidecarError::BadRequest(
             "proof request type did not match endpoint".to_string(),
         ));
     }
