@@ -42,5 +42,10 @@ notes.txt
 yarn.lock
 
 # sidecar
+/target/
 sidecar/target/
+sidecar/target-docker/
 sidecar/identities.json
+
+# tools
+.claude/
