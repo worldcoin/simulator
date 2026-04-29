@@ -24,7 +24,11 @@ pub async fn bearer_auth(req: Request, next: Next) -> Response {
         .and_then(|v| v.to_str().ok());
 
     match auth_header {
-        Some(header) if header.strip_prefix("Bearer ").is_some_and(|t| t == expected) => {
+        Some(header)
+            if header
+                .strip_prefix("Bearer ")
+                .is_some_and(|t| t == expected) =>
+        {
             next.run(req).await
         }
         _ => (

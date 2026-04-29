@@ -16,8 +16,7 @@ async fn main() -> eyre::Result<()> {
 
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .init();
 
@@ -26,7 +25,7 @@ async fn main() -> eyre::Result<()> {
     let sidecar_config = SidecarConfig::load(&config_path)?;
 
     // Load proof materials once (shared across all identities).
-    // These are the Groth16 circuit keys embedded in the binary via compress-zkeys.
+    // These are the Groth16 circuit keys embedded in the binary.
     tracing::info!("Loading proof materials (this may take a moment)...");
     let query_material = Arc::new(world_id_core::proof::load_embedded_query_material()?);
     let nullifier_material = Arc::new(world_id_core::proof::load_embedded_nullifier_material()?);
@@ -39,11 +38,10 @@ async fn main() -> eyre::Result<()> {
         let protocol_config = sidecar_config.protocol.clone();
 
         tracing::info!("Initializing identity {i}...");
-        let authenticator =
-            world_id_core::Authenticator::init(&seed, protocol_config)
-                .await
-                .map_err(|e| eyre::eyre!("failed to init identity {i}: {e}"))?
-                .with_proof_materials(query_material.clone(), nullifier_material.clone());
+        let authenticator = world_id_core::Authenticator::init(&seed, protocol_config.into())
+            .await
+            .map_err(|e| eyre::eyre!("failed to init identity {i}: {e}"))?
+            .with_proof_materials(query_material.clone(), nullifier_material.clone());
 
         tracing::info!(
             "Identity {i} initialized (leaf_index={})",

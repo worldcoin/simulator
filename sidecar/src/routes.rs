@@ -7,10 +7,8 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use tower_http::cors::CorsLayer;
-use world_id_core::primitives::{
-    Credential, FieldElement, ProofRequest, ProofResponse, RequestVersion,
-};
-use world_id_core::Authenticator;
+use world_id_core::requests::{ProofRequest, ProofResponse};
+use world_id_core::{Authenticator, Credential, CredentialInput};
 
 use crate::auth::bearer_auth;
 use crate::error::SidecarError;
@@ -65,9 +63,7 @@ async fn health() -> Json<serde_json::Value> {
     Json(serde_json::json!({"ok": true}))
 }
 
-async fn list_identities(
-    State(state): State<Arc<AppState>>,
-) -> Json<Vec<IdentityInfo>> {
+async fn list_identities(State(state): State<Arc<AppState>>) -> Json<Vec<IdentityInfo>> {
     let identities = state
         .identities
         .iter()
@@ -114,8 +110,14 @@ async fn generate_proof_inner(
         .get(req.identity_index)
         .ok_or(SidecarError::IdentityNotFound)?;
 
-    let proof_request: ProofRequest = serde_json::from_value(req.proof_request)
+    let proof_request = ProofRequest::from_json(&req.proof_request.to_string())
         .map_err(|e| SidecarError::Internal(format!("invalid proof_request: {e}")))?;
+
+    if is_session != proof_request.is_session_proof() {
+        return Err(SidecarError::Internal(
+            "proof request type did not match endpoint".to_string(),
+        ));
+    }
 
     // Check which credentials satisfy the request constraints
     let available: HashSet<u64> = identity
@@ -128,80 +130,49 @@ async fn generate_proof_inner(
         .credentials_to_prove(&available)
         .ok_or(SidecarError::CredentialUnavailable)?;
 
-    // Fetch inclusion proof and authenticator public key set from indexer
-    let (inclusion_proof, key_set) = identity
+    let account_inclusion_proof = identity
         .authenticator
         .fetch_inclusion_proof()
         .await
         .map_err(SidecarError::from)?;
 
-    // Generate OPRF nullifier (required for all proofs)
-    let oprf_output = identity
+    let nullifier = identity
         .authenticator
-        .generate_nullifier(&proof_request, inclusion_proof, key_set)
+        .generate_nullifier(&proof_request, Some(account_inclusion_proof.clone()))
         .await
         .map_err(SidecarError::from)?;
 
-    // For session proofs, generate session ID
-    let (session_id, session_id_r_seed) = if is_session {
-        let (sid, seed) = identity
-            .authenticator
-            .generate_session_id(&proof_request, None)
-            .await
-            .map_err(SidecarError::from)?;
-        (Some(sid), seed)
-    } else {
-        let seed = FieldElement::random(&mut rand::rngs::OsRng);
-        (None, seed)
-    };
-
-    // Generate proof for each credential that satisfies the request
-    let mut responses = Vec::new();
-    for (i, item) in items_to_prove.iter().enumerate() {
+    let mut credentials = Vec::with_capacity(items_to_prove.len());
+    for item in items_to_prove {
         let credential = identity
             .credentials
             .iter()
             .find(|c| c.issuer_schema_id == item.issuer_schema_id)
             .ok_or(SidecarError::CredentialUnavailable)?;
 
-        // Generate credential blinding factor via OPRF
         let blinding_factor = identity
             .authenticator
             .generate_credential_blinding_factor(item.issuer_schema_id)
             .await
             .map_err(SidecarError::from)?;
 
-        // For the first item we consume oprf_output, for subsequent items we'd need Clone.
-        // Currently the protocol typically requests a single credential, so this covers
-        // the common case. Multi-credential support requires FullOprfOutput to impl Clone.
-        if i > 0 {
-            return Err(SidecarError::Internal(
-                "multi-credential proofs not yet supported in sidecar".to_string(),
-            ));
-        }
-
-        let response_item = identity
-            .authenticator
-            .generate_single_proof(
-                oprf_output,
-                item,
-                credential,
-                blinding_factor,
-                session_id_r_seed,
-                session_id,
-                proof_request.created_at,
-            )
-            .map_err(SidecarError::from)?;
-
-        responses.push(response_item);
-        break; // consumed oprf_output by value
+        credentials.push(CredentialInput {
+            credential: credential.clone(),
+            blinding_factor,
+        });
     }
 
-    Ok(Json(ProofResponse {
-        id: proof_request.id.clone(),
-        version: proof_request.version,
-        session_id,
-        error: None,
-        responses,
-    }))
+    let result = identity
+        .authenticator
+        .generate_proof(
+            &proof_request,
+            nullifier,
+            &credentials,
+            Some(account_inclusion_proof),
+            None,
+        )
+        .await
+        .map_err(SidecarError::from)?;
+
+    Ok(Json(result.proof_response))
 }

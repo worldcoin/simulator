@@ -4,9 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-world-id-core = { git = "https://github.com/worldcoin/world-id-protocol", features = [
+# Keep this aligned with the world-id-core release used by walletkit-core 0.16.0.
+world-id-core = { version = "0.10.1", default-features = false, features = [
     "authenticator",
-    "compress-zkeys",
+    "embed-zkeys",
+    "zstd-compress-zkeys",
 ] }
 
 axum = "0.8"
