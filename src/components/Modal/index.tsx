@@ -163,15 +163,23 @@ export function Modal() {
 
       if (!response.ok) {
         const errorData = (await response.json()) as Record<string, unknown>;
-        const errorCode =
+        const errorField =
+          typeof errorData.error === "string" ? errorData.error : null;
+        const errorCodeField =
           typeof errorData.error_code === "string"
             ? errorData.error_code
             : null;
 
-        // Sidecar surfaces request/proof errors as 4xx with a structured `error_code`
-        // (e.g. `invalid_rp_signature`, `credential_unavailable`). Forward those to
-        // the bridge so IDKit can render the actual error to the dapp user, then
-        // close the drawer silently — no simulator error modal.
+        // Sidecar may put the precise snake_case code in `error` and a generic
+        // bucket in `error_code` (e.g. `error: "invalid_rp_signature"`,
+        // `error_code: "proof_generation_failed"`). Prefer `error` when it looks
+        // like a snake_case identifier; otherwise fall back to `error_code`.
+        const isSnakeCaseCode = (s: string) => /^[a-z][a-z0-9_]*$/.test(s);
+        const errorCode =
+          errorField && isSnakeCaseCode(errorField)
+            ? errorField
+            : errorCodeField;
+
         if (response.status >= 400 && response.status < 500 && errorCode) {
           console.warn(
             "Sidecar request error, forwarding to bridge:",

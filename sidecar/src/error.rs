@@ -1,7 +1,6 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
-use world_id_core::primitives::oprf::WorldIdRequestAuthError;
 use world_id_core::AuthenticatorError;
 
 /// Sidecar error type that converts into HTTP responses.
@@ -33,18 +32,27 @@ impl std::fmt::Display for SidecarError {
     }
 }
 
-/// Walk the error source chain looking for a `WorldIdRequestAuthError` and return its
-/// snake_case code (e.g. `invalid_rp_signature`). Falls back to `proof_generation_failed`.
+/// Extract a stable, snake_case error code from an `AuthenticatorError`.
+///
+/// `AuthenticatorError::ProofError(ProofError::RequestAuthError(WorldIdRequestAuthError))`
+/// chains transparent variants whose Display impl emits exactly the snake_case identifier
+/// (e.g. `invalid_rp_signature`, `rp_signature_expired`). We can't downcast to those types
+/// without taking a direct dep on world-id-proof, but `transparent` forwards Display, so the
+/// AuthenticatorError's own `to_string()` is already the code in those cases. Treat any
+/// display string that looks like a bare snake_case identifier as the code; otherwise
+/// fall back to a generic.
 fn authenticator_error_code(err: &AuthenticatorError) -> String {
-    use std::error::Error;
-    let mut current: Option<&dyn Error> = Some(err);
-    while let Some(e) = current {
-        if let Some(req_auth) = e.downcast_ref::<WorldIdRequestAuthError>() {
-            return req_auth.to_string();
-        }
-        current = e.source();
+    let display = err.to_string();
+    let is_snake_case_code = !display.is_empty()
+        && display.len() <= 64
+        && display
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_');
+    if is_snake_case_code {
+        display
+    } else {
+        "proof_generation_failed".to_string()
     }
-    "proof_generation_failed".to_string()
 }
 
 impl IntoResponse for SidecarError {
