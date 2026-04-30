@@ -8024,6 +8024,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.3.23",
  "world-id-core",
+ "world-id-proof",
 ]
 
 [[package]]

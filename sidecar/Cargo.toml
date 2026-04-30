@@ -10,6 +10,9 @@ world-id-core = { version = "0.10.1", default-features = false, features = [
     "embed-zkeys",
     "zstd-compress-zkeys",
 ] }
+# Direct dep so we can pattern-match on `ProofError::RequestAuthError`. Pin
+# matches the version world-id-core 0.10.1 pulls in transitively.
+world-id-proof = { version = "0.10.1", default-features = false }
 
 axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
