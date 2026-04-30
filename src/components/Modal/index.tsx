@@ -163,14 +163,26 @@ export function Modal() {
 
       if (!response.ok) {
         const errorData = (await response.json()) as Record<string, unknown>;
+        const errorCode =
+          typeof errorData.error_code === "string"
+            ? errorData.error_code
+            : null;
 
-        // Credential unavailable: respond to bridge with error
-        if (errorData.error_code === "credential_unavailable") {
-          await rejectRequestV4({ url, errorCode: "credential_unavailable" });
-          setStatus(Status.Error);
+        // Sidecar surfaces request/proof errors as 4xx with a structured
+        // `error_code` (e.g. `invalid_rp_signature`, `credential_unavailable`).
+        // Forward to the bridge so IDKit renders the actual failure to the
+        // dapp user, then close the drawer silently.
+        if (response.status >= 400 && response.status < 500 && errorCode) {
+          console.warn(
+            "Sidecar request error, forwarding to bridge:",
+            errorCode,
+          );
+          await rejectRequestV4({ url, errorCode });
+          close();
           return;
         }
 
+        // 5xx or unstructured failure: real internal error, surface the modal.
         console.error("Sidecar error:", errorData);
         setStatus(Status.Error);
         return;
@@ -191,7 +203,7 @@ export function Modal() {
       console.error("V4 proof generation failed:", error);
       setStatus(Status.Error);
     }
-  }, [activeIdentity, bridgeInitialData, url, setStatus]);
+  }, [activeIdentity, bridgeInitialData, url, setStatus, close]);
 
   return (
     <Drawer

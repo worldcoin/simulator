@@ -2,6 +2,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use world_id_core::AuthenticatorError;
+use world_id_proof::ProofError;
 
 /// Sidecar error type that converts into HTTP responses.
 pub enum SidecarError {
@@ -9,10 +10,10 @@ pub enum SidecarError {
     CredentialUnavailable,
     /// The requested identity index does not exist.
     IdentityNotFound,
+    /// The request body or proof_request itself is malformed.
+    BadRequest(String),
     /// An error from the authenticator (network, proof generation, etc.).
     Authenticator(AuthenticatorError),
-    /// Internal error.
-    Internal(String),
 }
 
 impl From<AuthenticatorError> for SidecarError {
@@ -25,10 +26,24 @@ impl std::fmt::Display for SidecarError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CredentialUnavailable => write!(f, "credential_unavailable"),
-            Self::IdentityNotFound => write!(f, "identity not found"),
+            Self::IdentityNotFound => write!(f, "identity_not_found"),
+            Self::BadRequest(msg) => write!(f, "bad request: {msg}"),
             Self::Authenticator(e) => write!(f, "authenticator error: {e}"),
-            Self::Internal(msg) => write!(f, "internal error: {msg}"),
         }
+    }
+}
+
+/// Extract a stable, snake_case error code from an `AuthenticatorError`.
+///
+/// Request-level failures bubble up as
+/// `AuthenticatorError::ProofError(ProofError::RequestAuthError(WorldIdRequestAuthError))`,
+/// whose Display is the snake_case identifier (e.g. `invalid_rp_signature`).
+fn authenticator_error_code(err: &AuthenticatorError) -> String {
+    match err {
+        AuthenticatorError::ProofError(ProofError::RequestAuthError(req_auth)) => {
+            req_auth.to_string()
+        }
+        _ => "proof_generation_failed".to_string(),
     }
 }
 
@@ -42,22 +57,20 @@ impl IntoResponse for SidecarError {
                 .into_response(),
             SidecarError::IdentityNotFound => (
                 StatusCode::NOT_FOUND,
-                Json(serde_json::json!({"error": "identity not found"})),
+                Json(serde_json::json!({"error_code": "identity_not_found"})),
+            )
+                .into_response(),
+            SidecarError::BadRequest(msg) => (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error_code": "bad_request", "error": msg})),
             )
                 .into_response(),
             SidecarError::Authenticator(e) => {
-                tracing::error!("Authenticator error: {e}");
+                let code = authenticator_error_code(&e);
+                tracing::warn!(error_code = %code, "Authenticator error: {e}");
                 (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(serde_json::json!({"error": e.to_string()})),
-                )
-                    .into_response()
-            }
-            SidecarError::Internal(msg) => {
-                tracing::error!("Internal error: {msg}");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(serde_json::json!({"error": msg})),
+                    StatusCode::BAD_REQUEST,
+                    Json(serde_json::json!({"error_code": code, "error": e.to_string()})),
                 )
                     .into_response()
             }
