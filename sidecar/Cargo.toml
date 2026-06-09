@@ -4,15 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Keep this aligned with the world-id-core release used by walletkit-core 0.16.0.
-world-id-core = { version = "0.10.1", default-features = false, features = [
+# Keep this aligned with the world-id-core release used by walletkit.
+world-id-core = { version = "0.11.0", default-features = false, features = [
     "authenticator",
-    "embed-zkeys",
-    "zstd-compress-zkeys",
+    "compress-zkeys",
 ] }
 # Direct dep so we can pattern-match on `ProofError::RequestAuthError`. Pin
-# matches the version world-id-core 0.10.1 pulls in transitively.
-world-id-proof = { version = "0.10.1", default-features = false }
+# matches the version world-id-core 0.11.0 pulls in transitively.
+world-id-proof = { version = "0.11.0", default-features = false }
 
 axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
