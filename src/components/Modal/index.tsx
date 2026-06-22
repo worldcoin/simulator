@@ -1,6 +1,7 @@
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
+import { levelSatisfies } from "@/lib/verification-level";
 import {
   generateDummyMerkleProof,
   getFullProof,
@@ -9,17 +10,17 @@ import {
 import {
   approveRequest,
   approveRequestV4,
+  rejectRequestV3,
   rejectRequestV4,
 } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
-import { Status } from "@/types";
+import { ErrorsCode, Status } from "@/types";
 
 import { VerificationLevel } from "@worldcoin/idkit-core";
 
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
-import ModalConfirm from "./ModalConfirm";
+import { useCallback, useMemo } from "react";
 import ModalEnvironment from "./ModalEnvironment";
 import ModalError from "./ModalError";
 import ModalLoading from "./ModalLoading";
@@ -30,6 +31,7 @@ const getStore = (store: ModalStore) => ({
   setOpen: store.setOpen,
   status: store.status,
   setStatus: store.setStatus,
+  setErrorCode: store.setErrorCode,
   errorCode: store.errorCode,
   metadata: store.metadata,
   bridgeInitialData: store.bridgeInitialData,
@@ -39,13 +41,13 @@ const getStore = (store: ModalStore) => ({
 
 export function Modal() {
   const { activeIdentity, generateIdentityProofsIfNeeded } = useIdentity();
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const {
     open,
     setOpen,
     status,
     setStatus,
+    setErrorCode,
     errorCode,
     bridgeInitialData,
     url,
@@ -55,7 +57,6 @@ export function Modal() {
 
   const close = useCallback(() => {
     setOpen(false);
-    setShowConfirm(false);
     reset();
   }, [reset, setOpen]);
 
@@ -67,72 +68,96 @@ export function Modal() {
   const showEnvironmentError =
     !isLoading && !showStagingContent && status != Status.Error;
 
-  // v3 proof flow (existing)
+  // v3 proof flow: enforce requested level and require a real inclusion proof.
   const handleClick = useCallback(
     async (
       malicious?: boolean,
-      verification_level: VerificationLevel = VerificationLevel.Orb,
+      presentedLevel: VerificationLevel = VerificationLevel.Orb,
     ) => {
-      if (!activeIdentity) return;
-
-      setStatus(Status.Pending);
-
-      await generateIdentityProofsIfNeeded(activeIdentity);
-
+      if (!activeIdentity || !url) {
+        setStatus(Status.Error);
+        return console.error("No active identity or URL");
+      }
       if (!bridgeInitialData) {
         setStatus(Status.Error);
         return console.error("No bridge initial data");
       }
 
-      // Show additional warning if the identity is unverified or still pending inclusion
-      if (!showConfirm && !activeIdentity.verified[verification_level]) {
-        setShowConfirm(true);
+      setStatus(Status.Pending);
+
+      // Use the refreshed identity; `activeIdentity` is stale after this await.
+      const identity = await generateIdentityProofsIfNeeded(activeIdentity);
+
+      if (malicious) {
+        try {
+          const merkleProof = generateDummyMerkleProof(identity);
+          const { fullProof } = await getFullProof(
+            { ...bridgeInitialData, verification_level: presentedLevel },
+            identity,
+            merkleProof,
+          );
+          const result = await approveRequest({
+            url,
+            fullProof,
+            verificationLevel: presentedLevel,
+          });
+          setStatus(result.success ? Status.Success : Status.Error);
+        } catch (err) {
+          console.error("Test-invalid-proof path failed:", err);
+          setStatus(Status.Error);
+        }
         return;
       }
-      // Generate proofs
-      const merkleProof = malicious
-        ? generateDummyMerkleProof(activeIdentity)
-        : getMerkleProof(activeIdentity, verification_level);
 
-      const { verified, fullProof } = await getFullProof(
-        {
-          ...bridgeInitialData,
-          verification_level,
-        },
-        activeIdentity,
-        merkleProof,
-      );
-
-      if (!verified) {
+      const requested = bridgeInitialData.verification_level;
+      const hasProof = !!identity.inclusionProof?.[presentedLevel]?.proof;
+      if (!levelSatisfies(requested, presentedLevel) || !hasProof) {
         setStatus(Status.Error);
-        return console.error("Not verified");
+        const rejected = await rejectRequestV3({
+          url,
+          errorCode: "credential_unavailable",
+        });
+        setErrorCode(
+          rejected.success
+            ? ErrorsCode.VerificationLevelNotSatisfied
+            : ErrorsCode.BridgeFetchError,
+        );
+        return;
       }
 
-      if (url) {
-        setShowConfirm(false);
+      try {
+        const merkleProof = getMerkleProof(identity, presentedLevel);
+        const { verified, fullProof } = await getFullProof(
+          { ...bridgeInitialData, verification_level: presentedLevel },
+          identity,
+          merkleProof,
+        );
+        if (!verified) throw new Error("Proof did not verify");
 
         const approveResult = await approveRequest({
           url,
           fullProof,
-          verificationLevel: verification_level,
+          verificationLevel: presentedLevel,
         });
-
         if (!approveResult.success) {
           setStatus(Status.Error);
-          return console.error(approveResult.error);
+          setErrorCode(approveResult.error.code);
+          return;
         }
 
         setStatus(Status.Success);
-      } else {
-        console.error("Something went wrong");
+      } catch (err) {
+        console.error("v3 proof generation failed:", err);
         setStatus(Status.Error);
+        setErrorCode(ErrorsCode.ProofError);
+        await rejectRequestV3({ url, errorCode: "generic_error" });
       }
     },
     [
       activeIdentity,
       bridgeInitialData,
       setStatus,
-      showConfirm,
+      setErrorCode,
       url,
       generateIdentityProofsIfNeeded,
     ],
@@ -223,99 +248,93 @@ export function Modal() {
           close={close}
         />
       )}
-      {!isLoading &&
-        !showConfirm &&
-        showStagingContent &&
-        status != Status.Error && (
-          <div className="flex w-full flex-col gap-6">
-            <div className="flex items-start justify-between">
-              <div className="flex size-[52px] items-center justify-center overflow-hidden rounded-16 bg-gray-900">
-                {metadata.verified_app_logo ? (
-                  <Image
-                    src={metadata.verified_app_logo}
-                    alt={metadata.name ?? "App logo"}
-                    width={52}
-                    height={52}
-                    className="size-full object-cover"
+      {!isLoading && showStagingContent && status != Status.Error && (
+        <div className="flex w-full flex-col gap-6">
+          <div className="flex items-start justify-between">
+            <div className="flex size-[52px] items-center justify-center overflow-hidden rounded-16 bg-gray-900">
+              {metadata.verified_app_logo ? (
+                <Image
+                  src={metadata.verified_app_logo}
+                  alt={metadata.name ?? "App logo"}
+                  width={52}
+                  height={52}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <Icon
+                  name="question"
+                  className="size-8 text-white"
+                />
+              )}
+            </div>
+            <button
+              className="flex"
+              onClick={close}
+            >
+              <Icon
+                name="close"
+                className="size-6 text-black"
+                bgClassName="h-9 w-9 rounded-full bg-gray-200"
+              />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-1">
+              <h2 className="font-sora text-26 font-semibold tracking-[-0.01em] text-[#181818]">
+                Verify with World ID
+              </h2>
+              <div className="inline-flex items-center gap-1">
+                <span className="text-17 font-sora text-[#717680]">
+                  to {metadata.name ?? "App Name"}
+                </span>
+                {metadata.is_verified ? (
+                  <Icon
+                    name="badge-verified"
+                    className="size-5 text-[#005CFF]"
                   />
                 ) : (
                   <Icon
-                    name="question"
-                    className="size-8 text-white"
+                    name="badge-not-verified"
+                    className="size-5 text-gray-500"
                   />
                 )}
               </div>
-              <button
-                className="flex"
-                onClick={close}
-              >
-                <Icon
-                  name="close"
-                  className="size-6 text-black"
-                  bgClassName="h-9 w-9 rounded-full bg-gray-200"
-                />
-              </button>
             </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-1">
-                <h2 className="font-sora text-26 font-semibold tracking-[-0.01em] text-[#181818]">
-                  Verify with World ID
-                </h2>
-                <div className="inline-flex items-center gap-1">
-                  <span className="text-17 font-sora text-[#717680]">
-                    to {metadata.name ?? "App Name"}
-                  </span>
-                  {metadata.is_verified ? (
-                    <Icon
-                      name="badge-verified"
-                      className="size-5 text-[#005CFF]"
-                    />
-                  ) : (
-                    <Icon
-                      name="badge-not-verified"
-                      className="size-5 text-gray-500"
-                    />
-                  )}
-                </div>
-              </div>
+            <hr className="h-px w-full rounded-full bg-gray-200" />
 
-              <hr className="h-px w-full rounded-full bg-gray-200" />
-
-              <div className="flex flex-col gap-3">
-                <p className="font-sora text-15 text-[#717680]">
-                  App will see your
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex size-5 items-center justify-center rounded-full bg-[#181818]">
-                    <Icon
-                      name="check"
-                      className="size-3 text-white"
-                    />
-                  </span>
-                  <span className="text-17 font-sora text-[#181818]">
-                    Verification level
-                  </span>
-                </div>
+            <div className="flex flex-col gap-3">
+              <p className="font-sora text-15 text-[#717680]">
+                App will see your
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex size-5 items-center justify-center rounded-full bg-[#181818]">
+                  <Icon
+                    name="check"
+                    className="size-3 text-white"
+                  />
+                </span>
+                <span className="text-17 font-sora text-[#181818]">
+                  Verification level
+                </span>
               </div>
             </div>
-
-            <ModalStatus
-              status={status}
-              hasProofRequest={!!bridgeInitialData?.proof_request}
-              handleClick={(malicious, verification_level) =>
-                void handleClick(malicious, verification_level)
-              }
-              handleV4Click={() => void handleV4Click()}
-            />
           </div>
-        )}
+
+          <ModalStatus
+            status={status}
+            hasProofRequest={!!bridgeInitialData?.proof_request}
+            requestedLevel={bridgeInitialData?.verification_level}
+            handleClick={(malicious, verification_level) =>
+              void handleClick(malicious, verification_level)
+            }
+            handleV4Click={() => void handleV4Click()}
+          />
+        </div>
+      )}
       {isLoading && <ModalLoading />}
       {showEnvironmentError && <ModalEnvironment />}
-
-      {!isLoading && showConfirm && (
-        <ModalConfirm handleClick={() => void handleClick()} />
-      )}
     </Drawer>
   );
 }

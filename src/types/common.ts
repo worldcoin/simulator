@@ -21,6 +21,7 @@ export enum ErrorsCode {
   BridgeDecryptError = "bridge_decrypt_error",
   BridgeNoInitialData = "bridge_no_initial_data",
   QRCodeInvalid = "qr_code_invalid",
+  VerificationLevelNotSatisfied = "verification_level_not_satisfied",
   ProofError = -32602,
 }
 

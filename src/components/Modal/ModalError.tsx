@@ -104,6 +104,33 @@ export default function ModalError(props: {
         </a>
       </div>
     );
+  } else if (props.errorCode == ErrorsCode.VerificationLevelNotSatisfied) {
+    return (
+      <div className="flex h-[360px] flex-col items-center justify-center px-8">
+        <button
+          className="absolute right-5 top-5 flex w-full justify-end"
+          onClick={props.close}
+        >
+          <Icon
+            name="close"
+            className="size-6 text-black"
+            bgClassName="h-9 w-9 rounded-full bg-gray-200"
+          />
+        </button>
+        <Icon
+          name="warning"
+          className="size-10 text-white"
+          bgClassName="h-16 w-16 rounded-full bg-error-700"
+        />
+        <h2 className="mt-4 text-center text-h2 font-bold text-gray-900">
+          Credential not accepted
+        </h2>
+        <p className="mt-4 text-center text-gray-500">
+          This identity can&apos;t produce a proof that satisfies the requested
+          verification level. The app was sent a rejection.
+        </p>
+      </div>
+    );
   } else {
     return (
       <div className="flex h-[360px] flex-col items-center justify-center">

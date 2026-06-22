@@ -122,6 +122,27 @@ export const rejectRequestV4 = async ({
   });
 };
 
+export const rejectRequestV3 = async ({
+  url,
+  errorCode,
+}: {
+  url: string;
+  errorCode: string;
+}): Promise<ApproveRequestReturnType> => {
+  const { valid, requestUUID, bridgeURL, key } = await parseWorldIDQRCode(url);
+
+  if (!valid) {
+    return {
+      success: false,
+      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
+    };
+  }
+
+  return sendEncryptedBridgeResponse(bridgeURL, requestUUID, key, {
+    error_code: errorCode,
+  });
+};
+
 /**
  * Shared helper: encrypt a JSON payload and PUT it to the bridge.
  */
