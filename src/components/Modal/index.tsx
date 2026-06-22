@@ -1,6 +1,10 @@
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
+import {
+  getIdentityProfile,
+  serializeV4PersonaForSidecar,
+} from "@/lib/identity-persona";
 import { levelSatisfies } from "@/lib/verification-level";
 import {
   generateDummyMerkleProof,
@@ -172,7 +176,10 @@ export function Modal() {
 
     setStatus(Status.Pending);
 
-    const identityIndex = parseInt(activeIdentity.id, 10);
+    const profile = getIdentityProfile(activeIdentity);
+    const identityIndex = profile.sidecarPersonaIndex ?? 0;
+    const identityAttributes = bridgeInitialData.identity_attributes;
+    const isIdentityCheck = Array.isArray(identityAttributes);
     const proofType = bridgeInitialData.proof_request.proof_type;
     const isSession =
       proofType === "create_session" ||
@@ -187,6 +194,10 @@ export function Modal() {
         body: JSON.stringify({
           identity_index: identityIndex,
           proof_request: bridgeInitialData.proof_request,
+          ...(isIdentityCheck && {
+            identity_attributes: identityAttributes,
+            persona: serializeV4PersonaForSidecar(profile.v4Persona),
+          }),
         }),
       });
 
@@ -206,7 +217,13 @@ export function Modal() {
             "Sidecar request error, forwarding to bridge:",
             errorCode,
           );
-          await rejectRequestV4({ url, errorCode });
+          const rejectResult = await rejectRequestV4({ url, errorCode });
+          if (!rejectResult.success) {
+            setStatus(Status.Error);
+            setErrorCode(rejectResult.error.code);
+            return;
+          }
+
           close();
           return;
         }
@@ -232,7 +249,7 @@ export function Modal() {
       console.error("V4 proof generation failed:", error);
       setStatus(Status.Error);
     }
-  }, [activeIdentity, bridgeInitialData, url, setStatus, close]);
+  }, [activeIdentity, bridgeInitialData, url, setStatus, setErrorCode, close]);
 
   return (
     <Drawer
