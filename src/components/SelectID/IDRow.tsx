@@ -1,4 +1,5 @@
 import { Icon } from "@/components/Icon";
+import { formatV4PersonaSummary } from "@/lib/identity-persona";
 import { cn } from "@/lib/utils";
 import type { Identity } from "@/types";
 import { VerificationLevel } from "@worldcoin/idkit-core";
@@ -66,6 +67,9 @@ export default function IDRow({ identity }: { identity: Identity }) {
           />
           <h4 className="text-b4 text-gray-500">{getVerificationText()}</h4>
         </div>
+        <p className="mt-1 text-b4 text-gray-500">
+          {formatV4PersonaSummary(identity)}
+        </p>
       </div>
     </button>
   );

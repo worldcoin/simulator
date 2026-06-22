@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import { V4PersonaEditor } from "@/components/IdentityProfile/V4PersonaEditor";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import type { UiStore } from "@/stores/ui";
@@ -22,7 +23,7 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
   const { id } = router.query;
   const [version, setVersion] = useState("2.0");
   const [copiedCommitment, setCopiedCommitment] = useState(false);
-  const { resetIdentityStore } = useIdentity();
+  const { activeIdentity, replaceIdentity, resetIdentityStore } = useIdentity();
 
   const close = useCallback(
     () => setSettingsOpened(false),
@@ -92,6 +93,10 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
               color="#00C3B6"
             />
           </Item>
+          <V4PersonaEditor
+            identity={activeIdentity}
+            onSave={replaceIdentity}
+          />
         </div>
         <Button
           className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
