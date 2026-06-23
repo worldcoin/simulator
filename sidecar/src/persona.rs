@@ -117,7 +117,7 @@ mod tests {
             document_type: PersonaDocumentType::Passport,
             document_number: "X1234567".to_string(),
             issuing_country: "USA".to_string(),
-            full_name: "Alex Example".to_string(),
+            full_name: "John Doe".to_string(),
             age: 30,
             nationality: "USA".to_string(),
         }
@@ -166,7 +166,7 @@ mod tests {
             IdentityAttribute::DocumentType(RequestedDocumentType::Passport),
             IdentityAttribute::DocumentNumber(" X1234567 ".to_string()),
             IdentityAttribute::IssuingCountry("usa".to_string()),
-            IdentityAttribute::FullName("Alex Example".to_string()),
+            IdentityAttribute::FullName("John Doe".to_string()),
             IdentityAttribute::MinimumAge(18),
             IdentityAttribute::Nationality("usa".to_string()),
         ];

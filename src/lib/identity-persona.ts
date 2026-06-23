@@ -16,9 +16,14 @@ export const DEFAULT_V4_PERSONA: V4IdentityPersona = {
   documentType: "passport",
   documentNumber: "X1234567",
   issuingCountry: "USA",
-  fullName: "Alex Example",
+  fullName: "John Doe",
   age: 30,
   nationality: "USA",
+};
+
+const LEGACY_DEFAULT_V4_PERSONA: V4IdentityPersona = {
+  ...DEFAULT_V4_PERSONA,
+  fullName: "Alex Example",
 };
 
 type PartialProfileIdentity = {
@@ -45,10 +50,24 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+function isSamePersona(
+  left: V4IdentityPersona,
+  right: V4IdentityPersona,
+): boolean {
+  return (
+    left.documentType === right.documentType &&
+    left.documentNumber === right.documentNumber &&
+    left.issuingCountry === right.issuingCountry &&
+    left.fullName === right.fullName &&
+    left.age === right.age &&
+    left.nationality === right.nationality
+  );
+}
+
 export function normalizeV4Persona(
   persona: Partial<V4IdentityPersona> | null | undefined,
 ): V4IdentityPersona {
-  return {
+  const normalized = {
     documentType: coerceDocumentType(persona?.documentType),
     documentNumber:
       typeof persona?.documentNumber === "string"
@@ -68,6 +87,12 @@ export function normalizeV4Persona(
         ? normalizeUpperCode(persona.nationality)
         : DEFAULT_V4_PERSONA.nationality,
   };
+
+  if (isSamePersona(normalized, LEGACY_DEFAULT_V4_PERSONA)) {
+    return DEFAULT_V4_PERSONA;
+  }
+
+  return normalized;
 }
 
 export function getIdentityProfile(

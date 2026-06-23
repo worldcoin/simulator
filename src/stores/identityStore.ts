@@ -13,7 +13,7 @@ export type IdentityStore = {
 };
 
 const IDENTITY_STORE_STORAGE_KEY = "Simulator_Identity_Store_2";
-const IDENTITY_STORE_VERSION = 1;
+const IDENTITY_STORE_VERSION = 2;
 type PersistedIdentityStore = Pick<
   IdentityStore,
   "activeIdentityID" | "identities"
