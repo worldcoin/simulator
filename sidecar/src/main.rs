@@ -3,6 +3,7 @@ use std::sync::Arc;
 mod auth;
 mod config;
 mod error;
+mod persona;
 mod routes;
 
 use config::SidecarConfig;
