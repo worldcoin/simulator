@@ -108,6 +108,19 @@ async fn generate_session_proof(
     generate_proof_inner(&state, req, true).await
 }
 
+fn persona_for_request(
+    req: &ProofRequestBody,
+    is_identity_check: bool,
+) -> Result<Option<&IdentityPersona>, SidecarError> {
+    if is_identity_check && req.persona.is_none() {
+        return Err(SidecarError::BadRequest(
+            "persona is required when identity_attributes are provided".to_string(),
+        ));
+    }
+
+    Ok(req.persona.as_ref())
+}
+
 fn validate_identity_check_selection<I>(
     persona: Option<&IdentityPersona>,
     identity_attributes: &[IdentityAttribute],
@@ -159,16 +172,8 @@ async fn generate_proof_inner(
     }
 
     let is_identity_check = req.identity_attributes.is_some();
-    let identity_attributes = req.identity_attributes.unwrap_or_default();
-    let persona = if is_identity_check {
-        Some(req.persona.as_ref().ok_or_else(|| {
-            SidecarError::BadRequest(
-                "persona is required when identity_attributes are provided".to_string(),
-            )
-        })?)
-    } else {
-        None
-    };
+    let persona = persona_for_request(&req, is_identity_check)?;
+    let identity_attributes = req.identity_attributes.as_deref().unwrap_or_default();
 
     // Check which credentials satisfy the request constraints.
     // Identity Check restricts Passport/MNC availability to the active persona
@@ -186,7 +191,7 @@ async fn generate_proof_inner(
 
     validate_identity_check_selection(
         persona,
-        &identity_attributes,
+        identity_attributes,
         items_to_prove.iter().map(|item| item.issuer_schema_id),
     )?;
 
@@ -258,6 +263,13 @@ mod tests {
         }
     }
 
+    fn mnc_persona() -> IdentityPersona {
+        IdentityPersona {
+            document_type: PersonaDocumentType::Mnc,
+            ..passport_persona()
+        }
+    }
+
     fn proof_response_json() -> serde_json::Value {
         serde_json::json!({
             "id": "req_identity_check",
@@ -297,6 +309,23 @@ mod tests {
         assert_eq!(payload["id"], "req_identity_check");
         assert!(payload.get("proof_response").is_none());
         assert!(payload.get("identity_attested").is_none());
+    }
+
+    #[test]
+    fn regular_v4_request_uses_optional_persona_for_document_filtering() {
+        let req = ProofRequestBody {
+            identity_index: 0,
+            proof_request: serde_json::json!({}),
+            identity_attributes: None,
+            persona: Some(mnc_persona()),
+        };
+
+        let persona = persona_for_request(&req, false).unwrap().unwrap();
+        let available = HashSet::from([PASSPORT_ISSUER_SCHEMA_ID, MNC_ISSUER_SCHEMA_ID]);
+        let filtered = available_for_persona(&available, Some(persona));
+
+        assert!(!filtered.contains(&PASSPORT_ISSUER_SCHEMA_ID));
+        assert!(filtered.contains(&MNC_ISSUER_SCHEMA_ID));
     }
 
     #[test]

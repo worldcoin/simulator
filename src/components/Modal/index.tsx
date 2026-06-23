@@ -194,9 +194,9 @@ export function Modal() {
         body: JSON.stringify({
           identity_index: identityIndex,
           proof_request: bridgeInitialData.proof_request,
+          persona: serializeV4PersonaForSidecar(profile.v4Persona),
           ...(isIdentityCheck && {
             identity_attributes: identityAttributes,
-            persona: serializeV4PersonaForSidecar(profile.v4Persona),
           }),
         }),
       });
