@@ -7,11 +7,16 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use tower_http::cors::CorsLayer;
-use world_id_core::requests::{ProofRequest, ProofResponse};
+use world_id_core::primitives::{
+    FieldElement, Nullifier, SessionId, SessionNullifier, ZeroKnowledgeProof,
+};
+use world_id_core::requests::{ProofRequest, ProofResponse, ResponseItem};
 use world_id_core::{Authenticator, Credential, CredentialInput};
 
 use crate::auth::bearer_auth;
 use crate::error::SidecarError;
+
+const PASSPORT_ISSUER_SCHEMA_ID: u64 = 9303;
 
 /// Shared application state.
 pub struct AppState {
@@ -119,13 +124,21 @@ async fn generate_proof_inner(
         ));
     }
 
-    // Check which credentials satisfy the request constraints
     let available: HashSet<u64> = identity
         .credentials
         .iter()
         .map(|c| c.issuer_schema_id)
         .collect();
 
+    if let Some(response) = fake_passport_response(&proof_request, &available) {
+        tracing::warn!(
+            request_id = %proof_request.id,
+            "returning fake passport proof response"
+        );
+        return Ok(Json(response));
+    }
+
+    // Check which credentials satisfy the request constraints
     let items_to_prove = proof_request
         .credentials_to_prove(&available)
         .ok_or(SidecarError::CredentialUnavailable)?;
@@ -175,4 +188,146 @@ async fn generate_proof_inner(
         .map_err(SidecarError::from)?;
 
     Ok(Json(result.proof_response))
+}
+
+fn fake_passport_response(
+    proof_request: &ProofRequest,
+    available: &HashSet<u64>,
+) -> Option<ProofResponse> {
+    let mut available_with_passport = available.clone();
+    available_with_passport.insert(PASSPORT_ISSUER_SCHEMA_ID);
+
+    let items_to_prove = proof_request.credentials_to_prove(&available_with_passport)?;
+    if !items_to_prove
+        .iter()
+        .any(|item| item.issuer_schema_id == PASSPORT_ISSUER_SCHEMA_ID)
+    {
+        return None;
+    }
+
+    let responses = items_to_prove
+        .into_iter()
+        .map(|item| {
+            let expires_at_min = item.effective_expires_at_min(proof_request.created_at);
+            if proof_request.is_session_proof() {
+                ResponseItem::new_session(
+                    item.identifier.clone(),
+                    item.issuer_schema_id,
+                    ZeroKnowledgeProof::default(),
+                    SessionNullifier::default(),
+                    expires_at_min,
+                )
+            } else {
+                ResponseItem::new_uniqueness(
+                    item.identifier.clone(),
+                    item.issuer_schema_id,
+                    ZeroKnowledgeProof::default(),
+                    fake_nullifier(
+                        proof_request,
+                        item.identifier.as_str(),
+                        item.issuer_schema_id,
+                    ),
+                    expires_at_min,
+                )
+            }
+        })
+        .collect();
+
+    let session_id = if proof_request.is_create_session() {
+        Some(SessionId::default())
+    } else {
+        proof_request.session_id
+    };
+
+    Some(ProofResponse {
+        id: proof_request.id.clone(),
+        version: proof_request.version,
+        session_id,
+        error: None,
+        responses,
+    })
+}
+
+fn fake_nullifier(
+    proof_request: &ProofRequest,
+    identifier: &str,
+    issuer_schema_id: u64,
+) -> Nullifier {
+    let seed = format!(
+        "simulator-fake-passport:{}:{}:{}",
+        proof_request.id, identifier, issuer_schema_id
+    );
+    Nullifier::new(FieldElement::from_arbitrary_raw_bytes(seed.as_bytes()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn proof_request_json(requests: serde_json::Value) -> serde_json::Value {
+        let zero_field = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+        serde_json::json!({
+            "id": "req_passport",
+            "version": 1,
+            "created_at": 1_735_689_600_u64,
+            "expires_at": 1_767_225_600_u64,
+            "rp_id": "rp_0000000000000001",
+            "oprf_key_id": 1,
+            "action": zero_field,
+            "signature": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001b",
+            "nonce": zero_field,
+            "proof_requests": requests
+        })
+    }
+
+    #[test]
+    fn builds_fake_passport_response_for_schema_9303() {
+        let proof_request = ProofRequest::from_json(
+            &proof_request_json(serde_json::json!([
+                {
+                    "identifier": "passport",
+                    "issuer_schema_id": 9303,
+                    "genesis_issued_at_min": null,
+                    "expires_at_min": 1_735_689_600_u64
+                }
+            ]))
+            .to_string(),
+        )
+        .unwrap();
+        let available = HashSet::new();
+
+        let response = fake_passport_response(&proof_request, &available).unwrap();
+
+        assert_eq!(response.id, "req_passport");
+        assert_eq!(response.responses.len(), 1);
+        assert_eq!(response.responses[0].identifier, "passport");
+        assert_eq!(response.responses[0].issuer_schema_id, 9303);
+        assert!(response.responses[0].nullifier.is_some());
+        assert!(response.responses[0].session_nullifier.is_none());
+        assert_ne!(
+            response.responses[0].nullifier,
+            Some(Nullifier::new(FieldElement::ZERO))
+        );
+        proof_request.validate_response(&response).unwrap();
+    }
+
+    #[test]
+    fn does_not_fake_non_passport_requests() {
+        let proof_request = ProofRequest::from_json(
+            &proof_request_json(serde_json::json!([
+                {
+                    "identifier": "document",
+                    "issuer_schema_id": 128,
+                    "genesis_issued_at_min": null,
+                    "expires_at_min": 1_735_689_600_u64
+                }
+            ]))
+            .to_string(),
+        )
+        .unwrap();
+        let available = HashSet::new();
+
+        assert!(fake_passport_response(&proof_request, &available).is_none());
+    }
 }
