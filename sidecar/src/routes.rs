@@ -133,15 +133,7 @@ where
 
 fn bridge_response_payload(
     proof_response: &impl Serialize,
-    is_identity_check: bool,
 ) -> Result<serde_json::Value, SidecarError> {
-    if is_identity_check {
-        return Ok(serde_json::json!({
-            "proof_response": proof_response,
-            "identity_attested": true,
-        }));
-    }
-
     serde_json::to_value(proof_response)
         .map_err(|e| SidecarError::BadRequest(format!("invalid proof response: {e}")))
 }
@@ -242,7 +234,7 @@ async fn generate_proof_inner(
         .await
         .map_err(SidecarError::from)?;
 
-    let response_payload = bridge_response_payload(&result.proof_response, is_identity_check)?;
+    let response_payload = bridge_response_payload(&result.proof_response)?;
 
     Ok(Json(response_payload))
 }
@@ -281,26 +273,26 @@ mod tests {
     }
 
     #[test]
-    fn identity_check_success_path_wraps_response_v2_1() {
+    fn identity_check_success_path_returns_flat_response_v2_after_attestation() {
         let persona = passport_persona();
 
         validate_identity_check_selection(Some(&persona), &[], [PASSPORT_ISSUER_SCHEMA_ID])
             .unwrap();
 
-        let payload = bridge_response_payload(&proof_response_json(), true).unwrap();
+        let payload = bridge_response_payload(&proof_response_json()).unwrap();
 
-        assert!(payload.get("id").is_none());
-        assert_eq!(payload["identity_attested"], true);
-        assert_eq!(payload["proof_response"]["id"], "req_identity_check");
+        assert_eq!(payload["id"], "req_identity_check");
         assert_eq!(
-            payload["proof_response"]["responses"][0]["issuer_schema_id"],
+            payload["responses"][0]["issuer_schema_id"],
             PASSPORT_ISSUER_SCHEMA_ID
         );
+        assert!(payload.get("proof_response").is_none());
+        assert!(payload.get("identity_attested").is_none());
     }
 
     #[test]
     fn regular_v4_payload_stays_flat_response_v2() {
-        let payload = bridge_response_payload(&proof_response_json(), false).unwrap();
+        let payload = bridge_response_payload(&proof_response_json()).unwrap();
 
         assert_eq!(payload["id"], "req_identity_check");
         assert!(payload.get("proof_response").is_none());
