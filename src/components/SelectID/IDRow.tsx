@@ -1,4 +1,5 @@
 import { Icon } from "@/components/Icon";
+import { formatV4PersonaSummary } from "@/lib/identity-persona";
 import { cn } from "@/lib/utils";
 import type { Identity } from "@/types";
 import { VerificationLevel } from "@worldcoin/idkit-core";
@@ -51,7 +52,7 @@ export default function IDRow({ identity }: { identity: Identity }) {
       className="flex w-full items-center rounded-16 bg-gray-50 p-4 outline-none"
     >
       <IDEmoji identityID={identity.id} />
-      <div className="ml-3 flex-1 text-left">
+      <div className="ml-3 min-w-0 flex-1 text-left">
         <h3 className="text-s3">{identity.meta.name}</h3>
         <div
           className={cn(
@@ -66,6 +67,9 @@ export default function IDRow({ identity }: { identity: Identity }) {
           />
           <h4 className="text-b4 text-gray-500">{getVerificationText()}</h4>
         </div>
+        <p className="mt-1 truncate text-b4 text-gray-500">
+          {formatV4PersonaSummary(identity)}
+        </p>
       </div>
     </button>
   );
@@ -79,7 +83,7 @@ export function identityIDToEmoji(identityID: string) {
 function IDEmoji({ identityID }: { identityID: string }) {
   const iconSource = useMemo(() => identityIDToEmoji(identityID), [identityID]);
   return (
-    <div className="flex size-12 justify-center rounded-full bg-gray-100 align-middle">
+    <div className="flex size-12 shrink-0 justify-center rounded-full bg-gray-100 align-middle">
       <Image
         width={72}
         height={72}
