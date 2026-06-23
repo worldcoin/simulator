@@ -1,7 +1,12 @@
 import type { VerificationLevel } from "@worldcoin/idkit-core";
 
 export type BridgeIdentityAttribute =
-  { type: "document_number"; value: string } | { type: "document_type"; value: "eid" | "mnc" | "passport" } | { type: "full_name"; value: string } | { type: "issuing_country"; value: string } | { type: "minimum_age"; value: number } | { type: "nationality"; value: string };
+  | { type: "document_number"; value: string }
+  | { type: "document_type"; value: "eid" | "mnc" | "passport" }
+  | { type: "full_name"; value: string }
+  | { type: "issuing_country"; value: string }
+  | { type: "minimum_age"; value: number }
+  | { type: "nationality"; value: string };
 
 export type BridgeInitialData = {
   app_id: `app_${string}`;
