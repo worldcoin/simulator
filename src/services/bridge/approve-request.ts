@@ -98,31 +98,10 @@ export const approveRequestV4 = async ({
 };
 
 /**
- * Send a v4 error response to the bridge.
+ * Send an error response to the bridge.
  * The payload matches IDKit's BridgeResponse::Error format.
  */
-export const rejectRequestV4 = async ({
-  url,
-  errorCode,
-}: {
-  url: string;
-  errorCode: string;
-}): Promise<ApproveRequestReturnType> => {
-  const { valid, requestUUID, bridgeURL, key } = await parseWorldIDQRCode(url);
-
-  if (!valid) {
-    return {
-      success: false,
-      error: new CodedError(ErrorsCode.QRCodeInvalid, "Invalid QR code"),
-    };
-  }
-
-  return sendEncryptedBridgeResponse(bridgeURL, requestUUID, key, {
-    error_code: errorCode,
-  });
-};
-
-export const rejectRequestV3 = async ({
+export const rejectRequest = async ({
   url,
   errorCode,
 }: {

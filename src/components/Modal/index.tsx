@@ -10,8 +10,7 @@ import {
 import {
   approveRequest,
   approveRequestV4,
-  rejectRequestV3,
-  rejectRequestV4,
+  rejectRequest,
 } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
@@ -113,7 +112,7 @@ export function Modal() {
       const hasProof = !!identity.inclusionProof?.[presentedLevel]?.proof;
       if (!levelSatisfies(requested, presentedLevel) || !hasProof) {
         setStatus(Status.Error);
-        const rejected = await rejectRequestV3({
+        const rejected = await rejectRequest({
           url,
           errorCode: "credential_unavailable",
         });
@@ -150,7 +149,7 @@ export function Modal() {
         console.error("v3 proof generation failed:", err);
         setStatus(Status.Error);
         setErrorCode(ErrorsCode.ProofError);
-        await rejectRequestV3({ url, errorCode: "generic_error" });
+        await rejectRequest({ url, errorCode: "generic_error" });
       }
     },
     [
@@ -206,7 +205,7 @@ export function Modal() {
             "Sidecar request error, forwarding to bridge:",
             errorCode,
           );
-          await rejectRequestV4({ url, errorCode });
+          await rejectRequest({ url, errorCode });
           close();
           return;
         }
