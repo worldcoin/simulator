@@ -1,12 +1,7 @@
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
-import { levelSatisfies } from "@/lib/verification-level";
-import {
-  generateDummyMerkleProof,
-  getFullProof,
-  getMerkleProof,
-} from "@/lib/proof";
+import { generateDummyMerkleProof, getFullProof } from "@/lib/proof";
 import {
   approveRequest,
   approveRequestV4,
@@ -24,6 +19,7 @@ import ModalEnvironment from "./ModalEnvironment";
 import ModalError from "./ModalError";
 import ModalLoading from "./ModalLoading";
 import { ModalStatus } from "./ModalStatus";
+import { selectV3MerkleProof } from "./v3-proof-flow";
 
 const getStore = (store: ModalStore) => ({
   open: store.open,
@@ -90,31 +86,44 @@ export function Modal() {
       if (malicious) {
         try {
           const merkleProof = generateDummyMerkleProof(identity);
-          const { fullProof } = await getFullProof(
+          const { verified, fullProof } = await getFullProof(
             { ...bridgeInitialData, verification_level: presentedLevel },
             identity,
             merkleProof,
           );
+          if (!verified) {
+            setStatus(Status.Error);
+            setErrorCode(ErrorsCode.ProofError);
+            return;
+          }
+
           const result = await approveRequest({
             url,
             fullProof,
             verificationLevel: presentedLevel,
           });
-          setStatus(result.success ? Status.Success : Status.Error);
+          setStatus(Status.Error);
+          setErrorCode(
+            result.success ? ErrorsCode.ProofError : result.error.code,
+          );
         } catch (err) {
           console.error("Test-invalid-proof path failed:", err);
           setStatus(Status.Error);
+          setErrorCode(ErrorsCode.ProofError);
         }
         return;
       }
 
-      const requested = bridgeInitialData.verification_level;
-      const hasProof = !!identity.inclusionProof?.[presentedLevel]?.proof;
-      if (!levelSatisfies(requested, presentedLevel) || !hasProof) {
+      const proofSelection = selectV3MerkleProof({
+        identity,
+        requestedLevel: bridgeInitialData.verification_level,
+        presentedLevel,
+      });
+      if (!proofSelection.ok) {
         setStatus(Status.Error);
         const rejected = await rejectRequest({
           url,
-          errorCode: "credential_unavailable",
+          errorCode: proofSelection.bridgeErrorCode,
         });
         setErrorCode(
           rejected.success
@@ -125,11 +134,10 @@ export function Modal() {
       }
 
       try {
-        const merkleProof = getMerkleProof(identity, presentedLevel);
         const { verified, fullProof } = await getFullProof(
           { ...bridgeInitialData, verification_level: presentedLevel },
           identity,
-          merkleProof,
+          proofSelection.merkleProof,
         );
         if (!verified) throw new Error("Proof did not verify");
 
