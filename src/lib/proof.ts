@@ -3,7 +3,7 @@ import type { BridgeInitialData, FP, Verification } from "@/types";
 import { CodedError, ErrorsCode, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import type { VerificationLevel } from "@worldcoin/idkit-core";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
@@ -172,6 +172,27 @@ export function getMerkleProof(
     ErrorsCode.VerificationLevelNotSatisfied,
     `No inclusion proof for verification level '${verificationLevel}'`,
   );
+}
+
+export function getSatisfyingMerkleProof(
+  identity: Identity,
+  requestedLevel: VerificationLevel,
+  presentedLevel: VerificationLevel,
+): MerkleProof {
+  const satisfiesLevel =
+    presentedLevel === VerificationLevel.Orb ||
+    presentedLevel === requestedLevel ||
+    (requestedLevel === VerificationLevel.Document &&
+      presentedLevel === VerificationLevel.SecureDocument);
+
+  if (!satisfiesLevel) {
+    throw new CodedError(
+      ErrorsCode.VerificationLevelNotSatisfied,
+      "Verification level not satisfied",
+    );
+  }
+
+  return getMerkleProof(identity, presentedLevel);
 }
 
 /**

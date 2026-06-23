@@ -1,7 +1,11 @@
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
-import { generateDummyMerkleProof, getFullProof } from "@/lib/proof";
+import {
+  generateDummyMerkleProof,
+  getFullProof,
+  getSatisfyingMerkleProof,
+} from "@/lib/proof";
 import {
   approveRequest,
   approveRequestV4,
@@ -9,17 +13,16 @@ import {
 } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
-import { ErrorsCode, Status } from "@/types";
+import { CodedError, ErrorsCode, Status } from "@/types";
 
 import { VerificationLevel } from "@worldcoin/idkit-core";
 
 import Image from "next/image";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import ModalEnvironment from "./ModalEnvironment";
 import ModalError from "./ModalError";
 import ModalLoading from "./ModalLoading";
 import { ModalStatus } from "./ModalStatus";
-import { selectV3MerkleProof } from "./v3-proof-flow";
 
 const getStore = (store: ModalStore) => ({
   open: store.open,
@@ -55,9 +58,7 @@ export function Modal() {
     reset();
   }, [reset, setOpen]);
 
-  const isLoading = useMemo(() => {
-    return status === Status.Loading;
-  }, [status]);
+  const isLoading = status === Status.Loading;
   const isProductionRequest = bridgeInitialData?.environment === "production";
   const showStagingContent = !isProductionRequest && metadata?.is_staging;
   const showEnvironmentError =
@@ -83,63 +84,20 @@ export function Modal() {
       // Use the refreshed identity; `activeIdentity` is stale after this await.
       const identity = await generateIdentityProofsIfNeeded(activeIdentity);
 
-      if (malicious) {
-        try {
-          const merkleProof = generateDummyMerkleProof(identity);
-          const { verified, fullProof } = await getFullProof(
-            { ...bridgeInitialData, verification_level: presentedLevel },
-            identity,
-            merkleProof,
-          );
-          if (!verified) {
-            setStatus(Status.Error);
-            setErrorCode(ErrorsCode.ProofError);
-            return;
-          }
-
-          const result = await approveRequest({
-            url,
-            fullProof,
-            verificationLevel: presentedLevel,
-          });
-          setStatus(Status.Error);
-          setErrorCode(
-            result.success ? ErrorsCode.ProofError : result.error.code,
-          );
-        } catch (err) {
-          console.error("Test-invalid-proof path failed:", err);
-          setStatus(Status.Error);
-          setErrorCode(ErrorsCode.ProofError);
-        }
-        return;
-      }
-
-      const proofSelection = selectV3MerkleProof({
-        identity,
-        requestedLevel: bridgeInitialData.verification_level,
-        presentedLevel,
-      });
-      if (!proofSelection.ok) {
-        setStatus(Status.Error);
-        const rejected = await rejectRequest({
-          url,
-          errorCode: proofSelection.bridgeErrorCode,
-        });
-        setErrorCode(
-          rejected.success
-            ? ErrorsCode.VerificationLevelNotSatisfied
-            : ErrorsCode.BridgeFetchError,
-        );
-        return;
-      }
-
       try {
+        const merkleProof = malicious
+          ? generateDummyMerkleProof(identity)
+          : getSatisfyingMerkleProof(
+              identity,
+              bridgeInitialData.verification_level,
+              presentedLevel,
+            );
         const { verified, fullProof } = await getFullProof(
           { ...bridgeInitialData, verification_level: presentedLevel },
           identity,
-          proofSelection.merkleProof,
+          merkleProof,
         );
-        if (!verified) throw new Error("Proof did not verify");
+        if (!verified) throw new CodedError(ErrorsCode.ProofError);
 
         const approveResult = await approveRequest({
           url,
@@ -152,12 +110,29 @@ export function Modal() {
           return;
         }
 
-        setStatus(Status.Success);
+        setStatus(malicious ? Status.Error : Status.Success);
+        if (malicious) setErrorCode(ErrorsCode.ProofError);
       } catch (err) {
         console.error("v3 proof generation failed:", err);
         setStatus(Status.Error);
+        if (
+          err instanceof CodedError &&
+          err.code === ErrorsCode.VerificationLevelNotSatisfied
+        ) {
+          const rejected = await rejectRequest({
+            url,
+            errorCode: "credential_unavailable",
+          });
+          setErrorCode(
+            rejected.success
+              ? ErrorsCode.VerificationLevelNotSatisfied
+              : ErrorsCode.BridgeFetchError,
+          );
+          return;
+        }
         setErrorCode(ErrorsCode.ProofError);
-        await rejectRequest({ url, errorCode: "generic_error" });
+        if (!malicious)
+          await rejectRequest({ url, errorCode: "generic_error" });
       }
     },
     [
