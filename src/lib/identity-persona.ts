@@ -41,6 +41,10 @@ function coerceAge(value: unknown): number {
   return DEFAULT_V4_PERSONA.age;
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 export function normalizeV4Persona(
   persona: Partial<V4IdentityPersona> | null | undefined,
 ): V4IdentityPersona {
@@ -69,12 +73,17 @@ export function normalizeV4Persona(
 export function getIdentityProfile(
   identity: PartialProfileIdentity,
 ): IdentityProfile {
+  const metaIdNumber = identity.meta?.idNumber;
+  const profileSidecarPersonaIndex = identity.profile?.sidecarPersonaIndex;
+  const sidecarPersonaIndex = isFiniteNumber(metaIdNumber)
+    ? metaIdNumber
+    : isFiniteNumber(profileSidecarPersonaIndex)
+    ? profileSidecarPersonaIndex
+    : 0;
+
   return {
     v4Persona: normalizeV4Persona(identity.profile?.v4Persona),
-    sidecarPersonaIndex:
-      typeof identity.profile?.sidecarPersonaIndex === "number"
-        ? identity.profile.sidecarPersonaIndex
-        : 0,
+    sidecarPersonaIndex,
   };
 }
 
