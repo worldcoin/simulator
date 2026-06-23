@@ -7,11 +7,15 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use tower_http::cors::CorsLayer;
-use world_id_core::requests::{ProofRequest, ProofResponse};
+use world_id_core::requests::ProofRequest;
 use world_id_core::{Authenticator, Credential, CredentialInput};
 
 use crate::auth::bearer_auth;
 use crate::error::SidecarError;
+use crate::persona::{
+    available_for_persona, identity_attributes_match, includes_persona_document_schema,
+    IdentityAttribute, IdentityPersona,
+};
 
 /// Shared application state.
 pub struct AppState {
@@ -31,6 +35,10 @@ pub struct ProofRequestBody {
     pub identity_index: usize,
     /// The ProofRequest from the bridge payload (passed through from IDKit).
     pub proof_request: serde_json::Value,
+    /// Identity Check attributes requested by the bridge payload.
+    pub identity_attributes: Option<Vec<IdentityAttribute>>,
+    /// Simulator persona for the selected identity. Required with identity_attributes.
+    pub persona: Option<IdentityPersona>,
 }
 
 /// Identity info returned by GET /identities.
@@ -88,14 +96,14 @@ async fn list_identities(State(state): State<Arc<AppState>>) -> Json<Vec<Identit
 async fn generate_uniqueness_proof(
     State(state): State<Arc<AppState>>,
     Json(req): Json<ProofRequestBody>,
-) -> Result<Json<ProofResponse>, SidecarError> {
+) -> Result<Json<serde_json::Value>, SidecarError> {
     generate_proof_inner(&state, req, false).await
 }
 
 async fn generate_session_proof(
     State(state): State<Arc<AppState>>,
     Json(req): Json<ProofRequestBody>,
-) -> Result<Json<ProofResponse>, SidecarError> {
+) -> Result<Json<serde_json::Value>, SidecarError> {
     generate_proof_inner(&state, req, true).await
 }
 
@@ -104,13 +112,20 @@ async fn generate_proof_inner(
     state: &AppState,
     req: ProofRequestBody,
     is_session: bool,
-) -> Result<Json<ProofResponse>, SidecarError> {
+) -> Result<Json<serde_json::Value>, SidecarError> {
+    let ProofRequestBody {
+        identity_index,
+        proof_request,
+        identity_attributes,
+        persona,
+    } = req;
+
     let identity = state
         .identities
-        .get(req.identity_index)
+        .get(identity_index)
         .ok_or(SidecarError::IdentityNotFound)?;
 
-    let proof_request = ProofRequest::from_json(&req.proof_request.to_string())
+    let proof_request = ProofRequest::from_json(&proof_request.to_string())
         .map_err(|e| SidecarError::BadRequest(format!("invalid proof_request: {e}")))?;
 
     if is_session != proof_request.is_session_proof() {
@@ -119,16 +134,35 @@ async fn generate_proof_inner(
         ));
     }
 
+    let is_identity_check = identity_attributes.is_some();
+    let identity_attributes = identity_attributes.unwrap_or_default();
+    let persona = if is_identity_check {
+        Some(persona.as_ref().ok_or_else(|| {
+            SidecarError::BadRequest(
+                "persona is required when identity_attributes are provided".to_string(),
+            )
+        })?)
+    } else {
+        None
+    };
+
     // Check which credentials satisfy the request constraints
     let available: HashSet<u64> = identity
         .credentials
         .iter()
         .map(|c| c.issuer_schema_id)
         .collect();
+    let available = available_for_persona(&available, persona);
 
     let items_to_prove = proof_request
         .credentials_to_prove(&available)
         .ok_or(SidecarError::CredentialUnavailable)?;
+
+    validate_identity_check_selection(
+        persona,
+        &identity_attributes,
+        items_to_prove.iter().map(|item| item.issuer_schema_id),
+    )?;
 
     let account_inclusion_proof = identity
         .authenticator
@@ -174,5 +208,137 @@ async fn generate_proof_inner(
         .await
         .map_err(SidecarError::from)?;
 
-    Ok(Json(result.proof_response))
+    Ok(Json(bridge_response_payload(
+        &result.proof_response,
+        is_identity_check,
+    )?))
+}
+
+fn validate_identity_check_selection<I>(
+    persona: Option<&IdentityPersona>,
+    identity_attributes: &[IdentityAttribute],
+    proved_schema_ids: I,
+) -> Result<(), SidecarError>
+where
+    I: IntoIterator<Item = u64>,
+{
+    let Some(persona) = persona else {
+        return Ok(());
+    };
+
+    if !includes_persona_document_schema(proved_schema_ids, persona) {
+        return Err(SidecarError::CredentialUnavailable);
+    }
+
+    if !identity_attributes_match(persona, identity_attributes) {
+        return Err(SidecarError::IdentityAttributesNotMatched);
+    }
+
+    Ok(())
+}
+
+fn bridge_response_payload(
+    proof_response: &impl Serialize,
+    is_identity_check: bool,
+) -> Result<serde_json::Value, SidecarError> {
+    if is_identity_check {
+        return Ok(serde_json::json!({
+            "proof_response": proof_response,
+            "identity_attested": true,
+        }));
+    }
+
+    serde_json::to_value(proof_response)
+        .map_err(|e| SidecarError::BadRequest(format!("invalid proof response: {e}")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::persona::{
+        IdentityAttribute, IdentityPersona, PersonaDocumentType, MNC_ISSUER_SCHEMA_ID,
+        PASSPORT_ISSUER_SCHEMA_ID,
+    };
+
+    fn passport_persona() -> IdentityPersona {
+        IdentityPersona {
+            document_type: PersonaDocumentType::Passport,
+            document_number: "X1234567".to_string(),
+            issuing_country: "USA".to_string(),
+            full_name: "Alex Example".to_string(),
+            age: 30,
+            nationality: "USA".to_string(),
+        }
+    }
+
+    #[test]
+    fn identity_check_success_path_wraps_response_v2_1() {
+        let proof_response = serde_json::json!({
+            "id": "proof-id",
+            "version": 2,
+            "responses": [],
+        });
+
+        let payload = bridge_response_payload(&proof_response, true).unwrap();
+
+        assert_eq!(payload["proof_response"], proof_response);
+        assert_eq!(payload["identity_attested"], true);
+        assert!(payload.get("id").is_none());
+    }
+
+    #[test]
+    fn regular_v4_payload_stays_flat_response_v2() {
+        let proof_response = serde_json::json!({
+            "id": "proof-id",
+            "version": 2,
+            "responses": [],
+        });
+
+        let payload = bridge_response_payload(&proof_response, false).unwrap();
+
+        assert_eq!(payload, proof_response);
+        assert!(payload.get("proof_response").is_none());
+        assert!(payload.get("identity_attested").is_none());
+    }
+
+    #[test]
+    fn identity_check_mismatched_attributes_returns_identity_attributes_not_matched() {
+        let persona = passport_persona();
+
+        let result = validate_identity_check_selection(
+            Some(&persona),
+            &[IdentityAttribute::Nationality("CAN".to_string())],
+            [PASSPORT_ISSUER_SCHEMA_ID],
+        );
+
+        assert!(matches!(
+            result,
+            Err(SidecarError::IdentityAttributesNotMatched)
+        ));
+    }
+
+    #[test]
+    fn identity_check_non_document_selection_returns_credential_unavailable() {
+        let persona = passport_persona();
+
+        let result = validate_identity_check_selection(Some(&persona), &[], [1]);
+
+        assert!(matches!(result, Err(SidecarError::CredentialUnavailable)));
+    }
+
+    #[test]
+    fn empty_identity_attributes_still_requires_document_selection() {
+        let persona = passport_persona();
+
+        assert!(validate_identity_check_selection(
+            Some(&persona),
+            &[],
+            [PASSPORT_ISSUER_SCHEMA_ID]
+        )
+        .is_ok());
+        assert!(matches!(
+            validate_identity_check_selection(Some(&persona), &[], [MNC_ISSUER_SCHEMA_ID]),
+            Err(SidecarError::CredentialUnavailable)
+        ));
+    }
 }
