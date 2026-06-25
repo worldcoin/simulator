@@ -7,7 +7,7 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use tower_http::cors::CorsLayer;
-use world_id_core::requests::ProofRequest;
+use world_id_core::requests::{ProofRequest, RequestItem};
 use world_id_core::{Authenticator, Credential, CredentialInput};
 
 use crate::auth::bearer_auth;
@@ -31,8 +31,11 @@ pub struct IdentityState {
 /// Request body for proof generation endpoints.
 #[derive(Debug, Deserialize)]
 pub struct ProofRequestBody {
-    /// Index into the pre-configured identities array.
-    pub identity_index: usize,
+    /// Deprecated and ignored: the identity is now auto-selected from the requested
+    /// credentials. Kept in the schema for backwards compatibility so existing callers
+    /// that still send it don't break.
+    #[serde(default)]
+    pub identity_index: Option<usize>,
     /// The ProofRequest from the bridge payload (passed through from IDKit).
     pub proof_request: serde_json::Value,
     /// Identity Check attributes requested by the bridge payload.
@@ -107,6 +110,43 @@ async fn generate_session_proof(
     generate_proof_inner(&state, req, true).await
 }
 
+/// Available credential schema ids for a single identity.
+fn available_schema_ids(
+    identity: &IdentityState,
+    persona: Option<&IdentityPersona>,
+) -> HashSet<u64> {
+    let available = identity
+        .credentials
+        .iter()
+        .map(|c| c.issuer_schema_id)
+        .collect();
+    available_for_persona(&available, persona)
+}
+
+/// Selects the first identity (in config order) that can satisfy the proof request, returning
+/// its index and the request items to prove.
+///
+/// Pure and side-effect free - it only consults `ProofRequest::credentials_to_prove`, which
+/// checks schema-id availability and any constraint expression. It does NOT verify
+/// `expires_at_min` / `genesis_issued_at_min`; those are enforced later inside
+/// `generate_proof`, so a match here is necessary but not a full guarantee of success.
+///
+/// Takes the available schema ids lazily so production can stream them from `state.identities`
+/// without an intermediate allocation, while tests pass hand-built sets.
+fn select_identity(
+    available_per_identity: impl IntoIterator<Item = HashSet<u64>>,
+    proof_request: &ProofRequest,
+) -> Option<(usize, Vec<&RequestItem>)> {
+    available_per_identity
+        .into_iter()
+        .enumerate()
+        .find_map(|(index, available)| {
+            proof_request
+                .credentials_to_prove(&available)
+                .map(|items| (index, items))
+        })
+}
+
 /// Core proof generation logic shared between uniqueness and session proofs.
 async fn generate_proof_inner(
     state: &AppState,
@@ -120,10 +160,11 @@ async fn generate_proof_inner(
         persona,
     } = req;
 
-    let identity = state
-        .identities
-        .get(identity_index)
-        .ok_or(SidecarError::IdentityNotFound)?;
+    if identity_index.is_some() {
+        tracing::warn!(
+            "identity_index is deprecated and ignored; identity is auto-selected from the requested credentials"
+        );
+    }
 
     let proof_request = ProofRequest::from_json(&proof_request.to_string())
         .map_err(|e| SidecarError::BadRequest(format!("invalid proof_request: {e}")))?;
@@ -146,16 +187,13 @@ async fn generate_proof_inner(
         None
     };
 
-    // Check which credentials satisfy the request constraints
-    let available: HashSet<u64> = identity
-        .credentials
+    // Auto-select: pick the first configured identity whose credentials satisfy the request.
+    // Identity Check restricts Passport/MNC availability to the selected persona first.
+    let available = state
+        .identities
         .iter()
-        .map(|c| c.issuer_schema_id)
-        .collect();
-    let available = available_for_persona(&available, persona);
-
-    let items_to_prove = proof_request
-        .credentials_to_prove(&available)
+        .map(|identity| available_schema_ids(identity, persona));
+    let (selected_index, items_to_prove) = select_identity(available, &proof_request)
         .ok_or(SidecarError::CredentialUnavailable)?;
 
     validate_identity_check_selection(
@@ -163,6 +201,9 @@ async fn generate_proof_inner(
         &identity_attributes,
         items_to_prove.iter().map(|item| item.issuer_schema_id),
     )?;
+
+    let identity = &state.identities[selected_index];
+    tracing::info!(selected_index, "auto-selected identity for proof request");
 
     let account_inclusion_proof = identity
         .authenticator
@@ -260,6 +301,10 @@ mod tests {
         PASSPORT_ISSUER_SCHEMA_ID,
     };
 
+    const POH: u64 = 1;
+    const PASSPORT: u64 = PASSPORT_ISSUER_SCHEMA_ID;
+    const MNC: u64 = MNC_ISSUER_SCHEMA_ID;
+
     fn passport_persona() -> IdentityPersona {
         IdentityPersona {
             document_type: PersonaDocumentType::Passport,
@@ -269,6 +314,48 @@ mod tests {
             age: 30,
             nationality: "USA".to_string(),
         }
+    }
+
+    /// Builds a valid uniqueness `ProofRequest` requesting the given (identifier, schema_id) items.
+    /// `proof_type` is omitted, which `world_id_core` treats as uniqueness.
+    fn proof_request(items: &[(&str, u64)]) -> ProofRequest {
+        let reqs: Vec<String> = items
+            .iter()
+            .map(|(id, schema)| {
+                format!(r#"{{"identifier":"{id}","issuer_schema_id":{schema}}}"#)
+            })
+            .collect();
+        let json = format!(
+            r#"{{
+              "id": "req_test",
+              "version": 1,
+              "created_at": 1725381192,
+              "expires_at": 1725381492,
+              "rp_id": "rp_0000000000000001",
+              "oprf_key_id": "0x1",
+              "session_id": null,
+              "action": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "signature": "0xa1fd06f0d8ceb541f6096fe2e865063eac1ff085c9d2bac2eedcc9ed03804bfc18d956b38c5ac3a8f7e71fde43deff3bda254d369c699f3c7a3f8e6b8477a5f51c",
+              "nonce": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "proof_requests": [{}]
+            }}"#,
+            reqs.join(",")
+        );
+        ProofRequest::from_json(&json).expect("valid test proof request")
+    }
+
+    fn sets(per_identity: &[&[u64]]) -> Vec<HashSet<u64>> {
+        per_identity
+            .iter()
+            .map(|s| s.iter().copied().collect())
+            .collect()
+    }
+
+    fn selected_index(
+        available: &[HashSet<u64>],
+        request: &ProofRequest,
+    ) -> Option<usize> {
+        select_identity(available.iter().cloned(), request).map(|(index, _)| index)
     }
 
     #[test]
@@ -308,7 +395,7 @@ mod tests {
         let result = validate_identity_check_selection(
             Some(&persona),
             &[IdentityAttribute::Nationality("CAN".to_string())],
-            [PASSPORT_ISSUER_SCHEMA_ID],
+            [PASSPORT],
         );
 
         assert!(matches!(
@@ -321,7 +408,7 @@ mod tests {
     fn identity_check_non_document_selection_returns_credential_unavailable() {
         let persona = passport_persona();
 
-        let result = validate_identity_check_selection(Some(&persona), &[], [1]);
+        let result = validate_identity_check_selection(Some(&persona), &[], [POH]);
 
         assert!(matches!(result, Err(SidecarError::CredentialUnavailable)));
     }
@@ -330,15 +417,70 @@ mod tests {
     fn empty_identity_attributes_still_requires_document_selection() {
         let persona = passport_persona();
 
-        assert!(validate_identity_check_selection(
-            Some(&persona),
-            &[],
-            [PASSPORT_ISSUER_SCHEMA_ID]
-        )
-        .is_ok());
+        assert!(validate_identity_check_selection(Some(&persona), &[], [PASSPORT]).is_ok());
         assert!(matches!(
-            validate_identity_check_selection(Some(&persona), &[], [MNC_ISSUER_SCHEMA_ID]),
+            validate_identity_check_selection(Some(&persona), &[], [MNC]),
             Err(SidecarError::CredentialUnavailable)
         ));
+    }
+
+    #[test]
+    fn selects_identity_holding_requested_credential() {
+        let available = sets(&[&[POH, PASSPORT], &[MNC]]);
+
+        let poh = proof_request(&[("orb", POH)]);
+        assert_eq!(selected_index(&available, &poh), Some(0));
+
+        let passport = proof_request(&[("passport", PASSPORT)]);
+        assert_eq!(selected_index(&available, &passport), Some(0));
+
+        let mnc = proof_request(&[("mnc", MNC)]);
+        assert_eq!(selected_index(&available, &mnc), Some(1));
+    }
+
+    #[test]
+    fn returns_selected_items_to_prove() {
+        let available = sets(&[&[POH, PASSPORT], &[MNC]]);
+        let mnc = proof_request(&[("mnc", MNC)]);
+        let (index, items) = select_identity(available.iter().cloned(), &mnc).expect("matches");
+        assert_eq!(index, 1);
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].issuer_schema_id, MNC);
+    }
+
+    #[test]
+    fn returns_none_when_no_identity_has_the_credential() {
+        let available = sets(&[&[POH, PASSPORT], &[MNC]]);
+        let selfie = proof_request(&[("selfie", 11)]);
+        assert_eq!(selected_index(&available, &selfie), None);
+    }
+
+    #[test]
+    fn first_match_wins_for_determinism() {
+        let available = sets(&[&[POH], &[POH]]);
+        let poh = proof_request(&[("orb", POH)]);
+        assert_eq!(selected_index(&available, &poh), Some(0));
+    }
+
+    #[test]
+    fn credentials_split_across_identities_cannot_be_satisfied() {
+        let available = sets(&[&[POH, PASSPORT], &[MNC]]);
+        let both = proof_request(&[("orb", POH), ("mnc", MNC)]);
+        assert_eq!(selected_index(&available, &both), None);
+    }
+
+    #[test]
+    fn persona_filters_auto_selection_to_selected_document_type() {
+        let persona = passport_persona();
+        let available = sets(&[&[POH, PASSPORT, MNC], &[MNC]])
+            .iter()
+            .map(|available| available_for_persona(available, Some(&persona)))
+            .collect::<Vec<_>>();
+
+        let passport = proof_request(&[("passport", PASSPORT)]);
+        assert_eq!(selected_index(&available, &passport), Some(0));
+
+        let mnc = proof_request(&[("mnc", MNC)]);
+        assert_eq!(selected_index(&available, &mnc), None);
     }
 }

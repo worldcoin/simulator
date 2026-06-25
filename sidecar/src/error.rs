@@ -12,6 +12,11 @@ pub enum SidecarError {
     /// The selected credential matched, but requested identity attributes did not.
     IdentityAttributesNotMatched,
     /// The requested identity index does not exist.
+    ///
+    /// No longer produced now that the proof endpoints auto-select the identity from the
+    /// requested credentials (the deprecated `identity_index` is ignored). Retained so the
+    /// `identity_not_found` error code / 404 mapping stays stable for any other caller.
+    #[allow(dead_code)]
     IdentityNotFound,
     /// The request body or proof_request itself is malformed.
     BadRequest(String),
