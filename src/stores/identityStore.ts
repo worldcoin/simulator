@@ -66,10 +66,6 @@ export const useIdentityStore = create<IdentityStore>()(
     {
       name: IDENTITY_STORE_STORAGE_KEY,
       version: IDENTITY_STORE_VERSION,
-      partialize: (state) => ({
-        activeIdentityID: state.activeIdentityID,
-        identities: state.identities,
-      }),
       migrate: migrateIdentityStoreState,
       merge: (persistedState, currentState) => {
         const persisted = persistedState as Partial<PersistedIdentityStore>;
