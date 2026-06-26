@@ -1,3 +1,4 @@
+import { preflightSidecarProofRequestBody } from "@/lib/identity-check-preflight";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 /**
@@ -17,6 +18,14 @@ export default async function handler(
   const { path } = req.query;
   const targetPath = Array.isArray(path) ? path.join("/") : path;
   const targetUrl = `${sidecarUrl}/${targetPath}`;
+  const preflight =
+    req.method !== "GET" ? preflightSidecarProofRequestBody(req.body) : null;
+
+  if (preflight && !preflight.ok) {
+    return res.status(preflight.status).json({
+      error_code: preflight.errorCode,
+    });
+  }
 
   try {
     const response = await fetch(targetUrl, {
@@ -27,7 +36,10 @@ export default async function handler(
           Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
         }),
       },
-      body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
+      body:
+        req.method !== "GET"
+          ? JSON.stringify(preflight?.body ?? req.body)
+          : undefined,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
