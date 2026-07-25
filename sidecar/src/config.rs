@@ -11,6 +11,13 @@ pub struct SidecarConfig {
     pub protocol: Config,
     /// Pre-configured identities with seeds and credentials.
     pub identities: Vec<IdentityConfig>,
+    /// Optional simulator proof endpoint used for Identity Check credentials.
+    ///
+    /// The public simulator exposes metadata for its document credential, but not
+    /// the signed credential itself. When configured, Identity Check requests are
+    /// validated against the local persona and then proved by this endpoint.
+    #[serde(default)]
+    pub identity_check_proof_url: Option<String>,
 }
 
 fn deserialize_protocol_config<'de, D>(deserializer: D) -> Result<Config, D::Error>
@@ -69,6 +76,23 @@ pub struct IdentityConfig {
     pub credentials: Vec<Credential>,
 }
 
+impl SidecarConfig {
+    /// Load configuration from a JSON file.
+    pub fn load(path: &str) -> eyre::Result<Self> {
+        let content = std::fs::read_to_string(path)?;
+        let config: Self = serde_json::from_str(&content)?;
+        Ok(config)
+    }
+}
+
+impl IdentityConfig {
+    /// Decode the hex seed into bytes.
+    pub fn seed_bytes(&self) -> eyre::Result<Vec<u8>> {
+        let seed = self.seed.strip_prefix("0x").unwrap_or(&self.seed);
+        hex::decode(seed).map_err(|e| eyre::eyre!("invalid hex seed: {e}"))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::SidecarConfig;
@@ -114,21 +138,28 @@ mod tests {
         assert_eq!(config.protocol.indexer_url(), "https://indexer.example.com");
         assert_eq!(config.protocol.gateway_url(), "https://gateway.example.com");
     }
-}
 
-impl SidecarConfig {
-    /// Load configuration from a JSON file.
-    pub fn load(path: &str) -> eyre::Result<Self> {
-        let content = std::fs::read_to_string(path)?;
-        let config: Self = serde_json::from_str(&content)?;
-        Ok(config)
-    }
-}
+    #[test]
+    fn loads_identity_check_proof_url() {
+        let config: SidecarConfig = serde_json::from_str(
+            r#"{
+              "protocol": {
+                "chain_id": 480,
+                "registry_address": "0x8556d07D75025f286fe757C7EeEceC40D54FA16D",
+                "indexer_url": "https://indexer.example.com",
+                "gateway_url": "https://gateway.example.com",
+                "nullifier_oracle_urls": ["https://node0.example.com"],
+                "nullifier_oracle_threshold": 1
+              },
+              "identity_check_proof_url": "https://simulator.example.com/proof/uniqueness",
+              "identities": []
+            }"#,
+        )
+        .expect("identity check proof URL should parse");
 
-impl IdentityConfig {
-    /// Decode the hex seed into bytes.
-    pub fn seed_bytes(&self) -> eyre::Result<Vec<u8>> {
-        let seed = self.seed.strip_prefix("0x").unwrap_or(&self.seed);
-        hex::decode(seed).map_err(|e| eyre::eyre!("invalid hex seed: {e}"))
+        assert_eq!(
+            config.identity_check_proof_url.as_deref(),
+            Some("https://simulator.example.com/proof/uniqueness")
+        );
     }
 }

@@ -82,3 +82,9 @@ and eID personas use the ICAO-9303 credential, while MNC personas use the MNC
 credential. When every requested attribute matches, the simulator returns
 IDKit's attested response envelope with `identity_attested: true`. A mismatch
 returns `identity_attributes_not_matched`.
+
+The example sidecar config uses the public simulator's signed document proof
+fixture through `identity_check_proof_url`. The local sidecar validates all
+requested attributes against the selected simulator persona before requesting
+the proof, and verifies that the returned credential schema matches that
+persona before attesting it.

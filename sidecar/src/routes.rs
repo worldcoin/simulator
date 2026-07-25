@@ -20,6 +20,7 @@ use crate::persona::{
 /// Shared application state.
 pub struct AppState {
     pub identities: Vec<IdentityState>,
+    pub identity_check_proof_url: Option<String>,
 }
 
 /// State for a single pre-configured identity.
@@ -155,7 +156,7 @@ async fn generate_proof_inner(
 ) -> Result<Json<serde_json::Value>, SidecarError> {
     let ProofRequestBody {
         identity_index,
-        proof_request,
+        proof_request: proof_request_json,
         identity_attributes,
         persona,
     } = req;
@@ -166,7 +167,7 @@ async fn generate_proof_inner(
         );
     }
 
-    let proof_request = ProofRequest::from_json(&proof_request.to_string())
+    let proof_request = ProofRequest::from_json(&proof_request_json.to_string())
         .map_err(|e| SidecarError::BadRequest(format!("invalid proof_request: {e}")))?;
 
     if is_session != proof_request.is_session_proof() {
@@ -195,6 +196,26 @@ async fn generate_proof_inner(
     } else {
         None
     };
+
+    if is_identity_check {
+        validate_identity_check_selection(
+            persona,
+            &identity_attributes,
+            proof_request
+                .requests
+                .iter()
+                .map(|item| item.issuer_schema_id),
+        )?;
+
+        if let Some(proof_url) = state.identity_check_proof_url.as_deref() {
+            return generate_delegated_identity_check_proof(
+                proof_url,
+                &proof_request_json,
+                persona.expect("Identity Check persona was validated above"),
+            )
+            .await;
+        }
+    }
 
     // Auto-select: pick the first configured identity whose credentials satisfy the request.
     // Identity Check restricts Passport/MNC availability to the selected persona first.
@@ -262,6 +283,76 @@ async fn generate_proof_inner(
         &result.proof_response,
         is_identity_check,
     )?))
+}
+
+async fn generate_delegated_identity_check_proof(
+    proof_url: &str,
+    proof_request: &serde_json::Value,
+    persona: &IdentityPersona,
+) -> Result<Json<serde_json::Value>, SidecarError> {
+    let response = reqwest::Client::new()
+        .post(proof_url)
+        .json(&serde_json::json!({ "proof_request": proof_request }))
+        .send()
+        .await
+        .map_err(|error| SidecarError::Upstream(error.to_string()))?;
+    let status = response.status();
+    let payload = response
+        .json::<serde_json::Value>()
+        .await
+        .map_err(|error| SidecarError::Upstream(format!("invalid response: {error}")))?;
+
+    if !status.is_success() {
+        return match payload
+            .get("error_code")
+            .and_then(serde_json::Value::as_str)
+        {
+            Some("credential_unavailable") => Err(SidecarError::CredentialUnavailable),
+            Some("identity_attributes_not_matched") => {
+                Err(SidecarError::IdentityAttributesNotMatched)
+            }
+            _ => Err(SidecarError::Upstream(format!(
+                "proof service returned {status}: {payload}"
+            ))),
+        };
+    }
+
+    let proved_schema_ids = proof_response_schema_ids(&payload)?;
+    if !includes_persona_document_schema(proved_schema_ids, persona) {
+        return Err(SidecarError::CredentialUnavailable);
+    }
+
+    Ok(Json(bridge_response_payload(&payload, true)?))
+}
+
+fn proof_response_schema_ids(proof_response: &serde_json::Value) -> Result<Vec<u64>, SidecarError> {
+    if proof_response
+        .get("error")
+        .is_some_and(|error| !error.is_null())
+    {
+        return Err(SidecarError::Upstream(
+            "proof service returned a protocol error".to_string(),
+        ));
+    }
+
+    proof_response
+        .get("responses")
+        .and_then(serde_json::Value::as_array)
+        .ok_or_else(|| {
+            SidecarError::Upstream("proof response did not contain responses".to_string())
+        })?
+        .iter()
+        .map(|response| {
+            response
+                .get("issuer_schema_id")
+                .and_then(serde_json::Value::as_u64)
+                .ok_or_else(|| {
+                    SidecarError::Upstream(
+                        "proof response contained an invalid issuer schema".to_string(),
+                    )
+                })
+        })
+        .collect()
 }
 
 fn validate_identity_check_selection<I>(
@@ -390,6 +481,36 @@ mod tests {
         assert_eq!(payload, proof_response);
         assert!(payload.get("proof_response").is_none());
         assert!(payload.get("identity_attested").is_none());
+    }
+
+    #[test]
+    fn delegated_proof_response_extracts_document_schema() {
+        let proof_response = serde_json::json!({
+            "id": "proof-id",
+            "version": 1,
+            "responses": [{
+                "identifier": "passport",
+                "issuer_schema_id": PASSPORT,
+                "proof": "proof",
+                "nullifier": "nil_test"
+            }],
+        });
+
+        assert_eq!(
+            proof_response_schema_ids(&proof_response).unwrap(),
+            vec![PASSPORT]
+        );
+    }
+
+    #[test]
+    fn delegated_proof_response_rejects_missing_responses() {
+        let error = proof_response_schema_ids(&serde_json::json!({
+            "id": "proof-id",
+            "version": 1,
+        }))
+        .expect_err("responses are required");
+
+        assert!(matches!(error, SidecarError::Upstream(_)));
     }
 
     #[test]

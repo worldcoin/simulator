@@ -20,6 +20,8 @@ pub enum SidecarError {
     IdentityNotFound,
     /// The request body or proof_request itself is malformed.
     BadRequest(String),
+    /// The configured simulator proof service could not complete the request.
+    Upstream(String),
     /// An error from the authenticator (network, proof generation, etc.).
     Authenticator(AuthenticatorError),
 }
@@ -37,6 +39,7 @@ impl std::fmt::Display for SidecarError {
             Self::IdentityAttributesNotMatched => write!(f, "identity_attributes_not_matched"),
             Self::IdentityNotFound => write!(f, "identity_not_found"),
             Self::BadRequest(msg) => write!(f, "bad request: {msg}"),
+            Self::Upstream(msg) => write!(f, "upstream proof service error: {msg}"),
             Self::Authenticator(e) => write!(f, "authenticator error: {e}"),
         }
     }
@@ -77,6 +80,11 @@ impl IntoResponse for SidecarError {
             SidecarError::BadRequest(msg) => (
                 StatusCode::BAD_REQUEST,
                 Json(serde_json::json!({"error_code": "bad_request", "error": msg})),
+            )
+                .into_response(),
+            SidecarError::Upstream(msg) => (
+                StatusCode::BAD_GATEWAY,
+                Json(serde_json::json!({"error_code": "generic_error", "error": msg})),
             )
                 .into_response(),
             SidecarError::Authenticator(e) => {
