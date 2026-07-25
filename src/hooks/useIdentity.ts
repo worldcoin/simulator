@@ -1,3 +1,7 @@
+import {
+  getIdentityProfile,
+  withIdentityProfile,
+} from "@/lib/identity-persona";
 import { encode } from "@/lib/utils";
 import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
@@ -61,7 +65,7 @@ const useIdentity = () => {
       );
       // Build updated identity object
       const newIdentity: Identity = {
-        ...identity,
+        ...withIdentityProfile(identity),
         id,
         verified: {
           [VerificationLevel.Orb]: orbProof !== null,
@@ -106,6 +110,7 @@ const useIdentity = () => {
           idNumber: idNum,
         },
         zkIdentity: zkIdentity.toString(),
+        profile: getIdentityProfile({}),
         verified: {
           [VerificationLevel.Orb]: true,
           [VerificationLevel.Device]: true,
@@ -195,6 +200,7 @@ const useIdentity = () => {
     resetIdentityStore,
     generateIdentityProofsIfNeeded,
     setActiveIdentityID,
+    replaceIdentity,
     generateFirstFiveIdentities,
   };
 };

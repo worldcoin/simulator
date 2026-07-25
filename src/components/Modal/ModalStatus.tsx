@@ -1,12 +1,13 @@
 import { Status } from "@/types";
 import { VerificationLevel } from "@worldcoin/idkit-core";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Button from "../Button";
 import { Icon } from "../Icon";
 
 interface ModalStatusProps {
   status: Status;
   hasProofRequest: boolean;
+  forceV4: boolean;
   handleClick: (
     malicious: boolean,
     verification_level: VerificationLevel,
@@ -16,12 +17,17 @@ interface ModalStatusProps {
 
 export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
   const [useV4, setUseV4] = useState(props.hasProofRequest);
+  const useV4Flow = props.forceV4 || useV4;
+
+  useEffect(() => {
+    setUseV4(props.hasProofRequest);
+  }, [props.hasProofRequest, props.forceV4]);
 
   return (
     <div className="flex w-full items-center justify-center">
       {props.status === Status.Waiting && (
         <div className="flex w-full flex-col gap-3">
-          {props.hasProofRequest && (
+          {props.hasProofRequest && !props.forceV4 && (
             <div className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 p-1">
               <button
                 onClick={() => setUseV4(false)}
@@ -46,12 +52,12 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
             </div>
           )}
 
-          {useV4 ? (
+          {useV4Flow ? (
             <Button
               onClick={props.handleV4Click}
               className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
             >
-              Verify
+              {props.forceV4 ? "Attest identity" : "Verify"}
             </Button>
           ) : (
             <>

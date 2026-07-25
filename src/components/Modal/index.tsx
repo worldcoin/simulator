@@ -2,6 +2,10 @@ import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import useIdentity from "@/hooks/useIdentity";
 import {
+  getIdentityProfile,
+  serializeV4PersonaForSidecar,
+} from "@/lib/identity-persona";
+import {
   generateDummyMerkleProof,
   getFullProof,
   getMerkleProof,
@@ -13,7 +17,7 @@ import {
 } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
 import { useModalStore } from "@/stores/modalStore";
-import { Status } from "@/types";
+import { Status, type BridgeIdentityAttribute } from "@/types";
 
 import { VerificationLevel } from "@worldcoin/idkit-core";
 
@@ -66,6 +70,11 @@ export function Modal() {
   const showStagingContent = !isProductionRequest && metadata?.is_staging;
   const showEnvironmentError =
     !isLoading && !showStagingContent && status != Status.Error;
+  const requestedIdentityAttributes = bridgeInitialData?.identity_attributes;
+  const identityCheckAttributes = Array.isArray(requestedIdentityAttributes)
+    ? requestedIdentityAttributes
+    : null;
+  const isIdentityCheck = identityCheckAttributes !== null;
 
   // v3 proof flow (existing)
   const handleClick = useCallback(
@@ -147,7 +156,7 @@ export function Modal() {
 
     setStatus(Status.Pending);
 
-    const identityIndex = parseInt(activeIdentity.id, 10);
+    const profile = getIdentityProfile(activeIdentity);
     const proofType = bridgeInitialData.proof_request.proof_type;
     const isSession =
       proofType === "create_session" ||
@@ -160,8 +169,11 @@ export function Modal() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          identity_index: identityIndex,
           proof_request: bridgeInitialData.proof_request,
+          ...(identityCheckAttributes !== null && {
+            identity_attributes: identityCheckAttributes,
+            persona: serializeV4PersonaForSidecar(profile.v4Persona),
+          }),
         }),
       });
 
@@ -181,13 +193,18 @@ export function Modal() {
             "Sidecar request error, forwarding to bridge:",
             errorCode,
           );
-          await rejectRequestV4({ url, errorCode });
+          const rejectResult = await rejectRequestV4({ url, errorCode });
+          if (!rejectResult.success) {
+            setStatus(Status.Error);
+            return console.error(rejectResult.error);
+          }
           close();
           return;
         }
 
         // 5xx or unstructured failure: real internal error, surface the modal.
         console.error("Sidecar error:", errorData);
+        await rejectRequestV4({ url, errorCode: "generic_error" });
         setStatus(Status.Error);
         return;
       }
@@ -205,9 +222,17 @@ export function Modal() {
       setStatus(Status.Success);
     } catch (error) {
       console.error("V4 proof generation failed:", error);
+      await rejectRequestV4({ url, errorCode: "generic_error" });
       setStatus(Status.Error);
     }
-  }, [activeIdentity, bridgeInitialData, url, setStatus, close]);
+  }, [
+    activeIdentity,
+    bridgeInitialData,
+    close,
+    identityCheckAttributes,
+    setStatus,
+    url,
+  ]);
 
   return (
     <Drawer
@@ -284,25 +309,51 @@ export function Modal() {
 
               <div className="flex flex-col gap-3">
                 <p className="font-sora text-15 text-[#717680]">
-                  App will see your
+                  {isIdentityCheck
+                    ? "App will learn whether"
+                    : "App will see your"}
                 </p>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex size-5 items-center justify-center rounded-full bg-[#181818]">
-                    <Icon
-                      name="check"
-                      className="size-3 text-white"
-                    />
-                  </span>
-                  <span className="text-17 font-sora text-[#181818]">
-                    Verification level
-                  </span>
-                </div>
+                {identityCheckAttributes !== null ? (
+                  <>
+                    {(identityCheckAttributes.length > 0
+                      ? identityCheckAttributes
+                      : [null]
+                    ).map((attribute, index) => (
+                      <div
+                        key={
+                          attribute
+                            ? `${attribute.type}-${index}`
+                            : "document-backed-identity"
+                        }
+                        className="flex items-start gap-2"
+                      >
+                        <CheckIcon />
+                        <span className="font-sora text-b2 text-[#181818]">
+                          {attribute
+                            ? formatIdentityAttribute(attribute)
+                            : "A document-backed identity is available"}
+                        </span>
+                      </div>
+                    ))}
+                    <p className="font-sora text-b4 text-[#717680]">
+                      Your underlying document data is not shared.
+                    </p>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <CheckIcon />
+                    <span className="font-sora text-b2 text-[#181818]">
+                      Verification level
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
             <ModalStatus
               status={status}
               hasProofRequest={!!bridgeInitialData?.proof_request}
+              forceV4={isIdentityCheck}
               handleClick={(malicious, verification_level) =>
                 void handleClick(malicious, verification_level)
               }
@@ -318,4 +369,38 @@ export function Modal() {
       )}
     </Drawer>
   );
+}
+
+function CheckIcon() {
+  return (
+    <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[#181818]">
+      <Icon
+        name="check"
+        className="size-3 text-white"
+      />
+    </span>
+  );
+}
+
+function formatIdentityAttribute(attribute: BridgeIdentityAttribute): string {
+  switch (attribute.type) {
+    case "document_type":
+      return `Document type is ${
+        attribute.value === "eid"
+          ? "eID"
+          : attribute.value === "mnc"
+          ? "MNC"
+          : "Passport"
+      }`;
+    case "document_number":
+      return `Document number matches ${attribute.value}`;
+    case "issuing_country":
+      return `Issuing country is ${attribute.value.toUpperCase()}`;
+    case "full_name":
+      return `Full name matches ${attribute.value}`;
+    case "minimum_age":
+      return `Age is ${attribute.value} or older`;
+    case "nationality":
+      return `Nationality is ${attribute.value.toUpperCase()}`;
+  }
 }

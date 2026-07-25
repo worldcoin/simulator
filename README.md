@@ -69,3 +69,16 @@ World ID QR URL:
 
 When valid, the simulator will auto-select an identity and open the existing
 verification modal flow. Invalid URLs show a toast and are ignored.
+
+## 🪪 Identity Check testing
+
+The simulator supports IDKit's
+[Identity Check preview](https://docs.world.org/world-id/idkit/credentials#identity-check-preview).
+Open an identity's settings to configure its simulated document type, document
+number, issuing country, full name, age, and nationality.
+
+Identity Check requests are handled through the World ID 4.0 sidecar. Passport
+and eID personas use the ICAO-9303 credential, while MNC personas use the MNC
+credential. When every requested attribute matches, the simulator returns
+IDKit's attested response envelope with `identity_attested: true`. A mismatch
+returns `identity_attributes_not_matched`.
