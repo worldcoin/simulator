@@ -8017,6 +8017,7 @@ dependencies = [
  "eyre",
  "hex",
  "rand 0.8.5",
+ "reqwest 0.12.28",
  "rustls",
  "serde",
  "serde_json",

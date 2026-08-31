@@ -3,6 +3,7 @@ use std::sync::Arc;
 mod auth;
 mod config;
 mod error;
+mod persona;
 mod routes;
 
 use config::SidecarConfig;
@@ -38,7 +39,7 @@ async fn main() -> eyre::Result<()> {
         let protocol_config = sidecar_config.protocol.clone();
 
         tracing::info!("Initializing identity {i}...");
-        let authenticator = world_id_core::Authenticator::init(&seed, protocol_config.into())
+        let authenticator = world_id_core::Authenticator::init(&seed, protocol_config)
             .await
             .map_err(|e| eyre::eyre!("failed to init identity {i}: {e}"))?
             .with_proof_materials(query_material.clone(), nullifier_material.clone());
@@ -54,7 +55,10 @@ async fn main() -> eyre::Result<()> {
         });
     }
 
-    let state = Arc::new(AppState { identities });
+    let state = Arc::new(AppState {
+        identities,
+        identity_check_proof_url: sidecar_config.identity_check_proof_url.clone(),
+    });
     let app = routes::router(state);
 
     let port: u16 = std::env::var("PORT")

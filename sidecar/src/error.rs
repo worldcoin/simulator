@@ -5,9 +5,12 @@ use world_id_core::AuthenticatorError;
 use world_id_proof::ProofError;
 
 /// Sidecar error type that converts into HTTP responses.
+#[derive(Debug)]
 pub enum SidecarError {
     /// The user's credentials do not satisfy the proof request constraints.
     CredentialUnavailable,
+    /// The selected credential matched, but requested identity attributes did not.
+    IdentityAttributesNotMatched,
     /// The requested identity index does not exist.
     ///
     /// No longer produced now that the proof endpoints auto-select the identity from the
@@ -17,6 +20,8 @@ pub enum SidecarError {
     IdentityNotFound,
     /// The request body or proof_request itself is malformed.
     BadRequest(String),
+    /// The configured simulator proof service could not complete the request.
+    Upstream(String),
     /// An error from the authenticator (network, proof generation, etc.).
     Authenticator(AuthenticatorError),
 }
@@ -31,8 +36,10 @@ impl std::fmt::Display for SidecarError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CredentialUnavailable => write!(f, "credential_unavailable"),
+            Self::IdentityAttributesNotMatched => write!(f, "identity_attributes_not_matched"),
             Self::IdentityNotFound => write!(f, "identity_not_found"),
             Self::BadRequest(msg) => write!(f, "bad request: {msg}"),
+            Self::Upstream(msg) => write!(f, "upstream proof service error: {msg}"),
             Self::Authenticator(e) => write!(f, "authenticator error: {e}"),
         }
     }
@@ -60,6 +67,11 @@ impl IntoResponse for SidecarError {
                 Json(serde_json::json!({"error_code": "credential_unavailable"})),
             )
                 .into_response(),
+            SidecarError::IdentityAttributesNotMatched => (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error_code": "identity_attributes_not_matched"})),
+            )
+                .into_response(),
             SidecarError::IdentityNotFound => (
                 StatusCode::NOT_FOUND,
                 Json(serde_json::json!({"error_code": "identity_not_found"})),
@@ -68,6 +80,11 @@ impl IntoResponse for SidecarError {
             SidecarError::BadRequest(msg) => (
                 StatusCode::BAD_REQUEST,
                 Json(serde_json::json!({"error_code": "bad_request", "error": msg})),
+            )
+                .into_response(),
+            SidecarError::Upstream(msg) => (
+                StatusCode::BAD_GATEWAY,
+                Json(serde_json::json!({"error_code": "generic_error", "error": msg})),
             )
                 .into_response(),
             SidecarError::Authenticator(e) => {
