@@ -7,6 +7,7 @@ import { Icon } from "../Icon";
 interface ModalStatusProps {
   status: Status;
   hasProofRequest: boolean;
+  requestedLevel?: VerificationLevel;
   handleClick: (
     malicious: boolean,
     verification_level: VerificationLevel,
@@ -21,6 +22,12 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
     <div className="flex w-full items-center justify-center">
       {props.status === Status.Waiting && (
         <div className="flex w-full flex-col gap-3">
+          {!props.hasProofRequest && props.requestedLevel && (
+            <p className="text-center font-sora text-b3 text-gray-500">
+              App requested: {props.requestedLevel}
+            </p>
+          )}
+
           {props.hasProofRequest && (
             <div className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 p-1">
               <button
@@ -92,7 +99,12 @@ export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
               <div className="flex w-full justify-center">
                 <button
                   className="mt-1 text-12 font-semibold uppercase tracking-[0.04em] text-gray-400"
-                  onClick={() => props.handleClick(true, VerificationLevel.Orb)}
+                  onClick={() =>
+                    props.handleClick(
+                      true,
+                      props.requestedLevel ?? VerificationLevel.Orb,
+                    )
+                  }
                 >
                   Test Invalid Proof
                 </button>

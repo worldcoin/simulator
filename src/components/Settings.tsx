@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import { V4PersonaEditor } from "@/components/IdentityProfile/V4PersonaEditor";
 import Item from "@/components/Item";
 import useIdentity from "@/hooks/useIdentity";
 import type { UiStore } from "@/stores/ui";
@@ -22,7 +23,7 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
   const { id } = router.query;
   const [version, setVersion] = useState("2.0");
   const [copiedCommitment, setCopiedCommitment] = useState(false);
-  const { resetIdentityStore } = useIdentity();
+  const { activeIdentity, replaceIdentity, resetIdentityStore } = useIdentity();
 
   const close = useCallback(
     () => setSettingsOpened(false),
@@ -68,8 +69,8 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
       open={settingsOpened}
       onClose={close}
     >
-      <div className="flex h-full flex-col justify-between">
-        <div>
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto pb-4">
           <Header
             heading="Settings"
             iconLeft="chevron-thick"
@@ -92,18 +93,22 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
               color="#00C3B6"
             />
           </Item>
+          <V4PersonaEditor
+            identity={activeIdentity}
+            onSave={replaceIdentity}
+          />
         </div>
-        <Button
-          className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
-          onClick={() => {
-            void handleLogout();
-          }}
-        >
-          Reset Simulator
-        </Button>
-        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-gray-400">
-          Version {version}
-        </p>
+        <div className="shrink-0 pb-6 pt-2">
+          <Button
+            className="mb-3 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
+            onClick={() => {
+              void handleLogout();
+            }}
+          >
+            Reset Simulator
+          </Button>
+          <p className="text-center text-14 text-gray-400">Version {version}</p>
+        </div>
       </div>
     </Drawer>
   );

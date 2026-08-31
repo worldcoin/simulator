@@ -1,6 +1,6 @@
 import verificationKeys from "@/public/semaphore/verification_key.json";
 import type { BridgeInitialData, FP, Verification } from "@/types";
-import { CodedError, type Identity } from "@/types";
+import { CodedError, ErrorsCode, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { VerificationLevel } from "@worldcoin/idkit-core";
@@ -144,7 +144,10 @@ export function getMerkleProof(
   console.log("identity", identity);
   const proofs = identity.inclusionProof;
   if (!proofs) {
-    throw new Error("Inclusion proof not found");
+    throw new CodedError(
+      ErrorsCode.VerificationLevelNotSatisfied,
+      "Inclusion proof map not found",
+    );
   }
   const proof = proofs[verificationLevel]?.proof;
   // Identity has inclusion proof from sequencer
@@ -165,10 +168,10 @@ export function getMerkleProof(
     } as MerkleProof;
   }
 
-  // TODO: Reevaluate if the dummy proof case is needed
-  // Generate a dummy proof for testing against error cases
-  console.warn("Identity inclusion proof was not found, using dummy proof");
-  return generateDummyMerkleProof(identity);
+  throw new CodedError(
+    ErrorsCode.VerificationLevelNotSatisfied,
+    `No inclusion proof for verification level '${verificationLevel}'`,
+  );
 }
 
 /**

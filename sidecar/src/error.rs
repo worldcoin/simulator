@@ -5,9 +5,12 @@ use world_id_core::AuthenticatorError;
 use world_id_proof::ProofError;
 
 /// Sidecar error type that converts into HTTP responses.
+#[derive(Debug)]
 pub enum SidecarError {
     /// The user's credentials do not satisfy the proof request constraints.
     CredentialUnavailable,
+    /// The selected credential matched, but requested identity attributes did not.
+    IdentityAttributesNotMatched,
     /// The requested identity index does not exist.
     ///
     /// No longer produced now that the proof endpoints auto-select the identity from the
@@ -31,6 +34,7 @@ impl std::fmt::Display for SidecarError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CredentialUnavailable => write!(f, "credential_unavailable"),
+            Self::IdentityAttributesNotMatched => write!(f, "identity_attributes_not_matched"),
             Self::IdentityNotFound => write!(f, "identity_not_found"),
             Self::BadRequest(msg) => write!(f, "bad request: {msg}"),
             Self::Authenticator(e) => write!(f, "authenticator error: {e}"),
@@ -58,6 +62,11 @@ impl IntoResponse for SidecarError {
             SidecarError::CredentialUnavailable => (
                 StatusCode::BAD_REQUEST,
                 Json(serde_json::json!({"error_code": "credential_unavailable"})),
+            )
+                .into_response(),
+            SidecarError::IdentityAttributesNotMatched => (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error_code": "identity_attributes_not_matched"})),
             )
                 .into_response(),
             SidecarError::IdentityNotFound => (

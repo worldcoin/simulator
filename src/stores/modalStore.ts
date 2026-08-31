@@ -55,6 +55,7 @@ export const useModalStore = create<ModalStore>((set) => ({
     set(() => ({
       open: false,
       status: Status.Loading,
+      errorCode: null,
       bridgeInitialData: null,
       url: "",
     })),
