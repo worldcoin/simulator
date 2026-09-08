@@ -82,7 +82,8 @@ Exclude tool arguments and `Mcp-Param-connect_url` headers from ingress/tracing
 logs, since the connection URL contains an encryption key.
 
 The adapter allows only the supported World bridge HTTPS origins, blocks redirects,
-and validates incoming Host/Origin headers. Local hosts are permitted only outside
+and validates incoming Host/Origin headers against the main domain and Vercel's
+configured deployment/branch hostnames. Local hosts are permitted only outside
 production. The Next.js request body limit is 8 KB, bridge/prover response limit is
 64 KB, and each operation has a 45-second deadline. Configure the hosting runtime
 to allow the route's 60-second duration. One active request per worker prevents

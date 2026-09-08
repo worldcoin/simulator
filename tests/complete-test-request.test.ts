@@ -223,6 +223,55 @@ test("MCP denies untrusted Host and Origin headers", async () => {
   });
 });
 
+test("MCP accepts its configured deployment hostnames in production", async () => {
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL_URL: process.env.VERCEL_URL,
+    VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL,
+  };
+  Object.assign(process.env, {
+    NODE_ENV: "production",
+    VERCEL_URL: "deployment.vercel.app",
+    VERCEL_BRANCH_URL: "branch.vercel.app",
+  });
+  try {
+    await withMcpServer(async (endpoint) => {
+      for (const host of ["deployment.vercel.app", "branch.vercel.app"]) {
+        const status = await new Promise<number | undefined>(
+          (resolve, reject) => {
+            const request = httpRequest(
+              endpoint,
+              {
+                method: "POST",
+                headers: {
+                  Host: host,
+                  Origin: `https://${host}`,
+                  "Content-Type": "application/json",
+                  Accept: "application/json, text/event-stream",
+                },
+              },
+              (response) => {
+                response.resume();
+                response.on("end", () => resolve(response.statusCode));
+              },
+            );
+            request.on("error", reject);
+            request.end(
+              JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }),
+            );
+          },
+        );
+        assert.equal(status, 200);
+      }
+    });
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
 test("MCP reports ambiguous failures without exposing the connection URL", async () => {
   proofReply = () =>
     Promise.reject(new Error(`Request failed for ${connectUrl}`));
