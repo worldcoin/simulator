@@ -31,3 +31,25 @@ v4, and verify. The application's callback displays a sanitized backend result.
   are not included. Local receipts are stored in the ignored `.state` directory.
 
 The fixture binds to loopback and is intended for local integration testing only.
+
+## Complete a request through MCP
+
+Start the simulator's local Next.js server with its existing sidecar configuration.
+To test against the deployed public proof gateway during development:
+
+```sh
+SIDECAR_URL=https://simulator.worldcoin.org/api/sidecar \
+NEXT_PUBLIC_DEV_PORTAL_URL=https://developer.world.org \
+  pnpm dev --port 3088
+```
+
+Start a fresh verification in the application, then run `pnpm test:real` instead
+of opening the simulator UI. The script connects a real MCP client, discovers the
+tool, and completes the existing request. It separately waits for the application's
+callback/backend result and exits with an error unless a native v4 proof is
+accepted and creates a receipt. `TEST_APP_URL` and `SIMULATOR_MCP_URL` can override
+the local fixture and MCP URLs. This command requires the configured real test
+app; it is not part of deterministic CI tests.
+
+The successful MCP/IDKit round trip uses the same browser callback and backend as
+the UI test. It does not substitute a result into the application.

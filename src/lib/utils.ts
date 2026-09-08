@@ -8,7 +8,6 @@ import {
   solidityEncode,
 } from "@worldcoin/idkit-core/hashing";
 
-import { Buffer } from "buffer/";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { encodePacked } from "viem";
@@ -97,29 +96,4 @@ export const generateExternalNullifier = (
   ]);
 };
 
-const buffer_encode = (buffer: ArrayBuffer): string => {
-  return Buffer.from(buffer).toString("base64");
-};
-
-export const buffer_decode = (encoded: string): ArrayBuffer => {
-  return Buffer.from(encoded, "base64");
-};
-
-export const encryptRequest = async (
-  key: CryptoKey,
-  iv: ArrayBuffer,
-  request: string,
-): Promise<{ payload: string; iv: string }> => {
-  const encoder = new TextEncoder();
-
-  return {
-    iv: buffer_encode(iv),
-    payload: buffer_encode(
-      await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv },
-        key,
-        encoder.encode(request),
-      ),
-    ),
-  };
-};
+export { buffer_decode, encryptRequest } from "./bridge-crypto";

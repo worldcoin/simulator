@@ -45,3 +45,28 @@ credential family, deployment capacity, or an availability guarantee.
 
 Signing keys, identity seeds, bridge encryption keys, full connection URLs and
 proof payloads are deliberately absent from this report.
+
+## MCP adapter validation
+
+The local MCP endpoint was also exercised with the official TypeScript SDK client
+against the deployed simulator proof gateway. Discovery returned
+`complete_test_request`; its call generated and delivered a real native proof in
+10,283 ms. The application's existing browser callback independently forwarded
+that proof to its backend, received Portal HTTP 200 with native 4.0 staging
+acceptance, and created receipt 4. Backend verification took 891 ms.
+
+The MCP result contained only delivery status and the original request ID. No
+simulator UI approval was performed for this request, and the Portal's synthetic
+verification infrastructure was not used.
+
+A second live MCP run exercised IDKit's standard Base64 key encoding and the
+current SDK negotiation path. Proof delivery took 10,396 ms; the separate backend
+result matched the original request ID, reported native v4 staging acceptance,
+and created receipt 5. Backend verification took 827 ms. The connection parser has
+a regression test for both standard Base64 and URL-safe Base64 keys.
+
+The final adapter validation used MCP protocol `2026-07-28` and checked the
+prover's compressed-hex wire response against the original request before
+delivery. It completed in 10,403 ms; the application independently accepted native
+v4 staging verification in 872 ms and created receipt 6. The deterministic tests
+also exercise legacy MCP negotiation.

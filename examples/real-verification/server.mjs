@@ -132,6 +132,7 @@ const server = createServer(async (req, res) => {
       const body = await bodyOf(req);
       if (!requests.has(body.nonce))
         return json(res, 400, { error: "Unknown request" });
+      requests.get(body.nonce).request_id = body.request_id;
       activeConnector = body.connect_url;
       events.push({
         stage: "request_ready",
@@ -171,14 +172,15 @@ const server = createServer(async (req, res) => {
         redirect: "error",
       });
       const verdict = await upstream.json();
-      let inserted = false;
-      if (
+      const accepted = Boolean(
         upstream.ok &&
-        verdict.success &&
-        verdict.protocol_version === "4.0" &&
-        verdict.environment === "staging" &&
-        verdict.test !== true
-      ) {
+          verdict.success &&
+          verdict.protocol_version === "4.0" &&
+          verdict.environment === "staging" &&
+          verdict.test !== true,
+      );
+      let inserted = false;
+      if (accepted) {
         inserted =
           insertReceipt.run(
             verdict.nullifier,
@@ -189,11 +191,12 @@ const server = createServer(async (req, res) => {
       }
       const result = {
         stage: "backend_verification",
+        request_id: pending.request_id,
         verifier_status: upstream.status,
         protocol_version: verdict.protocol_version ?? null,
         environment: verdict.environment ?? null,
         synthetic: verdict.test === true,
-        accepted: Boolean(upstream.ok && verdict.success),
+        accepted,
         receipt_created: inserted,
         receipt_count: countReceipts.get().count,
         verify_ms: Date.now() - started,
@@ -204,7 +207,13 @@ const server = createServer(async (req, res) => {
       events.push(result);
       json(
         res,
-        result.accepted ? (inserted ? 200 : 409) : upstream.status,
+        result.accepted
+          ? inserted
+            ? 200
+            : 409
+          : upstream.ok
+          ? 502
+          : upstream.status,
         result,
       );
       return;

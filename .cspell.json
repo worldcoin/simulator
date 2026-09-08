@@ -45,9 +45,10 @@
     "zkey",
     "zkeys",
     "zustand",
-    "zxing"
+    "zxing",
+    "Streamable",
+    "modelcontextprotocol",
+    "ciphertext"
   ],
-  "ignorePaths": [
-    "sidecar/target/**"
-  ]
+  "ignorePaths": ["sidecar/target/**"]
 }

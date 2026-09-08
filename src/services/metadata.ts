@@ -11,6 +11,7 @@ import {
 
 async function precheckAction(
   request: MetadataParams,
+  signal?: AbortSignal,
 ): Promise<MetadataResponse | null> {
   const url = new URL(request.app_id, DEV_PORTAL_PRECHECK_URL);
   const body = {
@@ -23,6 +24,7 @@ async function precheckAction(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal,
     });
 
     if (!response.ok) {
@@ -76,6 +78,7 @@ async function precheckAction(
 // IDKit v4: fetch app metadata via /proof-context endpoint
 async function proofContextAction(
   request: MetadataParams,
+  signal?: AbortSignal,
 ): Promise<Partial<MetadataResponse> | null> {
   const url = new URL(request.app_id, DEV_PORTAL_PROOF_CONTEXT_URL);
   const body: Record<string, string> = {};
@@ -87,6 +90,7 @@ async function proofContextAction(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal,
     });
 
     if (!response.ok) {
@@ -146,6 +150,7 @@ async function proofContextAction(
 
 export async function fetchMetadata(
   request: MetadataParams,
+  signal?: AbortSignal,
 ): Promise<Partial<MetadataResponse>> {
   let metadata: Partial<MetadataResponse> = {
     id: request.app_id,
@@ -157,8 +162,8 @@ export async function fetchMetadata(
   // IDKit v4: use /proof-context when environment is provided
   // Legacy: fall back to /precheck
   const response = request.environment
-    ? await proofContextAction(request)
-    : await precheckAction(request);
+    ? await proofContextAction(request, signal)
+    : await precheckAction(request, signal);
 
   if (response) {
     metadata = {

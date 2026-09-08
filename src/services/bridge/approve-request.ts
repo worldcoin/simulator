@@ -1,4 +1,5 @@
-import { buffer_decode, encodeBigInt, encryptRequest } from "@/lib/utils";
+import { encodeBigInt } from "@/lib/utils";
+import { deliverBridgeResponse } from "./deliver-response";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import {
   CodedError,
@@ -131,35 +132,8 @@ async function sendEncryptedBridgeResponse(
   key: string,
   payload: Record<string, unknown>,
 ): Promise<ApproveRequestReturnType> {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const keyBuffer = buffer_decode(key);
-
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw",
-    keyBuffer,
-    { name: "AES-GCM", length: 256 },
-    true,
-    ["encrypt", "decrypt"],
-  );
-
   try {
-    const result = await fetch(`${bridgeURL}/response/${requestUUID}`, {
-      method: "PUT",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-
-      body: JSON.stringify(
-        await encryptRequest(cryptoKey, iv, JSON.stringify(payload)),
-      ),
-    });
-
-    if (!result.ok) {
-      throw new Error(
-        `Unable to set bridge request data, ${result.status}: ${result.statusText}`,
-      );
-    }
+    await deliverBridgeResponse({ bridgeURL, requestUUID, key }, payload);
   } catch (error) {
     console.error(error);
     return {
