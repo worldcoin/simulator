@@ -72,6 +72,12 @@ the simulator MCP.
 
 ## Development and deployment
 
+Vercel builds use the public Developer Portal at `https://developer.world.org`,
+as configured in `vercel.json`, for both browser and MCP app metadata. Register
+test apps in that Portal. The proof request still uses the staging environment;
+this does not require an app in the internal staging Portal. Local builds can
+select the Portal with `NEXT_PUBLIC_DEV_PORTAL_URL`.
+
 The MCP route shares `SIDECAR_URL` and the private `BEARER_TOKEN` with the existing
 sidecar proxy. The bearer token is sent only to the configured proof service.
 Keep it server-side. Existing browser bridge encryption/delivery code is shared
