@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Real World ID verification fixture</title>
+    <style>
+      body {
+        max-width: 800px;
+        margin: 50px auto;
+        font: 17px system-ui;
+      }
+      button,
+      a {
+        margin: 8px;
+        padding: 12px;
+      }
+      pre {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Real World ID 4.0 verification</h1>
+    <p>
+      Staging proof generation and normal Portal verification. Each accepted
+      proof creates one SQLite receipt.
+    </p>
+    <button id="start">Start fresh verification</button>
+    <a
+      id="simulator"
+      href="/simulator"
+      target="_blank"
+      rel="noreferrer"
+      hidden
+      >Open simulator</a
+    >
+    <button
+      id="replay"
+      disabled
+    >
+      Replay last proof
+    </button>
+    <button
+      id="tamper"
+      disabled
+    >
+      Reject altered proof
+    </button>
+    <pre id="status">Ready</pre>
+    <script src="/sdk/idkit.global.js"></script>
+    <script>
+      const status = document.querySelector("#status");
+      let lastResult;
+      const post = async (path, body) => {
+        const response = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return response.json();
+      };
+      const verify = async (proof) => {
+        status.textContent =
+          "Checking the proof through the application backend…";
+        status.textContent = JSON.stringify(
+          await post("/api/verify", proof),
+          null,
+          2,
+        );
+      };
+      document.querySelector("#start").onclick = async () => {
+        document.querySelector("#simulator").hidden = true;
+        document.querySelector("#start").disabled = true;
+        status.textContent = "Creating a signed staging request…";
+        try {
+          const config = await post("/api/sign", {});
+          const request = await IDKit.request(config).preset(
+            IDKit.proofOfHuman(),
+          );
+          await post("/api/request-ready", {
+            nonce: config.rp_context.nonce,
+            request_id: request.requestId,
+            connect_url: request.connectorURI,
+          });
+          document.querySelector("#simulator").hidden = false;
+          status.textContent =
+            "Request ready. Open the simulator and approve verification.";
+          const completion = await request.pollUntilCompletion({
+            timeout: 600000,
+          });
+          if (!completion.success) throw new Error(completion.error);
+          lastResult = completion.result;
+          await verify(lastResult);
+          document.querySelector("#replay").disabled = false;
+          document.querySelector("#tamper").disabled = false;
+        } catch (error) {
+          status.textContent = "Verification failed: " + error.message;
+          await post("/api/client-error", { error: error.message });
+        } finally {
+          document.querySelector("#start").disabled = false;
+        }
+      };
+      document.querySelector("#replay").onclick = () => verify(lastResult);
+      document.querySelector("#tamper").onclick = () => {
+        const changed = structuredClone(lastResult);
+        changed.responses[0].proof[0] =
+          "0x" + (BigInt(changed.responses[0].proof[0]) + 1n).toString(16);
+        return verify(changed);
+      };
+    </script>
+  </body>
+</html>
