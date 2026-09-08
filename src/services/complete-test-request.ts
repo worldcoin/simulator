@@ -5,6 +5,7 @@ import {
 } from "@/services/bridge/deliver-response";
 import { fetchMetadata } from "@/services/metadata";
 import { fetchSidecar } from "@/services/sidecar";
+import { CodedError, ErrorsCode } from "@/types";
 
 type Stage =
   | "bridge_delivery"
@@ -242,6 +243,13 @@ export async function completeTestRequest(
     };
   } catch (error) {
     if (error instanceof TestRequestError) throw error;
+    if (
+      stage === "proof_context" &&
+      error instanceof CodedError &&
+      error.code === ErrorsCode.AppNotRegisteredV4
+    ) {
+      throw new TestRequestError(ErrorsCode.AppNotRegisteredV4, stage);
+    }
     // Never expose a fetch/crypto exception: it can contain the connection URL.
     throw new TestRequestError(
       signal.aborted ? "request_interrupted" : "request_failed",

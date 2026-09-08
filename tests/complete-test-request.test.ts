@@ -520,6 +520,7 @@ test("retains app proof-context eligibility checks before generating a proof", a
   contextReply = () =>
     json({ code: "not_registered", detail: "Not registered" }, 400);
   await assert.rejects(completeTestRequest(connectUrl), {
+    code: "app_not_registered_v4",
     stage: "proof_context",
     outcome: "not_completed",
   });
