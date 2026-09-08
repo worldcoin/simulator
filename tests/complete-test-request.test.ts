@@ -7,6 +7,7 @@ import {
 } from "@modelcontextprotocol/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import mcpHandler from "../src/pages/api/mcp";
+import sidecarProxy from "../src/pages/api/sidecar/[...path]";
 import {
   buffer_decode,
   decryptBridgeRequest,
@@ -297,6 +298,54 @@ test("MCP reports ambiguous failures without exposing the connection URL", async
       await client.close();
     }
   });
+});
+
+test("the sidecar proxy rejects arbitrary paths and preserves session routing", async () => {
+  const invoke = async (path: string[]) => {
+    let status = 200;
+    const response = {
+      status(code: number) {
+        status = code;
+        return response;
+      },
+      json() {
+        return response;
+      },
+    };
+    await sidecarProxy(
+      {
+        method: "POST",
+        query: { path },
+        body: { proof_request: {} },
+      } as unknown as NextApiRequest,
+      response as unknown as NextApiResponse,
+    );
+    return status;
+  };
+  for (const path of [
+    ["http:", "attacker.example"],
+    ["..", "health"],
+    ["proof", "unknown"],
+  ]) {
+    assert.equal(await invoke(path), 404);
+  }
+  assert.equal(calls.length, 0);
+  mock.method(
+    globalThis,
+    "fetch",
+    (input: string | URL | Request, init?: RequestInit) => {
+      assert.equal(
+        String(input),
+        "https://proof-service.example/proof/session",
+      );
+      assert.equal(
+        new Headers(init?.headers).get("authorization"),
+        "Bearer private-sidecar-token",
+      );
+      return Promise.resolve(json(nativeResponse));
+    },
+  );
+  assert.equal(await invoke(["proof", "session"]), 200);
 });
 // #endregion
 afterEach(() => mock.restoreAll());

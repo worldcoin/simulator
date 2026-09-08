@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { fetchSidecar } from "@/services/sidecar";
+import { fetchSidecar, getSidecarPath } from "@/services/sidecar";
 
 /**
  * Catch-all proxy route that forwards requests to the World ID v4 proof sidecar.
@@ -17,9 +17,12 @@ export default async function handler(
 
   const { path } = req.query;
   const targetPath = Array.isArray(path) ? path.join("/") : path;
+  const endpoint = getSidecarPath(targetPath ?? "");
+  if (!endpoint)
+    return res.status(404).json({ error: "Unknown proof service route" });
 
   try {
-    const response = await fetchSidecar(targetPath ?? "", {
+    const response = await fetchSidecar(endpoint, {
       method: req.method,
       body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
     });
