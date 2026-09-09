@@ -99,6 +99,3 @@ and prover capacity controls when deploying.
 Run deterministic tests with Node 22 and `pnpm test`. They use the real handler,
 encryption, and MCP client/HTTP transport, mocking remote I/O only. Both legacy MCP
 negotiation and current SDK negotiation are covered.
-
-See the [real application fixture](../examples/real-verification/README.md) for
-live proof testing.

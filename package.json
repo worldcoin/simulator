@@ -15,8 +15,7 @@
     "spellcheck": "cspell **/*.{md,ts,tsx}",
     "prepare": "husky install",
     "prebuild": "node -e \"const fs = require('fs'); const pkg = require('./package.json'); fs.writeFileSync('./public/version.json', JSON.stringify({ version: pkg.version }));\"",
-    "test": "node --import tsx --test tests/*.test.ts",
-    "test:real": "node examples/real-verification/complete.mjs"
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.0.0",
