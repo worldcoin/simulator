@@ -31,8 +31,16 @@ connection URLs; they contain the bridge's encryption key.
 
 `complete_test_request` completes a request that your application created, so
 the application must sign and publish a real IDKit request and verify the
-delivered proof itself. The smallest working shape with
-`@worldcoin/idkit-core@4.2.1`:
+delivered proof itself.
+
+An official, deployed reference exists: the
+[IDKit example arena](https://idkit-js-example.vercel.app/)
+([source](https://github.com/worldcoin/idkit/tree/main/js/examples/nextjs),
+with a plain-browser variant beside it). Its `api/arena/rp-context` route also
+shows how to mint deliberately broken request contexts (invalid RP signature,
+expired timestamps, replayed nonces) for failure-path testing.
+
+The smallest working shape with `@worldcoin/idkit-core@4.2.1`:
 
 Backend (Node):
 
@@ -79,7 +87,9 @@ if (completion.success) await postToBackendVerify(completion.result);
 
 Serve `idkit.global.js` and `idkit_wasm_bg.wasm` together from the installed
 package: the SDK loads its WASM relative to the script, and the package
-README's CDN snippet currently fails WASM initialization.
+README's CDN snippet currently fails WASM initialization. `signRequest` is also
+exported from `@worldcoin/idkit-server`, which the official example uses for
+server-side signing.
 
 Success means the application's backend received Portal HTTP 200 with
 `protocol_version` `"4.0"` and `environment` `"staging"` — not the tool's
