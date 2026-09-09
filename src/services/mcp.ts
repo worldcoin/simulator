@@ -19,7 +19,7 @@ Workflow:
 4. Let the application's IDKit polling or callback receive the proof. proof_delivered means the proof reached IDKit — judge success by the application's backend response and business effects.
 5. If the application fails, fix it and start a fresh request.
 
-Failure results carry error, stage, outcome, and error_delivered. outcome "not_completed": no proof was delivered — check the reported stage and the application's IDKit result. outcome "unknown": proof generation or delivery may already have happened — inspect the original IDKit request before another attempt; never retry blindly. simulator_busy: this worker already has an active request; this call started nothing new.
+A successful call returns { "status": "proof_delivered", "request_id": "..." } — note status, not outcome. Failure results carry error, stage, outcome, and error_delivered. outcome "not_completed": no proof was delivered — check the reported stage and the application's IDKit result. outcome "unknown": proof generation or delivery may already have happened — inspect the original IDKit request before another attempt; never retry blindly. simulator_busy: this worker already has an active request; this call started nothing new.
 
 Never log or repeat connection URLs: they contain the bridge encryption key. The tool never needs the RP private signing key. Test invalid proofs and business-rule failures through the application's backend; this server does not synthesize them.`,
     },
