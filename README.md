@@ -75,4 +75,4 @@ verification modal flow. Invalid URLs show a toast and are ignored.
 The [Simulator MCP](./docs/mcp.md) completes an application's native World ID 4.0
 staging Proof of Human request using the existing prover and bridge. Agents call
 `complete_test_request` with the application's connector URI, then inspect the
-application's own backend result. See [real verification evidence](./docs/real-verification-feasibility.md).
+application's own backend result.
