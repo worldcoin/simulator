@@ -27,6 +27,13 @@ its IDKit connector URI as `connect_url`, and judge success by the application's
 own backend response — proof delivery is not application acceptance. Never log
 connection URLs; they contain the bridge's encryption key.
 
+Two transport details for hand-rolled clients: responses arrive as a
+server-sent-events envelope (`data: {…}` lines carrying the JSON-RPC message;
+MCP SDK clients handle this automatically), and a successful call returns
+`{ "status": "proof_delivered", "request_id": "…" }` — note `status`, not
+`outcome`. Failed calls set `isError` and carry `error`, `stage`, `outcome`,
+and `error_delivered` fields instead.
+
 ## Minimal test application
 
 `complete_test_request` completes a request that your application created, so
