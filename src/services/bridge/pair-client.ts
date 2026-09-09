@@ -1,4 +1,4 @@
-import { buffer_decode } from "@/lib/utils";
+import { decryptBridgeRequest } from "@/lib/bridge-crypto";
 import { parseWorldIDQRCode } from "@/lib/validation";
 import { fetchMetadata } from "@/services/metadata";
 import type {
@@ -69,28 +69,10 @@ export const pairClient = async ({
   let bridgeInitialData: BridgeInitialData | null = null;
 
   try {
-    const { iv, payload } = bridgeRequestData;
-    const keyBuffer = buffer_decode(key);
-    const ivBuffer = buffer_decode(iv);
-    const payloadBuffer = buffer_decode(payload);
-
-    const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      keyBuffer,
-      { name: "AES-GCM", length: 256 },
-      true,
-      ["decrypt"],
-    );
-
-    const decryptedBuffer = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: ivBuffer },
-      cryptoKey,
-      payloadBuffer,
-    );
-
-    const decoder = new TextDecoder();
-    const decodedRaw = decoder.decode(decryptedBuffer);
-    bridgeInitialData = JSON.parse(decodedRaw) as BridgeInitialData | null;
+    bridgeInitialData = (await decryptBridgeRequest(
+      bridgeRequestData,
+      key,
+    )) as BridgeInitialData | null;
   } catch (error) {
     console.error(error);
     return {

@@ -14,9 +14,12 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false --declaration false",
     "spellcheck": "cspell **/*.{md,ts,tsx}",
     "prepare": "husky install",
-    "prebuild": "node -e \"const fs = require('fs'); const pkg = require('./package.json'); fs.writeFileSync('./public/version.json', JSON.stringify({ version: pkg.version }));\""
+    "prebuild": "node -e \"const fs = require('fs'); const pkg = require('./package.json'); fs.writeFileSync('./public/version.json', JSON.stringify({ version: pkg.version }));\"",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
     "@radix-ui/react-dialog": "^1.0.5",
     "@semaphore-protocol/group": "3.9.0",
     "@semaphore-protocol/identity": "3.9.0",
@@ -40,12 +43,14 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
     "@next/bundle-analyzer": "^13.5.6",
     "@types/node": "22",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
     "@types/snarkjs": "^0.7.7",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@worldcoin/idkit-test-client": "npm:@worldcoin/idkit-core@4.2.1",
     "autoprefixer": "10.4.16",
     "cspell": "^6.31.3",
     "eslint": "8.38.0",
@@ -62,6 +67,7 @@
     "prettier-plugin-organize-imports": "^2.3.4",
     "prettier-plugin-tailwindcss": "0.1.10",
     "tailwindcss": "^3.3.6",
+    "tsx": "4.23.5",
     "typescript": "5.0.4",
     "workbox-cli": "^6.6.1",
     "workbox-expiration": "^7.0.0",

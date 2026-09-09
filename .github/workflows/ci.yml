@@ -30,6 +30,9 @@ jobs:
       - name: Check Typescript
         run: pnpm typecheck
 
+      - name: Test MCP and shared bridge behavior
+        run: pnpm test
+
       - name: Check spelling
         run: pnpm run spellcheck
 

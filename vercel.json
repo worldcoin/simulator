@@ -1,0 +1,4 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "NEXT_PUBLIC_DEV_PORTAL_URL=https://developer.world.org pnpm build"
+}

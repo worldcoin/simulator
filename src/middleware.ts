@@ -27,6 +27,7 @@ const generateCsp = () => {
       name: "connect-src",
       values: [
         "'self'",
+        "https://developer.world.org",
         "https://developer.worldcoin.org",
         "https://staging-developer.worldcoin.org",
         "https://app.posthog.com",
