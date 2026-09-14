@@ -1,13 +1,13 @@
 import Layout from "@/components/Layout";
 import StatusBar from "@/components/StatusBar";
 import { METADATA } from "@/lib/constants";
+import { registerServiceWorker } from "@/lib/register-service-worker";
 import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
 import "@/styles/globals.css";
 import type { AppContext, AppProps } from "next/app";
 import { Rubik, Sora } from "next/font/google";
 import Head from "next/head";
-import Script from "next/script";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { useMediaQuery } from "usehooks-ts";
@@ -49,6 +49,11 @@ export default function App({
       });
     }
   }, [setComplete]);
+
+  // Register the service worker that downloads and caches the Semaphore
+  // artifacts. This runs after hydration, so it has to cope with the window
+  // "load" event having already fired; see registerServiceWorker.
+  useEffect(() => registerServiceWorker(), []);
 
   // Check if semaphore files already exist in cache
   useEffect(() => {
@@ -127,20 +132,6 @@ export default function App({
           --font-rubik: ${rubik.style.fontFamily};
         }
       `}</style>
-      <Script
-        id="sw"
-        nonce={pageProps.nonce}
-      >
-        {`
-          if (typeof window !== 'undefined' && "serviceWorker" in navigator) {
-            window.addEventListener("load", function() {
-              navigator.serviceWorker.register("/sw.js").catch(function(error) {
-                console.error("Error during service worker registration:", error);
-              });
-            });
-          }
-        `}
-      </Script>
     </>
   );
 }
