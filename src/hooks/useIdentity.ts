@@ -1,3 +1,4 @@
+import { nextIdentityNumber } from "@/lib/identities";
 import { encode } from "@/lib/utils";
 import type { IdentityStore } from "@/stores/identityStore";
 import { useIdentityStore } from "@/stores/identityStore";
@@ -88,8 +89,7 @@ const useIdentity = () => {
 
   const generateNextIdentity = useCallback(
     async (withIDNumber?: number) => {
-      const idNum =
-        withIDNumber || withIDNumber == 0 ? withIDNumber : identities.length;
+      const idNum = withIDNumber ?? nextIdentityNumber(identities);
       if (idNum > 999) {
         toast.error("You have reached the maximum number of identities");
         return;
@@ -128,7 +128,7 @@ const useIdentity = () => {
       });
     },
     [
-      identities.length,
+      identities,
       insertIdentity,
       replaceIdentity,
       setActiveIdentityID,
