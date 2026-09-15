@@ -13,16 +13,30 @@ export type IdentityStore = {
 
 const IDENTITY_STORE_STORAGE_KEY = "Simulator_Identity_Store_2";
 
+// `id` is the primary key of an identity. It is derived deterministically from
+// the identity number, so the same identity can legitimately be produced more
+// than once (e.g. seeding again after a reload); keep the first occurrence.
+const uniqueById = (identities: Identity[]): Identity[] => {
+  const seen = new Set<string>();
+  return identities.filter((identity) => {
+    if (seen.has(identity.id)) return false;
+    seen.add(identity.id);
+    return true;
+  });
+};
+
 export const useIdentityStore = create<IdentityStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       activeIdentityID: null,
       identities: [],
       setActiveIdentityID: (id) => set({ activeIdentityID: id }),
-      insertIdentity: (identity) =>
-        set((state) => ({
-          identities: [identity, ...state.identities],
-        })),
+      // Idempotent by id: inserting an identity that already exists is a no-op,
+      // so seeding or a double click can never create a duplicate row.
+      insertIdentity: (identity) => {
+        if (get().identities.some((i) => i.id === identity.id)) return;
+        set((state) => ({ identities: [identity, ...state.identities] }));
+      },
       replaceIdentity: (identity) =>
         set((state) => ({
           identities: state.identities.map((i) => {
@@ -42,6 +56,18 @@ export const useIdentityStore = create<IdentityStore>()(
     }),
     {
       name: IDENTITY_STORE_STORAGE_KEY,
+      // Persisted state is untrusted input: drop duplicate ids written by
+      // earlier versions of the seeding logic and tolerate a malformed list.
+      merge: (persistedState, currentState) => {
+        const persisted = (persistedState ?? {}) as Partial<IdentityStore>;
+        return {
+          ...currentState,
+          ...persisted,
+          identities: Array.isArray(persisted.identities)
+            ? uniqueById(persisted.identities)
+            : currentState.identities,
+        };
+      },
     },
   ),
 );
