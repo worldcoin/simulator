@@ -1,4 +1,5 @@
 import useIdentity from "@/hooks/useIdentity";
+import { useIdentityStore } from "@/stores/identityStore";
 import {
   CONNECT_URL_QUERY_KEY,
   isValidConnectUrl,
@@ -15,12 +16,23 @@ export default function Home() {
   const handledConnectUrlRef = useRef<string | null>(null);
   const connectUrl = readSingleQueryValue(router.query[CONNECT_URL_QUERY_KEY]);
 
+  // Seed the first identities only once the persisted store has been read, and
+  // decide from the live store state rather than the hook's `identities`: on a
+  // full page load React renders with the store's pre-hydration snapshot first,
+  // so `identities` can still be empty here although persisted ones exist.
   useEffect(() => {
-    if (identities.length === 0) {
+    const seedIfEmpty = () => {
+      if (useIdentityStore.getState().identities.length > 0) return;
       console.log("Generating first five identities...");
       void generateFirstFiveIdentities();
+    };
+
+    if (useIdentityStore.persist.hasHydrated()) {
+      seedIfEmpty();
+      return;
     }
-  }, [generateFirstFiveIdentities, identities]);
+    return useIdentityStore.persist.onFinishHydration(seedIfEmpty);
+  }, [generateFirstFiveIdentities]);
 
   useEffect(() => {
     if (!router.isReady || connectUrl) return;
