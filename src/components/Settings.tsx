@@ -1,15 +1,15 @@
-import Header from "@/components/Header";
-import Item from "@/components/Item";
+import Button from "@/components/Button";
+import { Drawer } from "@/components/Drawer";
+import { Icon } from "@/components/Icon";
+import { NavBarButton } from "@/components/NavBar";
+import { Row } from "@/components/Row";
+import { IDEmoji } from "@/components/SelectID/IDRow";
 import useIdentity from "@/hooks/useIdentity";
 import type { UiStore } from "@/stores/ui";
 import { useUiStore } from "@/stores/ui";
 import { useRouter } from "next/router";
 import { memo, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import Button from "./Button";
-import { Drawer } from "./Drawer";
-import { Icon } from "./Icon";
-import { IconGradient } from "./Icon/IconGradient";
 
 const getUiStore = (store: UiStore) => ({
   settingsOpened: store.settingsOpened,
@@ -22,7 +22,7 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
   const { id } = router.query;
   const [version, setVersion] = useState("2.0");
   const [copiedCommitment, setCopiedCommitment] = useState(false);
-  const { resetIdentityStore } = useIdentity();
+  const { activeIdentity, identities, resetIdentityStore } = useIdentity();
 
   const close = useCallback(
     () => setSettingsOpened(false),
@@ -33,16 +33,21 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
     try {
       await navigator.clipboard.writeText(props.commitment);
       setCopiedCommitment(true);
-      toast.success("Copied commitment");
+      toast.success("Copied identity commitment");
 
-      setTimeout(() => setCopiedCommitment(false), 500);
+      setTimeout(() => setCopiedCommitment(false), 1500);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to copy commitment");
+      toast.error("Couldn't copy the commitment");
     }
   };
 
-  const handleLogout = async () => {
+  const handleSwitchIdentity = async () => {
+    close();
+    await router.push("/select-id");
+  };
+
+  const handleReset = async () => {
     // Clear session storage
     resetIdentityStore();
     console.info("Session storage cleared");
@@ -51,7 +56,7 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
     close();
 
     // Redirect to landing page
-    toast.success(`Logged out of identity ${id}`);
+    toast.success(`Reset simulator, left identity ${id}`);
     await router.push("/select-id");
   };
 
@@ -62,48 +67,72 @@ export const Settings = memo(function Settings(props: { commitment: string }) {
       .then((data: { version: string }) => setVersion(data.version));
   }, []);
 
+  const shortCommitment = `${props.commitment.slice(
+    0,
+    8,
+  )}…${props.commitment.slice(-6)}`;
+
   return (
     <Drawer
       fullHeight
       open={settingsOpened}
       onClose={close}
     >
-      <div className="flex h-full flex-col justify-between">
-        <div>
-          <Header
-            heading="Settings"
-            iconLeft="chevron-thick"
-            onClickLeft={close}
+      <div className="flex h-full flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-h3 text-fg-primary">Settings</h2>
+          <NavBarButton
+            icon="xmark"
+            label="Close settings"
+            onClick={close}
           />
-          <Item
-            heading="Identity commitment"
-            text="Copy your identity commitment"
-            className="mt-3 p-4"
-            indicator={() => (
+        </div>
+
+        {activeIdentity && (
+          <div className="flex items-center gap-3 rounded-16 bg-surface-secondary p-4">
+            <IDEmoji identityID={activeIdentity.id} />
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <p className="truncate text-s1 text-fg-primary">
+                {activeIdentity.meta.name}
+              </p>
+              <p className="text-b3 text-fg-tertiary">Active test identity</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col">
+          <Row
+            icon="person-circle"
+            title="Switch test identity"
+            detail={`${identities.length} identities available`}
+            divider
+            onClick={() => void handleSwitchIdentity()}
+          />
+          <Row
+            icon="key"
+            title="Identity commitment"
+            detail={shortCommitment}
+            trailing={
               <Icon
                 name={copiedCommitment ? "check" : "copy"}
-                className="size-6 text-gray-400"
+                className="size-6 text-fg-tertiary"
+                label={copiedCommitment ? "Copied" : "Copy"}
               />
-            )}
+            }
             onClick={() => void handleCopyCommitment()}
-          >
-            <IconGradient
-              name="note"
-              color="#00C3B6"
-            />
-          </Item>
+          />
         </div>
-        <Button
-          className="mb-8 h-14 w-full bg-error-100 font-sora text-16 font-semibold text-error-700"
-          onClick={() => {
-            void handleLogout();
-          }}
-        >
-          Reset Simulator
-        </Button>
-        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-14 text-gray-400">
-          Version {version}
-        </p>
+
+        <div className="mt-auto flex flex-col items-center gap-4">
+          <Button
+            variant="warning"
+            fullWidth
+            onClick={() => void handleReset()}
+          >
+            Reset simulator
+          </Button>
+          <p className="text-c1 text-fg-tertiary">Version {version}</p>
+        </div>
       </div>
     </Drawer>
   );

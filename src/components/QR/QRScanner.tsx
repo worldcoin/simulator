@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
 import { cn } from "@/lib/utils";
@@ -180,7 +181,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
     const file = acceptedFiles[0];
     const reader = new FileReader();
 
-    reader.onabort = () => console.log("file reading was aborted");
+    reader.onabort = () => console.warn("file reading was aborted");
     reader.onerror = () => console.error("file reading has failed");
     reader.onload = () => {
       const binaryStr = reader.result;
@@ -193,18 +194,19 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
     };
     reader.readAsDataURL(file);
   }, []);
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+    multiple: false,
+  });
 
   return (
     <Dialog
       open={scannerOpened}
       onClose={close}
-      closeIcon="close"
+      dark
+      closeLabel="Close scanner"
     >
-      <h2 className="relative z-10 mt-3 py-1.5 text-center text-h3 font-bold text-white">
-        Scanner
-      </h2>
-
       <div
         ref={containerRef}
         className={cn("absolute inset-0 bg-black", props.className)}
@@ -234,68 +236,61 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
 
             <QRFrame
               valid={valid}
-              videoRef={videoRef}
               containerRef={containerRef}
             />
 
-            <div className="absolute bottom-40 left-1/2 flex -translate-x-1/2 flex-col items-center gap-25 pb-8">
-              <div className="space-y-4 text-center font-rubik text-white">
-                <p className="text-20 font-semibold">Scan QR code</p>
-
-                <p>Use this QR code for payments and identity verification</p>
-              </div>
+            <div className="absolute inset-x-6 top-[calc(50%_+_60px)] flex flex-col items-center gap-3 text-center">
+              <p className="text-h2 text-white">Scan code</p>
+              <p className="text-b1 text-grey-500">
+                Scan QR codes to use World ID
+              </p>
             </div>
           </Fragment>
         )}
 
         {allowed === false && (
-          <div className="absolute inset-x-0 top-1/2 grid -translate-y-1/2 place-items-center space-y-8">
-            <span className="rounded-full bg-gray-100 p-7">
+          <div className="absolute inset-x-6 top-1/2 flex -translate-y-1/2 flex-col items-center gap-6 text-center">
+            <span className="flex size-16 items-center justify-center rounded-full bg-grey-900">
               <Icon
                 name="camera-off"
-                className="size-8 text-gray-400"
+                className="size-8 text-grey-500"
               />
             </span>
-
-            <div className="space-y-4 px-14 text-center font-rubik text-white">
-              <p className="text-20 font-semibold">
-                Allow Worldcoin to access your camera
+            <div className="flex flex-col gap-3">
+              <p className="text-h4 text-white">Allow camera access</p>
+              <p className="text-b1 text-grey-500">
+                This lets you scan World ID QR codes. You can also paste a code
+                instead.
               </p>
-
-              <p>This lets you scan QR codes.</p>
             </div>
           </div>
         )}
 
-        <div className="absolute inset-x-0 bottom-12 flex justify-center gap-8">
-          <button
-            className="flex flex-col items-center"
+        <div className="absolute inset-x-0 bottom-12 flex justify-center gap-3">
+          <Button
+            variant="ghost"
+            size={40}
             onClick={onClickManualInput}
           >
-            <div className="flex size-9 items-center justify-center rounded-full bg-gray-200">
-              <Icon
-                name="text"
-                className="size-6"
-              />
-            </div>
-
-            <div className="mt-3 text-b3 text-white">Manual Input</div>
-          </button>
-          <button
-            className="flex flex-col items-center"
-            onClick={onClickManualInput}
-            {...getRootProps()}
-          >
+            <Icon
+              name="text"
+              className="size-5"
+            />
+            Paste code
+          </Button>
+          <div {...getRootProps({ className: "contents" })}>
             <input {...getInputProps()} />
-            <div className="flex size-9 items-center justify-center rounded-full bg-gray-200">
+            <Button
+              variant="ghost"
+              size={40}
+            >
               <Icon
-                name="gallery"
-                className="size-6"
+                name="photo"
+                className="size-5"
               />
-            </div>
-
-            <div className="mt-3 text-b3 text-white">From Gallery</div>
-          </button>
+              From gallery
+            </Button>
+          </div>
         </div>
       </div>
     </Dialog>

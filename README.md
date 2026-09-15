@@ -44,6 +44,17 @@ All the technical docs for the Worldcoin SDK, World ID Protocol, examples, guide
 
 ## 🧑‍💻 Development & testing
 
+### Look and feel
+
+The UI mirrors the World App's World ID screens. Colors, the type scale and
+icons come from [Nucleus](https://github.com/worldcoin/nucleus), the World
+design system, via the `@worldcoin/nucleus` package: `tailwind.config.js`
+reads its token JSON at build time, `src/components/Icon` maps the icons it
+needs, and `src/pages/_app.tsx` loads the World Pro variable font from the
+same package. Prefer those tokens (`text-fg-primary`, `bg-surface-secondary`,
+`text-h3`, `rounded-32`, ...) over hard-coded values.
+
+
 - Get an Infura project ID from https://infura.io/ and create an `.env` file with it (see [.env.sample](./.env.sample))
 
 - Install dependencies

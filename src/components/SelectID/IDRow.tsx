@@ -1,73 +1,43 @@
 import { Icon } from "@/components/Icon";
-import { cn } from "@/lib/utils";
+import { Row } from "@/components/Row";
+import { credentialsForIdentity } from "@/lib/credentials";
 import type { Identity } from "@/types";
-import { VerificationLevel } from "@worldcoin/idkit-core";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
-export default function IDRow({ identity }: { identity: Identity }) {
+export default function IDRow(props: {
+  identity: Identity;
+  active?: boolean;
+  divider?: boolean;
+}) {
   const router = useRouter();
 
-  // Check verification status for all levels
-  const verifiedLevels = Object.entries(identity.verified)
-    .filter(([_, isVerified]) => isVerified)
-    .map(([level]) => level);
-
-  const isVerified = verifiedLevels.length > 0;
-
-  // Format the verification text
-  const getVerificationText = () => {
-    if (!isVerified) return "Unverified";
-
-    if (verifiedLevels.length === Object.keys(VerificationLevel).length) {
-      return "Verified (All)";
-    }
-
-    // Map verification level enum keys to readable names
-    const levelNames = verifiedLevels.map((level) => {
-      switch (level) {
-        case VerificationLevel.Orb:
-          return "Orb";
-        case VerificationLevel.Device:
-          return "Device";
-        case VerificationLevel.SecureDocument:
-          return "Secure Document";
-        case VerificationLevel.Document:
-          return "Document";
-        default:
-          return level;
-      }
-    });
-
-    return `Verified (${levelNames.join(", ")})`;
-  };
+  const detail = useMemo(() => {
+    const credentials = credentialsForIdentity(props.identity);
+    if (credentials.length === 0) return "Unverified";
+    return credentials.map((credential) => credential.title).join(" · ");
+  }, [props.identity]);
 
   return (
-    <button
-      key={identity.id}
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onClick={async () => router.push(`/id/${identity.id}`)}
-      className="flex w-full items-center rounded-16 bg-gray-50 p-4 outline-none"
-    >
-      <IDEmoji identityID={identity.id} />
-      <div className="ml-3 flex-1 text-left">
-        <h3 className="text-s3">{identity.meta.name}</h3>
-        <div
-          className={cn(
-            "inline-flex h-full items-center gap-x-1 align-middle",
-            { "text-info-700": isVerified },
-            { "text-gray-500": !isVerified },
-          )}
-        >
-          <Icon
-            name={isVerified ? "badge-verified" : "badge-not-verified"}
-            className={"size-3 "}
-          />
-          <h4 className="text-b4 text-gray-500">{getVerificationText()}</h4>
-        </div>
-      </div>
-    </button>
+    <li>
+      <Row
+        title={props.identity.meta.name}
+        detail={detail}
+        leading={<IDEmoji identityID={props.identity.id} />}
+        divider={props.divider}
+        trailing={
+          props.active ? (
+            <Icon
+              name="check-circle-solid"
+              className="size-6 text-fg-primary"
+              label="Active identity"
+            />
+          ) : undefined
+        }
+        onClick={() => void router.push(`/id/${props.identity.id}`)}
+      />
+    </li>
   );
 }
 
@@ -76,17 +46,21 @@ export function identityIDToEmoji(identityID: string) {
   return `/images/emojis/${intID % 32}.png`;
 }
 
-function IDEmoji({ identityID }: { identityID: string }) {
-  const iconSource = useMemo(() => identityIDToEmoji(identityID), [identityID]);
+export function IDEmoji(props: { identityID: string; className?: string }) {
+  const iconSource = useMemo(
+    () => identityIDToEmoji(props.identityID),
+    [props.identityID],
+  );
+
   return (
-    <div className="flex size-12 justify-center rounded-full bg-gray-100 align-middle">
+    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-secondary">
       <Image
         width={72}
         height={72}
-        className="m-auto size-8"
+        className="size-6"
         src={iconSource}
-        alt="icon"
+        alt=""
       />
-    </div>
+    </span>
   );
 }

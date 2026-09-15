@@ -8,10 +8,15 @@ interface DrawerProps {
   open: boolean;
   onClose: () => void;
   className?: string;
+  /** Flush, near full-height sheet (settings) instead of a floating card. */
   fullHeight?: boolean;
   children: React.ReactNode;
 }
 
+/**
+ * World App bottom sheet: a floating card inset 8pt from the edges with 32pt
+ * corners, a 58×4 grabber, a faint shadow and a 40% dim behind it.
+ */
 export const Drawer = React.memo(function Drawer(props: DrawerProps) {
   const panel = useRef<HTMLDivElement>(null);
 
@@ -39,7 +44,7 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 bg-[rgba(24,24,24,0.4)]"
+              className="absolute inset-0 z-20 bg-surface-overlay"
             />
           </Overlay>
         )}
@@ -59,14 +64,20 @@ export const Drawer = React.memo(function Drawer(props: DrawerProps) {
               exit={{ y: "120%" }}
               transition={{ type: "spring", stiffness: 420, damping: 44 }}
               className={cn(
-                "absolute z-30 outline-none",
+                "absolute z-30 flex flex-col bg-surface-primary shadow-sheet outline-none",
                 props.fullHeight
-                  ? "inset-x-0 bottom-0 top-[44px] overflow-y-auto rounded-t-20 bg-white p-6"
-                  : "inset-x-3 bottom-[33px] max-h-[calc(100%_-_45px)] overflow-y-auto rounded-[28px] bg-white px-8 pb-8 pt-8 scrollbar-hidden",
+                  ? "inset-x-0 bottom-0 top-11 rounded-t-32 px-6 pb-8 pt-6"
+                  : "inset-x-2 bottom-2 max-h-[calc(100%_-_56px)] rounded-32 px-6 pb-8 pt-6",
                 props.className,
               )}
             >
-              {props.children}
+              <span
+                aria-hidden
+                className="absolute left-1/2 top-2 h-1 w-[58px] -translate-x-1/2 rounded-2 bg-surface-tertiary"
+              />
+              <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hidden">
+                {props.children}
+              </div>
             </motion.div>
           </Content>
         )}

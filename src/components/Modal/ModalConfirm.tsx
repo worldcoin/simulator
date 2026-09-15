@@ -1,33 +1,36 @@
 import Button from "../Button";
-import { Icon } from "../Icon";
+import { ModalContent } from "./ModalContent";
 
 interface ModalConfirmProps {
   handleClick: () => void;
+  onCancel: () => void;
 }
 
 export default function ModalConfirm(props: ModalConfirmProps) {
   return (
-    <div className="flex flex-col items-center justify-center">
-      <Icon
-        name="info"
-        className="size-10 text-gray-900"
-        bgClassName="h-20 w-20 rounded-full bg-gray-200 mt-8"
-      />
-
-      <h2 className="mt-8 text-center font-sora text-h1">
-        Unverified identity
-      </h2>
-
-      <p className="mt-4 text-center text-b1 text-gray-500">
-        You are trying to use an unverified identity to generate a proof.
-      </p>
-
-      <Button
-        onClick={props.handleClick}
-        className="mb-8 mt-14 flex h-14 w-full items-center justify-center bg-gray-900 font-sora text-16 font-semibold text-white"
-      >
-        Continue anyway
-      </Button>
-    </div>
+    <ModalContent
+      hero="info-circle"
+      title="Unverified identity"
+      actions={
+        <>
+          <Button
+            fullWidth
+            onClick={props.handleClick}
+          >
+            Continue anyway
+          </Button>
+          <Button
+            variant="tertiary"
+            fullWidth
+            onClick={props.onCancel}
+          >
+            Cancel
+          </Button>
+        </>
+      }
+    >
+      This test identity isn&apos;t verified for the requested credential, so
+      the app will reject the proof.
+    </ModalContent>
   );
 }

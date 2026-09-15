@@ -1,6 +1,5 @@
 import Button from "@/components/Button";
 import useIdentity from "@/hooks/useIdentity";
-import { cn } from "@/lib/utils";
 import { useModalStore } from "@/stores/modalStore";
 import { useUiStore, type UiStore } from "@/stores/ui";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -95,73 +94,72 @@ export const QRInput = memo(function QRInput(props: {
     }
   }, [qrInputOpened]);
 
+  const handlePaste = () => {
+    navigator.clipboard.readText().then(
+      (text) => setValue(text),
+      (error) => {
+        console.error(error);
+      },
+    );
+  };
+
   return (
     <Dialog
       open={qrInputOpened}
       onClose={close}
-      closeIcon="direction-left"
+      closeIcon="chevron-left"
+      closeLabel="Back"
     >
-      <div className="mt-24 py-3 text-center font-sora text-h2">
-        Enter or paste
-        <br />
-        QR code
-      </div>
-
-      <div className="mt-4 text-center text-b1 text-gray-500">
-        Tap the IDKit QR code to copy it to your clipboard, then paste it below.
-      </div>
-
-      <Input
-        className="mt-8"
-        placeholder="QR code"
-        invalid={isInvalid}
-        value={value}
-        onChange={(e) => void handleChange(e)}
-        renderButton={({ isEmpty, isFocused, isInvalid }) => (
-          <>
-            <button
-              className={cn("h-10 rounded-10 px-3 text-12 font-medium", {
-                "bg-white": !isInvalid && !isFocused,
-                "bg-gray-100": !isInvalid && isFocused,
-                "text-gray-500": !isInvalid,
-                "bg-error-700 text-white": isInvalid,
-              })}
-              onClick={() => {
-                if (isEmpty) {
-                  navigator.clipboard.readText().then(
-                    (text) => {
-                      setValue(text);
-                    },
-                    (error) => {
-                      console.error(error);
-                    },
-                  );
-                } else {
-                  setValue("");
-                }
-              }}
-            >
-              {isEmpty && "PASTE"}
-              {!isEmpty && "CLEAR"}
-            </button>
-          </>
-        )}
-      />
-
-      {isInvalid && (
-        <div className="mt-2 text-b3 text-error-700">
-          The QR code is not valid
+      <div className="flex min-h-0 flex-1 flex-col gap-6 pt-3">
+        <div className="flex flex-col gap-3">
+          <h1 className="text-h2 text-fg-primary">Paste code</h1>
+          <p className="text-b1 text-fg-secondary">
+            Tap the IDKit QR code to copy its link to your clipboard, then paste
+            it here.
+          </p>
         </div>
-      )}
 
-      <Button
-        type="submit"
-        className="mt-8 h-14 w-full bg-gray-900 text-white disabled:bg-gray-100 disabled:text-gray-300"
-        isDisabled={isInvalid || !value || isSubmitting}
-        onClick={(e) => void handleSubmit(e)}
-      >
-        Submit
-      </Button>
+        <div className="flex flex-col gap-2">
+          <Input
+            placeholder="https://world.org/verify?t=wld&i=…"
+            invalid={isInvalid}
+            value={value}
+            onChange={(e) => void handleChange(e)}
+            autoComplete="off"
+            spellCheck={false}
+            renderButton={({ isEmpty }) => (
+              <Button
+                variant="tertiary"
+                size={36}
+                onClick={() => (isEmpty ? handlePaste() : setValue(""))}
+              >
+                {isEmpty ? "Paste" : "Clear"}
+              </Button>
+            )}
+          />
+
+          {isInvalid && (
+            <p
+              className="text-b3 text-status-error"
+              role="alert"
+            >
+              This isn&apos;t a valid World ID QR code link.
+            </p>
+          )}
+        </div>
+
+        <div className="mt-auto">
+          <Button
+            type="submit"
+            fullWidth
+            isDisabled={isInvalid || !value}
+            isLoading={isSubmitting}
+            onClick={(e) => void handleSubmit(e)}
+          >
+            Continue
+          </Button>
+        </div>
+      </div>
     </Dialog>
   );
 });

@@ -15,7 +15,7 @@ export const SECURE_DOCUMENT_SEQUENCER_STAGING_URL =
 
 // Site Metadata
 export const METADATA = {
-  name: "Worldcoin Simulator",
+  name: "World ID Simulator",
   description: "The simulator for testing World ID verifications.",
   url: "https://id.worldcoin.org/",
   icons: ["https://worldcoin.org/icons/logo-small.svg"],

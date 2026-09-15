@@ -29,6 +29,9 @@ importers:
       '@worldcoin/idkit-core':
         specifier: ^1.4.3
         version: 1.5.0(@types/react@18.0.37)(react@18.3.1)(typescript@5.0.4)
+      '@worldcoin/nucleus':
+        specifier: 0.2.9
+        version: 0.2.9
       '@zk-kit/incremental-merkle-tree':
         specifier: ^1.1.0
         version: 1.1.0
@@ -1878,6 +1881,9 @@ packages:
   '@worldcoin/idkit-server@1.1.1':
     resolution: {integrity: sha512-iO4Kd3QBLzJak3BPz5eIzRjW0kT8Px5c3LbNzvCKMnczLvVSKoWqdvGiJlkK8Dp29KstNI62iv4ak0z8nzui/Q==}
     engines: {node: '>=18'}
+
+  '@worldcoin/nucleus@0.2.9':
+    resolution: {integrity: sha512-MGd0ZwYnrXvPG/KqA9hDSzsY7Yymop7TX907CzFpXkoI+tHvMDnXusjYlr2TftIA9VsGFwVjqXcq3mrpxy/Heg==}
 
   '@zk-kit/incremental-merkle-tree@0.4.3':
     resolution: {integrity: sha512-2qHfrJXtPx8/UmF0wFAUr4VqCLr3J/P859fk/e3fwKLUnf3baeIUAO6inY4wrh0NGy4bzpKUWYjDph0yTbPz6A==}
@@ -6444,6 +6450,8 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.8.0
       '@noble/secp256k1': 2.3.0
+
+  '@worldcoin/nucleus@0.2.9': {}
 
   '@zk-kit/incremental-merkle-tree@0.4.3': {}
 

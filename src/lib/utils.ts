@@ -9,7 +9,7 @@ import {
 } from "@worldcoin/idkit-core/hashing";
 
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
 import { encodePacked } from "viem";
 import {
   DOCUMENT_SEQUENCER_STAGING_URL,
@@ -77,6 +77,35 @@ export const SEQUENCER_ENDPOINT: Record<VerificationLevel, string> = {
   [VerificationLevel.SecureDocument]: SECURE_DOCUMENT_SEQUENCER_STAGING_URL,
   [VerificationLevel.Document]: DOCUMENT_SEQUENCER_STAGING_URL,
 };
+
+// Teach tailwind-merge the Nucleus type scale (`text-h3`, `text-b1`, ...) so it
+// never mistakes those size tokens for text colors and drops `text-fg-*`.
+const twMerge = extendTailwindMerge({
+  classGroups: {
+    "font-size": [
+      {
+        text: [
+          "d1",
+          "h1",
+          "h2",
+          "h3",
+          "h4",
+          "h5",
+          "s1",
+          "s2",
+          "s3",
+          "l1",
+          "l2",
+          "l3",
+          "b1",
+          "b2",
+          "b3",
+          "c1",
+        ],
+      },
+    ],
+  },
+});
 
 export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
 

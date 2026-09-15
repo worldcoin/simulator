@@ -6,7 +6,7 @@ import type { CacheStore } from "@/stores/cacheStore";
 import { useCacheStore } from "@/stores/cacheStore";
 import "@/styles/globals.css";
 import type { AppContext, AppProps } from "next/app";
-import { Rubik, Sora } from "next/font/google";
+import localFont from "next/font/local";
 import Head from "next/head";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
@@ -15,16 +15,12 @@ import { useMediaQuery } from "usehooks-ts";
 // Must be loaded after global styles
 import { checkCache, retryDownload } from "@/lib/utils";
 
-const sora = Sora({
-  subsets: ["latin"],
-  style: ["normal"],
-  weight: ["400", "600", "700"],
-});
-
-const rubik = Rubik({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  weight: ["400", "500", "600"],
+// World Pro, the variable typeface World App ships through the Nucleus design system.
+const worldPro = localFont({
+  src: "../../node_modules/@worldcoin/nucleus/fonts/WorldProMVP.ttf",
+  weight: "300 800",
+  display: "swap",
+  fallback: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
 });
 
 const getStore = (store: CacheStore) => ({
@@ -84,7 +80,7 @@ export default function App({
         <link
           rel="mask-icon"
           href="/favicon/safari-pinned-tab.svg"
-          color="#191919"
+          color="#1F1F1F"
         />
         <link
           rel="apple-touch-icon"
@@ -109,7 +105,7 @@ export default function App({
         href="https://world.org/blog/engineering/introducing-world-id-4.0"
         target="_blank"
         rel="noreferrer"
-        className="fixed top-0 z-50 flex w-full items-center justify-center gap-x-2 bg-warning-100 px-4 py-2 text-center text-b4 font-medium text-warning-700"
+        className="fixed top-0 z-50 flex w-full items-center justify-center gap-x-2 bg-amber-100 px-4 py-2 text-center text-s3 text-amber-700"
       >
         This simulator will change with the adoption of World ID 4.0. Learn
         more.
@@ -122,14 +118,29 @@ export default function App({
         </Layout>
       </div>
 
-      <Toaster position={isMobile ? "top-center" : "top-right"} />
+      <Toaster
+        position={isMobile ? "bottom-center" : "top-right"}
+        containerStyle={isMobile ? { bottom: 76 } : undefined}
+        toastOptions={{
+          duration: 1500,
+          style: {
+            background: "#F1F1F1",
+            color: "#1F1F1F",
+            borderRadius: 58,
+            boxShadow: "0 10px 30px rgba(36, 57, 129, 0.1)",
+            padding: "8px 12px",
+            fontSize: 15,
+            fontWeight: 450,
+            fontFamily: worldPro.style.fontFamily,
+          },
+        }}
+      />
       <style
         jsx
         global
       >{`
         :root {
-          --font-sora: ${sora.style.fontFamily};
-          --font-rubik: ${rubik.style.fontFamily};
+          --font-world: ${worldPro.style.fontFamily};
         }
       `}</style>
     </>
