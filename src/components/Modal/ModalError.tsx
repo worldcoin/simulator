@@ -100,7 +100,7 @@ export default function ModalError(props: {
       title="Something went wrong"
       actions={dismiss}
     >
-      We couldn&apos;t complete that request. Please try again.
+      {"We couldn't complete that request. Please try again."}
     </ModalContent>
   );
 }

@@ -48,7 +48,14 @@
     "zxing",
     "Streamable",
     "modelcontextprotocol",
-    "ciphertext"
+    "ciphertext",
+    "ceecff",
+    "daeefd",
+    "wordmark",
+    "WLDUI",
+    "xmark"
   ],
-  "ignorePaths": ["sidecar/target/**"]
+  "ignorePaths": [
+    "sidecar/target/**"
+  ]
 }
