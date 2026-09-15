@@ -1,5 +1,10 @@
-import { IconGradient } from "@/components/Icon/IconGradient";
+import Button from "@/components/Button";
+import { CredentialDetails } from "@/components/Credentials/CredentialDetails";
+import { CredentialStack } from "@/components/Credentials/CredentialStack";
+import { Icon } from "@/components/Icon";
 import { Modal } from "@/components/Modal";
+import { WORLD_ID_ART } from "@/lib/assets";
+import { NavBar, NavBarButton } from "@/components/NavBar";
 import { QRInput } from "@/components/QR/QRInput";
 import { identityIDToEmoji } from "@/components/SelectID/IDRow";
 import { Settings } from "@/components/Settings";
@@ -9,6 +14,8 @@ import {
   isValidConnectUrl,
   readSingleQueryValue,
 } from "@/lib/connect-url";
+import type { CredentialKind } from "@/lib/credentials";
+import { credentialsForIdentity } from "@/lib/credentials";
 import { checkCache, encode, retryDownload } from "@/lib/utils";
 import { pairClient } from "@/services/bridge";
 import type { ModalStore } from "@/stores/modalStore";
@@ -16,22 +23,14 @@ import { useModalStore } from "@/stores/modalStore";
 import { useUiStore, type UiStore } from "@/stores/ui";
 import { ErrorsCode, Status } from "@/types";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
-import { VerificationLevel } from "@worldcoin/idkit-core";
+import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-const DynamicChip = dynamic(() => import("@/components/Chip"), {
-  ssr: false,
-});
-const DynamicWorldID = dynamic(() => import("@/components/WorldID"), {
-  ssr: false,
-});
 const DynamicQRScanner = dynamic(() => import("@/components/QR/QRScanner"), {
-  ssr: false,
-});
-const DynamicHeader = dynamic(() => import("@/components/Header"), {
   ssr: false,
 });
 
@@ -56,6 +55,7 @@ export default function Id() {
   const { id } = router.query;
   const { activeIdentity, setActiveIdentityID } = useIdentity();
   const consumedConnectUrlRef = useRef<string | null>(null);
+  const [focused, setFocused] = useState<CredentialKind | null>(null);
 
   const {
     setOpen,
@@ -131,6 +131,16 @@ export default function Id() {
     [activeIdentity],
   );
 
+  const credentials = useMemo(
+    () => credentialsForIdentity(activeIdentity),
+    [activeIdentity],
+  );
+
+  const focusedCredential = useMemo(
+    () => credentials.find((credential) => credential.kind === focused) ?? null,
+    [credentials, focused],
+  );
+
   useEffect(() => {
     if (!router.isReady) return;
     if (typeof id !== "string") return;
@@ -172,64 +182,106 @@ export default function Id() {
   }, [activeIdentity, id, performVerification, router]);
 
   return (
-    <div className="flex flex-col gap-y-4 px-2 pb-4 xs:gap-y-6 xs:pb-6">
-      <DynamicHeader
-        iconLeft="user"
-        imgLeft={userIconSrc}
-        iconRight="setting"
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClickLeft={async () => router.push("/select-id")}
-        onClickRight={() => setSettingsOpened(true)}
-      >
-        <DynamicChip />
-      </DynamicHeader>
-
-      <DynamicWorldID
-        verified={activeIdentity?.verified[VerificationLevel.Orb]}
-        bioVerified={activeIdentity?.verified[VerificationLevel.Orb]}
-        deviceVerified={activeIdentity?.verified[VerificationLevel.Device]}
+    <div className="flex min-h-0 flex-col gap-6 overflow-y-auto px-2 pb-6 scrollbar-hidden">
+      <NavBar
+        title={focusedCredential ? undefined : "Credentials"}
+        leading={
+          focusedCredential && (
+            <NavBarButton
+              icon="xmark"
+              label="Close credential"
+              onClick={() => setFocused(null)}
+            />
+          )
+        }
+        trailing={
+          !focusedCredential && (
+            <>
+              <NavBarButton
+                icon="qr-code"
+                label="Scan QR code"
+                onClick={() => setScannerOpened(true)}
+              />
+              <NavBarButton
+                label="Settings"
+                onClick={() => setSettingsOpened(true)}
+              >
+                {userIconSrc ? (
+                  <Image
+                    width={72}
+                    height={72}
+                    src={userIconSrc}
+                    className="size-7"
+                    alt=""
+                  />
+                ) : (
+                  <Icon
+                    name="person-circle"
+                    className="size-6"
+                  />
+                )}
+              </NavBarButton>
+            </>
+          )
+        }
       />
 
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          className="rounded-16 border-4 border-gray-100 p-4 text-left"
-          onClick={() => setScannerOpened(true)}
-        >
-          <IconGradient
-            name="scanner"
-            color="black"
-            className="size-6 text-white"
-            bgClassName="h-[44px] w-[44px] rounded-full"
+      {credentials.length > 0 ? (
+        <CredentialStack
+          credentials={credentials}
+          focused={focused}
+          onFocus={setFocused}
+        />
+      ) : (
+        <div className="flex flex-col gap-3 rounded-16 bg-grey-950 p-6 text-white">
+          <Image
+            src={WORLD_ID_ART.orbFront}
+            alt=""
+            width={56}
+            height={56}
+            className="size-14"
           />
+          <p className="text-h4">Prove you&apos;re human, fully privately</p>
+          <p className="text-b2 text-grey-500">
+            This test identity has no verified credentials yet.
+          </p>
+        </div>
+      )}
 
-          <div className="mt-4.5 text-s2 font-medium text-gray-900">
-            Scanner
-          </div>
-
-          <div className="mt-1 text-s4 font-normal text-gray-500">
-            Scan QR Code
-          </div>
-        </button>
-        <button
-          className="rounded-16 border-4 border-gray-100 p-4 text-left"
-          onClick={() => setQrInputOpened(true)}
-        >
-          <IconGradient
-            name="paste"
-            color="black"
-            className="size-6 text-white"
-            bgClassName="h-[44px] w-[44px] rounded-full"
+      <AnimatePresence
+        mode="wait"
+        initial={false}
+      >
+        {focusedCredential ? (
+          <CredentialDetails
+            key={focusedCredential.kind}
+            credential={focusedCredential}
           />
-
-          <div className="mt-4.5 text-s2 font-medium text-gray-900">
-            Paste Code
-          </div>
-
-          <div className="mt-1 text-s4 font-normal text-gray-500">
-            Manual Input
-          </div>
-        </button>
-      </div>
+        ) : (
+          <motion.div
+            key="actions"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex justify-center"
+          >
+            <div className="flex justify-center">
+              <Button
+                variant="secondary"
+                size={40}
+                onClick={() => setQrInputOpened(true)}
+              >
+                <Icon
+                  name="text"
+                  className="size-5"
+                />
+                Paste code
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {scannerOpened && (
         <DynamicQRScanner performVerification={performVerification} />

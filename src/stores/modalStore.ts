@@ -59,3 +59,10 @@ export const useModalStore = create<ModalStore>((set) => ({
       url: "",
     })),
 }));
+
+// Development-only escape hatch so the request sheet can be driven without a
+// live bridge request (visual checks, screenshots). Stripped from production.
+if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+  (window as unknown as { __modalStore: typeof useModalStore }).__modalStore =
+    useModalStore;
+}

@@ -1,144 +1,96 @@
 import { cn } from "@/lib/utils";
-import type { Bounds } from "@/types";
 import type { MutableRefObject } from "react";
 import { useEffect, useState } from "react";
 
+/** World App's scanner viewfinder: a 240pt window with 24pt corners and round-capped brackets. */
+const FRAME_SIZE = 240;
+const RADIUS = 24;
+const BRACKET = 32;
+
 interface QRFrameProps {
   valid?: boolean | null;
-  // position: Bounds | null; // TODO: Add back QR code position calculation
-  videoRef: MutableRefObject<HTMLVideoElement | null>;
   containerRef: MutableRefObject<HTMLElement | null>;
-  classNames?: string;
+  className?: string;
 }
 
-// NOTE: minify path d attribute value
-const minD = (d: string) =>
-  d
-    .replace(/\n+/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/(\s|)([a-z])(\s|)/gi, "$2")
-    .replace(/(\s|)(-)(\s|)/gi, "$2");
-
 export function QRFrame(props: QRFrameProps) {
-  const [frame, setFrame] = useState("");
-  const [border, setBorder] = useState("");
+  const [paths, setPaths] = useState<{ scrim: string; brackets: string }>();
 
-  // NOTE: calculate svg paths
   useEffect(() => {
     const container = props.containerRef.current;
-    const video = props.videoRef.current;
+    if (!container) return;
 
-    if (!container || !video) {
-      return;
-    }
-
-    // NOTE: calculate frame position
     const calcShapes = () => {
-      // NOTE: init frame width
-      const d = 188;
-
-      // NOTE: container sizes
       const cw = container.offsetWidth;
       const ch = container.offsetHeight;
+      const d = FRAME_SIZE;
+      const r = RADIUS;
+      const l = BRACKET;
 
-      // NOTE: video sizes
-      // const vw = video.videoWidth;
-      // const vh = video.videoHeight;
+      const x0 = (cw - d) / 2;
+      const y0 = Math.max(24, (ch - d) / 2 - 80);
+      const x1 = x0 + d;
+      const y1 = y0 + d;
 
-      // NOTE: real video sizes
-      // const rw = vw === vh ? Math.max(cw, ch) : vw > vh ? vw + ch - vh : cw;
-      // const rh = vw === vh ? Math.max(cw, ch) : vw > vh ? ch : vh + cw - vw;
+      // Full-bleed rectangle with a rounded window cut out (even-odd fill).
+      const scrim = [
+        `M0 0H${cw}V${ch}H0Z`,
+        `M${x0 + r} ${y0}H${x1 - r}A${r} ${r} 0 0 1 ${x1} ${y0 + r}V${y1 - r}`,
+        `A${r} ${r} 0 0 1 ${x1 - r} ${y1}H${x0 + r}A${r} ${r} 0 0 1 ${x0} ${
+          y1 - r
+        }`,
+        `V${y0 + r}A${r} ${r} 0 0 1 ${x0 + r} ${y0}Z`,
+      ].join("");
 
-      // NOTE: scale multiplier
-      // const wm = rw / vw;
-      // const hm = rh / vh;
+      const brackets = [
+        `M${x0} ${y0 + r + l}V${y0 + r}A${r} ${r} 0 0 1 ${x0 + r} ${y0}H${
+          x0 + r + l
+        }`,
+        `M${x1 - r - l} ${y0}H${x1 - r}A${r} ${r} 0 0 1 ${x1} ${y0 + r}V${
+          y0 + r + l
+        }`,
+        `M${x1} ${y1 - r - l}V${y1 - r}A${r} ${r} 0 0 1 ${x1 - r} ${y1}H${
+          x1 - r - l
+        }`,
+        `M${x0 + r + l} ${y1}H${x0 + r}A${r} ${r} 0 0 1 ${x0} ${y1 - r}V${
+          y1 - r - l
+        }`,
+      ].join("");
 
-      // NOTE: frame bounds
-      const f: Bounds = [cw / 2 - d / 2, cw / 2 + d / 2, ch / 6, ch / 6 + d];
-
-      // if (props.position) {
-      //   f = [
-      //     props.position[0] * wm - (rw - cw) / 2,
-      //     props.position[1] * wm - (rw - cw) / 2,
-      //     props.position[2] * hm - (rh - ch) / 2,
-      //     props.position[3] * hm - (rh - ch) / 2,
-      //   ];
-      // }
-
-      // NOTE: padding
-      const p = ((f[1] - f[0]) / 100) * 2;
-
-      const frame = `
-        M ${cw} 0
-        H 0
-            v ${ch}
-            h ${cw}
-        M ${f[0]} ${f[2] - 26 - p}
-            c -14 0 -26 12 -26 26
-            v ${f[3] - f[2] + p}
-            c 0 14 12 26 26 26
-            h ${f[1] - f[0] + p}
-            c 14 0 26 -12 26 -26
-            v -${f[3] - f[2] + p}
-            c 0 -14 -12 -26 -26 -26
-            h -${f[1] - f[0] + p}
-      `;
-
-      const border = `
-        M ${f[0] + 26 - 5} ${f[2] - 26 - p}
-            h -21
-            c -14 0 -26 11 -26 26
-            v 20
-        M ${f[1] + 26 + p} ${f[2] + 26 - 5 - p}
-            v -21
-            c 0 -14 -12 -26 -26 -26
-            h -20
-        M ${f[1] - 26 + 5 + p} ${f[3] + 26}
-            h 21
-            c 14 0 26 -12 26 -26
-            v -20
-        M ${f[0] - 26} ${f[3] + 5 - 26}
-            v 21
-            c 0 14 12 26 26 26
-            h 20
-      `;
-
-      setFrame(minD(frame));
-      setBorder(minD(border));
+      setPaths({ scrim, brackets });
     };
 
     calcShapes();
-
     window.addEventListener("resize", calcShapes);
 
     return () => {
       window.removeEventListener("resize", calcShapes);
     };
-  }, [props.containerRef, props.videoRef]);
+  }, [props.containerRef]);
 
   return (
     <svg
-      className={cn("absolute inset-0", props.classNames)}
+      className={cn("absolute inset-0", props.className)}
       xmlns="http://www.w3.org/2000/svg"
       width="100%"
       height="100%"
       fill="none"
+      aria-hidden
     >
       <path
-        d={frame}
-        fill="#191C20"
+        d={paths?.scrim}
+        fill="#000000"
         fillRule="evenodd"
         clipRule="evenodd"
         opacity=".7"
-        className="transition-all"
       />
       <path
-        d={border}
+        d={paths?.brackets}
         strokeLinecap="round"
         strokeWidth="4"
-        className={cn("transition-all", {
-          "stroke-[#FF5A76]": props.valid === false,
-          "stroke-[#fff]": props.valid !== false,
+        className={cn("transition-colors", {
+          "stroke-red-600": props.valid === false,
+          "stroke-white": props.valid !== false,
         })}
       />
     </svg>

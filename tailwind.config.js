@@ -1,98 +1,142 @@
 const plugin = require("tailwindcss/plugin");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
+// Design tokens come straight from Nucleus, the cross-platform World design
+// system that World App consumes on iOS and Android, so the simulator stays in
+// sync with the real app. https://github.com/worldcoin/nucleus
+const primitives = require("@worldcoin/nucleus/nucleus-primitive-colors.json");
+const semantic = require("@worldcoin/nucleus/nucleus-semantic-colors-light.json");
+const fonts = require("@worldcoin/nucleus/nucleus-fonts.json");
+
+/** `grey950: "#1F1F1F"` -> `{ grey: { 950: "#1F1F1F" } }` (white/black stay flat). */
+const palette = Object.entries(primitives).reduce((acc, [key, value]) => {
+    const match = /^([a-z]+)(\d+)$/.exec(key);
+    if (!match) {
+        acc[key] = value;
+        return acc;
+    }
+    const [, hue, step] = match;
+    acc[hue] = { ...(acc[hue] ?? {}), [step]: value };
+    return acc;
+}, {});
+
+/** Resolve `{primitive.color.grey.950}` style references to their hex value. */
+const resolve = (value) => {
+    const ref = /^\{primitive\.color\.([a-z]+)(?:\.(\d+))?\}$/.exec(value);
+    if (!ref) return value;
+    const [, hue, step] = ref;
+    return step ? palette[hue][step] : palette[hue];
+};
+
+/**
+ * `foregroundPrimary` -> `fg.primary`, `backgroundSecondary` -> `surface.secondary`,
+ * `strokeSecondary` -> `stroke.secondary`, `statusError` -> `status.error`, ...
+ */
+const semanticGroups = Object.entries(semantic).reduce((acc, [key, value]) => {
+    const [, group, name] = /^([a-z]+)([A-Z][a-zA-Z]+)$/.exec(key);
+    const groupKey = { background: "surface", foreground: "fg" }[group] ?? group;
+    acc[groupKey] = { ...(acc[groupKey] ?? {}), [name.toLowerCase()]: resolve(value) };
+    return acc;
+}, {});
+
+/** Nucleus type scale: `text-h2`, `text-b1`, `text-l2`, ... carry size, weight, tracking and leading. */
+const fontSize = Object.fromEntries(
+    Object.entries(fonts).map(([token, t]) => [
+        token,
+        [
+            t.size,
+            {
+                lineHeight: String(t.lineHeight),
+                letterSpacing: t.letterSpacing,
+                fontWeight: String(t.weight),
+            },
+        ],
+    ]),
+);
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ["./src/**/*.{js,ts,jsx,tsx}"],
 
     theme: {
+        colors: {
+            transparent: "transparent",
+            current: "currentColor",
+            ...palette,
+            // World App adds a single off-white step below the Nucleus ramp for pills and tiles.
+            grey: { ...palette.grey, 50: "#F9FAFB" },
+            ...semanticGroups,
+        },
+
+        fontSize,
+
+        fontFamily: {
+            sans: ["var(--font-world)", ...defaultTheme.fontFamily.sans],
+        },
+
         borderRadius: {
-            2.5: "calc(2.5 * 1rem / 16)",
-            5: "calc(5 * 1rem / 16)",
-            8: "calc(8 * 1rem / 16)",
-            9: "calc(9 * 1rem / 16)",
-            4: "calc(4 * 1rem / 16)",
-            10: "calc(10 * 1rem / 16)",
-            12: "calc(12 * 1rem / 16)",
-            16: "calc(16 * 1rem / 16)",
-            18: "calc(18 * 1rem / 16)",
-            20: "calc(20 * 1rem / 16)",
-            24: "calc(24 * 1rem / 16)",
-            30: "calc(30 * 1rem / 16)",
-            34: "calc(34 * 1rem / 16)",
-            36: "calc(36 * 1rem / 16)",
-            40: "calc(40 * 1rem / 16)",
-            full: "9999px",
             none: "0",
+            2: "2px",
+            4: "4px",
+            6: "6px",
+            8: "8px",
+            10: "10px",
+            12: "12px",
+            14: "14px",
+            16: "16px",
+            20: "20px",
+            24: "24px",
+            28: "28px",
+            32: "32px",
+            40: "40px",
+            full: "9999px",
         },
 
         borderWidth: {
             DEFAULT: "1px",
+            0: "0",
             2: "2px",
             4: "4px",
-            6: "6px",
         },
 
         boxShadow: {
-            input: "0px 10px 30px rgba(25, 28, 32, 0.1)",
-        },
-
-        colors: {
-            black: "#000000",
-            error: {
-                100: "#FFF5F7",
-                700: "#FF5A76"
-            },
-            gray: {
-                0: '#FFFFFF',
-                50: "#F9FAFB",
-                100: "#F3F4F5",
-                200: "#EBECEF",
-                300: "#D6D9DD",
-                400: "#9BA3AE",
-                500: "#657080",
-                900: "#191C20",
-            },
-            icons: {
-                blue: {
-                    primary: "#4940E0",
-                    secondary: "#F0F0FD",
-                },
-                purple: {
-                    primary: "#9D50FF",
-                    secondary: "#F7F1FF",
-                }
-            },
-            info: {
-                100: "#F5F6FD",
-                700: "#506DFF",
-            },
-            success: {
-                700: "#00C313"
-            },
-            warning: {
-                100: '#FFF5E6',
-                700: "#FFB11B"
-            },
-            white: "#FFFFFF",
-            current: "currentColor",
-            transparent: "transparent",
+            // CredentialCard: black @15%, y 4, blur 12
+            card: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            // Bottom sheet: black @4%, y -2, blur 10
+            sheet: "0 -2px 10px rgba(0, 0, 0, 0.04)",
+            // Toast: #243981 @10%, y 10, blur 30
+            toast: "0 10px 30px rgba(36, 57, 129, 0.1)",
+            none: "none",
         },
 
         extend: {
+            fontWeight: {
+                light: "300",
+                regular: "350",
+                medium: "500",
+                semibold: "600",
+                bold: "650",
+            },
+
             animation: {
-                "pulse-short": "pulse 900ms cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                "pulse-short-delay-300": "pulse 900ms 300ms cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                "pulse-short-delay-600": "pulse 900ms 600ms cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                "fade-in-short": "fade-in 500ms cubic-bezier(.53,.04,.68,.33) forwards",
-                "fade-in-long": "fade-in 600ms cubic-bezier(.53,.04,.68,.33) forwards",
-                "circle-left": "move-right 1.4s cubic-bezier(.38,.29,.28,1.59) forwards",
-                "circle-right": "move-left 1.1s cubic-bezier(.38,.29,.28,1.59) forwards",
+                indicator: "spin 0.4s linear infinite",
+                shimmer: "shimmer 1.6s ease-in-out infinite",
+                "fade-in": "fade-in 200ms ease-out forwards",
+            },
+
+            keyframes: {
+                shimmer: {
+                    "0%": { backgroundPosition: "200% 0" },
+                    "100%": { backgroundPosition: "-200% 0" },
+                },
+                "fade-in": {
+                    "0%": { opacity: 0 },
+                    "100%": { opacity: 1 },
+                },
             },
 
             gridTemplateColumns: {
                 "1fr/auto": "1fr auto",
-                "1fr/minmax(0/360)/1fr": "1fr minmax(0, calc(360 * .25rem)) 1fr",
                 "auto/1fr": "auto 1fr",
                 "auto/1fr/auto": "auto 1fr auto",
             },
@@ -103,105 +147,59 @@ module.exports = {
                 "auto/1fr/auto": "auto 1fr auto",
             },
 
-            keyframes: {
-                "fade-in": {
-                    "0%": { opacity: 0, visibility: "hidden" },
-                    "100%": { opacity: 1, visibility: "visible" },
-                },
-
-                "move-left": {
-                    "0%": { right: "-120%", opacity: 0, transform: "rotate(360deg)" },
-                    "100%": { right: "-30%", opacity: 1, transform: "rotate(0deg)" },
-                },
-
-                "move-right": {
-                    "0%": { left: "-120%", opacity: 0, transform: "rotate(360deg)" },
-                    "100%": { left: "-90px", opacity: 1, transform: "rotate(0deg)" },
-                },
-            },
-
             screens: {
                 xs: "500px",
             },
 
             spacing: {
-                1.5: "calc(1.5 * 1rem / 4)",
-                15: "calc(15 * 1rem / 4)",
-                4.5: "calc(4.5 * 1rem / 4)",
-                25: "calc(25 * .25rem)",
-                full: "100%",
-                "screen-x": "100vw",
-                "screen-y": "100vh",
+                4.5: "1.125rem",
+                13: "3.25rem",
+                15: "3.75rem",
+                18: "4.5rem",
             },
 
             transitionProperty: {
-                position: "top, right, left, bottom",
-                "transform/opacity": "transform, opacity",
-                "visibility/opacity": "visibility, opacity",
+                press: "transform, opacity, background-color, color",
             },
 
-            width: {
-                "max-content": "max-content",
+            transitionDuration: {
+                DEFAULT: "200ms",
+                100: "100ms",
+                500: "500ms",
             },
-
-            lineHeight: {
-                "1px": "1px",
-            },
-        },
-
-        fontFamily: {
-            rubik: ["var(--font-rubik)", ...defaultTheme.fontFamily.sans],
-            sora: ["var(--font-sora)", ...defaultTheme.fontFamily.sans],
-        },
-
-        fontSize: {
-            h1: ["calc(32 * 1rem / 16)", { lineHeight: "120%", fontWeight: 600 }],
-            h2: ["calc(26 * 1rem / 16)", { lineHeight: "120%", fontWeight: 600 }],
-            h3: ["calc(20 * 1rem / 16)", { lineHeight: "120%" }],
-            s1: ["calc(18 * 1rem / 16)", { lineHeight: "120%" }],
-            s2: ["calc(16 * 1rem / 16)", { lineHeight: "120%", fontWeight: 500 }],
-            s3: ["calc(14 * 1rem / 16)", { lineHeight: "120%", fontWeight: 500 }],
-            s4: ["calc(12 * 1rem / 16)", { lineHeight: "120%" }],
-            b1: ["calc(18 * 1rem / 16)", { lineHeight: "130%" }],
-            b2: ["calc(16 * 1rem / 16)", { lineHeight: "130%" }],
-            b3: ["calc(14 * 1rem / 16)", { lineHeight: "130%" }],
-            b4: ["calc(12 * 1rem / 16)", { lineHeight: "130%" }],
-            5: ["calc(5 * 1rem / 16)", { lineHeight: "6px" }],
-            7: ["calc(7 * 1rem / 16)", { lineHeight: "8px" }],
-            10: "calc(10 * 1rem / 16)",
-            11: "calc(11 * 1rem / 16)",
-            12: "calc(12 * 1rem / 16)",
-            14: "calc(14 * 1rem / 16)",
-            15: "calc(15 * 1rem / 16)",
-            16: "calc(16 * 1rem / 16)",
-            18: "calc(18 * 1rem / 16)",
-            20: "calc(20 * 1rem / 16)",
-            24: "calc(24 * 1rem / 16)",
-            26: "calc(26 * 1rem / 16)",
-            30: "calc(30 * 1rem / 16)",
-            32: "calc(32 * 1rem / 16)",
-            40: "calc(40 * 1rem / 16)",
-        },
-
-        transitionDuration: {
-            DEFAULT: "200ms",
-            500: "500ms",
         },
     },
 
     plugins: [
-        plugin(({ addUtilities }) =>
+        plugin(({ addUtilities, theme }) =>
             addUtilities({
                 ".area-span-full": { gridArea: "1/1/-1/-1" },
                 ".scrollbar-hidden": {
                     "&::-webkit-scrollbar": { display: "none" },
                     scrollbarWidth: "none",
                 },
-                '.no-select': {
-                    '-webkit-user-select': 'none',
-                    '-moz-user-select': 'none',
-                    '-ms-user-select': 'none',
-                    'user-select': 'none',
+                ".no-select": {
+                    "-webkit-user-select": "none",
+                    "user-select": "none",
+                },
+                // World App uses continuous (squircle) corners; CSS can't, so the
+                // closest we get is the plain radius plus this softer press curve.
+                ".ease-press": {
+                    transitionTimingFunction: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                },
+                // Skeleton placeholder, mirrors World App's ShimmeringRectangleView.
+                ".shimmer": {
+                    backgroundImage: `linear-gradient(90deg, ${theme("colors.grey.100")} 0%, ${theme("colors.grey.200")} 50%, ${theme("colors.grey.100")} 100%)`,
+                    backgroundSize: "200% 100%",
+                    animation: "shimmer 1.6s ease-in-out infinite",
+                },
+                // Gold foil used for the "Human" wordmark on the credential card.
+                ".text-foil-gold": {
+                    backgroundImage:
+                        "linear-gradient(100deg, #6b4c1a 0%, #b8893a 30%, #e2c27a 50%, #b8893a 70%, #6b4c1a 100%)",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    color: "transparent",
                 },
             }),
         ),

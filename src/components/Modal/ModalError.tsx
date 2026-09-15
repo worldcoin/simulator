@@ -1,132 +1,106 @@
+import { AssetIcon } from "@/components/Icon";
+import { WORLD_ID_ICONS } from "@/lib/assets";
 import { ErrorsCode } from "@/types";
-import { Icon } from "../Icon";
+import Button from "../Button";
+import { ModalContent } from "./ModalContent";
 
 const DEVELOPER_PORTAL_URL = "https://developer.world.org";
+
+const openDeveloperPortal = () =>
+  window.open(DEVELOPER_PORTAL_URL, "_blank", "noopener,noreferrer");
+
+const warningHero = (
+  <AssetIcon
+    src={WORLD_ID_ICONS.warningGrey}
+    noMask
+    className="size-16"
+  />
+);
 
 export default function ModalError(props: {
   errorCode: ErrorsCode | null;
   close: () => void;
 }) {
+  const dismiss = (
+    <Button
+      variant="tertiary"
+      fullWidth
+      onClick={props.close}
+    >
+      Dismiss
+    </Button>
+  );
+
+  const portal = (
+    <Button
+      fullWidth
+      onClick={openDeveloperPortal}
+    >
+      Open Developer Portal
+    </Button>
+  );
+
   if (props.errorCode == ErrorsCode.InputError) {
     return (
-      <div className="flex h-[360px] flex-col items-center justify-center">
-        <button
-          className="absolute right-5 top-5 flex w-full justify-end"
-          onClick={props.close}
-        >
-          <Icon
-            name="close"
-            className="size-6 text-black"
-            bgClassName="h-9 w-9 rounded-full bg-gray-200"
+      <ModalContent
+        hero={
+          <AssetIcon
+            src={WORLD_ID_ICONS.noQr}
+            noMask
+            className="size-16"
           />
-        </button>
-        <Icon
-          name="qr-code"
-          className="size-10"
-          bgClassName="h-20 w-20 rounded-full bg-gray-400"
-          noMask
-        />
-        <h2 className="mt-4 text-h2 font-bold text-gray-900">
-          Expired QR Code
-        </h2>
-        <p className="mt-4 text-center text-gray-500">
-          This connection has expired <br></br> Please try a different code.
-        </p>
-      </div>
-    );
-  } else if (props.errorCode == ErrorsCode.MissingAction) {
-    return (
-      <div className="flex h-[360px] flex-col items-center justify-center px-8">
-        <button
-          className="absolute right-5 top-5 flex w-full justify-end"
-          onClick={props.close}
-        >
-          <Icon
-            name="close"
-            className="size-6 text-black"
-            bgClassName="h-9 w-9 rounded-full bg-gray-200"
-          />
-        </button>
-        <Icon
-          name="warning"
-          className="size-10 text-white"
-          bgClassName="h-16 w-16 rounded-full bg-error-700"
-        />
-        <h2 className="mt-4 text-center text-h2 font-bold text-gray-900">
-          Action Required
-        </h2>
-        <p className="mt-4 text-center text-gray-500">
-          No action found for this app.
-          <br></br>
-          Create one in the Developer Portal.
-        </p>
-        <a
-          className="mt-4 text-b3 font-medium text-info-700 underline"
-          href={DEVELOPER_PORTAL_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          developer.world.org
-        </a>
-      </div>
-    );
-  } else if (props.errorCode == ErrorsCode.AppNotRegisteredV4) {
-    return (
-      <div className="flex h-[360px] flex-col items-center justify-center px-8">
-        <button
-          className="absolute right-5 top-5 flex w-full justify-end"
-          onClick={props.close}
-        >
-          <Icon
-            name="close"
-            className="size-6 text-black"
-            bgClassName="h-9 w-9 rounded-full bg-gray-200"
-          />
-        </button>
-        <Icon
-          name="warning"
-          className="size-10 text-white"
-          bgClassName="h-16 w-16 rounded-full bg-error-700"
-        />
-        <h2 className="mt-4 text-center text-h2 font-bold text-gray-900">
-          App Not Found
-        </h2>
-        <p className="mt-4 text-center text-gray-500">
-          Please create this app in the dev portal.
-        </p>
-        <a
-          className="mt-4 text-b3 font-medium text-info-700 underline"
-          href={DEVELOPER_PORTAL_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          developer.world.org
-        </a>
-      </div>
-    );
-  } else {
-    return (
-      <div className="flex h-[360px] flex-col items-center justify-center">
-        <button
-          className="absolute right-5 top-5 flex w-full justify-end"
-          onClick={props.close}
-        >
-          <Icon
-            name="close"
-            className="size-6 text-black"
-            bgClassName="h-9 w-9 rounded-full bg-gray-200"
-          />
-        </button>
-        <Icon
-          name="warning"
-          className="size-10 text-white"
-          bgClassName="h-16 w-16 rounded-full bg-error-700"
-        />
-        <h2 className="mt-4 text-h2 font-bold text-gray-900">Error</h2>
-        <p className="mt-4 text-center text-gray-500">
-          Something went wrong <br></br> Please try again later.
-        </p>
-      </div>
+        }
+        title="Invalid or expired QR code"
+        actions={dismiss}
+      >
+        Request is invalid or expired. Please request a new one.
+      </ModalContent>
     );
   }
+
+  if (props.errorCode == ErrorsCode.MissingAction) {
+    return (
+      <ModalContent
+        hero={warningHero}
+        title="Action required"
+        actions={
+          <>
+            {portal}
+            {dismiss}
+          </>
+        }
+      >
+        No action found for this app. Create one in the Developer Portal and try
+        again.
+      </ModalContent>
+    );
+  }
+
+  if (props.errorCode == ErrorsCode.AppNotRegisteredV4) {
+    return (
+      <ModalContent
+        hero={warningHero}
+        title="App not found"
+        actions={
+          <>
+            {portal}
+            {dismiss}
+          </>
+        }
+      >
+        This app isn&apos;t registered in the Developer Portal. Create it there
+        and try again.
+      </ModalContent>
+    );
+  }
+
+  return (
+    <ModalContent
+      hero={warningHero}
+      title="Something went wrong"
+      actions={dismiss}
+    >
+      We couldn&apos;t complete that request. Please try again.
+    </ModalContent>
+  );
 }

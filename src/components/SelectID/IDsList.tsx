@@ -2,20 +2,20 @@ import useIdentity from "@/hooks/useIdentity";
 import IDRow from "./IDRow";
 
 export default function IDsList() {
-  const { identities } = useIdentity();
+  const { identities, activeIdentityID } = useIdentity();
 
   return (
-    <div className="mt-12 flex size-full max-h-[calc(100vh-100rem)] flex-col gap-4 ">
-      {identities
+    <ul className="flex flex-col">
+      {[...identities]
         .sort((a, b) => b.meta.idNumber - a.meta.idNumber)
-        .map((identity, i) => {
-          return (
-            <IDRow
-              key={i}
-              identity={identity}
-            />
-          );
-        })}
-    </div>
+        .map((identity, index, all) => (
+          <IDRow
+            key={identity.id}
+            identity={identity}
+            active={identity.id === activeIdentityID}
+            divider={index < all.length - 1}
+          />
+        ))}
+    </ul>
   );
 }

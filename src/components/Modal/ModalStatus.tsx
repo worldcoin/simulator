@@ -1,152 +1,109 @@
+import { WORLD_ID_ICONS } from "@/lib/assets";
 import { Status } from "@/types";
-import { VerificationLevel } from "@worldcoin/idkit-core";
-import { memo, useState } from "react";
+import { memo, type ReactNode } from "react";
+import { ActivityIndicator } from "../ActivityIndicator";
 import Button from "../Button";
-import { Icon } from "../Icon";
+import { AssetIcon, Icon } from "../Icon";
 
 interface ModalStatusProps {
   status: Status;
-  hasProofRequest: boolean;
-  handleClick: (
-    malicious: boolean,
-    verification_level: VerificationLevel,
-  ) => void;
-  handleV4Click: () => void;
+  onCancel: () => void;
+  onContinue: () => void;
 }
 
-export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
-  const [useV4, setUseV4] = useState(props.hasProofRequest);
-
+function StatusLabel(props: {
+  icon: ReactNode;
+  className: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="flex w-full items-center justify-center">
-      {props.status === Status.Waiting && (
-        <div className="flex w-full flex-col gap-3">
-          {props.hasProofRequest && (
-            <div className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 p-1">
-              <button
-                onClick={() => setUseV4(false)}
-                className={`flex-1 rounded-full px-4 py-2 font-sora text-14 font-semibold transition-colors ${
-                  !useV4
-                    ? "bg-[#181818] text-white"
-                    : "hover:text-gray-700 text-gray-500"
-                }`}
-              >
-                v3
-              </button>
-              <button
-                onClick={() => setUseV4(true)}
-                className={`flex-1 rounded-full px-4 py-2 font-sora text-14 font-semibold transition-colors ${
-                  useV4
-                    ? "bg-[#181818] text-white"
-                    : "hover:text-gray-700 text-gray-500"
-                }`}
-              >
-                v4
-              </button>
-            </div>
-          )}
+    <div className={`flex items-center gap-2 text-s1 ${props.className}`}>
+      {props.icon}
+      {props.children}
+    </div>
+  );
+}
 
-          {useV4 ? (
-            <Button
-              onClick={props.handleV4Click}
-              className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
-            >
-              Verify
-            </Button>
-          ) : (
-            <>
-              <div className="grid w-full grid-cols-2 gap-3">
-                <Button
-                  onClick={() =>
-                    props.handleClick(false, VerificationLevel.Orb)
-                  }
-                  className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
-                >
-                  Orb
-                </Button>
-                <Button
-                  onClick={() =>
-                    props.handleClick(false, VerificationLevel.SecureDocument)
-                  }
-                  className="h-14 w-full rounded-full bg-[#181818] px-3 font-sora text-15 font-semibold text-white"
-                >
-                  Secure Document
-                </Button>
-                <Button
-                  onClick={() =>
-                    props.handleClick(false, VerificationLevel.Document)
-                  }
-                  className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
-                >
-                  Document
-                </Button>
-                <Button
-                  onClick={() =>
-                    props.handleClick(false, VerificationLevel.Device)
-                  }
-                  className="h-14 w-full rounded-full bg-[#181818] px-4 font-sora text-16 font-semibold text-white"
-                >
-                  Device
-                </Button>
-              </div>
-              <div className="flex w-full justify-center">
-                <button
-                  className="mt-1 text-12 font-semibold uppercase tracking-[0.04em] text-gray-400"
-                  onClick={() => props.handleClick(true, VerificationLevel.Orb)}
-                >
-                  Test Invalid Proof
-                </button>
-              </div>
-            </>
-          )}
+/**
+ * The 56pt action slot of the request sheet: Cancel / Continue while waiting,
+ * then an inline status while the proof is presented.
+ */
+export const ModalStatus = memo(function ModalStatus(props: ModalStatusProps) {
+  return (
+    <div
+      className="flex h-14 w-full items-center justify-center"
+      aria-live="polite"
+    >
+      {props.status === Status.Waiting && (
+        <div className="flex w-full gap-4">
+          <Button
+            variant="secondary"
+            className="min-w-0 flex-1"
+            onClick={props.onCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            className="min-w-0 flex-1"
+            onClick={props.onContinue}
+          >
+            Continue
+          </Button>
         </div>
       )}
       {props.status === Status.Pending && (
-        <>
-          <Icon
-            name="spinner"
-            className="size-6 animate-spin text-black"
-          />
-          <span className="ml-2 text-16 font-semibold text-gray-500">
-            Verifying
-          </span>
-        </>
+        <StatusLabel
+          className="text-grey-400"
+          icon={
+            <ActivityIndicator
+              size={24}
+              className="text-fg-primary"
+            />
+          }
+        >
+          Presenting
+        </StatusLabel>
       )}
       {props.status === Status.Success && (
-        <>
-          <Icon
-            name="checkmark"
-            className="size-4 text-white "
-            bgClassName="rounded-full w-6 h-6 bg-success-700"
-          />
-          <span className="ml-2 text-16 font-semibold text-success-700">
-            Verified
-          </span>
-        </>
+        <StatusLabel
+          className="text-green-600"
+          icon={
+            <AssetIcon
+              src={WORLD_ID_ICONS.success24}
+              noMask
+              className="size-6"
+            />
+          }
+        >
+          Presented
+        </StatusLabel>
       )}
       {props.status === Status.Warning && (
-        <>
-          <Icon
-            name="close"
-            className="size-4 text-white "
-            bgClassName="rounded-full w-6 h-6 bg-warning-700"
-          />
-          <span className="ml-2 text-16 font-semibold text-warning-700">
-            You&apos;ve done this before
-          </span>
-        </>
+        <StatusLabel
+          className="text-amber-600"
+          icon={
+            <Icon
+              name="refresh"
+              className="size-6"
+            />
+          }
+        >
+          Already verified
+        </StatusLabel>
       )}
       {props.status === Status.Error && (
-        <>
-          <Icon
-            name="cross"
-            className="size-4 text-white "
-            bgClassName="rounded-full w-6 h-6 bg-error-700"
-          />
-          <span className="ml-2 text-16 font-semibold text-error-700">
-            Verification failed
-          </span>
-        </>
+        <StatusLabel
+          className="text-red-600"
+          icon={
+            <AssetIcon
+              src={WORLD_ID_ICONS.failure24}
+              noMask
+              className="size-6"
+            />
+          }
+        >
+          Failed
+        </StatusLabel>
       )}
     </div>
   );

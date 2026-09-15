@@ -10,6 +10,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   }) => React.ReactNode;
 }
 
+/** World App text field: 56pt, secondary fill at rest, hairline stroke when focused. */
 export const Input = React.memo(function Input(props: InputProps) {
   const {
     className,
@@ -51,21 +52,23 @@ export const Input = React.memo(function Input(props: InputProps) {
 
   return (
     <div
-      className={cn(className, "flex items-center rounded-12 border-2 p-0.5", {
-        "bg-gray-100": !isFocused,
-        "border-gray-100": !isFocused && !isInvalid,
-        "border-error-700": isInvalid,
-        "bg-white shadow-input": isFocused,
-        "border-gray-200": isFocused && !isInvalid,
-      })}
+      className={cn(
+        className,
+        "flex h-14 items-center gap-2 rounded-12 border pl-4 pr-2 transition-colors",
+        {
+          "border-transparent bg-surface-secondary": !isFocused && !isInvalid,
+          "border-stroke-secondary bg-surface-primary": isFocused && !isInvalid,
+          "border-status-error bg-surface-primary": isInvalid,
+        },
+      )}
     >
       <input
-        className="h-10 grow bg-transparent px-3 text-14 outline-0 placeholder:text-gray-500"
-        placeholder="QR code"
+        className="h-full min-w-0 grow bg-transparent text-s1 text-fg-primary outline-0 placeholder:text-fg-tertiary"
         value={value}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        aria-invalid={isInvalid || undefined}
         {...otherProps}
       />
 
