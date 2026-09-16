@@ -94,3 +94,30 @@ test("rehydration tolerates a malformed identities field", async () => {
   assert.equal(state.activeIdentityID, seeded[1].id);
   assert.equal(typeof state.insertIdentity, "function");
 });
+
+test("removeIdentity drops the identity and moves the active slot if needed", () => {
+  useIdentityStore.setState({
+    activeIdentityID: seeded[0].id,
+    identities: [...seeded],
+  });
+  const { removeIdentity } = useIdentityStore.getState();
+
+  // Removing an inactive identity leaves the active one alone.
+  removeIdentity(seeded[2].id);
+  assert.deepEqual(
+    ids(useIdentityStore.getState().identities),
+    ids([seeded[0], seeded[1], seeded[3], seeded[4]]),
+  );
+  assert.equal(useIdentityStore.getState().activeIdentityID, seeded[0].id);
+
+  // Removing the active identity hands the slot to the most recent remaining one.
+  removeIdentity(seeded[0].id);
+  assert.equal(useIdentityStore.getState().activeIdentityID, seeded[1].id);
+
+  // Removing everything leaves no active identity.
+  for (const identity of [seeded[1], seeded[3], seeded[4]]) {
+    removeIdentity(identity.id);
+  }
+  assert.deepEqual(useIdentityStore.getState().identities, []);
+  assert.equal(useIdentityStore.getState().activeIdentityID, null);
+});
