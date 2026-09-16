@@ -34,20 +34,24 @@ export default function Home() {
     return useIdentityStore.persist.onFinishHydration(seedIfEmpty);
   }, [generateFirstFiveIdentities]);
 
+  // Route once, from the live store after hydration, for the same reason as
+  // above: deciding on the pre-hydration snapshot sent every load through
+  // /select-id before landing on the active identity. `replace` keeps this
+  // redirect page out of the history, so Back never bounces through it again.
   useEffect(() => {
     if (!router.isReady || connectUrl) return;
 
-    if (
-      activeIdentityID != null &&
-      !router.pathname.includes(`/id/${activeIdentityID}`)
-    ) {
-      console.log("Redirecting to active identity:", activeIdentityID);
-      void router.push(`/id/${activeIdentityID}`);
-    } else if (!activeIdentityID && !router.pathname.includes("/select-id")) {
-      console.log("Redirecting to select identity");
-      void router.push("/select-id");
+    const redirect = () => {
+      const { activeIdentityID: activeId } = useIdentityStore.getState();
+      void router.replace(activeId ? `/id/${activeId}` : "/select-id");
+    };
+
+    if (useIdentityStore.persist.hasHydrated()) {
+      redirect();
+      return;
     }
-  }, [activeIdentityID, connectUrl, router]);
+    return useIdentityStore.persist.onFinishHydration(redirect);
+  }, [connectUrl, router]);
 
   useEffect(() => {
     if (!router.isReady) return;
