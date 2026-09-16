@@ -15,6 +15,7 @@ const getStore = (store: IdentityStore) => ({
   insertIdentity: store.insertIdentity,
   replaceIdentity: store.replaceIdentity,
   reset: store.reset,
+  removeIdentity: store.removeIdentity,
 });
 
 const useIdentity = () => {
@@ -25,6 +26,7 @@ const useIdentity = () => {
     insertIdentity,
     replaceIdentity,
     reset,
+    removeIdentity,
   } = useIdentityStore(getStore);
 
   const generateIdentityProofsIfNeeded = useCallback(
@@ -190,6 +192,7 @@ const useIdentity = () => {
         ? null
         : activeIdentityID,
     generateNextIdentity,
+    removeIdentity,
     identities,
     activeIdentity: activeIdentity,
     resetIdentityStore,

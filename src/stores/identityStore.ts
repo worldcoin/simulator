@@ -8,6 +8,7 @@ export type IdentityStore = {
   setActiveIdentityID: (id: string) => void;
   insertIdentity: (identity: Identity) => void;
   replaceIdentity: (identity: Identity) => void;
+  removeIdentity: (id: string) => void;
   reset: () => void;
 };
 
@@ -46,6 +47,19 @@ export const useIdentityStore = create<IdentityStore>()(
             return i;
           }),
         })),
+      // Removing the active identity hands the active slot to the most recent
+      // remaining one, so the home screen never points at a missing identity.
+      removeIdentity: (id) =>
+        set((state) => {
+          const identities = state.identities.filter((i) => i.id !== id);
+          return {
+            identities,
+            activeIdentityID:
+              state.activeIdentityID === id
+                ? identities[0]?.id ?? null
+                : state.activeIdentityID,
+          };
+        }),
       reset: () =>
         set(() => ({
           identities: [],
