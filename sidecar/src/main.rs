@@ -20,9 +20,21 @@ async fn main() -> eyre::Result<()> {
         )
         .init();
 
-    let config_path = std::env::var("CONFIG_PATH").unwrap_or_else(|_| "identities.json".into());
-    tracing::info!("Loading config from {config_path}");
-    let sidecar_config = SidecarConfig::load(&config_path)?;
+    // Managed runtimes can inject the identity configuration from a secret without
+    // baking seeds or credentials into the container image.
+    let sidecar_config = match std::env::var("SIDECAR_CONFIG_JSON") {
+        Ok(json) => {
+            tracing::info!("Loading config from SIDECAR_CONFIG_JSON");
+            serde_json::from_str::<SidecarConfig>(&json)?
+        }
+        Err(std::env::VarError::NotPresent) => {
+            let config_path =
+                std::env::var("CONFIG_PATH").unwrap_or_else(|_| "identities.json".into());
+            tracing::info!("Loading config from {config_path}");
+            SidecarConfig::load(&config_path)?
+        }
+        Err(error) => return Err(error.into()),
+    };
 
     // Load proof materials once (shared across all identities).
     // These are the Groth16 circuit keys embedded in the binary.
