@@ -15,7 +15,7 @@ export const simulatorMcp = createMcpHandler(() => {
 Workflow:
 1. Configure the app with the Developer Portal MCP (a separate connection) and confirm its RP is registered in the staging registry.
 2. Start verification in the application under test. Obtain the IDKit connector URI from its signed request. Use staging and disable legacy fallback.
-3. Call complete_test_request with that URI as connect_url. Only native v4, single Proof of Human uniqueness requests are supported; the signed request supplies all proof context.
+3. Call complete_test_request with that URI as connect_url. Only native v4, single Proof of Human uniqueness requests are supported, including those creating a bound session; the signed request supplies all proof context.
 4. Let the application's IDKit polling or callback receive the proof. proof_delivered means the proof reached IDKit — judge success by the application's backend response and business effects.
 5. If the application fails, fix it and start a fresh request.
 

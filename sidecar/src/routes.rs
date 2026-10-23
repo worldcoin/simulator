@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use axum::extract::State;
 use axum::middleware;
@@ -160,8 +161,8 @@ async fn generate_proof_inner(
 
     // Auto-select: pick the first configured identity whose credentials satisfy the request.
     let available = state.identities.iter().map(available_schema_ids);
-    let (selected_index, items_to_prove) = select_identity(available, &proof_request)
-        .ok_or(SidecarError::CredentialUnavailable)?;
+    let (selected_index, items_to_prove) =
+        select_identity(available, &proof_request).ok_or(SidecarError::CredentialUnavailable)?;
 
     let identity = &state.identities[selected_index];
     tracing::info!(selected_index, "auto-selected identity for proof request");
@@ -174,7 +175,14 @@ async fn generate_proof_inner(
 
     let nullifier = identity
         .authenticator
-        .generate_nullifier(&proof_request, Some(account_inclusion_proof.clone()))
+        .generate_nullifier(
+            &proof_request,
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock before Unix epoch")
+                .as_secs(),
+            Some(account_inclusion_proof.clone()),
+        )
         .await
         .map_err(SidecarError::from)?;
 
@@ -227,9 +235,7 @@ mod tests {
     fn proof_request(items: &[(&str, u64)]) -> ProofRequest {
         let reqs: Vec<String> = items
             .iter()
-            .map(|(id, schema)| {
-                format!(r#"{{"identifier":"{id}","issuer_schema_id":{schema}}}"#)
-            })
+            .map(|(id, schema)| format!(r#"{{"identifier":"{id}","issuer_schema_id":{schema}}}"#))
             .collect();
         let json = format!(
             r#"{{
@@ -260,10 +266,7 @@ mod tests {
 
     /// Index of the selected identity, dropping the items (most assertions only care about which
     /// identity was chosen).
-    fn selected_index(
-        available: &[HashSet<u64>],
-        request: &ProofRequest,
-    ) -> Option<usize> {
+    fn selected_index(available: &[HashSet<u64>], request: &ProofRequest) -> Option<usize> {
         select_identity(available.iter().cloned(), request).map(|(index, _)| index)
     }
 
@@ -317,5 +320,33 @@ mod tests {
         let available = sets(&[&[POH, PASSPORT], &[MNC]]);
         let both = proof_request(&[("orb", POH), ("mnc", MNC)]);
         assert_eq!(selected_index(&available, &both), None);
+    }
+
+    #[test]
+    fn uniqueness_can_create_a_bound_session() {
+        for explicit_type in [false, true] {
+            let mut request = serde_json::to_value(proof_request(&[("selfie", 11)])).unwrap();
+            if !explicit_type {
+                request.as_object_mut().unwrap().remove("proof_type");
+            }
+            request["session_id"] = serde_json::json!("create");
+            let parsed = ProofRequest::from_json(&request.to_string()).unwrap();
+            assert!(!parsed.is_session_proof());
+            assert!(parsed.binds_session());
+            assert_eq!(parsed.action, proof_request(&[("selfie", 11)]).action);
+            assert_eq!(selected_index(&sets(&[&[POH], &[11]]), &parsed), Some(1));
+        }
+    }
+
+    #[test]
+    fn standalone_session_creation_requires_explicit_type_and_no_action() {
+        let mut request = serde_json::to_value(proof_request(&[("orb", POH)])).unwrap();
+        request["proof_type"] = serde_json::json!("session");
+        request["session_id"] = serde_json::json!("create");
+        assert!(ProofRequest::from_json(&request.to_string()).is_err());
+        request.as_object_mut().unwrap().remove("action");
+        let parsed = ProofRequest::from_json(&request.to_string()).unwrap();
+        assert!(parsed.is_session_proof());
+        assert!(!parsed.binds_session());
     }
 }

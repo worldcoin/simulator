@@ -3,6 +3,9 @@
 The simulator exposes one MCP tool, `complete_test_request`. It completes a
 native World ID 4.0 staging Proof of Human uniqueness request with a real proof,
 so an agent can test an application's verification flow without a phone.
+Uniqueness requests may also create a session (`create_session: true` in IDKit,
+encoded as `session_id: "create"`). The returned session is delivered unchanged
+alongside the uniqueness proof. Standalone session proofs remain a browser flow.
 
 ## Connect
 
