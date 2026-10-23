@@ -110,3 +110,21 @@ application's own backend result.
   tracing logs; the connection URL contains an encryption key.
 
 Run the MCP tests with Node 22 and `pnpm test`.
+
+### Native proof sidecar
+
+The sidecar uses `world-id-core` / `world-id-proof` 0.16.0, matching the protocol
+generation used by WalletKit 0.27.3. It supports uniqueness proofs, uniqueness
+proofs that create a session, and standalone session creation and proving.
+The explicit `proof_type` selects the endpoint; `session_id: "create"` alone
+does not turn a uniqueness request into a session proof.
+
+Build and test with Rust 1.98.1 and the committed lockfile:
+
+```sh
+cargo test --locked --release --manifest-path sidecar/Cargo.toml
+docker build -t simulator-sidecar:0.2.0 sidecar
+```
+
+Available credential types depend on the credentials injected into the sidecar.
+Updating the proof engine does not issue credentials to the configured identities.

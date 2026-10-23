@@ -147,7 +147,7 @@ export async function completeTestRequest(
     if (
       !isRecord(proof) ||
       proof.version !== 1 ||
-      proof.session_id != null ||
+      (proof.session_id != null && proof.session_id !== "create") ||
       (proof.proof_type != null && proof.proof_type !== "uniqueness")
     )
       throw new TestRequestError("native_uniqueness_required", stage);
@@ -223,6 +223,9 @@ export async function completeTestRequest(
       !isRecord(payload) ||
       payload.id !== proof.id ||
       payload.version !== proof.version ||
+      (proof.session_id === "create" &&
+        (typeof payload.session_id !== "string" ||
+          !payload.session_id.startsWith("session_"))) ||
       !Array.isArray(payload.responses) ||
       payload.responses.length !== 1 ||
       !isRecord(payload.responses[0]) ||

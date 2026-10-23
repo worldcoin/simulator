@@ -7,6 +7,9 @@ mod routes;
 
 use config::SidecarConfig;
 use routes::{AppState, IdentityState};
+use world_id_core::artifacts::{
+    embedded::EmbeddedZkArtifacts, ZkArtifactSource, ZkArtifactSourceExt,
+};
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -39,8 +42,9 @@ async fn main() -> eyre::Result<()> {
     // Load proof materials once (shared across all identities).
     // These are the Groth16 circuit keys embedded in the binary.
     tracing::info!("Loading proof materials (this may take a moment)...");
-    let query_material = Arc::new(world_id_core::proof::load_embedded_query_material()?);
-    let nullifier_material = Arc::new(world_id_core::proof::load_embedded_nullifier_material()?);
+    let artifacts = Arc::new(EmbeddedZkArtifacts.cached());
+    artifacts.query_material()?;
+    artifacts.nullifier_material()?;
     tracing::info!("Proof materials loaded");
 
     // Initialize an Authenticator for each pre-configured identity.
@@ -50,10 +54,10 @@ async fn main() -> eyre::Result<()> {
         let protocol_config = sidecar_config.protocol.clone();
 
         tracing::info!("Initializing identity {i}...");
-        let authenticator = world_id_core::Authenticator::init(&seed, protocol_config.into())
-            .await
-            .map_err(|e| eyre::eyre!("failed to init identity {i}: {e}"))?
-            .with_proof_materials(query_material.clone(), nullifier_material.clone());
+        let authenticator =
+            world_id_core::Authenticator::init(&seed, protocol_config, artifacts.clone())
+                .await
+                .map_err(|e| eyre::eyre!("failed to init identity {i}: {e}"))?;
 
         tracing::info!(
             "Identity {i} initialized (leaf_index={})",

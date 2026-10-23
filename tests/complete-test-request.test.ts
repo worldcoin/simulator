@@ -405,6 +405,46 @@ test("rejects destinations, request paths and keys before any network access", a
   );
 });
 
+test("uniqueness can create a session while preserving the signed request and response", async () => {
+  const request = makeRequest();
+  const proof = {
+    ...request.proof_request,
+    proof_type: "uniqueness",
+    session_id: "create",
+  };
+  envelope = await encrypt({ ...request, proof_request: proof });
+  const response = { ...nativeResponse, session_id: "session_created" };
+  proofReply = () => Promise.resolve(json(response));
+  assert.equal(
+    (await completeTestRequest(connectUrl)).status,
+    "proof_delivered",
+  );
+  assert.equal(calls[2].url, "https://proof-service.example/proof/uniqueness");
+  assert.deepEqual(JSON.parse(String(calls[2].init?.body)), {
+    proof_request: proof,
+  });
+  assert.deepEqual(
+    await decryptBridgeRequest(
+      JSON.parse(String(calls[3].init?.body)) as typeof envelope,
+      key,
+    ),
+    response,
+  );
+});
+
+test("requested session creation requires a session in the prover response", async () => {
+  const request = makeRequest();
+  envelope = await encrypt({
+    ...request,
+    proof_request: { ...request.proof_request, session_id: "create" },
+  });
+  await assert.rejects(completeTestRequest(connectUrl), {
+    code: "invalid_prover_response",
+    outcome: "unknown",
+  });
+  assert.equal(calls.length, 3);
+});
+
 test("requires explicit staging and native uniqueness before context or prover work", async () => {
   for (const [request, code] of [
     [makeRequest({ environment: undefined }), "staging_required"],

@@ -11,6 +11,7 @@ import {
   getMerkleProof,
 } from "@/lib/proof";
 import { cn } from "@/lib/utils";
+import { proofEndpoint } from "@/lib/proof-endpoint";
 import {
   approveRequest,
   approveRequestV4,
@@ -266,12 +267,7 @@ export function Modal() {
     setStatus(Status.Pending);
 
     const identityIndex = parseInt(activeIdentity.id, 10);
-    const proofType = bridgeInitialData.proof_request.proof_type;
-    const isSession =
-      proofType === "create_session" ||
-      proofType === "session" ||
-      (proofType == null && !!bridgeInitialData.proof_request.session_id);
-    const endpoint = isSession ? "proof/session" : "proof/uniqueness";
+    const endpoint = proofEndpoint(bridgeInitialData.proof_request);
 
     try {
       const response = await fetch(`/api/sidecar/${endpoint}`, {
