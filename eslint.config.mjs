@@ -1,5 +1,6 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -17,13 +18,9 @@ const config = compat.config({
     node: false,
   },
   extends: [
-    "next/core-web-vitals",
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:react/recommended",
-    "plugin:react/jsx-runtime",
-    "plugin:jsx-a11y/recommended",
     "plugin:tailwindcss/recommended",
     "prettier",
   ],
@@ -97,4 +94,4 @@ const config = compat.config({
   },
 });
 
-export default [{ files: ["**/*.{js,jsx,ts,tsx}"] }, ...config];
+export default [...nextCoreWebVitals, ...config];

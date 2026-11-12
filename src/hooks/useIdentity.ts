@@ -18,6 +18,34 @@ const getStore = (store: IdentityStore) => ({
   removeIdentity: store.removeIdentity,
 });
 
+const getIdentityProof = async (
+  verificationLevel: VerificationLevel,
+  encodedCommitment: string,
+): Promise<InclusionProofResponse | null> => {
+  try {
+    const response = await fetch("/api/sequencer/inclusionProof", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        verificationLevel,
+        commitment: encodedCommitment,
+      }),
+    });
+
+    if (response.status === 200) {
+      console.log(
+        `Fetched fresh inclusion proof from sequencer for: ${verificationLevel}.`,
+      );
+      return (await response.json()) as InclusionProofResponse;
+    }
+  } catch (error) {
+    console.error(
+      `Unable to get identity proof for credential type '${verificationLevel}'. Error: ${error}`,
+    );
+  }
+  return null;
+};
+
 const useIdentity = () => {
   const {
     activeIdentityID,
@@ -156,34 +184,6 @@ const useIdentity = () => {
     }
     return identities.find((i) => i.id === activeIdentityID) ?? null;
   }, [activeIdentityID, identities]);
-
-  const getIdentityProof = async (
-    verificationLevel: VerificationLevel,
-    encodedCommitment: string,
-  ): Promise<InclusionProofResponse | null> => {
-    try {
-      const response = await fetch("/api/sequencer/inclusionProof", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          verificationLevel,
-          commitment: encodedCommitment,
-        }),
-      });
-
-      if (response.status === 200) {
-        console.log(
-          `Fetched fresh inclusion proof from sequencer for: ${verificationLevel}.`,
-        );
-        return (await response.json()) as InclusionProofResponse;
-      }
-    } catch (error) {
-      console.error(
-        `Unable to get identity proof for credential type '${verificationLevel}'. Error: ${error}`,
-      );
-    }
-    return null;
-  };
 
   return {
     // temp fix for persistence rehydration issue

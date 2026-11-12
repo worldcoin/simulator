@@ -4,11 +4,17 @@ import { CodedError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { VerificationLevel } from "@worldcoin/idkit-core";
-import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
 import { generateExternalNullifier } from "./utils";
 import { validateExternalNullifier, validateSignal } from "./validation";
+
+interface MerkleProof {
+  root: unknown;
+  leaf: unknown;
+  siblings: bigint[];
+  pathIndices: number[];
+}
 
 /**
  * Packs a proof into a format compatible with Semaphore.
@@ -71,7 +77,7 @@ async function generateSemaphoreProof(
       throw new Error("The identity is not part of the group");
     }
 
-    merkleProof = groupOrMerkleProof.generateMerkleProof(index);
+    merkleProof = groupOrMerkleProof.generateMerkleProof(index) as MerkleProof;
   } else {
     merkleProof = groupOrMerkleProof;
   }
@@ -181,7 +187,7 @@ export function generateDummyMerkleProof(identity: Identity): MerkleProof {
   const group = new Group(1, 30);
   const zkIdentity = new ZkIdentity(identity.zkIdentity);
   group.addMember(zkIdentity.commitment);
-  return group.generateMerkleProof(0);
+  return group.generateMerkleProof(0) as MerkleProof;
 }
 
 /**

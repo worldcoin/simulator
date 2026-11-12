@@ -36,8 +36,8 @@ import xmarkCircle from "@worldcoin/nucleus/icons/xmark-circle-regular.svg";
 import xmarkCircleSolid from "@worldcoin/nucleus/icons/xmark-circle-solid.svg";
 import xmark from "@worldcoin/nucleus/icons/xmark-regular.svg";
 
-/** Next's image loader hands SVG imports back as `{ src }` static assets. */
-const asset = (module: unknown): string => (module as { src: string }).src;
+const asset = (module: unknown): string =>
+  typeof module === "string" ? module : (module as { src: string }).src;
 
 export const NUCLEUS_ICONS = {
   "arrow-left": asset(arrowLeft),

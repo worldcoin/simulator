@@ -154,10 +154,13 @@ export function Modal() {
   } = useModalStore(getStore);
 
   // Default to what the app asked for; the tester can still switch credentials.
+  // Request data arrives after mount, so selectable state must reset when it changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setLevel(bridgeInitialData?.verification_level ?? VerificationLevel.Orb);
     setUseV4(!!bridgeInitialData?.proof_request);
   }, [bridgeInitialData]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const close = useCallback(() => {
     setOpen(false);
