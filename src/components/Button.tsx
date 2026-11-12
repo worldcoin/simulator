@@ -11,11 +11,7 @@ import { ActivityIndicator } from "./ActivityIndicator";
  * - warning:   red600 fill, destructive
  */
 export type ButtonVariant =
-  | "ghost"
-  | "primary"
-  | "secondary"
-  | "tertiary"
-  | "warning";
+  "ghost" | "primary" | "secondary" | "tertiary" | "warning";
 
 /** Heights used across the app: 56 (normal), 48 / 40 (Nucleus), 44 (toolbar), 36 (nav bar). */
 export type ButtonSize = 36 | 40 | 44 | 48 | 56;

@@ -59,7 +59,7 @@ const generateCsp = () => {
   return { csp: cspString, nonce };
 };
 
-export const middleware = async (request: NextRequest) => {
+export const proxy = async (request: NextRequest) => {
   if (process.env.NODE_ENV === "development") {
     return NextResponse.next();
   }

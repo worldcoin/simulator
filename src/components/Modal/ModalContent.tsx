@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
  */
 export function ModalContent(props: {
   /** A Nucleus icon name (drawn in a grey circle) or ready-made hero artwork. */
-  hero?: IconType | ReactNode;
+  hero?: ReactNode;
   title: string;
   children?: ReactNode;
   actions?: ReactNode;

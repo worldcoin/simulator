@@ -1,8 +1,5 @@
 export type SidecarPath =
-  | "health"
-  | "identities"
-  | "proof/session"
-  | "proof/uniqueness";
+  "health" | "identities" | "proof/session" | "proof/uniqueness";
 
 /** Return fixed destinations rather than forwarding an arbitrary proxy path. */
 export function getSidecarPath(path: string): SidecarPath | undefined {

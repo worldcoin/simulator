@@ -23,6 +23,7 @@ import { Status } from "@/types";
 import { VerificationLevel } from "@worldcoin/idkit-core";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import ModalConfirm from "./ModalConfirm";
 import ModalEnvironment from "./ModalEnvironment";
 import ModalError from "./ModalError";
@@ -151,13 +152,16 @@ export function Modal() {
     url,
     metadata,
     reset,
-  } = useModalStore(getStore);
+  } = useModalStore(useShallow(getStore));
 
   // Default to what the app asked for; the tester can still switch credentials.
+  // Request data arrives after mount, so selectable state must reset when it changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setLevel(bridgeInitialData?.verification_level ?? VerificationLevel.Orb);
     setUseV4(!!bridgeInitialData?.proof_request);
   }, [bridgeInitialData]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const close = useCallback(() => {
     setOpen(false);

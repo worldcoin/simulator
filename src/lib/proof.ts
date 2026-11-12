@@ -4,11 +4,17 @@ import { CodedError, type Identity } from "@/types";
 import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { VerificationLevel } from "@worldcoin/idkit-core";
-import type { MerkleProof } from "@zk-kit/incremental-merkle-tree";
 import type { Groth16Proof, NumericString } from "snarkjs";
 import { groth16 } from "snarkjs";
 import { generateExternalNullifier } from "./utils";
 import { validateExternalNullifier, validateSignal } from "./validation";
+
+interface MerkleProof {
+  root: unknown;
+  leaf: unknown;
+  siblings: bigint[];
+  pathIndices: number[];
+}
 
 /**
  * Packs a proof into a format compatible with Semaphore.
@@ -71,12 +77,12 @@ async function generateSemaphoreProof(
       throw new Error("The identity is not part of the group");
     }
 
-    merkleProof = groupOrMerkleProof.generateMerkleProof(index);
+    merkleProof = groupOrMerkleProof.generateMerkleProof(index) as MerkleProof;
   } else {
     merkleProof = groupOrMerkleProof;
   }
 
-  const { proof, publicSignals } = (await groth16.fullProve(
+  const { proof, publicSignals } = await groth16.fullProve(
     {
       identityTrapdoor: trapdoor,
       identityNullifier: nullifier,
@@ -87,7 +93,7 @@ async function generateSemaphoreProof(
     },
     "/semaphore/semaphore.wasm",
     "/semaphore/semaphore.zkey",
-  )) as { proof: Groth16Proof; publicSignals: string[] };
+  );
 
   return {
     merkleTreeRoot: publicSignals[0],
@@ -120,11 +126,11 @@ async function verifySemaphoreProof(
 
   return groth16.verify(
     verificationKey,
-    [merkleTreeRoot, nullifierHash, signal, externalNullifier] as [
-      string,
-      string,
-      string,
-      string,
+    [
+      merkleTreeRoot,
+      nullifierHash,
+      signal.toString(),
+      externalNullifier.toString(),
     ],
 
     unpackProof(proof),
@@ -162,7 +168,7 @@ export function getMerkleProof(
       leaf: null,
       siblings: siblings,
       pathIndices: pathIndices,
-    } as MerkleProof;
+    };
   }
 
   // TODO: Reevaluate if the dummy proof case is needed
@@ -181,7 +187,7 @@ export function generateDummyMerkleProof(identity: Identity): MerkleProof {
   const group = new Group(1, 30);
   const zkIdentity = new ZkIdentity(identity.zkIdentity);
   group.addMember(zkIdentity.commitment);
-  return group.generateMerkleProof(0);
+  return group.generateMerkleProof(0) as MerkleProof;
 }
 
 /**
@@ -207,9 +213,8 @@ export const getFullProof = async (
       bridgeInitialData.action,
     ).digest;
 
-    const externalNullifier = await validateExternalNullifier(
-      rawExternalNullifier,
-    );
+    const externalNullifier =
+      await validateExternalNullifier(rawExternalNullifier);
 
     const zkIdentity = new ZkIdentity(identity.zkIdentity);
 

@@ -32,7 +32,7 @@ export const validateRequestSchema = async <T extends yup.Schema>({
   } catch (error) {
     if (error instanceof yup.ValidationError) {
       const handleError = (req: NextApiRequest, res: NextApiResponse) => {
-        const validationError = error as yup.ValidationError;
+        const validationError = error;
 
         return errorResponse({
           code: "invalid",

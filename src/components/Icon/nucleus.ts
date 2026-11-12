@@ -28,7 +28,7 @@ import settings from "@worldcoin/nucleus/icons/settings-regular.svg";
 import shieldCheck from "@worldcoin/nucleus/icons/shield-check-regular.svg";
 import shieldHalf from "@worldcoin/nucleus/icons/shield-half-solid.svg";
 import smartphone from "@worldcoin/nucleus/icons/smartphone-regular.svg";
-import text from "@worldcoin/nucleus/icons/text-solid.svg";
+import text from "@worldcoin/nucleus/icons/text-regular.svg";
 import trash from "@worldcoin/nucleus/icons/trash-solid.svg";
 import warningTriangle from "@worldcoin/nucleus/icons/warning-triangle-regular.svg";
 import worldcoin from "@worldcoin/nucleus/icons/worldcoin-regular.svg";
@@ -36,8 +36,8 @@ import xmarkCircle from "@worldcoin/nucleus/icons/xmark-circle-regular.svg";
 import xmarkCircleSolid from "@worldcoin/nucleus/icons/xmark-circle-solid.svg";
 import xmark from "@worldcoin/nucleus/icons/xmark-regular.svg";
 
-/** Next's image loader hands SVG imports back as `{ src }` static assets. */
-const asset = (module: unknown): string => (module as { src: string }).src;
+const asset = (module: unknown): string =>
+  typeof module === "string" ? module : (module as { src: string }).src;
 
 export const NUCLEUS_ICONS = {
   "arrow-left": asset(arrowLeft),

@@ -1,7 +1,12 @@
-import type { FullProof } from "@semaphore-protocol/proof";
 import type { NumericString } from "snarkjs";
 
-export type FP = Omit<FullProof, "proof"> & { proof: NumericString[] };
+export type FP = {
+  merkleTreeRoot: NumericString;
+  nullifierHash: NumericString;
+  signal: bigint;
+  externalNullifier: bigint;
+  proof: NumericString[];
+};
 
 export enum Status {
   Loading,

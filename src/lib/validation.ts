@@ -42,7 +42,7 @@ export async function parseWorldIDQRCode(
 export async function validateSignal(signal: string) {
   try {
     return BigInt(signal);
-  } catch (error) {
+  } catch {
     throw new CodedError(ErrorsCode.ProofError, "invalid_signal");
   }
 }
@@ -50,7 +50,7 @@ export async function validateSignal(signal: string) {
 export async function validateExternalNullifier(externalNullifier: string) {
   try {
     return BigInt(externalNullifier);
-  } catch (error) {
+  } catch {
     throw new CodedError(ErrorsCode.ProofError, "invalid_external_nullifier");
   }
 }

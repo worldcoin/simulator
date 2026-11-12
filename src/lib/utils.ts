@@ -1,4 +1,4 @@
-import type { AbiEncodedValue, IDKitConfig } from "@worldcoin/idkit-core";
+import type { IDKitConfig } from "@worldcoin/idkit-core";
 import { VerificationLevel } from "@worldcoin/idkit-core";
 import type { HashFunctionOutput } from "@worldcoin/idkit-core/hashing";
 
@@ -81,29 +81,31 @@ export const SEQUENCER_ENDPOINT: Record<VerificationLevel, string> = {
 // Teach tailwind-merge the Nucleus type scale (`text-h3`, `text-b1`, ...) so it
 // never mistakes those size tokens for text colors and drops `text-fg-*`.
 const twMerge = extendTailwindMerge({
-  classGroups: {
-    "font-size": [
-      {
-        text: [
-          "d1",
-          "h1",
-          "h2",
-          "h3",
-          "h4",
-          "h5",
-          "s1",
-          "s2",
-          "s3",
-          "l1",
-          "l2",
-          "l3",
-          "b1",
-          "b2",
-          "b3",
-          "c1",
-        ],
-      },
-    ],
+  extend: {
+    classGroups: {
+      "font-size": [
+        {
+          text: [
+            "d1",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "s1",
+            "s2",
+            "s3",
+            "l1",
+            "l2",
+            "l3",
+            "b1",
+            "b2",
+            "b3",
+            "c1",
+          ],
+        },
+      ],
+    },
   },
 });
 
@@ -119,8 +121,7 @@ export const generateExternalNullifier = (
   return packAndEncode([
     ["uint256", hashToField(app_id).hash],
     ...action.types.map(
-      (type, index) =>
-        [type, (action as AbiEncodedValue).values[index]] as [string, unknown],
+      (type, index) => [type, action.values[index]] as [string, unknown],
     ),
   ]);
 };
