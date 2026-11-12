@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx && prettier --check \"src/**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "format": "eslint src --ext .js,.jsx,.ts,.tsx --fix && prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md,json}\"",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false --declaration false",
+    "typecheck": "next typegen && tsc --noEmit --emitDeclarationOnly false --declaration false",
     "spellcheck": "cspell **/*.{md,ts,tsx}",
     "prebuild": "node -e \"const fs = require('fs'); const pkg = require('./package.json'); fs.writeFileSync('./public/version.json', JSON.stringify({ version: pkg.version }));\"",
     "test": "node --import tsx --test tests/*.test.ts"
