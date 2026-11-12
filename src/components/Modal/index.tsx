@@ -23,6 +23,7 @@ import { Status } from "@/types";
 import { VerificationLevel } from "@worldcoin/idkit-core";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import ModalConfirm from "./ModalConfirm";
 import ModalEnvironment from "./ModalEnvironment";
 import ModalError from "./ModalError";
@@ -151,7 +152,7 @@ export function Modal() {
     url,
     metadata,
     reset,
-  } = useModalStore(getStore);
+  } = useModalStore(useShallow(getStore));
 
   // Default to what the app asked for; the tester can still switch credentials.
   // Request data arrives after mount, so selectable state must reset when it changes.

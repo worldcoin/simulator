@@ -3,6 +3,7 @@ import useIdentity from "@/hooks/useIdentity";
 import { useModalStore } from "@/stores/modalStore";
 import { useUiStore, type UiStore } from "@/stores/ui";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { Dialog } from "../Dialog";
 import { Input } from "../Input";
 
@@ -17,7 +18,9 @@ export const QRInput = memo(function QRInput(props: {
   const [value, setValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { open } = useModalStore();
-  const { qrInputOpened, setQrInputOpened } = useUiStore(getUiStore);
+  const { qrInputOpened, setQrInputOpened } = useUiStore(
+    useShallow(getUiStore),
+  );
   useIdentity();
 
   const close = useCallback(() => setQrInputOpened(false), [setQrInputOpened]);

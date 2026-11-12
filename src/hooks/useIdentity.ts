@@ -7,6 +7,7 @@ import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import { VerificationLevel } from "@worldcoin/idkit-core";
 import { useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
+import { useShallow } from "zustand/react/shallow";
 
 const getStore = (store: IdentityStore) => ({
   activeIdentityID: store.activeIdentityID,
@@ -55,7 +56,7 @@ const useIdentity = () => {
     replaceIdentity,
     reset,
     removeIdentity,
-  } = useIdentityStore(getStore);
+  } = useIdentityStore(useShallow(getStore));
 
   const generateIdentityProofsIfNeeded = useCallback(
     async (identity: Identity) => {
