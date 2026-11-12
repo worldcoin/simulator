@@ -92,7 +92,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
             setValid(true);
             void props.performVerification(data);
           } else {
-            throw res.errorMessage;
+            throw new Error(res.errorMessage);
           }
         })
         .catch((err) => console.error(err));

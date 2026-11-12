@@ -41,7 +41,7 @@ export const QRInput = memo(function QRInput(props: {
           ) &&
         url.searchParams.get("k")?.match(/[^&]*/)
       );
-    } catch (e) {
+    } catch {
       return true;
     }
   };

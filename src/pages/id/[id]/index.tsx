@@ -144,7 +144,7 @@ export default function Id() {
   useEffect(() => {
     if (!router.isReady) return;
     if (typeof id !== "string") return;
-    if (!activeIdentity || activeIdentity.id !== id) return;
+    if (activeIdentity?.id !== id) return;
 
     const connectUrl = readSingleQueryValue(
       router.query[CONNECT_URL_QUERY_KEY],

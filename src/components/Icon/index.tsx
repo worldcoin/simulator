@@ -4,16 +4,8 @@ import styles from "./Icon.module.css";
 import { NUCLEUS_ICONS, type NucleusIconName } from "./nucleus";
 
 /** Glyphs Nucleus does not ship: the fake iOS status bar, the spinner and the World logo. */
-const legacyIcons = [
-  "battery",
-  "camera-off",
-  "logo",
-  "network",
-  "spinner",
-  "wifi",
-] as const;
-
-type LegacyIconName = (typeof legacyIcons)[number];
+type LegacyIconName =
+  "battery" | "camera-off" | "logo" | "network" | "spinner" | "wifi";
 
 export type IconType = LegacyIconName | NucleusIconName;
 

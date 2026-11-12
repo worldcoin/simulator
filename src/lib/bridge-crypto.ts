@@ -1,14 +1,20 @@
 import { Buffer } from "buffer/";
 
-const bufferEncode = (buffer: ArrayBuffer): string =>
-  Buffer.from(buffer).toString("base64");
+const bufferEncode = (
+  buffer: ArrayBuffer | Uint8Array<ArrayBuffer>,
+): string => {
+  const bytes = ArrayBuffer.isView(buffer)
+    ? new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+    : new Uint8Array(buffer);
+  return Buffer.from(bytes).toString("base64");
+};
 
 export const buffer_decode = (encoded: string): ArrayBuffer =>
   Uint8Array.from(Buffer.from(encoded, "base64")).buffer;
 
 export const encryptRequest = async (
   key: CryptoKey,
-  iv: ArrayBuffer,
+  iv: ArrayBuffer | Uint8Array<ArrayBuffer>,
   request: string,
 ): Promise<{ payload: string; iv: string }> => ({
   iv: bufferEncode(iv),

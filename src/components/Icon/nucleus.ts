@@ -28,7 +28,7 @@ import settings from "@worldcoin/nucleus/icons/settings-regular.svg";
 import shieldCheck from "@worldcoin/nucleus/icons/shield-check-regular.svg";
 import shieldHalf from "@worldcoin/nucleus/icons/shield-half-solid.svg";
 import smartphone from "@worldcoin/nucleus/icons/smartphone-regular.svg";
-import text from "@worldcoin/nucleus/icons/text-solid.svg";
+import text from "@worldcoin/nucleus/icons/text-regular.svg";
 import trash from "@worldcoin/nucleus/icons/trash-solid.svg";
 import warningTriangle from "@worldcoin/nucleus/icons/warning-triangle-regular.svg";
 import worldcoin from "@worldcoin/nucleus/icons/worldcoin-regular.svg";
