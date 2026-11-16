@@ -62,8 +62,8 @@ export function CredentialStack(props: {
               filter: isAbove
                 ? "blur(3px)"
                 : isBelow
-                ? "blur(12px)"
-                : "blur(0px)",
+                  ? "blur(12px)"
+                  : "blur(0px)",
             }}
             whileTap={{ scale: 0.985 }}
             transition={spring}

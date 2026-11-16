@@ -29,6 +29,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useShallow } from "zustand/react/shallow";
 
 const DynamicQRScanner = dynamic(() => import("@/components/QR/QRScanner"), {
   ssr: false,
@@ -64,14 +65,14 @@ export default function Id() {
     setUrl,
     setBridgeInitialData,
     setMetadata,
-  } = useModalStore(getStore);
+  } = useModalStore(useShallow(getStore));
 
   const {
     scannerOpened,
     setScannerOpened,
     setSettingsOpened,
     setQrInputOpened,
-  } = useUiStore(getUiStore);
+  } = useUiStore(useShallow(getUiStore));
 
   useEffect(() => {
     if (id) setActiveIdentityID(id as string);
@@ -144,7 +145,7 @@ export default function Id() {
   useEffect(() => {
     if (!router.isReady) return;
     if (typeof id !== "string") return;
-    if (!activeIdentity || activeIdentity.id !== id) return;
+    if (activeIdentity?.id !== id) return;
 
     const connectUrl = readSingleQueryValue(
       router.query[CONNECT_URL_QUERY_KEY],

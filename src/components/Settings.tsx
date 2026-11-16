@@ -10,6 +10,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRouter } from "next/router";
 import { memo, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useShallow } from "zustand/react/shallow";
 
 const getUiStore = (store: UiStore) => ({
   settingsOpened: store.settingsOpened,
@@ -17,7 +18,9 @@ const getUiStore = (store: UiStore) => ({
 });
 
 export const Settings = memo(function Settings(props: { commitment: string }) {
-  const { settingsOpened, setSettingsOpened } = useUiStore(getUiStore);
+  const { settingsOpened, setSettingsOpened } = useUiStore(
+    useShallow(getUiStore),
+  );
   const router = useRouter();
   const { id } = router.query;
   const [version, setVersion] = useState("2.0");

@@ -23,8 +23,8 @@ import passportEmblem from "@/assets/world-id/passport-emblem.svg";
 import type { CredentialKind } from "@/lib/credentials";
 import type { StaticImageData } from "next/image";
 
-/** Next's image loader hands SVG imports back as `{ src }` static assets. */
-const svg = (module: unknown): string => (module as { src: string }).src;
+const svg = (module: unknown): string =>
+  typeof module === "string" ? module : (module as { src: string }).src;
 
 /** Bitmap artwork, for `next/image`. */
 export const WORLD_ID_ART = {

@@ -11,6 +11,7 @@ import Head from "next/head";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { useMediaQuery } from "usehooks-ts";
+import { useShallow } from "zustand/react/shallow";
 
 // Must be loaded after global styles
 import { checkCache, retryDownload } from "@/lib/utils";
@@ -33,7 +34,7 @@ export default function App({
   pageProps,
 }: AppProps<{ nonce: string }>) {
   const isMobile = useMediaQuery("(max-width: 499px)");
-  const { setComplete } = useCacheStore(getStore);
+  const { setComplete } = useCacheStore(useShallow(getStore));
 
   // Listen for service worker to complete semaphore downloads
   useEffect(() => {

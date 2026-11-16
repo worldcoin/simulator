@@ -1,6 +1,6 @@
 import type { Identity } from "@/types/identity";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export type IdentityStore = {
   activeIdentityID: string | null;
@@ -56,7 +56,7 @@ export const useIdentityStore = create<IdentityStore>()(
             identities,
             activeIdentityID:
               state.activeIdentityID === id
-                ? identities[0]?.id ?? null
+                ? (identities[0]?.id ?? null)
                 : state.activeIdentityID,
           };
         }),
@@ -70,6 +70,7 @@ export const useIdentityStore = create<IdentityStore>()(
     }),
     {
       name: IDENTITY_STORE_STORAGE_KEY,
+      storage: createJSONStorage(() => localStorage),
       // Persisted state is untrusted input: drop duplicate ids written by
       // earlier versions of the seeding logic and tolerate a malformed list.
       merge: (persistedState, currentState) => {

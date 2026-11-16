@@ -49,7 +49,7 @@ export const pairClient = async ({
     }
 
     bridgeRequestData = (await response.json()) as BridgeRequestData | null;
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: new CodedError(

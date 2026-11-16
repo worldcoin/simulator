@@ -16,6 +16,7 @@ import React, {
 } from "react";
 import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
+import { useShallow } from "zustand/react/shallow";
 import { QRFrame } from "./QRFrame";
 
 interface QRScannerProps {
@@ -41,8 +42,9 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
   const [imageSrc, setImageSrc] = useState(null as string | null);
   const [uploadedImageLoaded, setUploadedImageLoaded] = useState(false);
 
-  const { scannerOpened, setScannerOpened, setQrInputOpened } =
-    useUiStore(getUiStore);
+  const { scannerOpened, setScannerOpened, setQrInputOpened } = useUiStore(
+    useShallow(getUiStore),
+  );
 
   const close = useCallback(() => {
     setScannerOpened(false);
@@ -92,7 +94,7 @@ export const QRScanner = React.memo(function QRScanner(props: QRScannerProps) {
             setValid(true);
             void props.performVerification(data);
           } else {
-            throw res.errorMessage;
+            throw new Error(res.errorMessage);
           }
         })
         .catch((err) => console.error(err));
