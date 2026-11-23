@@ -53,9 +53,10 @@
     "daeefd",
     "wordmark",
     "WLDUI",
-    "xmark"
+    "xmark",
+    "hostnames",
+    "opennextjs",
+    "cutover"
   ],
-  "ignorePaths": [
-    "sidecar/target/**"
-  ]
+  "ignorePaths": ["sidecar/target/**"]
 }

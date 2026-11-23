@@ -88,6 +88,11 @@ staging Proof of Human request using the existing prover and bridge. Agents call
 `complete_test_request` with the application's connector URI, then inspect the
 application's own backend result.
 
+### Cloudflare hosting
+
+See [the deployment guide](./docs/cloudflare.md) for Workers Builds setup,
+runtime secrets, local verification, and the staging/production DNS cutover.
+
 ### Deploying the MCP endpoint
 
 - `SIDECAR_URL` and the private `BEARER_TOKEN` are shared with the existing
@@ -98,7 +103,7 @@ application's own backend result.
   test apps there. Proof requests always use the staging environment.
 - The route allows only the supported World bridge HTTPS origins, blocks
   redirects, and validates Host/Origin headers against the main domain and
-  Vercel's configured deployment/branch host names. Local hosts are permitted
+  the staging/production Workers hosts and Vercel deployment/branch host names. Local hosts are permitted
   only outside production.
 - Limits: 8 KB request body, 64 KB bridge/prover responses, and a 45-second
   operation deadline. Configure the hosting runtime to allow the route a

@@ -15,7 +15,12 @@
     "typecheck": "next typegen && tsc --noEmit --emitDeclarationOnly false --declaration false",
     "spellcheck": "cspell **/*.{md,ts,tsx}",
     "prebuild": "node -e \"const fs = require('fs'); const pkg = require('./package.json'); fs.writeFileSync('./public/version.json', JSON.stringify({ version: pkg.version }));\"",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "build:cloudflare": "opennextjs-cloudflare build",
+    "preview:cloudflare": "opennextjs-cloudflare preview",
+    "deploy:dev": "opennextjs-cloudflare deploy --env \"\"",
+    "deploy:prod": "opennextjs-cloudflare deploy --env prod",
+    "upload:prod": "opennextjs-cloudflare upload --env prod"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.1.2",
@@ -49,6 +54,7 @@
     "@eslint/js": "9.39.5",
     "@modelcontextprotocol/client": "2.4.0",
     "@next/bundle-analyzer": "16.4.6",
+    "@opennextjs/cloudflare": "1.20.18",
     "@types/node": "22.20.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -75,6 +81,7 @@
     "workbox-expiration": "7.4.1",
     "workbox-precaching": "7.4.1",
     "workbox-routing": "7.4.1",
-    "workbox-strategies": "7.4.1"
+    "workbox-strategies": "7.4.1",
+    "wrangler": "4.166.0"
   }
 }

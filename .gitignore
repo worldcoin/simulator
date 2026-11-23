@@ -48,3 +48,8 @@ sidecar/identities.json
 
 # tools
 .claude/
+
+# Cloudflare
+.open-next/
+.wrangler/
+.dev.vars*

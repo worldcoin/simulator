@@ -1,4 +1,6 @@
 allowedDeprecatedVersions:
+  # Required by the Cloudflare SDK until its formdata-node dependency is updated.
+  node-domexception: 1.0.0
   "@worldcoin/idkit-core": 1.5.0
   eslint: 9.39.5
 

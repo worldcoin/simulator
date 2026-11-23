@@ -5,9 +5,8 @@ import { Group } from "@semaphore-protocol/group";
 import { Identity as ZkIdentity } from "@semaphore-protocol/identity";
 import type { VerificationLevel } from "@worldcoin/idkit-core";
 import type { Groth16Proof, NumericString } from "snarkjs";
-import { groth16 } from "snarkjs";
-import { generateExternalNullifier } from "./utils";
-import { validateExternalNullifier, validateSignal } from "./validation";
+import { generateExternalNullifier } from "@/lib/utils";
+import { validateExternalNullifier, validateSignal } from "@/lib/validation";
 
 interface MerkleProof {
   root: unknown;
@@ -82,6 +81,8 @@ async function generateSemaphoreProof(
     merkleProof = groupOrMerkleProof;
   }
 
+  // The browser prover uses dynamic code generation, which Workers cannot load during SSR.
+  const { groth16 } = await import("snarkjs");
   const { proof, publicSignals } = await groth16.fullProve(
     {
       identityTrapdoor: trapdoor,
@@ -124,6 +125,7 @@ async function verifySemaphoreProof(
     IC: verificationKeys.IC[treeDepth - 16],
   };
 
+  const { groth16 } = await import("snarkjs");
   return groth16.verify(
     verificationKey,
     [
