@@ -56,6 +56,7 @@ test("Worker accepts MCP on deployed hosts and rejects an untrusted origin", asy
           `${base}/api/mcp`,
           {
             method: "POST",
+            signal: AbortSignal.timeout(5000),
             headers: {
               Host: host,
               Origin: allowed ? `https://${host}` : "https://attacker.example",
@@ -72,9 +73,6 @@ test("Worker accepts MCP on deployed hosts and rejects an untrusted origin", asy
             res.on("end", () => resolve({ status: res.statusCode, body }));
             res.on("error", reject);
           },
-        );
-        req.setTimeout(5000, () =>
-          req.destroy(new Error("MCP request timed out")),
         );
         req.on("error", reject);
         req.end(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }));

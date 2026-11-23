@@ -52,5 +52,5 @@ jobs:
         run: |
           pnpm preview:cloudflare --port 8787 > /tmp/worker-preview.log 2>&1 &
           preview_pid=$!
-          trap 'kill "$preview_pid"; cat /tmp/worker-preview.log' EXIT
+          trap 'cat /tmp/worker-preview.log; kill "$preview_pid" 2>/dev/null || true' EXIT
           node --test tests/cloudflare-smoke.test.mjs
