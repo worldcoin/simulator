@@ -54,7 +54,6 @@ needs, and `src/pages/_app.tsx` loads the World Pro variable font from the
 same package. Prefer those tokens (`text-fg-primary`, `bg-surface-secondary`,
 `text-h3`, `rounded-32`, ...) over hard-coded values.
 
-
 - Get an Infura project ID from https://infura.io/ and create an `.env` file with it (see [.env.sample](./.env.sample))
 
 - Install dependencies
@@ -88,6 +87,10 @@ staging Proof of Human request using the existing prover and bridge. Agents call
 `complete_test_request` with the application's connector URI, then inspect the
 application's own backend result.
 
+### Cloudflare hosting
+
+[simulator.world.org](https://simulator.world.org) is deployed to Cloudflare Workers.
+
 ### Deploying the MCP endpoint
 
 - `SIDECAR_URL` and the private `BEARER_TOKEN` are shared with the existing
@@ -98,7 +101,7 @@ application's own backend result.
   test apps there. Proof requests always use the staging environment.
 - The route allows only the supported World bridge HTTPS origins, blocks
   redirects, and validates Host/Origin headers against the main domain and
-  Vercel's configured deployment/branch host names. Local hosts are permitted
+  the production Worker host and Vercel deployment/branch host names. Local hosts are permitted
   only outside production.
 - Limits: 8 KB request body, 64 KB bridge/prover responses, and a 45-second
   operation deadline. Configure the hosting runtime to allow the route a

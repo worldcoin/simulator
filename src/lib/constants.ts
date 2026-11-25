@@ -1,6 +1,6 @@
 // Dev portal
 const DEV_PORTAL_URL =
-  process.env.NEXT_PUBLIC_DEV_PORTAL_URL ?? "https://developer.worldcoin.org";
+  process.env.NEXT_PUBLIC_DEV_PORTAL_URL ?? "https://developer.world.org";
 export const DEV_PORTAL_PRECHECK_URL = `${DEV_PORTAL_URL}/api/v1/precheck/`;
 export const DEV_PORTAL_PROOF_CONTEXT_URL = `${DEV_PORTAL_URL}/api/v4/proof-context/`;
 

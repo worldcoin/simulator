@@ -19,6 +19,8 @@ export default async function handler(
 ) {
   const hostnames = [
     "simulator.worldcoin.org",
+    "simulator.world.org",
+    "simulator-prod.worldcoin.workers.dev",
     process.env.VERCEL_URL,
     process.env.VERCEL_BRANCH_URL,
   ].filter((hostname): hostname is string => Boolean(hostname));
