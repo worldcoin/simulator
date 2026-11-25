@@ -242,8 +242,6 @@ test("MCP accepts its configured deployment hostnames in production", async () =
         "deployment.vercel.app",
         "branch.vercel.app",
         "simulator.world.org",
-        "staging-simulator.world.org",
-        "simulator-dev.worldcoin.workers.dev",
         "simulator-prod.worldcoin.workers.dev",
       ]) {
         const status = await new Promise<number | undefined>(

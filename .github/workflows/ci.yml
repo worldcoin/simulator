@@ -43,10 +43,8 @@ jobs:
           INFURA_ID: "unsafe_test_id"
           WALLETCONNECT_PID: "unsafe_test_pid"
 
-      - name: Validate staging and production bundles
-        run: |
-          pnpm exec wrangler deploy --env "" --dry-run
-          pnpm exec wrangler deploy --env prod --dry-run
+      - name: Validate production bundle
+        run: pnpm exec wrangler deploy --dry-run
 
       - name: Smoke test the Workers runtime
         run: |

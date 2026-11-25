@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "simulator-dev",
+  "name": "simulator-prod",
   "account_id": "ae97c44fcd31b9289a7455120d2698b2",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-23",
@@ -12,10 +12,4 @@
     "binding": "ASSETS",
   },
   "images": { "binding": "IMAGES" },
-  "env": {
-    "prod": {
-      "name": "simulator-prod",
-      "images": { "binding": "IMAGES" },
-    },
-  },
 }

@@ -49,7 +49,10 @@ test("Worker serves the service worker and proof artifacts", async () => {
 });
 
 test("Worker accepts MCP on deployed hosts and rejects an untrusted origin", async () => {
-  for (const host of ["simulator.world.org", "staging-simulator.world.org"]) {
+  for (const host of [
+    "simulator.world.org",
+    "simulator-prod.worldcoin.workers.dev",
+  ]) {
     for (const allowed of [true, false]) {
       const { status, body } = await new Promise((resolve, reject) => {
         const req = request(

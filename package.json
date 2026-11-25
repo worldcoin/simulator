@@ -18,9 +18,8 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "build:cloudflare": "opennextjs-cloudflare build",
     "preview:cloudflare": "opennextjs-cloudflare preview",
-    "deploy:dev": "opennextjs-cloudflare deploy --env \"\"",
-    "deploy:prod": "opennextjs-cloudflare deploy --env prod",
-    "upload:prod": "opennextjs-cloudflare upload --env prod"
+    "deploy:prod": "opennextjs-cloudflare deploy",
+    "upload:prod": "opennextjs-cloudflare upload"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.1.2",
